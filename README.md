@@ -1,12 +1,15 @@
 ### Install
 
-1. create a python virtual env with python 3.8
-2. install pytorch 
+1. Create a python virtual env with python 3.8
+   ```bash
+    conda create --name <env_name> python=3.8
+   ```
+2. Install PyTorch 
    ```bash
    pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
    ```
 
-3. install Isaac Gym
+3. Install IsaacGym from nvidia
 - Download from https://developer.nvidia.com/isaac-gym
   ```bash
   cd isaacgym/python
@@ -21,26 +24,25 @@
   
 - For troubleshooting, check docs at: `isaacgym/docs/index.html`
 
-4. install other libs
+4. Install other dependencies
     ```bash
    pip install tensorboard
    pip install numpy==1.23
    pip install matplotlib
     ```
    
-5. install solo_legged_gym as a package
+5. Install solo_legged_gym as a package in your conda environment, please go the repo
     ```bash
-   cd solo_legged_gym
    pip install -e .
     ```
 
-6. install and login weights and bias
+6. Install and login Weights and Biases
    ```bash
    pip install wandb
    wandb login
    ```
    
-7. configure pycharm by setting the environment variables (important)
+7. (optional) Configure pycharm by setting the environment variables (important)
    ```
    PYTHONUNBUFFERED=1;LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path-to-virtual-env>/lib;WANDB_USERNAME=<your-wandb-username>
    ```
