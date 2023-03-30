@@ -53,7 +53,6 @@ class keyboard_play:
             )
             name = "policy"
             export_policy_as_jit(self.runner.algorithm.actor_critic, self.runner.obs_normalizer, path, filename=f"{name}.pt")
-            export_policy_as_onnx(self.runner.algorithm.actor_critic, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
             print("Exported policy to: ", path)
 
         if LOG_DATA:
@@ -98,15 +97,11 @@ class keyboard_play:
         self.log_path = os.path.join(path, "log_data.csv")
         self.step_counter = 0
         header = ['step',
-                  'command_x', 'command_az',
+                  'command_x', 'command_y', 'command_az',
                   'base_x', 'base_y', 'base_z', 'base_ax', 'base_ay', 'base_az',
                   'base_vel_x', 'base_vel_y', 'base_vel_z',
                   'base_avel_x', 'base_avel_y', 'base_avel_z',
-                  'dphase_FL', 'dphase_FR', 'dphase_RL', 'dphase_RR',
-                  'phase_FL', 'phase_FR', 'phase_RL', 'phase_RR',
-                  'contact_FL', 'contact_FR', 'contact_RL', 'contact_RR',
                   'joint_targets_rate',
-                  'cot',
                   ]
         with open(self.log_path, 'w+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -119,11 +114,7 @@ class keyboard_play:
         data.extend(torch.stack(get_euler_xyz(self.env.base_quat), dim=1)[0, :].tolist())
         data.extend(self.env.base_lin_vel[0, :].tolist())
         data.extend(self.env.base_ang_vel[0, :].tolist())
-        data.extend(self.env.delta_phases[0, :].tolist())
-        data.extend(self.env.phases[0, :].tolist())
-        data.extend(map(lambda x: 1 if x else 0, self.env.ee_contact[0, :].tolist()))
         data.append(self.env.joint_targets_rate[0].item())
-        data.append(self.env.cot[0].item())
 
         self.step_counter += 1
         with open(self.log_path, 'a', encoding='UTF8') as f:
@@ -141,10 +132,14 @@ class keyboard_play:
                 self.env.commands[:, 0] += 0.1
             elif event.action == "s" and event.value > 0:
                 self.env.commands[:, 0] -= 0.1
-            elif event.action == "q" and event.value > 0:
+            elif event.action == "a" and event.value > 0:
                 self.env.commands[:, 1] += 0.1
-            elif event.action == "e" and event.value > 0:
+            elif event.action == "d" and event.value > 0:
                 self.env.commands[:, 1] -= 0.1
+            elif event.action == "q" and event.value > 0:
+                self.env.commands[:, 2] += 0.1
+            elif event.action == "e" and event.value > 0:
+                self.env.commands[:, 2] -= 0.1
 
             if event.value > 0 and event.action in list(self.keyboard_control.values()):
                 self.env.commands = torch.round(self.env.commands * 10) / 10
