@@ -1,50 +1,75 @@
-### Install
-
-1. Create a python virtual env with python 3.8
-   ```bash
-    conda create --name <env_name> python=3.8
-   ```
-2. Install PyTorch 
-   ```bash
-   pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
-   ```
-
-3. Install IsaacGym from nvidia
-- Download from https://developer.nvidia.com/isaac-gym
-  ```bash
-  cd isaacgym/python
-  pip install -e .
-  ```
-  
-- Try running an example:
-  ```bash
-  cd examples
-  python 1080_balls_of_solitude.py
-  ```
-  
-- For troubleshooting, check docs at: `isaacgym/docs/index.html`
-
-4. Install other dependencies
+### Installation
+0. Clone the repo:
     ```bash
-   pip install tensorboard
-   pip install numpy==1.23
-   pip install matplotlib
+    git clone git@gitlab.is.tue.mpg.de:autonomous-learning/solo_legged_gym.git
     ```
-   
-5. Install solo_legged_gym as a package in your conda environment, please go the repo
+    then go to the root folder.
+
+1. Install poetry
+    
+    on PC
     ```bash
-   pip install -e .
+    curl -sSL https://install.python-poetry.org | python3 - --version 1.4.0
+    ```
+    
+    on cluster
+    ```bash
+    curl -sSL https://install.python-poetry.org | POETRY_HOME=/fast/username/poetry python3 - --version 1.4.0
+    ```
+    Make sure to replace `username` by your account name. Installing in the `/fast/` directory gives you better execution speed.
+    Newer versions of poetry might not work due to incompatbility with the specific package versions we require.
+
+2. Set up bashrc
+
+    on pc
+    ```bash
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc 
+    ```
+    on cluster
+    ```bash
+    export PATH="/fast/<username>/poetry/bin:$PATH"
+    export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
+    source ~/.bashrc 
+    ```
+    Make sure to replace the username in the bashrc with your own.
+
+3. (Optional) Make sure you have setup ssh key access to `gitlab.tuebingen.mpg.de` and `gitlab.is.tue.mpg.de`. Both are needed for the required dependencies. If there are issues, try adding:
+    ```
+    eval $(ssh-agent -s)
+    ssh-add ~/.ssh/mpi_is_gitlab
+    ssh-add ~/.ssh/mpi_tuebingen_gitlab
+    ```
+    to you bashrc. Make sure to replace the key names by your own ssh-keys.
+
+4. Check if this worked so far. Call
+    ```bash
+    poetry --version
+    ```
+    
+    It should be:
+    ```
+    Poetry (version 1.4.0)
     ```
 
-6. Install and login Weights and Biases
+5. Now we want to use Python 3.8 to create virtual environment. This is ensured to work with isaacgym preview version 4. `python >= 3.10` will definitely not work with the cluster_utils package. First make sure that you are in a clean environment. Deactivate all conda env virtualenv environments and delete any `.venv` in the root folder of your legged_gym clone. Call:
+    ```bash
+    poetry env use /usr/bin/python3.8
+    ```
+
+6. Run 
+    ```bash
+    poetry install
+    ```
+
+6. Login Weights and Biases
    ```bash
-   pip install wandb
    wandb login
    ```
    
 7. (optional) Configure pycharm by setting the environment variables (important)
    ```
-   PYTHONUNBUFFERED=1;LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path-to-virtual-env>/lib;WANDB_USERNAME=<your-wandb-username>
+   PYTHONUNBUFFERED=1;WANDB_USERNAME=<your-wandb-username>
    ```
 
 8. Other troubleshooting

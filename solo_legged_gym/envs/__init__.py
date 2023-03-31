@@ -6,4 +6,4 @@ from solo_legged_gym.envs.solo12_vanilla.solo12_vanilla_config import Solo12Vani
 
 from solo_legged_gym.utils.task_registry import task_registry
 
-task_registry.register("Solo12_vanilla", Solo12Vanilla, Solo12VanillaEnvCfg(), Solo12VanillaTrainCfg())
+task_registry.register("solo12_vanilla", Solo12Vanilla, Solo12VanillaEnvCfg(), Solo12VanillaTrainCfg())
