@@ -296,7 +296,6 @@ class Solo12Phase(BaseTask):
         self.gym.set_dof_state_tensor_indexed(self.sim,
                                               gymtorch.unwrap_tensor(self.dof_state),
                                               gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        self._refresh_quantities()
 
     def _reset_root_states(self, env_ids):
         # base position
@@ -313,7 +312,6 @@ class Solo12Phase(BaseTask):
         self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                      gymtorch.unwrap_tensor(self.root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        self._refresh_quantities()
 
     def _push_robots(self):
         # base velocity impulse
@@ -322,7 +320,6 @@ class Solo12Phase(BaseTask):
                                                     device=self.device)  # lin vel x/y
         self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
         self.gym.refresh_net_contact_force_tensor(self.sim)
-        self._refresh_quantities()
 
     def _set_default_dof_pos(self):
         self.p_gains = torch.zeros(12, dtype=torch.float, device=self.device, requires_grad=False)
