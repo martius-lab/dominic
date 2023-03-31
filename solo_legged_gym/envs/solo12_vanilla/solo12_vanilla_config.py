@@ -75,25 +75,25 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_z = ["task", 0.2]
 
             lin_z = ["pose", 0.1]
-            lin_vel_z = ["pose", 0.4]
+            lin_vel_z = ["pose", 1.0]
             ang_xy = ["pose", 0.3]
-            ang_vel_xy = ["pose", 2.0]
+            ang_vel_xy = ["pose", 3.0]
 
             joint_targets_rate = ["regularizer", 1.0]
             # stand_still = ["regularizer", 1.0]
             # dof_acc = ["regularizer", 0.1]
             # dof_vel
 
-            feet_air_time = ["feet", None]
+            # feet_air_time = ["feet", None]
 
             # collision
             # torques
 
         class scales:
-            task = 1.2
+            task = 1.5
             pose = 0.5
             regularizer = 0.5
-            feet = 0.25
+            # feet = 0.2
 
         base_height_target = 0.25
 
@@ -146,7 +146,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'test'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
