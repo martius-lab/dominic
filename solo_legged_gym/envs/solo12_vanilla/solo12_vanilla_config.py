@@ -55,8 +55,8 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]  # TODO: UPPER?
-        self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter TODO: 0?
+        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
     class domain_rand(BaseEnvCfg.domain_rand):
@@ -70,14 +70,14 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = ["task", 0.4]
+            lin_vel_x = ["task", 0.2]
             lin_vel_y = ["task", 0.2]
             ang_vel_z = ["task", 0.2]
 
             lin_z = ["pose", 0.1]
             lin_vel_z = ["pose", 0.4]
             ang_xy = ["pose", 0.3]
-            ang_vel_xy = ["pose", 1.0]
+            ang_vel_xy = ["pose", 2.0]
 
             joint_targets_rate = ["regularizer", 1.0]
             # stand_still = ["regularizer", 1.0]
@@ -93,7 +93,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             task = 1.2
             pose = 0.5
             regularizer = 0.5
-            feet = 0.2
+            feet = 0.25
 
         base_height_target = 0.25
 

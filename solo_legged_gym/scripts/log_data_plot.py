@@ -22,35 +22,14 @@ def plot(args):
     log_path = os.path.join(os.path.dirname(load_path), "logged_data", "log_data.csv")
     df = pd.read_csv(log_path)
 
-    fig, axes = plt.subplots(nrows=4, ncols=2)
+    fig, axes = plt.subplots(nrows=4, ncols=3)
     df.command_x.iloc[START:END].plot(ax=axes[0, 0], label='command_x')
     df.base_vel_x.iloc[START:END].plot(ax=axes[0, 0], label='base_vel_x')
-    df.command_az.iloc[START:END].plot(ax=axes[0, 1], label='command_az')
-    df.base_avel_z.iloc[START:END].plot(ax=axes[0, 1], label='base_avel_z')
-    df.base_vel_y.iloc[START:END].plot(ax=axes[1, 0], label='base_vel_y')
-    df.phase_FL.iloc[START:END].plot(ax=axes[1, 1], label='phase_FL')
-    df.phase_FR.iloc[START:END].plot(ax=axes[1, 1], label='phase_FR')
-    df.phase_RL.iloc[START:END].plot(ax=axes[1, 1], label='phase_RL')
-    df.phase_RR.iloc[START:END].plot(ax=axes[1, 1], label='phase_RR')
-    df.dphase_FL.iloc[START:END].plot(ax=axes[2, 0], label='dphase_FL')
-    df.dphase_FR.iloc[START:END].plot(ax=axes[2, 0], label='dphase_FR')
-    df.dphase_RL.iloc[START:END].plot(ax=axes[2, 0], label='dphase_RL')
-    df.dphase_RR.iloc[START:END].plot(ax=axes[2, 0], label='dphase_RR')
-
-    ax = axes[2, 1]
-    colors = [(1, 1, 1),
-              (0.12109375, 0.46484375, 0.703125),
-              (0.99609375, 0.49609375, 0.0546875),
-              (0.171875, 0.625, 0.171875),
-              (0.8359375, 0.15234375, 0.15625)]
-    colmap = matplotlib.colors.ListedColormap(colors)
-    contact = df[['contact_FL', 'contact_FR', 'contact_RL', 'contact_RR']].to_numpy().transpose() > 0.5
-    contact = (1 + np.arange(contact.shape[0]))[:, None] * contact
-    ax.imshow(contact, aspect='auto', cmap=colmap, interpolation='nearest')
-    ax.set_yticks(np.arange(4))
-    ax.set_yticklabels(['contact_FL', 'contact_FR', 'contact_RL', 'contact_RR'])
-    df.joint_targets_rate.iloc[START:END].plot(ax=axes[3, 0], label='joint_targets_rate')
-    df.cot.iloc[START:END].plot(ax=axes[3, 1], label='cot')
+    df.command_y.iloc[START:END].plot(ax=axes[0, 1], label='command_y')
+    df.base_vel_y.iloc[START:END].plot(ax=axes[0, 1], label='base_vel_y')
+    df.command_az.iloc[START:END].plot(ax=axes[0, 2], label='command_az')
+    df.base_avel_z.iloc[START:END].plot(ax=axes[0, 2], label='base_avel_z')
+    df.joint_targets_rate.iloc[START:END].plot(ax=axes[2, 0], label='joint_targets_rate')
 
     for ax in fig.get_axes():
         ax.legend()
