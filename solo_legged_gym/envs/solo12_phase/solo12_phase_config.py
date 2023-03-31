@@ -49,7 +49,7 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad] # TODO?
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 2.5  # TODO?
+        torque_limits = 2.5
         dof_vel_limits = 10.0  # TODO?
         scale_joint_target = 0.25
         clip_joint_target = 100.
@@ -93,22 +93,18 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
             contact_match = ["contact", 2.0]
 
             joint_targets_rate = ["regularizer", 1.0]
-            # stand_still = ["regularizer", 1.0]
+            stand_still = ["regularizer", 0.4]
             # dof_acc = ["regularizer", 0.1]
             # dof_vel
-
-            # feet_air_time = ["feet", None]
-
             # collision
             # torques
 
         class scales:
-            task = 4.0
+            task = 4.5
             ee = 2.0
-            pose = 1.5
+            pose = 1.0
             contact = 2.0
-            regularizer = 0.5
-            # feet = 0.2
+            regularizer = 1.0
 
         base_height_target = 0.25
 
@@ -152,7 +148,7 @@ class Solo12PhaseTrainCfg(BaseTrainCfg):
         policy_class_name = 'ActorCritic'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
-        max_iterations = 1000  # number of policy updates
+        max_iterations = 1500  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging

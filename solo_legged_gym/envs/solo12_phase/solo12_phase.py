@@ -348,7 +348,7 @@ class Solo12Phase(BaseTask):
         # EE sequence: FL, FR, HL, HR
         # phase >= 0, stance; phase < 0, swing
         dx = 0.22
-        dy = 0.15
+        dy = 0.14
         dz = 0.08
 
         gait_period = self.cfg.control.default_gait_duration
@@ -471,6 +471,10 @@ class Solo12Phase(BaseTask):
     def _reward_contact_match(self, sigma):
         contact_mismatch = torch.count_nonzero(self.ee_contact != self.ee_contact_target, dim=1)
         return torch.pow(np.exp(-sigma), contact_mismatch)
+
+    def _reward_stand_still(self, sigma):
+        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
+        return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
