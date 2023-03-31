@@ -75,21 +75,25 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_z = ["task", 0.2]
 
             lin_z = ["pose", 0.1]
-            lin_vel_z = ["pose", 0.2]
-            ang_xy = ["pose", 0.5]
+            lin_vel_z = ["pose", 0.4]
+            ang_xy = ["pose", 0.3]
             ang_vel_xy = ["pose", 1.0]
 
             joint_targets_rate = ["regularizer", 1.0]
-            # collision
-            # feet_air_time
-            # dof_acc
+            # stand_still = ["regularizer", 1.0]
+            # dof_acc = ["regularizer", 0.1]
             # dof_vel
+
+            feet_air_time = ["feet", None]
+
+            # collision
             # torques
 
         class scales:
-            task = 1.0
+            task = 1.2
             pose = 0.5
             regularizer = 0.5
+            feet = 0.2
 
         base_height_target = 0.25
 
@@ -136,7 +140,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         policy_class_name = 'ActorCritic'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
-        max_iterations = 1500  # number of policy updates
+        max_iterations = 1000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging

@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "solo-legged-gym"
+version = "0.1.0"
+description = ""
+authors = ["Jin Cheng <jcheng@tuebingen.mpg.de>"]
+readme = "README.md"
+packages = [{include = "solo_legged_gym"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8 <3.9"
+matplotlib = "*"
+numpy = "^1.23"
+torch = {url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp38-cp38-linux_x86_64.whl"}
+isaacgym = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/isaacgym.git"}
+tensorboard = "^2.12.0"
+
+[tool.poetry.group.dev.dependencies]
+cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}
+
+[tool.black]
+line-length = 140
+target-version = ["py38"]
+
+[tool.ruff]
+ignore = ["C901", "F403", "F405", "E501", "E402"]
+select = ["F", "E", "W", "I001"]
+line-length = 120
+target-version= "py38"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

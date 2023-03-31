@@ -52,4 +52,11 @@ wandb
 
 # other
 *.egg-info
-__pycache__
+/__pycache__/
+*.png
+*.csv
+.venv/
+.github/
+
+# build
+gymtorch/
