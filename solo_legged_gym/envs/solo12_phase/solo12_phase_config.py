@@ -22,8 +22,8 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [-0.5, 0.5]  # min max [m/s]
-            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
+            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
+            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.35]  # x,y,z [m]
@@ -51,10 +51,13 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
         torque_limits = 2.5
         dof_vel_limits = 10.0  # TODO?
+
         scale_joint_target = 0.25
         clip_joint_target = 100.
+
         scale_delta_phase = 0.25
-        clip_delta_phase = [-0.5, 1.0]
+        clip_delta_phase = [-0.5, 1.5]
+
         default_gait_duration = 1.0
         default_duty_factor = 0.2
         decimation = 4
@@ -91,16 +94,10 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
             ang_vel_xy = ["pose", 3.0]
 
             contact_match = ["contact", 2.0]
-
             joint_targets_rate = ["regularizer", 1.0]
-            stand_still = ["regularizer", 0.4]
-            # dof_acc = ["regularizer", 0.1]
-            # dof_vel
-            # collision
-            # torques
 
         class scales:
-            task = 4.5
+            task = 4.0
             ee = 2.0
             pose = 1.0
             contact = 2.0
