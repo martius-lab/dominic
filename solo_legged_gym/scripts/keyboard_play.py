@@ -53,6 +53,7 @@ class keyboard_play:
             )
             name = "policy"
             export_policy_as_jit(self.runner.algorithm.actor_critic, self.runner.obs_normalizer, path, filename=f"{name}.pt")
+            export_policy_as_onnx(self.runner.algorithm.actor_critic, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
             print("Exported policy to: ", path)
 
         if LOG_DATA:
@@ -64,6 +65,8 @@ class keyboard_play:
         self.keyboard_control = {
             "linear velocity X increment: 0.1 m/s": "w",
             "linear velocity X increment: -0.1 m/s": "s",
+            "linear velocity Y increment: 0.1 m/s": "a",
+            "linear velocity Y increment: -0.1 m/s": "d",
             "angular velocity YAW increment: 0.1 rad/s": "q",
             "angular velocity YAW increment: -0.1 rad/s": "e",
             "reset command": "x",
@@ -101,6 +104,9 @@ class keyboard_play:
                   'base_x', 'base_y', 'base_z', 'base_ax', 'base_ay', 'base_az',
                   'base_vel_x', 'base_vel_y', 'base_vel_z',
                   'base_avel_x', 'base_avel_y', 'base_avel_z',
+                  'dphase_FL', 'dphase_FR', 'dphase_RL', 'dphase_RR',
+                  'phase_FL', 'phase_FR', 'phase_RL', 'phase_RR',
+                  'contact_FL', 'contact_FR', 'contact_RL', 'contact_RR',
                   'joint_targets_rate',
                   ]
         with open(self.log_path, 'w+', encoding='UTF8') as f:
@@ -114,6 +120,9 @@ class keyboard_play:
         data.extend(torch.stack(get_euler_xyz(self.env.base_quat), dim=1)[0, :].tolist())
         data.extend(self.env.base_lin_vel[0, :].tolist())
         data.extend(self.env.base_ang_vel[0, :].tolist())
+        data.extend(self.env.delta_phases[0, :].tolist())
+        data.extend(self.env.phases[0, :].tolist())
+        data.extend(map(lambda x: 1 if x else 0, self.env.ee_contact[0, :].tolist()))
         data.append(self.env.joint_targets_rate[0].item())
 
         self.step_counter += 1
@@ -143,7 +152,7 @@ class keyboard_play:
 
             if event.value > 0 and event.action in list(self.keyboard_control.values()):
                 self.env.commands = torch.round(self.env.commands * 10) / 10
-                self.env.commands *= (torch.norm(self.env.commands[:, :2], dim=1) >= 0.1).unsqueeze(1)
+                self.env.commands *= (torch.norm(self.env.commands[:, :3], dim=1) >= 0.1).unsqueeze(1)
                 print(list(self.keyboard_control.keys())[list(self.keyboard_control.values()).index(event.action)] +
                       ", now the command is " +
                       np.array2string(self.env.commands[0, :].cpu().detach().numpy().astype(float)))
