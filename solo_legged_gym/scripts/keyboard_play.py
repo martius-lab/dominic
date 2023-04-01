@@ -13,6 +13,7 @@ import csv
 EXPORT_POLICY = True
 LOG_DATA = True
 REAL_TIME = False
+np.set_printoptions(precision=2)
 
 
 class keyboard_play:
@@ -78,17 +79,16 @@ class keyboard_play:
 
     def play(self):
         if REAL_TIME:
-            threading.Timer(1 / 50, self.play).start()
+            threading.Timer(1 / 25, self.play).start()
             self.step()
-            self.update_keyboard_command()
         else:
             while True:
                 self.step()
-                self.update_keyboard_command()
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
         self.obs, _, _, _ = self.env.step(self.policy(self.obs.detach()).detach())
+        self.update_keyboard_command()
         if LOG_DATA:
             self.log_data()
 
@@ -106,7 +106,7 @@ class keyboard_play:
                   'dphase_FL', 'dphase_FR', 'dphase_RL', 'dphase_RR',
                   'phase_FL', 'phase_FR', 'phase_RL', 'phase_RR',
                   'contact_FL', 'contact_FR', 'contact_RL', 'contact_RR',
-                  'joint_targets_rate',
+                  'joint_targets_rate', 'torques', 'dof_vel', 'dof_acc'
                   ]
         with open(self.log_path, 'w+', encoding='UTF8') as f:
             writer = csv.writer(f)
@@ -123,6 +123,9 @@ class keyboard_play:
         data.extend(self.env.phases[0, :].tolist())
         data.extend(map(lambda x: 1 if x else 0, self.env.ee_contact[0, :].tolist()))
         data.append(self.env.joint_targets_rate[0].item())
+        data.append(torch.norm(self.env.torques[0, :], p=2).item())
+        data.append(torch.norm(self.env.dof_vel[0, :], p=2).item())
+        data.append(torch.norm(self.env.dof_acc[0, :], p=2).item())
 
         self.step_counter += 1
         with open(self.log_path, 'a', encoding='UTF8') as f:

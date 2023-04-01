@@ -14,6 +14,7 @@ torch = {url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp38
 isaacgym = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/isaacgym.git"}
 tensorboard = "^2.12.0"
 wandb = "*"
+pyqt5 = "*"
 
 [tool.poetry.group.dev.dependencies]
 cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}

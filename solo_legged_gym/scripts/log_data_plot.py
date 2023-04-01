@@ -50,6 +50,9 @@ def plot(args):
     ax.set_yticks(np.arange(4))
     ax.set_yticklabels(['contact_FL', 'contact_FR', 'contact_RL', 'contact_RR'])
     df.joint_targets_rate.iloc[START:END].plot(ax=axes[2, 0], label='joint_targets_rate')
+    df.torques.iloc[START:END].plot(ax=axes[2, 1], label='torques')
+    df.dof_vel.iloc[START:END].plot(ax=axes[2, 2], label='dof_vel')
+    df.dof_acc.iloc[START:END].plot(ax=axes[3, 0], label='dof_acc')
 
     for ax in fig.get_axes():
         ax.legend()

@@ -344,6 +344,7 @@ class BaseTask:
         self.last_actions = torch.zeros(self.num_envs, self.num_actions, dtype=torch.float, device=self.device,
                                         requires_grad=False)
         self.last_dof_vel = torch.zeros_like(self.dof_vel)
+        self.dof_acc = torch.zeros_like(self.dof_vel)
         self.last_root_vel = torch.zeros_like(self.root_states[:, 7:13])
         self.commands = torch.zeros(self.num_envs, self.cfg.commands.num_commands, dtype=torch.float,
                                     device=self.device, requires_grad=False)

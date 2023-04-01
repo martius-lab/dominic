@@ -56,7 +56,7 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
         clip_joint_target = 100.
 
         scale_delta_phase = 0.25
-        clip_delta_phase = [-0.5, 1.5]
+        clip_delta_phase = [-0.8, 1.5]
 
         default_gait_duration = 1.0
         default_duty_factor = 0.2
@@ -95,12 +95,15 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
 
             contact_match = ["contact", 2.0]
             joint_targets_rate = ["regularizer", 1.0]
+            # torques = ["regularizer", 8.0]  # This will make the legs closer to each other to reduce shoulder torque.
+            # dof_vel = ["regularizer", 15.0]  # This will affect the high speed tracking performance
+            # dof_acc = ["regularizer", 1000.0]  # This does not help at all :(
 
         class scales:
-            task = 4.0
-            ee = 2.0
+            task = 4.5
+            ee = 1.0
             pose = 1.0
-            contact = 2.0
+            contact = 1.5
             regularizer = 1.0
 
         base_height_target = 0.25
@@ -145,7 +148,7 @@ class Solo12PhaseTrainCfg(BaseTrainCfg):
         policy_class_name = 'ActorCritic'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
-        max_iterations = 1500  # number of policy updates
+        max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging

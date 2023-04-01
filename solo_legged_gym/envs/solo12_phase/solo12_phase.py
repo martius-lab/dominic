@@ -44,10 +44,10 @@ class Solo12Phase(BaseTask):
         )
         self.torque_limits[:] = self.cfg.control.torque_limits
 
-        self.dof_vel_limits = torch.zeros_like(self.dof_vel)
-        self.dof_vel_limits[:, self.HAA_indices] = self.cfg.control.dof_vel_limits
-        self.dof_vel_limits[:, self.KFE_indices] = self.cfg.control.dof_vel_limits
-        self.dof_vel_limits[:, self.HFE_indices] = self.cfg.control.dof_vel_limits
+        # self.dof_vel_limits = torch.zeros_like(self.dof_vel)
+        # self.dof_vel_limits[:, self.HAA_indices] = self.cfg.control.dof_vel_limits
+        # self.dof_vel_limits[:, self.KFE_indices] = self.cfg.control.dof_vel_limits
+        # self.dof_vel_limits[:, self.HFE_indices] = self.cfg.control.dof_vel_limits
 
         self.joint_targets = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
                                          requires_grad=False)
@@ -248,6 +248,7 @@ class Solo12Phase(BaseTask):
         for i in range(len(self.feet_indices)):
             self.ee_local[:, i, :] = quat_rotate_inverse(get_quat_yaw(self.base_quat), ee_local_[:, i, :])
         self.joint_targets_rate = torch.norm(self.last_joint_targets - self.joint_targets, p=2, dim=1)
+        self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],
@@ -344,8 +345,8 @@ class Solo12Phase(BaseTask):
     def _update_ee_local_target(self):
         # EE sequence: FL, FR, HL, HR
         # phase >= 0, stance; phase < 0, swing
-        dx = 0.22
-        dy = 0.14
+        dx = 0.2
+        dy = 0.13
         dz = 0.08
 
         gait_period = self.cfg.control.default_gait_duration
@@ -471,3 +472,12 @@ class Solo12Phase(BaseTask):
 
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
+
+    def _reward_torques(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+
+    def _reward_dof_vel(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
+
+    def _reward_dof_acc(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
