@@ -55,8 +55,8 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
         scale_joint_target = 0.25
         clip_joint_target = 100.
 
-        scale_delta_phase = 0.25
-        clip_delta_phase = [-0.8, 1.5]
+        scale_delta_phase = 0.1
+        clip_delta_phase = [-0.8, 2.0]
 
         default_gait_duration = 1.0
         default_duty_factor = 0.2
