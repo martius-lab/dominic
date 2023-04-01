@@ -54,6 +54,8 @@ class BaseEnvCfg(ABCConfig):
         num_actions = None  # overwrite in the tasks
         env_spacing = 2.  # not used with heightfields/trimeshes
         episode_length_s = 20  # episode length in seconds
+        play = False
+        debug = False
 
     class terrain:
         static_friction = 1.0

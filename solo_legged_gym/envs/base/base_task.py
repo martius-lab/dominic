@@ -64,6 +64,7 @@ class BaseTask:
                               self.root_states[self.cfg.viewer.ref_env, 1].item(),
                               0.2]
                 self._set_camera(ref_pos, ref_lookat)
+            self.viewer_set = True
             self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_ESCAPE, "QUIT")
             self.gym.subscribe_viewer_keyboard_event(
@@ -105,6 +106,7 @@ class BaseTask:
                     self.enable_viewer_sync = not self.enable_viewer_sync
                 elif evt.action == "toggle_overview" and evt.value > 0:
                     self.overview = not self.overview
+                    self.viewer_set = False
 
             # fetch results
             if self.device != 'cpu':
@@ -112,9 +114,7 @@ class BaseTask:
 
             # step graphics
             if self.enable_viewer_sync:
-                if self.overview:
-                    self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
-                else:
+                if self.cfg.env.play:
                     ref_pos = [self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
                                self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
                                self.cfg.viewer.ref_pos_b[2]]
@@ -122,6 +122,19 @@ class BaseTask:
                                   self.root_states[self.cfg.viewer.ref_env, 1].item(),
                                   0.2]
                     self._set_camera(ref_pos, ref_lookat)
+                else:
+                    if not self.viewer_set:
+                        if self.overview:
+                            self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
+                        else:
+                            ref_pos = [self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                                       self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                                       self.cfg.viewer.ref_pos_b[2]]
+                            ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
+                                          self.root_states[self.cfg.viewer.ref_env, 1].item(),
+                                          0.2]
+                            self._set_camera(ref_pos, ref_lookat)
+                        self.viewer_set = True
                 self.gym.step_graphics(self.sim)
                 self.gym.draw_viewer(self.viewer, self.sim, True)
                 if sync_frame_time:

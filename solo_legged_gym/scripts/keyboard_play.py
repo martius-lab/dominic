@@ -23,7 +23,6 @@ class keyboard_play:
         env_cfg.env.episode_length_s = 1.e4
         env_cfg.env.play = True
         env_cfg.env.debug = False
-        env_cfg.viewer.overview = False
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
         env_cfg.domain_rand.push_robots = False
