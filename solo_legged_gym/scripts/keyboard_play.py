@@ -45,16 +45,28 @@ class keyboard_play:
         # export policy as a jit module and as onnx model (used to run it from C++)
         if EXPORT_POLICY:
             path = os.path.join(
-                ROOT_DIR,
-                "logs",
-                train_cfg.runner.experiment_name,
+                os.path.dirname(load_path),
                 "exported",
                 "policies",
             )
             name = "policy"
             export_policy_as_jit(self.runner.algorithm.actor_critic, self.runner.obs_normalizer, path, filename=f"{name}.pt")
             export_policy_as_onnx(self.runner.algorithm.actor_critic, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
+            print("--------------------------")
             print("Exported policy to: ", path)
+            policy_jit_path = os.path.join(
+                os.path.dirname(load_path),
+                "exported",
+                "policies",
+                "policy.pt"
+            )
+            policy_jit = torch.jit.load(policy_jit_path)
+            test_input = torch.rand(1, env_cfg.env.num_observations)
+            print("loaded policy test output: ")
+            print(self.policy(test_input.to("cuda:0")))
+            print("loaded jit policy test output: ")
+            print(policy_jit(test_input))
+            print("--------------------------")
 
         if LOG_DATA:
             self.prepare_log_file(load_path)
