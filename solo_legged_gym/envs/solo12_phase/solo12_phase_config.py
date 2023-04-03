@@ -17,7 +17,7 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = False
+        change_commands = True
         change_interval_s = 10.  # time before command are changed[s]
 
         class ranges:
@@ -75,7 +75,7 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
         friction_range = [0.5, 1.25]
         randomize_base_mass = False
         added_mass_range = [-1., 1.]
-        push_robots = False
+        push_robots = True
         push_interval_s = 15
         max_push_vel_xy = 1.
 
@@ -154,7 +154,7 @@ class Solo12PhaseTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_phase'
-        run_name = 'baseline'
+        run_name = 'push_robots'
 
         # load
         load_run = -1  # -1 = last run
