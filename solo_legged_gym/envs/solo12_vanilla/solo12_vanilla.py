@@ -4,7 +4,7 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz
 
 from solo_legged_gym.envs import BaseTask
-from solo_legged_gym.utils import class_to_dict
+from solo_legged_gym.utils import class_to_dict, get_quat_yaw
 
 
 class Solo12Vanilla(BaseTask):
@@ -44,10 +44,10 @@ class Solo12Vanilla(BaseTask):
         )
         self.torque_limits[:] = self.cfg.control.torque_limits
 
-        self.dof_vel_limits = torch.zeros_like(self.dof_vel)
-        self.dof_vel_limits[:, self.HAA_indices] = self.cfg.control.dof_vel_limits
-        self.dof_vel_limits[:, self.KFE_indices] = self.cfg.control.dof_vel_limits
-        self.dof_vel_limits[:, self.HFE_indices] = self.cfg.control.dof_vel_limits
+        # self.dof_vel_limits = torch.zeros_like(self.dof_vel)
+        # self.dof_vel_limits[:, self.HAA_indices] = self.cfg.control.dof_vel_limits
+        # self.dof_vel_limits[:, self.KFE_indices] = self.cfg.control.dof_vel_limits
+        # self.dof_vel_limits[:, self.HFE_indices] = self.cfg.control.dof_vel_limits
 
         self.joint_targets = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
                                          requires_grad=False)
@@ -60,6 +60,15 @@ class Solo12Vanilla(BaseTask):
         self.total_power = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
         self.total_torque = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
 
+        self.ee_local = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+                                    requires_grad=False)
+        self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
+
+        self.actuator_lag_buffer = torch.zeros(self.num_envs, self.cfg.domain_rand.actuator_lag_steps + 1, 12,
+                                               dtype=torch.float, device=self.device, requires_grad=False)
+        self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
+                                                size=[self.num_envs], device=self.device)
+
         self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float, device=self.device, requires_grad=False)
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device, requires_grad=False)
 
@@ -71,6 +80,7 @@ class Solo12Vanilla(BaseTask):
         self._reset_dofs(env_ids)
         self._reset_root_states(env_ids)
         self._resample_commands(env_ids)
+        self._refresh_quantities()
 
         # reset buffers
         self.last_actions[env_ids] = 0.
@@ -78,6 +88,7 @@ class Solo12Vanilla(BaseTask):
         self.last_root_vel[env_ids] = 0.
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
+        self.actuator_lag_buffer[env_ids] = 0.
         self.feet_air_time[env_ids] = 0.
 
         self.episode_length_buf[env_ids] = 0
@@ -122,10 +133,8 @@ class Solo12Vanilla(BaseTask):
             total_torque_ = torch.sum(torch.square(self.torques), dim=1)
             self.total_power += total_power_
             self.total_torque += total_torque_
-
             self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(self.torques))
-            if not pause:
-                self.gym.simulate(self.sim)
+            self.gym.simulate(self.sim)
             if self.device == 'cpu':
                 self.gym.fetch_results(self.sim, True)
             self.gym.refresh_dof_state_tensor(self.sim)
@@ -134,6 +143,8 @@ class Solo12Vanilla(BaseTask):
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
+        self.gym.refresh_dof_state_tensor(self.sim)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
         self._refresh_quantities()
 
@@ -170,17 +181,21 @@ class Solo12Vanilla(BaseTask):
         self.reset_buf |= self.time_out_buf
 
     def compute_observations(self):
-        self.obs_buf = torch.cat((self.base_lin_vel,
-                                  self.base_ang_vel,
-                                  (self.dof_pos - self.default_dof_pos),
-                                  self.dof_vel,
-                                  self.projected_gravity,
-                                  self.actions,
-                                  self.commands,
+        self.obs_buf = torch.cat((self.base_lin_vel,  # 3
+                                  self.base_ang_vel,  # 3
+                                  (self.dof_pos - self.default_dof_pos),  # 12
+                                  self.dof_vel,  # 12
+                                  self.projected_gravity,  # 3
+                                  self.actions,  # 12
+                                  self.commands,  # 3
                                   ), dim=-1)
         # add noise if needed
         if self.add_noise:
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
+
+        # clip the observation if needed
+        clip_obs = self.cfg.observations.clip_observations
+        self.obs_buf = torch.clip(self.obs_buf, -clip_obs, clip_obs)
 
     def _get_noise_scale_vec(self):
         noise_vec = torch.zeros_like(self.obs_buf[0])
@@ -200,7 +215,13 @@ class Solo12Vanilla(BaseTask):
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+        self.ee_contact = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) > 0.2
+        ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
+        ee_local_[:, :, 0:2] -= self.root_states[:, 0:2].unsqueeze(1)
+        for i in range(len(self.feet_indices)):
+            self.ee_local[:, i, :] = quat_rotate_inverse(get_quat_yaw(self.base_quat), ee_local_[:, i, :])
         self.joint_targets_rate = torch.norm(self.last_joint_targets - self.joint_targets, p=2, dim=1)
+        self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],
@@ -212,6 +233,7 @@ class Solo12Vanilla(BaseTask):
         self.commands[env_ids, 2] = torch_rand_float(self.command_ranges["ang_vel_yaw"][0],
                                                      self.command_ranges["ang_vel_yaw"][1], (len(env_ids), 1),
                                                      device=self.device).squeeze(1)
+        # clip the small command to zero
         self.commands[env_ids, :] *= torch.any(self.commands[env_ids, :] >= 0.1, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
@@ -219,14 +241,25 @@ class Solo12Vanilla(BaseTask):
     def _compute_torques(self, joint_targets):
         # pd controller
         control_type = self.cfg.control.control_type
+
+        if self.cfg.domain_rand.actuator_lag:
+            self.actuator_lag_buffer = torch.cat((self.actuator_lag_buffer[:, 1:, :],
+                                                  joint_targets.unsqueeze(1)), dim=1)
+            if self.cfg.domain_rand.randomize_actuator_lag:
+                joint_targets_ = self.actuator_lag_buffer[torch.arange(self.num_envs), self.actuator_lag_index]
+            else:
+                joint_targets_ = self.actuator_lag_buffer[:, 0, :]
+        else:
+            joint_targets_ = joint_targets
+
         if control_type == "P":
             torques = self.p_gains * (
-                    joint_targets + self.default_dof_pos - self.dof_pos) - self.d_gains * self.dof_vel
+                    joint_targets_ + self.default_dof_pos - self.dof_pos) - self.d_gains * self.dof_vel
         elif control_type == "V":
-            torques = self.p_gains * (joint_targets - self.dof_vel) - self.d_gains * (
+            torques = self.p_gains * (joint_targets_ - self.dof_vel) - self.d_gains * (
                     self.dof_vel - self.last_dof_vel) / self.sim_params.dt
         elif control_type == "T":
-            torques = joint_targets
+            torques = joint_targets_
         else:
             raise NameError(f"Unknown controller type: {control_type}")
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
@@ -259,20 +292,21 @@ class Solo12Vanilla(BaseTask):
         self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                      gymtorch.unwrap_tensor(self.root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
-        self._refresh_quantities()
 
     def _push_robots(self):
         # base velocity impulse
-        max_vel = self.cfg.domain_rand.max_push_vel_xy
-        self.root_states[:, 7:9] = torch_rand_float(-max_vel, max_vel, (self.num_envs, 2),
-                                                    device=self.device)  # lin vel x/y
+        max_vel = self.cfg.domain_rand.max_push_vel_xyz
+        self.root_states[:, 7:10] += torch_rand_float(-max_vel, max_vel, (self.num_envs, 3),
+                                                      device=self.device)  # lin vel x/y/z
+        max_avel = self.cfg.domain_rand.max_push_avel_xyz
+        self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
+                                                       device=self.device)  # ang vel x/y/z
         self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
         self.gym.refresh_net_contact_force_tensor(self.sim)
-        self._refresh_quantities()
 
     def _set_default_dof_pos(self):
-        self.p_gains = torch.zeros(self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
-        self.d_gains = torch.zeros(self.num_actions, dtype=torch.float, device=self.device, requires_grad=False)
+        self.p_gains = torch.zeros(12, dtype=torch.float, device=self.device, requires_grad=False)
+        self.d_gains = torch.zeros(12, dtype=torch.float, device=self.device, requires_grad=False)
         for i in range(self.num_dofs):
             name = self.dof_names[i]
             angle = self.cfg.init_state.default_joint_angles[name]
@@ -362,16 +396,17 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_dof_vel(self, sigma):
-        dof_vel_ = torch.norm(self.dof_vel, p=2, dim=1)
-        return torch.exp(-torch.square(dof_vel_ / sigma))
+        return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
 
     def _reward_dof_acc(self, sigma):
-        dof_acc_ = torch.norm((self.last_dof_vel - self.dof_vel) / self.dt, p=2, dim=1)
-        return torch.exp(-torch.square(dof_acc_ / sigma))
+        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
     def _reward_stand_still(self, sigma):
         not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
         return torch.exp(-torch.square(not_stand / sigma))
+
+    def _reward_torques(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
 
     def _reward_feet_air_time(self, sigma):
         # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes

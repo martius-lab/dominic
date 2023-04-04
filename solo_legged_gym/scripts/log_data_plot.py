@@ -35,14 +35,6 @@ def plot(args):
     df.command_az.iloc[START:END].plot(ax=axes[1, 2], label='command_az')
     df.base_avel_z.iloc[START:END].plot(ax=axes[1, 2], label='base_avel_z')
 
-    df.phase_FL.iloc[START:END].plot(ax=axes[2, 0], label='phase_FL')
-    df.phase_FR.iloc[START:END].plot(ax=axes[2, 0], label='phase_FR')
-    df.phase_RL.iloc[START:END].plot(ax=axes[2, 0], label='phase_RL')
-    df.phase_RR.iloc[START:END].plot(ax=axes[2, 0], label='phase_RR')
-    df.dphase_FL.iloc[START:END].plot(ax=axes[2, 1], label='dphase_FL')
-    df.dphase_FR.iloc[START:END].plot(ax=axes[2, 1], label='dphase_FR')
-    df.dphase_RL.iloc[START:END].plot(ax=axes[2, 1], label='dphase_RL')
-    df.dphase_RR.iloc[START:END].plot(ax=axes[2, 1], label='dphase_RR')
     ax = axes[2, 2]
     colors = [(1, 1, 1),
               (0.12109375, 0.46484375, 0.703125),

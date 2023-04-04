@@ -10,6 +10,10 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         num_actions = 12
         episode_length_s = 20  # episode length in seconds
         play = False
+        debug = False
+
+    class viewer(BaseEnvCfg.viewer):
+        overview = True
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
@@ -18,8 +22,8 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [-0.5, 0.5]  # min max [m/s]
-            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
+            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
+            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.35]  # x,y,z [m]
@@ -43,10 +47,10 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
     class control(BaseEnvCfg.control):
         control_type = 'P'  # P: position, V: velocity, T: torques
-        stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad] # TODO?
+        stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 2.5  # TODO?
-        dof_vel_limits = 10.0  # TODO?
+        torque_limits = 2.5
+        dof_vel_limits = 10.0  # not used anyway...
         scale_joint_target = 0.25
         clip_joint_target = 100.
         decimation = 4
@@ -62,11 +66,18 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
     class domain_rand(BaseEnvCfg.domain_rand):
         randomize_friction = False
         friction_range = [0.5, 1.25]
+
         randomize_base_mass = False
-        added_mass_range = [-1., 1.]
+        added_mass_range = [-0.5, 0.5]
+
         push_robots = False
         push_interval_s = 15
-        max_push_vel_xy = 1.
+        max_push_vel_xyz = 0.5
+        max_push_avel_xyz = 0.5
+
+        actuator_lag = False
+        randomize_actuator_lag = False
+        actuator_lag_steps = 6  # the lag simulated would be actuator_lag_steps * dt * decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
@@ -74,9 +85,9 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             lin_vel_y = ["task", 0.2]
             ang_vel_z = ["task", 0.2]
 
-            lin_z = ["pose", 0.1]
+            lin_z = ["pose", 0.4]
             lin_vel_z = ["pose", 1.0]
-            ang_xy = ["pose", 0.3]
+            ang_xy = ["pose", 1.0]
             ang_vel_xy = ["pose", 3.0]
 
             joint_targets_rate = ["regularizer", 1.0]
@@ -90,15 +101,12 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             # torques
 
         class scales:
-            task = 1.5
-            pose = 0.5
-            regularizer = 0.5
+            task = 4.0
+            pose = 0.25
+            regularizer = 2.0
             # feet = 0.2
 
         base_height_target = 0.25
-
-    class viewer(BaseEnvCfg.viewer):
-        overview = True
 
     class observations:
         add_noise = False
@@ -140,7 +148,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         policy_class_name = 'ActorCritic'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
-        max_iterations = 1000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging

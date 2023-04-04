@@ -84,7 +84,7 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
 
         actuator_lag = False
         randomize_actuator_lag = False
-        actuator_lag_steps = 6  # the lag simulated would be actuator_lag_steps * dt
+        actuator_lag_steps = 6  # the lag simulated would be actuator_lag_steps * dt * decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]

@@ -27,7 +27,7 @@ class keyboard_play:
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
         env_cfg.domain_rand.push_robots = False
-        env_cfg.domain_rand.actuator_lag = True
+        env_cfg.domain_rand.actuator_lag = False
         env_cfg.domain_rand.randomize_actuator_lag = False
         env_cfg.domain_rand.actuator_lag_steps = 6
         env_cfg.commands.change_commands = False
@@ -118,8 +118,6 @@ class keyboard_play:
                   'base_x', 'base_y', 'base_z', 'base_ax', 'base_ay', 'base_az',
                   'base_vel_x', 'base_vel_y', 'base_vel_z',
                   'base_avel_x', 'base_avel_y', 'base_avel_z',
-                  'dphase_FL', 'dphase_FR', 'dphase_RL', 'dphase_RR',
-                  'phase_FL', 'phase_FR', 'phase_RL', 'phase_RR',
                   'contact_FL', 'contact_FR', 'contact_RL', 'contact_RR',
                   'joint_targets_rate', 'torques', 'dof_vel', 'dof_acc'
                   ]
@@ -134,8 +132,6 @@ class keyboard_play:
         data.extend(torch.stack(get_euler_xyz(self.env.base_quat), dim=1)[0, :].tolist())
         data.extend(self.env.base_lin_vel[0, :].tolist())
         data.extend(self.env.base_ang_vel[0, :].tolist())
-        data.extend(self.env.delta_phases[0, :].tolist())
-        data.extend(self.env.phases[0, :].tolist())
         data.extend(map(lambda x: 1 if x else 0, self.env.ee_contact[0, :].tolist()))
         data.append(self.env.joint_targets_rate[0].item())
         data.append(torch.norm(self.env.torques[0, :], p=2).item())
