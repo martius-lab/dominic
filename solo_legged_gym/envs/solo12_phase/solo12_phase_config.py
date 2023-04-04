@@ -161,7 +161,7 @@ class Solo12PhaseTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_phase'
-        run_name = 'actuator_lag_randomize'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
