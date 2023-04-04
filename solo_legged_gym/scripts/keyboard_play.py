@@ -27,7 +27,7 @@ class keyboard_play:
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
         env_cfg.domain_rand.push_robots = False
-        env_cfg.domain_rand.actuator_lag = False
+        env_cfg.domain_rand.actuator_lag = True
         env_cfg.domain_rand.randomize_actuator_lag = False
         env_cfg.domain_rand.actuator_lag_steps = 6
         env_cfg.commands.change_commands = False
