@@ -73,12 +73,18 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
     class domain_rand(BaseEnvCfg.domain_rand):
         randomize_friction = True
         friction_range = [0.5, 1.25]
+
         randomize_base_mass = True
         added_mass_range = [-0.5, 0.5]
+
         push_robots = True
         push_interval_s = 15
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
+
+        actuator_lag = False
+        randomize_actuator_lag = False
+        actuator_lag_steps = 6  # the lag simulated would be actuator_lag_steps * dt
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
@@ -155,7 +161,7 @@ class Solo12PhaseTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_phase'
-        run_name = 'push_ang_xyz'
+        run_name = 'actuator_lag_randomize'
 
         # load
         load_run = -1  # -1 = last run

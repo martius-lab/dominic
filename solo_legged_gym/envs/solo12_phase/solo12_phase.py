@@ -72,6 +72,11 @@ class Solo12Phase(BaseTask):
         self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
         self.control_time_step_size = self.cfg.sim.dt * self.cfg.control.decimation
 
+        self.actuator_lag_buffer = torch.zeros(self.num_envs, self.cfg.domain_rand.actuator_lag_steps + 1, 12,
+                                               dtype=torch.float, device=self.device, requires_grad=False)
+        self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
+                                                size=[self.num_envs], device=self.device)
+
     def reset_idx(self, env_ids):
         """Reset selected robots"""
         if len(env_ids) == 0:
@@ -92,6 +97,7 @@ class Solo12Phase(BaseTask):
         self.last_root_vel[env_ids] = 0.
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
+        self.actuator_lag_buffer[env_ids] = 0.
 
         self.episode_length_buf[env_ids] = 0
 
@@ -273,14 +279,25 @@ class Solo12Phase(BaseTask):
     def _compute_torques(self, joint_targets):
         # pd controller
         control_type = self.cfg.control.control_type
+
+        if self.cfg.domain_rand.actuator_lag:
+            self.actuator_lag_buffer = torch.cat((self.actuator_lag_buffer[:, 1:, :],
+                                                  joint_targets.unsqueeze(1)), dim=1)
+            if self.cfg.domain_rand.randomize_actuator_lag:
+                joint_targets_ = self.actuator_lag_buffer[torch.arange(self.num_envs), self.actuator_lag_index]
+            else:
+                joint_targets_ = self.actuator_lag_buffer[:, 0, :]
+        else:
+            joint_targets_ = joint_targets
+
         if control_type == "P":
             torques = self.p_gains * (
-                    joint_targets + self.default_dof_pos - self.dof_pos) - self.d_gains * self.dof_vel
+                    joint_targets_ + self.default_dof_pos - self.dof_pos) - self.d_gains * self.dof_vel
         elif control_type == "V":
-            torques = self.p_gains * (joint_targets - self.dof_vel) - self.d_gains * (
+            torques = self.p_gains * (joint_targets_ - self.dof_vel) - self.d_gains * (
                     self.dof_vel - self.last_dof_vel) / self.sim_params.dt
         elif control_type == "T":
-            torques = joint_targets
+            torques = joint_targets_
         else:
             raise NameError(f"Unknown controller type: {control_type}")
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
@@ -321,7 +338,7 @@ class Solo12Phase(BaseTask):
                                                       device=self.device)  # lin vel x/y/z
         max_avel = self.cfg.domain_rand.max_push_avel_xyz
         self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
-                                                      device=self.device)  # ang vel x/y/z
+                                                       device=self.device)  # ang vel x/y/z
 
         self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
         self.gym.refresh_net_contact_force_tensor(self.sim)

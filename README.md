@@ -134,4 +134,3 @@ custom_parameters = [
 ### WIP:
 
 1. cluster integration with json files
-2. peotry integration
