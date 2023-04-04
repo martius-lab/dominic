@@ -47,10 +47,10 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
 
     class control(BaseEnvCfg.control):
         control_type = 'P'  # P: position, V: velocity, T: torques
-        stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad] # TODO?
+        stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
         torque_limits = 2.5
-        dof_vel_limits = 10.0  # TODO?
+        dof_vel_limits = 10.0  # not used anyway...
 
         scale_joint_target = 0.25
         clip_joint_target = 100.
@@ -77,7 +77,8 @@ class Solo12PhaseEnvCfg(BaseEnvCfg):
         added_mass_range = [-0.5, 0.5]
         push_robots = True
         push_interval_s = 15
-        max_push_vel_xy = 1.
+        max_push_vel_xyz = 0.5
+        max_push_avel_xyz = 0.5
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
@@ -154,7 +155,7 @@ class Solo12PhaseTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_phase'
-        run_name = 'randomize_mass_and_friction'
+        run_name = 'push_ang_xyz'
 
         # load
         load_run = -1  # -1 = last run
