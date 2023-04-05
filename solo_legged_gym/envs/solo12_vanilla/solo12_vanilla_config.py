@@ -91,9 +91,9 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_xy = ["task", 3.0]
 
             joint_default = ["task", 1.0]
-            joint_targets_rate = ["task", 0.6]
+            joint_targets_rate = ["task", 1.0]
             # stand_still = ["regularizer", 1.0]
-            # dof_acc = ["task", 4000]
+            # dof_acc = ["regularizer", 0.1]
             # dof_vel
 
             # feet_air_time = ["feet", None]

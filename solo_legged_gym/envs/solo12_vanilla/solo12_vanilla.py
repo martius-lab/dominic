@@ -394,7 +394,7 @@ class Solo12Vanilla(BaseTask):
 
     def _reward_joint_default(self, sigma):
         joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
-        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.8) / 0.8
+        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.9) / 0.9
 
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
