@@ -85,28 +85,32 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             lin_vel_y = ["task", 0.2]
             ang_vel_z = ["task", 0.2]
 
-            lin_z = ["pose", 0.4]
-            lin_vel_z = ["pose", 1.0]
-            ang_xy = ["pose", 1.0]
-            ang_vel_xy = ["pose", 3.0]
+            lin_z = ["task", 0.4]
+            lin_vel_z = ["task", 1.0]
+            ang_xy = ["task", 1.0]
+            ang_vel_xy = ["task", 3.0]
 
-            joint_targets_rate = ["regularizer", 1.0]
+            joint_default = ["task", 1.0]
+            joint_targets_rate = ["task", 0.6]
             # stand_still = ["regularizer", 1.0]
-            # dof_acc = ["regularizer", 0.1]
+            # dof_acc = ["task", 4000]
             # dof_vel
 
             # feet_air_time = ["feet", None]
+
+            # torque: penalize torque
+            # work: penalize work
 
             # collision
             # torques
 
         class scales:
-            task = 4.0
-            pose = 0.25
-            regularizer = 2.0
-            # feet = 0.2
+            task = 1.0
+            # pose = 1.0
+            # regularizer = 1.2
+            # feet = 0.75
 
-        base_height_target = 0.25
+        base_height_target = 0.22
 
     class observations:
         add_noise = False
@@ -148,13 +152,13 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         policy_class_name = 'ActorCritic'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 1000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
