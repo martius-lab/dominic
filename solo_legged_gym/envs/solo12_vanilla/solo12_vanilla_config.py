@@ -35,10 +35,10 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             "HL_HAA": 0.0,
             "FR_HAA": 0.0,
             "HR_HAA": 0.0,
-            "FL_HFE": 0.8,
-            "HL_HFE": -0.8,
-            "FR_HFE": 0.8,
-            "HR_HFE": -0.8,
+            "FL_HFE": 0.6,
+            "HL_HFE": -0.6,
+            "FR_HFE": 0.6,
+            "HR_HFE": -0.6,
             "FL_KFE": -1.4,
             "HL_KFE": 1.4,
             "FR_KFE": -1.4,
@@ -87,13 +87,14 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
             lin_z = ["task", 0.4]
             lin_vel_z = ["task", 1.0]
-            ang_xy = ["task", 1.0]
+            ang_xy = ["task", 0.6]
             ang_vel_xy = ["task", 3.0]
 
-            joint_default = ["task", 1.0]
+            joint_default = ["task", 1.5]
             joint_targets_rate = ["task", 0.8]
             feet_slip = ["task", 0.1]
-            # stand_still = ["regularizer", 1.0]
+            # stand_still = ["task", 1.0]
+            torques = ["task", 10.0]
             # dof_acc = ["regularizer", 0.1]
             # dof_vel
 
@@ -159,7 +160,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'feet_slip'
+        run_name = 'torque'
 
         # load
         load_run = -1  # -1 = last run

@@ -276,7 +276,7 @@ class Solo12Vanilla(BaseTask):
         if self.cfg.env.play:
             self.dof_pos[env_ids] = self.default_dof_pos
         else:
-            self.dof_pos[env_ids] = self.default_dof_pos * torch_rand_float(0.5, 1.5, (len(env_ids), self.num_dof),
+            self.dof_pos[env_ids] = self.default_dof_pos + torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof),
                                                                             device=self.device)
 
         self.dof_vel[env_ids] = 0.
@@ -402,13 +402,13 @@ class Solo12Vanilla(BaseTask):
 
     def _reward_joint_default(self, sigma):
         joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
-        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.8) / 0.8
+        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.7) / 0.7
 
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_feet_slip(self, sigma):
-        feet_low = self.ee_global[:, :, 2] < 0.02
+        feet_low = self.ee_global[:, :, 2] < 0.03
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         feet_slip = torch.sum(feet_move * feet_low, dim=1)
         return torch.exp(-torch.square(feet_slip / sigma))
@@ -422,9 +422,9 @@ class Solo12Vanilla(BaseTask):
     # def _reward_stand_still(self, sigma):
     #     not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
     #     return torch.exp(-torch.square(not_stand / sigma))
-    #
-    # def _reward_torques(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+
+    def _reward_torques(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
     #
     # def _reward_feet_air_time(self, sigma):
     #     # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
