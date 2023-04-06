@@ -160,7 +160,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'torque'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
