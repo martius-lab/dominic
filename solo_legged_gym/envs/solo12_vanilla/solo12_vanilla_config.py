@@ -91,7 +91,8 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_xy = ["task", 3.0]
 
             joint_default = ["task", 1.0]
-            joint_targets_rate = ["task", 1.0]
+            joint_targets_rate = ["task", 0.8]
+            feet_slip = ["task", 0.1]
             # stand_still = ["regularizer", 1.0]
             # dof_acc = ["regularizer", 0.1]
             # dof_vel
@@ -158,7 +159,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'test'
+        run_name = 'feet_slip'
 
         # load
         load_run = -1  # -1 = last run

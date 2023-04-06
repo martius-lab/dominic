@@ -59,7 +59,10 @@ class Solo12Vanilla(BaseTask):
                                    requires_grad=False)
         self.total_power = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
         self.total_torque = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
-
+        self.ee_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+                                     requires_grad=False)
+        self.last_ee_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+                                          requires_grad=False)
         self.ee_local = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                     requires_grad=False)
         self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
@@ -69,8 +72,10 @@ class Solo12Vanilla(BaseTask):
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
                                                 size=[self.num_envs], device=self.device)
 
-        self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float, device=self.device, requires_grad=False)
-        self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device, requires_grad=False)
+        self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
+                                         device=self.device, requires_grad=False)
+        self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device,
+                                         requires_grad=False)
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -86,6 +91,7 @@ class Solo12Vanilla(BaseTask):
         self.last_actions[env_ids] = 0.
         self.last_dof_vel[env_ids] = 0.
         self.last_root_vel[env_ids] = 0.
+        self.last_ee_global[env_ids] = 0.
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
@@ -170,6 +176,7 @@ class Solo12Vanilla(BaseTask):
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
         self.last_joint_targets[:] = self.joint_targets[:]
+        self.last_ee_global[:] = self.ee_global[:]
 
         clip_obs = self.cfg.observations.clip_observations
         self.obs_buf = torch.clip(self.obs_buf, -clip_obs, clip_obs)
@@ -216,6 +223,7 @@ class Solo12Vanilla(BaseTask):
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
         self.ee_contact = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) > 0.2
+        self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
         ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
         ee_local_[:, :, 0:2] -= self.root_states[:, 0:2].unsqueeze(1)
         for i in range(len(self.feet_indices)):
@@ -394,32 +402,38 @@ class Solo12Vanilla(BaseTask):
 
     def _reward_joint_default(self, sigma):
         joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
-        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.9) / 0.9
+        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.8) / 0.8
 
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
-    def _reward_dof_vel(self, sigma):
-        return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
+    def _reward_feet_slip(self, sigma):
+        feet_low = self.ee_global[:, :, 2] < 0.02
+        feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
+        feet_slip = torch.sum(feet_move * feet_low, dim=1)
+        return torch.exp(-torch.square(feet_slip / sigma))
 
-    def _reward_dof_acc(self, sigma):
-        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
-
-    def _reward_stand_still(self, sigma):
-        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
-        return torch.exp(-torch.square(not_stand / sigma))
-
-    def _reward_torques(self, sigma):
-        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
-
-    def _reward_feet_air_time(self, sigma):
-        # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
-        contact = self.contact_forces[:, self.feet_indices, 2] > 1.
-        contact_filter = torch.logical_or(contact, self.last_contacts)
-        self.last_contacts = contact
-        first_contact = (self.feet_air_time > 0.) * contact_filter
-        self.feet_air_time += self.dt
-        rew_airTime = torch.sum((self.feet_air_time - 0.5) * first_contact, dim=1) # reward only on first contact with the ground
-        rew_airTime *= torch.norm(self.commands[:, :2], dim=1) > 0.1  # no reward for zero command
-        self.feet_air_time *= ~contact_filter  # if in contact, reset to zero
-        return rew_airTime
+    # def _reward_dof_vel(self, sigma):
+    #     return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
+    #
+    # def _reward_dof_acc(self, sigma):
+    #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
+    #
+    # def _reward_stand_still(self, sigma):
+    #     not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
+    #     return torch.exp(-torch.square(not_stand / sigma))
+    #
+    # def _reward_torques(self, sigma):
+    #     return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+    #
+    # def _reward_feet_air_time(self, sigma):
+    #     # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
+    #     contact = self.contact_forces[:, self.feet_indices, 2] > 1.
+    #     contact_filter = torch.logical_or(contact, self.last_contacts)
+    #     self.last_contacts = contact
+    #     first_contact = (self.feet_air_time > 0.) * contact_filter
+    #     self.feet_air_time += self.dt
+    #     rew_airTime = torch.sum((self.feet_air_time - 0.5) * first_contact, dim=1) # reward only on first contact with the ground
+    #     rew_airTime *= torch.norm(self.commands[:, :2], dim=1) > 0.1  # no reward for zero command
+    #     self.feet_air_time *= ~contact_filter  # if in contact, reset to zero
+    #     return rew_airTime
