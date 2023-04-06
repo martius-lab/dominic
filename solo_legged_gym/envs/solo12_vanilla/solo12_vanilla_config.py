@@ -93,7 +93,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             joint_default = ["task", 1.5]
             joint_targets_rate = ["task", 0.8]
             feet_slip = ["task", 0.1]
-            # stand_still = ["task", 1.0]
+            stand_still = ["task", 1.0]
             torques = ["task", 10.0]
             # dof_acc = ["regularizer", 0.1]
             # dof_vel

@@ -242,7 +242,7 @@ class Solo12Vanilla(BaseTask):
                                                      self.command_ranges["ang_vel_yaw"][1], (len(env_ids), 1),
                                                      device=self.device).squeeze(1)
         # clip the small command to zero
-        self.commands[env_ids, :] *= torch.any(self.commands[env_ids, :] >= 0.1, dim=1).unsqueeze(1)
+        self.commands[env_ids, :] *= torch.any(self.commands[env_ids, :] >= 0.2, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
 
@@ -418,10 +418,10 @@ class Solo12Vanilla(BaseTask):
     #
     # def _reward_dof_acc(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
-    #
-    # def _reward_stand_still(self, sigma):
-    #     not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
-    #     return torch.exp(-torch.square(not_stand / sigma))
+
+    def _reward_stand_still(self, sigma):
+        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
+        return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_torques(self, sigma):
         return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
