@@ -1,13 +1,13 @@
 import os
 import sys
 from cluster import cluster_main
+from solo_legged_gym.envs import *  # needed
 
 
 @cluster_main
 def train(id, working_dir, **kwargs):
     import isaacgym
     import torch
-    from solo_legged_gym.envs import *  # needed
     from solo_legged_gym.utils import (
         get_args,
         merge_config_args_into_cmd_line,
