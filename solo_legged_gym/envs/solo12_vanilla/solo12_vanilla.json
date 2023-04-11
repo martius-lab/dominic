@@ -12,6 +12,7 @@
       "control": {
         "decimation": 4
       }
+    }
   },
   "working_dir": "./logs/cluster/solo12_vanilla",
   "id": 1
