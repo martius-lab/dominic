@@ -1,7 +1,7 @@
+from solo_legged_gym.envs import *  # needed
 import os
 import sys
 from cluster import cluster_main
-from solo_legged_gym.envs import *  # needed
 
 
 @cluster_main
