@@ -2,7 +2,7 @@
   "solo_legged_gym": {
     "args": {
       "headless": true,
-      "wandb": false,
+      "wandb": true,
       "task": "solo12_vanilla"
     },
     "train_cfg": {
@@ -40,11 +40,11 @@
         "checkpoint": -1,
         "experiment_name": "solo12_vanilla",
         "load_run": -1,
-        "max_iterations": 1000,
+        "max_iterations": 100,
         "normalize_observation": true,
         "num_steps_per_env": 24,
         "policy_class_name": "ActorCritic",
-        "run_name": "baseline",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": false
       },
