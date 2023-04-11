@@ -156,6 +156,11 @@ Run the scripts from the root directory (where `.venv` is).
 ### Cluster run
 run at least once on the local machine to update the json file
 
+launch an interactive session to debug
+```bash
+condor_submit_bid 15 -i -append request_cpus=10 -append request_memory=20000 -append request_gpus=1
+export PATH="/fast/username/poetry/bin:$PATH"
+```
 
 
 ### WIP:
