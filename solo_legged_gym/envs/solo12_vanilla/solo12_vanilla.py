@@ -333,16 +333,14 @@ class Solo12Vanilla(BaseTask):
         self.default_dof_pos = self.default_dof_pos.unsqueeze(0)
 
     def _prepare_reward(self):
+        print(self.cfg.rewards.terms)
         self.reward_terms = class_to_dict(self.cfg.rewards.terms)
         self.reward_scales = class_to_dict(self.cfg.rewards.scales)
         self.reward_groups = {}
         for group, scale in self.reward_scales.items():
             self.reward_groups[group] = []
 
-        print(self.reward_terms)
         for name, info in self.reward_terms.items():
-            print(name)
-            print(info)
             group = info[0]
             self.reward_groups[group].append(name)
 
