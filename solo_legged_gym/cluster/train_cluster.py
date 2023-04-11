@@ -18,7 +18,7 @@ def train(id, working_dir, **kwargs):
     # remove json from command line argument if present
     sys.argv = [sys.argv[0]]
     # we need these for gymparse to work correctly
-    merge_config_args_into_cmd_line(kwargs["legged_gym"]["args"])
+    merge_config_args_into_cmd_line(kwargs["solo_legged_gym"]["args"])
     # get args from gymparse
     args = get_args()
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
