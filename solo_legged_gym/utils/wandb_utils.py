@@ -14,7 +14,7 @@ class WandbSummaryWriter(SummaryWriter):
         super().__init__(log_dir, flush_secs)
 
         try:
-            project = cfg["experiment_name"]
+            project = cfg.experiment_name
         except KeyError:
             raise KeyError(
                 "Please specify wandb_project in the runner config."

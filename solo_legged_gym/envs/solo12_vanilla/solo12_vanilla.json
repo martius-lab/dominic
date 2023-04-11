@@ -1,0 +1,11 @@
+{
+  "solo_legged_gym": {
+    "args": {
+      "headless": true,
+      "wandb": false,
+      "task": "solo12_vanilla"
+    }
+  },
+  "working_dir": "./logs/cluster/solo12_vanilla",
+  "id": 1
+}

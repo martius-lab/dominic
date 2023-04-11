@@ -1,6 +1,7 @@
 from isaacgym import gymapi
 from isaacgym import gymutil
 import os
+import sys
 import copy
 import numpy as np
 import random
@@ -227,3 +228,20 @@ class OnnxPolicyExporter(torch.nn.Module):
             output_names=["actions"],
             dynamic_axes={},
         )
+
+
+def merge_config_args_into_cmd_line(args):
+    # arguments that don't need a value in command line
+    store_true_keywords = ["headless", "wandb"]
+    for k, v in args.items():
+        if v is None:
+            continue
+        elif k in store_true_keywords:
+            if v is True:
+                sys.argv.append(f"--{k}")
+        else:
+            sys.argv.append(f"--{k}={v}")
+
+def update_cfgs_from_dict(env_cfg, train_cfg, update_cfg):
+    update_class_from_dict(env_cfg, update_cfg["legged_gym"]["env_cfg"])
+    update_class_from_dict(train_cfg, update_cfg["legged_gym"]["train_cfg"])

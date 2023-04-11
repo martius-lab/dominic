@@ -87,7 +87,7 @@
      sudo apt install libpython3.8
      ```
 
-### RUN
+### RUN on local machine
 Run the scripts from the root directory (where `.venv` is). 
 1. use `scripts/train.py` to start training.
    For example:

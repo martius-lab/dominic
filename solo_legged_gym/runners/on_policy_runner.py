@@ -119,10 +119,14 @@ class OnPolicyRunner:
                 self.log(locals())
             if it % self.save_interval == 0:
                 self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
+            if it >= tot_iter - 1:
+                if len(rewbuffer) > 0:
+                    avg_score = statistics.mean(rewbuffer)
             ep_infos.clear()
 
         self.current_learning_iteration += self.num_learning_iterations
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)))
+        return avg_score
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs

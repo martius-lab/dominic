@@ -46,15 +46,16 @@ class TaskRegistry:
                          headless=args.headless)
         return env, env_cfg
 
-    def make_alg_runner(self, env, name, args, env_cfg, train_cfg=None):
+    def make_alg_runner(self, env, name, args, env_cfg, train_cfg=None, log_dir=None):
         create_and_save = False
         if train_cfg is None:
             _, train_cfg = self.get_cfgs(name)
             create_and_save = True
         train_cfg = update_train_cfg_from_args(train_cfg, args)
 
-        log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
-        log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + train_cfg.runner.run_name)
+        if log_dir is None:
+            log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
+            log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + train_cfg.runner.run_name)
 
         if create_and_save:
             os.makedirs(log_dir)

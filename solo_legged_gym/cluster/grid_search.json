@@ -1,0 +1,32 @@
+{
+  "optimization_procedure_name": "test",
+  "results_dir": "logs/cluster",
+  "script_relative_path": "./solo_legged_gym/scripts/train_cluster.py",
+  "git_params": {
+  },
+  "environment_setup": {
+    "run_as_module": false
+  },
+  "cluster_requirements": {
+    "request_cpus": 10,
+    "request_gpus": 1,
+    "memory_in_mb": 20000,
+    "cuda_requirement": "TARGET.CUDACapability >= 6.0",
+    "bid": 15,
+    "forbidden_hostnames": []
+  },
+  "fixed_params": {
+    "__import_promise__": "envs/solo12_vanilla/solo12_vanilla.json"
+  },
+
+  "remove_jobs_dir": false,
+  "run_in_working_dir": true,
+  "local_run": false,
+  "restarts": 1,
+   "hyperparam_list": [
+     {
+     "param": "legged_gym.env_cfg.control.decimation",
+     "values": [1, 2, 3, 4]
+     }
+   ]
+}
