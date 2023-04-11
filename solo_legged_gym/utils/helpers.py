@@ -7,7 +7,6 @@ import numpy as np
 import random
 import torch
 import argparse
-import inspect
 
 
 def get_args() -> argparse.Namespace:
@@ -78,11 +77,11 @@ def class_to_dict(obj) -> dict:
 def update_class_from_dict(obj, dict):
     for key, val in dict.items():
         attr = getattr(obj, key, None)
-        if not hasattr(val, "__dict__"):
-            print(key)
-            setattr(obj, key, val)
-        else:
+        print(attr)
+        if isinstance(attr, type):
             update_class_from_dict(attr, val)
+        else:
+            setattr(obj, key, val)
     return
 
 
