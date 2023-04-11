@@ -25,7 +25,7 @@
   "restarts": 1,
    "hyperparam_list": [
      {
-     "param": "legged_gym.env_cfg.control.decimation",
+     "param": "solo_legged_gym.env_cfg.control.decimation",
      "values": [1, 2, 3, 4]
      }
    ]
