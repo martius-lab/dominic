@@ -351,6 +351,8 @@ class Solo12Vanilla(BaseTask):
         # allocate
         self.group_reward = torch.ones(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
 
+        print("yeah")
+
     def compute_reward(self):
         self.rew_buf[:] = 0.
         for group_name, terms in self.reward_groups.items():
