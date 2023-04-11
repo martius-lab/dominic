@@ -81,7 +81,6 @@ def update_class_from_dict(obj, dict):
         if not hasattr(val, "__dict__"):
             setattr(obj, key, val)
         else:
-            print("yeah go deeper")
             update_class_from_dict(attr, val)
     return
 
