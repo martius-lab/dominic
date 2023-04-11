@@ -64,7 +64,7 @@ class TaskRegistry:
                 "solo_legged_gym": {
                     "args": {
                         "headless": True,
-                        "wandb": False,
+                        "wandb": True,
                         "task": train_cfg.runner.experiment_name
                     },
                     "train_cfg": train_cfg_dict,

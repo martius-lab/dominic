@@ -2,7 +2,7 @@
   "solo_legged_gym": {
     "args": {
       "headless": true,
-      "wandb": false,
+      "wandb": true,
       "task": "solo12_vanilla"
     },
     "train_cfg": {
