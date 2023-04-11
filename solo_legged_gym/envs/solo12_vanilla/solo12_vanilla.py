@@ -339,9 +339,8 @@ class Solo12Vanilla(BaseTask):
         for group, scale in self.reward_scales.items():
             self.reward_groups[group] = []
 
-        for name, info in self.reward_terms.items():
-            print(info)
-            group = info[0]
+        for name, extra in self.reward_terms.items():
+            group = extra[0]
             self.reward_groups[group].append(name)
 
         self.episode_term_sums = {
