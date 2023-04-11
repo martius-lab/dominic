@@ -337,7 +337,9 @@ class Solo12Vanilla(BaseTask):
         self.reward_groups = {}
         for group, scale in self.reward_scales.items():
             self.reward_groups[group] = []
-
+        print(type(self.cfg.rewards.terms))
+        print(self.cfg.rewards.terms)
+        print(type(self.reward_terms))
         print(self.reward_terms)
         for name, info in self.reward_terms.items():
             group = info[0]
