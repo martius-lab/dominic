@@ -153,6 +153,10 @@ Run the scripts from the root directory (where `.venv` is).
    ]
    ```
 
+### Cluster run
+run at least once on the local machine to update the json file
+
+
 
 ### WIP:
 
