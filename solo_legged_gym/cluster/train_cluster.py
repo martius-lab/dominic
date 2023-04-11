@@ -23,8 +23,7 @@ def train(id, working_dir, **kwargs):
     args = get_args()
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     update_cfgs_from_dict(env_cfg, train_cfg, kwargs)
-    print(type(env_cfg))
-    print(type(train_cfg))
+    print(env_cfg)
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     runner = task_registry.make_alg_runner(
         env=env,
