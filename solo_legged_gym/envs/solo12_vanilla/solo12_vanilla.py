@@ -340,7 +340,6 @@ class Solo12Vanilla(BaseTask):
             self.reward_groups[group] = []
 
         for name, info in self.reward_terms.items():
-            print(type(info))
             group = info[0]
             self.reward_groups[group].append(name)
 
