@@ -75,11 +75,12 @@ def class_to_dict(obj) -> dict:
 
 
 def update_class_from_dict(obj, dict):
-    print(dict)
     print(type(dict))
     for key, val in dict.items():
         attr = getattr(obj, key, None)
+        print(type(attr))
         if isinstance(attr, type):
+            print("yeah go deeper")
             update_class_from_dict(attr, val)
         else:
             setattr(obj, key, val)
