@@ -242,6 +242,7 @@ def merge_config_args_into_cmd_line(args):
         else:
             sys.argv.append(f"--{k}={v}")
 
+
 def update_cfgs_from_dict(env_cfg, train_cfg, update_cfg):
     update_class_from_dict(env_cfg, update_cfg["legged_gym"]["env_cfg"])
     update_class_from_dict(train_cfg, update_cfg["legged_gym"]["train_cfg"])
