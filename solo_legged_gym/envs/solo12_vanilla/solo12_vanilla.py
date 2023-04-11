@@ -333,7 +333,6 @@ class Solo12Vanilla(BaseTask):
         self.default_dof_pos = self.default_dof_pos.unsqueeze(0)
 
     def _prepare_reward(self):
-        print(self.cfg.rewards.terms)
         self.reward_terms = class_to_dict(self.cfg.rewards.terms)
         self.reward_scales = class_to_dict(self.cfg.rewards.scales)
         self.reward_groups = {}
@@ -344,6 +343,7 @@ class Solo12Vanilla(BaseTask):
             group = info[0]
             self.reward_groups[group].append(name)
 
+        print(class_to_dict(self.cfg.rewards.terms))
         self.episode_term_sums = {
             name: torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
             for name in self.reward_terms.keys()}
