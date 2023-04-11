@@ -154,13 +154,13 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         policy_class_name = 'ActorCritic'
         algorithm_class_name = 'PPO'
         num_steps_per_env = 24  # per iteration
-        max_iterations = 1000  # number of policy updates
+        max_iterations = 100  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
