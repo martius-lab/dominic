@@ -23,6 +23,6 @@
   "run_in_working_dir": true,
   "local_run": false,
   "restarts": 1,
-   "hyperparam_list": [
-   ]
+  "hyperparam_list": [
+  ]
 }

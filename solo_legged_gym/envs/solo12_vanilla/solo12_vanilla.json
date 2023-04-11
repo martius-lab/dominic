@@ -203,54 +203,54 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": {
-            "group": "task",
-            "sigma": 3.0
-          },
-          "ang_vel_z": {
-            "group": "task",
-            "sigma": 0.2
-          },
-          "ang_xy": {
-            "group": "task",
-            "sigma": 0.6
-          },
-          "feet_slip": {
-            "group": "task",
-            "sigma": 0.1
-          },
-          "joint_default": {
-            "group": "task",
-            "sigma": 1.5
-          },
-          "joint_targets_rate": {
-            "group": "task",
-            "sigma": 0.8
-          },
-          "lin_vel_x": {
-            "group": "task",
-            "sigma": 0.2
-          },
-          "lin_vel_y": {
-            "group": "task",
-            "sigma": 0.2
-          },
-          "lin_vel_z": {
-            "group": "task",
-            "sigma": 1.0
-          },
-          "lin_z": {
-            "group": "task",
-            "sigma": 0.4
-          },
-          "stand_still": {
-            "group": "task",
-            "sigma": 1.0
-          },
-          "torques": {
-            "group": "task",
-            "sigma": 10.0
-          }
+          "ang_vel_xy": [
+            "task",
+            3.0
+          ],
+          "ang_vel_z": [
+            "task",
+            0.2
+          ],
+          "ang_xy": [
+            "task",
+            0.6
+          ],
+          "feet_slip": [
+            "task",
+            0.1
+          ],
+          "joint_default": [
+            "task",
+            1.5
+          ],
+          "joint_targets_rate": [
+            "task",
+            0.8
+          ],
+          "lin_vel_x": [
+            "task",
+            0.2
+          ],
+          "lin_vel_y": [
+            "task",
+            0.2
+          ],
+          "lin_vel_z": [
+            "task",
+            1.0
+          ],
+          "lin_z": [
+            "task",
+            0.4
+          ],
+          "stand_still": [
+            "task",
+            1.0
+          ],
+          "torques": [
+            "task",
+            10.0
+          ]
         }
       },
       "seed": 42,
