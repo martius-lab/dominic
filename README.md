@@ -3,7 +3,7 @@
     ```bash
     git clone git@gitlab.is.tue.mpg.de:autonomous-learning/solo_legged_gym.git
     ```
-    then go to the root folder.
+    then checkout to this branch and go to the root folder.
 
 2. Install poetry
     
@@ -64,7 +64,9 @@
 
 8. Login Weights and Biases
    ```bash
-   wandb login
+   echo 'export WANDB_USERNAME=jin-cheng' >> ~/.bashrc
+   source ~/.bashrc 
+   poetry run wandb login
    ```
    
 
