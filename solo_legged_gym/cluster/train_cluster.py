@@ -5,7 +5,7 @@ from cluster import cluster_main
 
 
 @cluster_main
-def train(id, **kwargs):
+def train(id, working_dir, **kwargs):
     import isaacgym
     import torch
     from solo_legged_gym.utils import (

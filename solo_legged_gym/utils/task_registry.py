@@ -70,6 +70,7 @@ class TaskRegistry:
                     "train_cfg": train_cfg_dict,
                     "env_cfg": env_cfg_dict
                 },
+                "working_dir": "./logs/cluster",
                 "id": 1
             }
 

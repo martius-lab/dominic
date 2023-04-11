@@ -303,5 +303,6 @@
       }
     }
   },
+  "working_dir": "./logs/cluster",
   "id": 1
 }
