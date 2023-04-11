@@ -24,9 +24,5 @@
   "local_run": false,
   "restarts": 1,
    "hyperparam_list": [
-     {
-     "param": "solo_legged_gym.env_cfg.control.decimation",
-     "values": [2, 4]
-     }
    ]
 }
