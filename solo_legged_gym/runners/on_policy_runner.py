@@ -5,6 +5,7 @@ import numpy as np
 import statistics
 
 import torch
+from torch.utils.tensorboard import SummaryWriter
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
 from solo_legged_gym.runners.algorithms.ppo import PPO
 from solo_legged_gym.runners.modules.actor_critic import ActorCritic
@@ -61,9 +62,11 @@ class OnPolicyRunner:
     def learn(self):
         # initialize writer
         if self.writer is None:
-            self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.runner_cfg, init_wandb=self.runner_cfg["wandb"])
-
-        if self.runner_cfg["wandb"]: self.writer.log_config(self.env.cfg, self.runner_cfg, self.algorithm_cfg, self.policy_cfg)
+            if self.runner_cfg["wandb"]:
+                self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.runner_cfg)
+                self.writer.log_config(self.env.cfg, self.runner_cfg, self.algorithm_cfg, self.policy_cfg)
+            else:
+                self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
 
         self.env.episode_length_buf = torch.randint_like(
             self.env.episode_length_buf, high=int(self.env.max_episode_length)
@@ -137,24 +140,23 @@ class OnPolicyRunner:
                         ep_info[key] = ep_info[key].unsqueeze(0)
                     infotensor = torch.cat((infotensor, ep_info[key].to(self.device)))
                 value = torch.mean(infotensor)
-                if self.runner_cfg["wandb"]: self.writer.add_scalar('Episode/' + key, value, locs['it'])
+                self.writer.add_scalar('Episode/' + key, value, locs['it'])
                 ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
         mean_std = self.algorithm.actor_critic.std.mean()
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
-        if self.runner_cfg["wandb"]:
-            self.writer.add_scalar('Learning/value_function_loss', locs['mean_value_loss'], locs['it'])
-            self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
-            self.writer.add_scalar('Learning/learning_rate', self.algorithm.learning_rate, locs['it'])
-            self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
-            self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
-            self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
-            self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
-            if len(locs['rewbuffer']) > 0:
-                self.writer.add_scalar('Train/mean_reward', statistics.mean(locs['rewbuffer']), locs['it'])
-                self.writer.add_scalar('Train/mean_reward_each_step', statistics.mean(locs['rew_each_step']), locs['it'])
-                self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['lenbuffer']), locs['it'])
-                self.writer.add_scalar('Train/mean_episode_length_percentage', statistics.mean(locs['len_percent_buffer']), locs['it'])
+        self.writer.add_scalar('Learning/value_function_loss', locs['mean_value_loss'], locs['it'])
+        self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
+        self.writer.add_scalar('Learning/learning_rate', self.algorithm.learning_rate, locs['it'])
+        self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
+        self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
+        self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
+        self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
+        if len(locs['rewbuffer']) > 0:
+            self.writer.add_scalar('Train/mean_reward', statistics.mean(locs['rewbuffer']), locs['it'])
+            self.writer.add_scalar('Train/mean_reward_each_step', statistics.mean(locs['rew_each_step']), locs['it'])
+            self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['lenbuffer']), locs['it'])
+            self.writer.add_scalar('Train/mean_episode_length_percentage', statistics.mean(locs['len_percent_buffer']), locs['it'])
 
         str = f" \033[1m Learning iteration {locs['it']}/{self.current_learning_iteration + self.num_learning_iterations} \033[0m "
 

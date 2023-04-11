@@ -10,10 +10,8 @@ except ModuleNotFoundError:
 
 
 class WandbSummaryWriter(SummaryWriter):
-    def __init__(self, log_dir: str, flush_secs: int, cfg, init_wandb: bool):
+    def __init__(self, log_dir: str, flush_secs: int, cfg):
         super().__init__(log_dir, flush_secs)
-
-        if not init_wandb: return
 
         try:
             project = cfg["experiment_name"]
