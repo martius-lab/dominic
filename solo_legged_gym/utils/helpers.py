@@ -77,8 +77,8 @@ def class_to_dict(obj) -> dict:
 def update_class_from_dict(obj, dict):
     for key, val in dict.items():
         attr = getattr(obj, key, None)
-        print(dir(attr))
-        if isinstance(attr, type):
+        if hasattr(attr, "__dict__"):
+            print("GO DEEPER")
             update_class_from_dict(attr, val)
         else:
             setattr(obj, key, val)
