@@ -80,7 +80,7 @@ def update_class_from_dict(obj, dict):
     for key, val in dict.items():
         attr = getattr(obj, key, None)
         print(type(attr))
-        if inspect.isclass(attr):
+        if isinstance(val, dict):
             print("yeah go deeper")
             update_class_from_dict(attr, val)
         else:
