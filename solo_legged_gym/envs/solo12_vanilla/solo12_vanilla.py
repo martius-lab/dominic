@@ -21,8 +21,9 @@ class Solo12Vanilla(BaseTask):
         self.change_commands = self.cfg.commands.change_commands
         if self.change_commands:
             self.change_interval = np.ceil(self.cfg.commands.change_interval_s / self.dt)
-
+        print(0)
         self._set_default_dof_pos()
+        print(1)
         self._prepare_reward()
 
     def _init_buffers(self):

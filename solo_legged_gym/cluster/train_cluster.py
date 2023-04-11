@@ -21,13 +21,9 @@ def train(id, working_dir, **kwargs):
     merge_config_args_into_cmd_line(kwargs["solo_legged_gym"]["args"])
     # get args from gymparse
     args = get_args()
-    print("0")
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
-    print("1")
     update_cfgs_from_dict(env_cfg, train_cfg, kwargs)
-    print("2")
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
-    print("3")
     runner = task_registry.make_alg_runner(
         env=env,
         env_cfg=env_cfg,
@@ -35,9 +31,7 @@ def train(id, working_dir, **kwargs):
         name=args.task,
         args=args,
     )
-    print("4")
     avg_score = runner.learn()
-    print("5")
 
     try:
         assert avg_score is not None
