@@ -1,6 +1,7 @@
 # just for fun
 
 import os
+import json
 from datetime import datetime
 from solo_legged_gym import ROOT_DIR
 from solo_legged_gym.runners import OnPolicyRunner
@@ -34,6 +35,7 @@ class TaskRegistry:
             raise ValueError(f"Task with name: {name} was not registered")
         if env_cfg is None:
             env_cfg, _ = self.get_cfgs(name)
+
         set_seed(env_cfg.seed)
         sim_params = {"sim": class_to_dict(env_cfg.sim)}
         sim_params = parse_sim_params(args, sim_params)
@@ -42,20 +44,28 @@ class TaskRegistry:
                          physics_engine=args.physics_engine,
                          sim_device=args.sim_device,
                          headless=args.headless)
-        return env
+        return env, env_cfg
 
-    def make_alg_runner(self, env, name, args, train_cfg=None):
+    def make_alg_runner(self, env, name, args, env_cfg, train_cfg=None):
+        create_and_save = False
         if train_cfg is None:
             _, train_cfg = self.get_cfgs(name)
+            create_and_save = True
         train_cfg = update_train_cfg_from_args(train_cfg, args)
 
         log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
         log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + train_cfg.runner.run_name)
 
-        train_cfg_dict = class_to_dict(train_cfg)
+        if create_and_save:
+            os.makedirs(log_dir)
+            env_cfg_dict = class_to_dict(env_cfg)
+            train_cfg_dict = class_to_dict(train_cfg)
+            with open(log_dir + '/cfg.json', 'w') as f:
+                json.dump([env_cfg_dict, train_cfg_dict], f, indent=4)
+
         runner = OnPolicyRunner(
             env=env,
-            train_cfg=train_cfg_dict,
+            train_cfg=train_cfg,
             log_dir=log_dir,
             device=args.device)
         return runner

@@ -32,9 +32,10 @@ class keyboard_play:
         env_cfg.domain_rand.actuator_lag_steps = 6
         env_cfg.commands.change_commands = False
 
-        self.env = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
+        env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
+        self.env = env
+        self.runner = task_registry.make_alg_runner(env=self.env, name=args.task, args=args, env_cfg=env_cfg, train_cfg=train_cfg)
         self.obs = self.env.get_observations()
-        self.runner = task_registry.make_alg_runner(env=self.env, name=args.task, args=args, train_cfg=train_cfg)
 
         load_path = get_load_path(
             os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),

@@ -7,6 +7,7 @@ import statistics
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
+from solo_legged_gym.utils.helpers import class_to_dict
 from solo_legged_gym.runners.algorithms.ppo import PPO
 from solo_legged_gym.runners.modules.actor_critic import ActorCritic
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
@@ -19,23 +20,23 @@ class OnPolicyRunner:
                  log_dir=None,
                  device='cpu'):
 
-        self.runner_cfg = train_cfg["runner"]
-        self.algorithm_cfg = train_cfg["algorithm"]
-        self.policy_cfg = train_cfg["policy"]
+        self.runner_cfg = train_cfg.runner
+        self.algorithm_cfg = train_cfg.algorithm
+        self.policy_cfg = train_cfg.policy
         self.device = device
         self.env = env
-        policy_class = eval(self.runner_cfg["policy_class_name"])  # ActorCritic
+        policy_class = eval(self.runner_cfg.policy_class_name)  # ActorCritic
         actor_critic: ActorCritic = policy_class(num_actor_obs=self.env.num_obs,
                                                  num_critic_obs=self.env.num_obs,
                                                  num_actions=self.env.num_actions,
-                                                 **self.policy_cfg).to(self.device)
-        algorithm_class = eval(self.runner_cfg["algorithm_class_name"])  # PPO
+                                                 **class_to_dict(self.policy_cfg)).to(self.device)
+        algorithm_class = eval(self.runner_cfg.algorithm_class_name)  # PPO
         self.algorithm: PPO = algorithm_class(actor_critic=actor_critic,
                                               device=self.device,
-                                              **self.algorithm_cfg)
-        self.num_steps_per_env = self.runner_cfg["num_steps_per_env"]
-        self.save_interval = self.runner_cfg["save_interval"]
-        self.normalize_observation = self.runner_cfg["normalize_observation"]
+                                              **class_to_dict(self.algorithm_cfg))
+        self.num_steps_per_env = self.runner_cfg.num_steps_per_env
+        self.save_interval = self.runner_cfg.save_interval
+        self.normalize_observation = self.runner_cfg.normalize_observation
 
         if self.normalize_observation:
             self.obs_normalizer = EmpiricalNormalization(shape=self.env.num_obs,
@@ -55,14 +56,14 @@ class OnPolicyRunner:
         self.tot_timesteps = 0
         self.tot_time = 0
         self.current_learning_iteration = 0
-        self.num_learning_iterations = self.runner_cfg["max_iterations"]
+        self.num_learning_iterations = self.runner_cfg.max_iterations
 
         self.env.reset()
 
     def learn(self):
         # initialize writer
         if self.writer is None:
-            if self.runner_cfg["wandb"]:
+            if self.runner_cfg.wandb:
                 self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.runner_cfg)
                 self.writer.log_config(self.env.cfg, self.runner_cfg, self.algorithm_cfg, self.policy_cfg)
             else:
@@ -204,7 +205,7 @@ class OnPolicyRunner:
         torch.save(saved_dict, path)
 
         # Upload model to external logging service
-        if self.runner_cfg["wandb"]: self.writer.save_model(path, self.current_learning_iteration)
+        if self.runner_cfg.wandb: self.writer.save_model(path, self.current_learning_iteration)
 
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)
@@ -221,7 +222,7 @@ class OnPolicyRunner:
         if device is not None:
             self.algorithm.actor_critic.to(device)
         policy = self.algorithm.actor_critic.act_inference
-        if self.runner_cfg["normalize_observation"]:
+        if self.runner_cfg.normalize_observation:
             if device is not None:
                 self.obs_normalizer.to(device)
             policy = lambda x: self.algorithm.actor_critic.act_inference(self.obs_normalizer(x))

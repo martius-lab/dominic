@@ -67,12 +67,15 @@
    wandb login
    ```
    
-9. (optional) Configure pycharm by setting the environment variables (important)
+
+### Optional
+1. Open the project with PyCharm and choose python interpreter as poetry. 
+2. Configure PyCharm Run/Debug setting. 
+   by setting the environment variables (important)
    ```
    PYTHONUNBUFFERED=1;WANDB_USERNAME=<your-wandb-username>
    ```
-
-10. Other troubleshooting
+3. Other troubleshooting
      To fix the following error:
      ```
      ImportError: libpython3.8m.so.1.0: cannot open shared object file: No such file or directory
@@ -83,28 +86,29 @@
      ```
 
 ### RUN
-1. use `script/train.py` to start training.
-   
-   for example:
+Run the scripts from the root directory (where `.venv` is). 
+1. use `scripts/train.py` to start training.
+   For example:
    ```bash 
-   python script/train.py --task=solo12_vanilla (--wandb --headless)
+   poetry run python solo_legged_gym/scripts/train.py --task=solo12_vanilla (--wandb --headless)
    ```
    When viewer is enabled, use `v` to pause/resume rendering; use `b` to zoom in the first env/ zoom out. 
-2. use `script/keyboard_play.py` to control the robot with trained model. 
-   for example:
+2. use `scripts/keyboard_play.py` to control the robot with trained model. 
+   For example:
    ```bash 
-   python script/keyboard_play.py --task=solo12_vanilla
+   poetry run python solo_legged_gym/scripts/keyboard_play.py --task=solo12_vanilla
    ```
    use `w/a/s/d/q/e/x` to send command, specify the log data in `keyboard_play.py`
-3. use `script/log_data_plot.py` to plot the data. 
-   for example:
+3. use `scripts/log_data_plot.py` to plot the data. 
+   For example:
    ```bash
-   python script/log_data_plot.py --task=solo12_vanilla
+   poetry run python solo_legged_gym/scripts/log_data_plot.py --task=solo12_vanilla
    ```
    use `w/a/s/d/q/e/x` to send command, specify the log data in `keyboard_play.py`
-4. If wandb is not used, tensorboard will be the default writer
+4. If wandb is not used, tensorboard will be the default writer. 
+   For example:
    ```bash
-   tensorboard --logdir logs/<experiment_name>
+   tensorboard --logdir logs/solo12_vanilla
    ```
 5. specify the argument as shown in `utis/helpers.py`
    
