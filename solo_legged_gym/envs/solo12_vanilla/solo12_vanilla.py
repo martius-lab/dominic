@@ -340,10 +340,10 @@ class Solo12Vanilla(BaseTask):
             self.reward_groups[group] = []
 
         for name, info in self.reward_terms.items():
+            print(info)
             group = info[0]
             self.reward_groups[group].append(name)
 
-        print(class_to_dict(self.cfg.rewards.terms))
         self.episode_term_sums = {
             name: torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
             for name in self.reward_terms.keys()}
