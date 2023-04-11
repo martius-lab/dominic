@@ -1,7 +1,7 @@
 {
   "optimization_procedure_name": "test",
-  "results_dir": "logs/cluster",
-  "script_relative_path": "./solo_legged_gym/scripts/train_cluster.py",
+  "results_dir": "cluster/logs",
+  "script_relative_path": "./solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
   },
   "environment_setup": {
@@ -16,7 +16,7 @@
     "forbidden_hostnames": []
   },
   "fixed_params": {
-    "__import_promise__": "envs/solo12_vanilla/solo12_vanilla.json"
+    "__import_promise__": "./solo_legged_gym/envs/solo12_vanilla/solo12_vanilla.json"
   },
 
   "remove_jobs_dir": false,
