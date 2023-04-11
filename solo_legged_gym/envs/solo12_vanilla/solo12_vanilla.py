@@ -21,9 +21,7 @@ class Solo12Vanilla(BaseTask):
         self.change_commands = self.cfg.commands.change_commands
         if self.change_commands:
             self.change_interval = np.ceil(self.cfg.commands.change_interval_s / self.dt)
-        print(0)
         self._set_default_dof_pos()
-        print(1)
         self._prepare_reward()
 
     def _init_buffers(self):
@@ -341,7 +339,7 @@ class Solo12Vanilla(BaseTask):
             self.reward_groups[group] = []
 
         for name, info in self.reward_terms.items():
-            group = info[0]
+            group = info["group"]
             self.reward_groups[group].append(name)
 
         self.episode_term_sums = {
@@ -362,7 +360,7 @@ class Solo12Vanilla(BaseTask):
             for i in range(len(terms)):
                 reward_name = terms[i]
                 reward_function = getattr(self, '_reward_' + reward_name)
-                reward_sigma = self.reward_terms[reward_name][1]
+                reward_sigma = self.reward_terms[reward_name]["sigma"]
                 term_reward = reward_function(reward_sigma)
                 self.episode_term_sums[reward_name] += term_reward
                 self.group_reward *= term_reward
