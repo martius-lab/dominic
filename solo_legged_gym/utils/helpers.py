@@ -79,6 +79,7 @@ def update_class_from_dict(obj, dict):
     for key, val in dict.items():
         attr = getattr(obj, key, None)
         if not hasattr(val, "__dict__"):
+            print(key)
             setattr(obj, key, val)
         else:
             update_class_from_dict(attr, val)
