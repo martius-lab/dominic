@@ -110,7 +110,7 @@ Run the scripts from the root directory (where `.venv` is).
 4. If wandb is not used, tensorboard will be the default writer. 
    For example:
    ```bash
-   tensorboard --logdir logs/solo12_vanilla
+   poetry run tensorboard --logdir logs/solo12_vanilla
    ```
 5. specify the argument as shown in `utis/helpers.py`
    
@@ -162,7 +162,18 @@ condor_submit_bid 15 -i -append request_cpus=10 -append request_memory=20000 -ap
 export PATH="/fast/username/poetry/bin:$PATH"
 ```
 
+for training, specify the grid search params in `cluster/grid_search.json`
+be sure to enable `tmux`
+```bash
+export PATH="/fast/username/poetry/bin:$PATH"
+poetry run python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
+```
 
-### WIP:
+tensorboard
+```bash
+poetry run tensorboard --logdir logs/solo12_vanilla
+```
 
-1. cluster integration with json files
+### WIP
+how to visualize through tensorboard? ssh port...
+
