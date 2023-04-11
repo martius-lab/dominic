@@ -46,23 +46,35 @@ class TaskRegistry:
                          headless=args.headless)
         return env, env_cfg
 
-    def make_alg_runner(self, env, name, args, env_cfg, train_cfg=None, log_dir=None):
+    def make_alg_runner(self, env, name, args, env_cfg, train_cfg=None):
         create_and_save = False
         if train_cfg is None:
             _, train_cfg = self.get_cfgs(name)
             create_and_save = True
         train_cfg = update_train_cfg_from_args(train_cfg, args)
 
-        if log_dir is None:
-            log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
-            log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + train_cfg.runner.run_name)
+        log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
+        log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + train_cfg.runner.run_name)
 
         if create_and_save:
             os.makedirs(log_dir)
             env_cfg_dict = class_to_dict(env_cfg)
             train_cfg_dict = class_to_dict(train_cfg)
-            with open(log_dir + '/cfg.json', 'w') as f:
-                json.dump([env_cfg_dict, train_cfg_dict], f, indent=4)
+            cfg = {
+                "solo_legged_gym": {
+                    "args": {
+                        "headless": True,
+                        "wandb": False,
+                        "task": train_cfg.runner.experiment_name
+                    },
+                    "train_cfg": train_cfg_dict,
+                    "env_cfg": env_cfg_dict
+                },
+                "id": 1
+            }
+
+            with open(os.path.join(ROOT_DIR, 'envs', train_cfg.runner.experiment_name + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
+                json.dump(cfg, f, indent=2)
 
         runner = OnPolicyRunner(
             env=env,

@@ -5,7 +5,7 @@ from cluster import cluster_main
 
 
 @cluster_main
-def train(id, working_dir, **kwargs):
+def train(id, **kwargs):
     import isaacgym
     import torch
     from solo_legged_gym.utils import (
@@ -23,9 +23,6 @@ def train(id, working_dir, **kwargs):
     args = get_args()
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     update_cfgs_from_dict(env_cfg, train_cfg, kwargs)
-    if not os.path.exists(working_dir):
-        os.makedirs(working_dir)
-    # create env and policy with cfgs
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     runner = task_registry.make_alg_runner(
         env=env,
@@ -33,7 +30,6 @@ def train(id, working_dir, **kwargs):
         train_cfg=train_cfg,
         name=args.task,
         args=args,
-        log_root=working_dir,
     )
     avg_score = runner.learn()
     try:
