@@ -7,7 +7,7 @@
 
 2. Install poetry
     
-    on PC
+    on local machine
     ```bash
     curl -sSL https://install.python-poetry.org | python3 - --version 1.4.0
     ```
@@ -64,16 +64,16 @@
 
 8. Login Weights and Biases
    ```bash
-   echo 'export WANDB_USERNAME=jin-cheng' >> ~/.bashrc
+   echo 'export WANDB_USERNAME=<wandb_username>' >> ~/.bashrc
    source ~/.bashrc 
    poetry run wandb login
    ```
-   
+   you will be asked to paste the API keys, you can get it from your personal profile. 
 
 ### Optional
 1. Open the project with PyCharm and choose python interpreter as poetry. 
 2. Configure PyCharm Run/Debug setting. 
-   by setting the environment variables (important)
+   by setting the environment variables (important!)
    ```
    PYTHONUNBUFFERED=1;WANDB_USERNAME=<your-wandb-username>
    ```
@@ -154,26 +154,24 @@ Run the scripts from the root directory (where `.venv` is).
    ```
 
 ### Cluster run
-run at least once on the local machine to update the json file
+run at least once on the local machine to update the json file specified in `env`
 
+####  - Interactive debug on cluster
 launch an interactive session to debug
 ```bash
 condor_submit_bid 15 -i -append request_cpus=10 -append request_memory=20000 -append request_gpus=1
 export PATH="/fast/username/poetry/bin:$PATH"
 ```
-
-for training, specify the grid search params in `cluster/grid_search.json`
-be sure to enable `tmux`
+####  - Grid search
+For training, specify the grid search params in `cluster/grid_search.json`
+be sure to enable `tmux` so that your session will not terminate if you close the terminal.
 ```bash
 export PATH="/fast/username/poetry/bin:$PATH"
 poetry run python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
 ```
-
-tensorboard
-```bash
-poetry run tensorboard --logdir logs/solo12_vanilla
-```
+by default, weights and biases is used. 
 
 ### WIP
-how to visualize through tensorboard? ssh port...
+1. Cluster optimization
+2. how to visualize the cluster training using tensorboard? (to limit the internet usage)
 
