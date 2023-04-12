@@ -46,7 +46,7 @@
         "policy_class_name": "ActorCritic",
         "run_name": "baseline",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true
       },
       "runner_class_name": "OnPolicyRunner"
     },

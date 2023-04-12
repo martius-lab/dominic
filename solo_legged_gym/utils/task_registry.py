@@ -58,6 +58,7 @@ class TaskRegistry:
 
         if create_and_save:
             os.makedirs(log_dir)
+            # update the json file for cluster running
             env_cfg_dict = class_to_dict(env_cfg)
             train_cfg_dict = class_to_dict(train_cfg)
             cfg = {
