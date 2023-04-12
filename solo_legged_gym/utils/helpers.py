@@ -80,7 +80,7 @@ def update_class_from_dict(obj, dict):
         if hasattr(attr, "__dict__"):
             update_class_from_dict(attr, val)
         else:
-            print(key + ': ' + str(val))
+            print(key + ': ' + str(val), file=sys.stderr)
             setattr(obj, key, val)
     return
 
