@@ -119,7 +119,7 @@ Run the scripts from the root directory (where `.venv` is).
            {
                "name": "--task",
                "type": str,
-               "default": "a1_vanilla",
+               "default": "solo12_vanilla",
                "help": "Start testing from a checkpoint. Overrides config file if provided.",
            },
            {
