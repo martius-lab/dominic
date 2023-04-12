@@ -171,6 +171,13 @@ poetry run python -m cluster.grid_search solo_legged_gym/cluster/grid_search.jso
 ```
 by default, weights and biases is used. 
 
+#### - File transfer
+FileZilla is recommended, you can easily install it
+```bash
+sudo apt install filezilla
+```
+connect the cluster by specifying `SFTP` and port `22`. 
+
 ### WIP
 1. Cluster optimization
 2. how to visualize the cluster training using tensorboard? (to limit the internet usage)
