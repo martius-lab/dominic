@@ -155,7 +155,7 @@ class Solo12VanillaTrainCfg:
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 100  # number of policy updates
+        max_iterations = 1000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging
