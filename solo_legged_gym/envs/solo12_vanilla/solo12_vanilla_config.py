@@ -167,6 +167,5 @@ class Solo12VanillaTrainCfg:
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
-        # debug
         wandb = False
 
