@@ -1,7 +1,7 @@
 import torch
 
 
-class RolloutStorage:
+class RolloutBuffer:
     class Transition:
         def __init__(self):
             self.observations = None

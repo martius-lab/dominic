@@ -128,17 +128,18 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
                 gravity = 0.05
 
 
-class Solo12VanillaTrainCfg(BaseTrainCfg):
-    runner_class_name = 'OnPolicyRunner'
+class Solo12VanillaTrainCfg:
+    algorithm_name = 'PPO'
 
-    class policy(BaseTrainCfg.policy):
-        init_noise_std = 1.0
-        actor_hidden_dims = [512, 256, 128]
-        critic_hidden_dims = [512, 256, 128]
-        activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+    class network:
+        policy_init_noise_std = 1.0
+        policy_hidden_dims = [512, 256, 128]
+        policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        value_hidden_dims = [512, 256, 128]
+        value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
-    class algorithm(BaseTrainCfg.algorithm):
-        # training params
+    class algorithm:
+        # algorithm params
         value_loss_coef = 1.0
         use_clipped_value_loss = True
         clip_param = 0.2
@@ -147,14 +148,14 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         num_mini_batches = 4  # mini batch size = num_envs * nsteps / nminibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
+        gamma = 0.99
+        lam = 0.95
         desired_kl = 0.01
         max_grad_norm = 1.
 
-    class runner(BaseTrainCfg.runner):
-        policy_class_name = 'ActorCritic'
-        algorithm_class_name = 'PPO'
+    class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 1000  # number of policy updates
+        max_iterations = 100  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging
@@ -165,4 +166,7 @@ class Solo12VanillaTrainCfg(BaseTrainCfg):
         # load
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
+
+        # debug
+        wandb = False
 

@@ -1,1 +1,1 @@
-from .rollout_storage import RolloutStorage
+from .rollout_buffer import RolloutBuffer

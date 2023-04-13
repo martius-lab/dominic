@@ -3,52 +3,36 @@ import torch.nn as nn
 from torch.distributions import Normal
 
 
-class ActorCritic(nn.Module):
+class Policy(nn.Module):
     def __init__(self,
-                 num_actor_obs,
-                 num_critic_obs,
+                 num_obs,
                  num_actions,
-                 actor_hidden_dims=[256, 256, 256],
-                 critic_hidden_dims=[256, 256, 256],
+                 hidden_dims=[256, 256, 256],
                  activation='elu',
                  init_noise_std=1.0,
                  **kwargs):
         if kwargs:
-            print("ActorCritic.__init__ got unexpected arguments, which will be ignored: " + str(
+            print("Policy.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
-        super(ActorCritic, self).__init__()
+        super(Policy, self).__init__()
 
         activation = get_activation(activation)
 
-        mlp_input_dim_a = num_actor_obs
-        mlp_input_dim_c = num_critic_obs
+        mlp_input_dim = num_obs
 
         # Policy
-        actor_layers = []
-        actor_layers.append(nn.Linear(mlp_input_dim_a, actor_hidden_dims[0]))
-        actor_layers.append(activation)
-        for l in range(len(actor_hidden_dims)):
-            if l == len(actor_hidden_dims) - 1:
-                actor_layers.append(nn.Linear(actor_hidden_dims[l], num_actions))
+        layers = []
+        layers.append(nn.Linear(mlp_input_dim, hidden_dims[0]))
+        layers.append(activation)
+        for l in range(len(hidden_dims)):
+            if l == len(hidden_dims) - 1:
+                layers.append(nn.Linear(hidden_dims[l], num_actions))
             else:
-                actor_layers.append(nn.Linear(actor_hidden_dims[l], actor_hidden_dims[l + 1]))
-                actor_layers.append(activation)
-        self.actor = nn.Sequential(*actor_layers)
+                layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
+                layers.append(activation)
+        self.policy = nn.Sequential(*layers)
 
-        # Value function
-        critic_layers = []
-        critic_layers.append(nn.Linear(mlp_input_dim_c, critic_hidden_dims[0]))
-        critic_layers.append(activation)
-        for l in range(len(critic_hidden_dims)):
-            if l == len(critic_hidden_dims) - 1:
-                critic_layers.append(nn.Linear(critic_hidden_dims[l], 1))
-            else:
-                critic_layers.append(nn.Linear(critic_hidden_dims[l], critic_hidden_dims[l + 1]))
-                critic_layers.append(activation)
-        self.critic = nn.Sequential(*critic_layers)
-
-        print(f"Actor MLP: {self.actor}")
-        print(f"Critic MLP: {self.critic}")
+        print(f"Policy MLP: {self.policy}")
 
         # Action noise
         # action_std = torch.concat((1.0 * torch.ones(12), 0.1 * torch.ones(5)))
@@ -83,7 +67,7 @@ class ActorCritic(nn.Module):
         return self.distribution.entropy().sum(dim=-1)
 
     def update_distribution(self, observations):
-        mean = self.actor(observations)
+        mean = self.policy(observations)
         self.distribution = Normal(mean, mean * 0. + self.std)
 
     def act(self, observations):
@@ -94,12 +78,8 @@ class ActorCritic(nn.Module):
         return self.distribution.log_prob(actions).sum(dim=-1)
 
     def act_inference(self, observations):
-        actions_mean = self.actor(observations)
+        actions_mean = self.policy(observations)
         return actions_mean
-
-    def evaluate(self, critic_observations):
-        value = self.critic(critic_observations)
-        return value
 
 
 def get_activation(act_name):

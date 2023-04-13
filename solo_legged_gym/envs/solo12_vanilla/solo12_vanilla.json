@@ -20,35 +20,33 @@
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
       },
-      "init_member_classes": {},
-      "policy": {
-        "activation": "elu",
-        "actor_hidden_dims": [
+      "algorithm_name": "PPO",
+      "network": {
+        "policy_activation": "elu",
+        "policy_hidden_dims": [
           512,
           256,
           128
         ],
-        "critic_hidden_dims": [
+        "policy_init_noise_std": 1.0,
+        "value_activation": "elu",
+        "value_hidden_dims": [
           512,
           256,
           128
-        ],
-        "init_noise_std": 1.0
+        ]
       },
       "runner": {
-        "algorithm_class_name": "PPO",
         "checkpoint": -1,
         "experiment_name": "solo12_vanilla",
         "load_run": -1,
-        "max_iterations": 1000,
+        "max_iterations": 100,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "policy_class_name": "ActorCritic",
         "run_name": "baseline",
         "save_interval": 50,
         "wandb": true
-      },
-      "runner_class_name": "OnPolicyRunner"
+      }
     },
     "env_cfg": {
       "asset": {

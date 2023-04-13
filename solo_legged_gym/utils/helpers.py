@@ -151,43 +151,31 @@ def update_train_cfg_from_args(train_cfg, args):
     return train_cfg
 
 
-def export_policy_as_jit(actor_critic, normalizer, path, filename="policy.pt"):
-    policy_exporter = TorchPolicyExporter(actor_critic, normalizer)
+def export_policy_as_jit(policy, normalizer, path, filename="policy.pt"):
+    policy_exporter = TorchPolicyExporter(policy, normalizer)
     policy_exporter.export(path, filename)
 
 
-def export_policy_as_onnx(actor_critic, normalizer, path, filename="policy.onnx"):
-    policy_exporter = OnnxPolicyExporter(actor_critic, normalizer)
+def export_policy_as_onnx(policy, normalizer, path, filename="policy.onnx"):
+    policy_exporter = OnnxPolicyExporter(policy, normalizer)
     policy_exporter.export(path, filename)
 
 
 class TorchPolicyExporter(torch.nn.Module):
-    def __init__(self, actor_critic, normalizer=None):
+    def __init__(self, policy, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
         else:
             self.normalizer = torch.nn.Identity()
-        self.actor = copy.deepcopy(actor_critic.actor)
-
-    def forward_lstm(self, x):
-        x = self.normalizer(x)
-        x, (h, c) = self.rnn(x.unsqueeze(0), (self.hidden_state, self.cell_state))
-        self.hidden_state[:] = h
-        self.cell_state[:] = c
-        x = x.squeeze(0)
-        return self.actor(x)
+        self.policy = copy.deepcopy(policy)
 
     def forward(self, x):
-        return self.actor(self.normalizer(x))
+        return self.policy(self.normalizer(x))
 
     @torch.jit.export
     def reset(self):
         pass
-
-    def reset_memory(self):
-        self.hidden_state[:] = 0.0
-        self.cell_state[:] = 0.0
 
     def export(self, path, filename):
         os.makedirs(path, exist_ok=True)
@@ -198,25 +186,20 @@ class TorchPolicyExporter(torch.nn.Module):
 
 
 class OnnxPolicyExporter(torch.nn.Module):
-    def __init__(self, actor_critic, normalizer=None):
+    def __init__(self, policy, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
         else:
             self.normalizer = torch.nn.Identity()
-        self.actor = copy.deepcopy(actor_critic.actor)
-
-    def forward_lstm(self, x_in, h_in, c_in):
-        x_in = self.normalizer(x_in)
-        x, (h, c) = self.rnn(x_in.unsqueeze(0), (h_in, c_in))
-        return self.actor(x.squeeze(0)), h, c
+        self.policy = copy.deepcopy(policy)
 
     def forward(self, x):
-        return self.actor(self.normalizer(x))
+        return self.policy(self.normalizer(x))
 
     def export(self, path, filename):
         self.to("cpu")
-        obs = torch.zeros(1, self.actor[0].in_features)
+        obs = torch.zeros(1, self.policy[0].in_features)
         torch.onnx.export(
             self,
             obs,

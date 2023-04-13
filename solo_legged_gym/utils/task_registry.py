@@ -4,7 +4,7 @@ import os
 import json
 from datetime import datetime
 from solo_legged_gym import ROOT_DIR
-from solo_legged_gym.runners import OnPolicyRunner
+from solo_legged_gym.runners.algorithms import *
 from .helpers import class_to_dict, set_seed, parse_sim_params, update_train_cfg_from_args
 
 
@@ -78,7 +78,8 @@ class TaskRegistry:
             with open(os.path.join(ROOT_DIR, 'envs', train_cfg.runner.experiment_name + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
                 json.dump(cfg, f, indent=2)
 
-        runner = OnPolicyRunner(
+        algorithm = eval(train_cfg.algorithm_name)
+        runner = algorithm(
             env=env,
             train_cfg=train_cfg,
             log_dir=log_dir,

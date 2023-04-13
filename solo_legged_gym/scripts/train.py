@@ -4,8 +4,8 @@ from solo_legged_gym.utils import task_registry, get_args
 
 def train(args):
     env, env_cfg = task_registry.make_env(name=args.task, args=args)
-    ppo_runner = task_registry.make_alg_runner(env=env, name=args.task, args=args, env_cfg=env_cfg)
-    _ = ppo_runner.learn()
+    runner = task_registry.make_alg_runner(env=env, name=args.task, args=args, env_cfg=env_cfg)
+    _ = runner.learn()
 
 
 if __name__ == '__main__':
