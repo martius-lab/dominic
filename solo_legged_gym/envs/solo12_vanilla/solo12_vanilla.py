@@ -241,7 +241,7 @@ class Solo12Vanilla(BaseTask):
                                                      self.command_ranges["ang_vel_yaw"][1], (len(env_ids), 1),
                                                      device=self.device).squeeze(1)
         # clip the small command to zero
-        self.commands[env_ids, :] *= torch.any(self.commands[env_ids, :] >= 0.2, dim=1).unsqueeze(1)
+        self.commands[env_ids, :] *= torch.any(self.commands[env_ids, :] >= 0.1, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
 
@@ -406,7 +406,7 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_feet_slip(self, sigma):
-        feet_low = self.ee_global[:, :, 2] < 0.03
+        feet_low = self.ee_global[:, :, 2] < 0.04
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         feet_slip = torch.sum(feet_move * feet_low, dim=1)
         return torch.exp(-torch.square(feet_slip / sigma))

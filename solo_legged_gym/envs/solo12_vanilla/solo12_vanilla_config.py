@@ -1,4 +1,4 @@
-from solo_legged_gym.envs import BaseEnvCfg, BaseTrainCfg
+from solo_legged_gym.envs import BaseEnvCfg
 
 
 class Solo12VanillaEnvCfg(BaseEnvCfg):
@@ -94,23 +94,12 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             joint_targets_rate = ["task", 0.8]
             feet_slip = ["task", 0.1]
             stand_still = ["task", 1.0]
-            torques = ["task", 10.0]
+            # torques = ["task", 10.0]
             # dof_acc = ["regularizer", 0.1]
-            # dof_vel
-
             # feet_air_time = ["feet", None]
-
-            # torque: penalize torque
-            # work: penalize work
-
-            # collision
-            # torques
 
         class scales:
             task = 1.0
-            # pose = 1.0
-            # regularizer = 1.2
-            # feet = 0.75
 
         base_height_target = 0.22
 

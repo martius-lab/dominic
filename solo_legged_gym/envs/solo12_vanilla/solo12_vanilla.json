@@ -40,7 +40,7 @@
         "checkpoint": -1,
         "experiment_name": "solo12_vanilla",
         "load_run": -1,
-        "max_iterations": 100,
+        "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
         "run_name": "baseline",
@@ -223,7 +223,7 @@
           ],
           "joint_targets_rate": [
             "task",
-            0.8
+            0.6
           ],
           "lin_vel_x": [
             "task",
@@ -244,10 +244,6 @@
           "stand_still": [
             "task",
             1.0
-          ],
-          "torques": [
-            "task",
-            10.0
           ]
         }
       },
