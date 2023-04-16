@@ -65,7 +65,8 @@ class Solo12Vanilla(BaseTask):
         self.ee_local = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                     requires_grad=False)
         self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
-
+        self.ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+                                         requires_grad=False)
         self.actuator_lag_buffer = torch.zeros(self.num_envs, self.cfg.domain_rand.actuator_lag_steps + 1, 12,
                                                dtype=torch.float, device=self.device, requires_grad=False)
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
@@ -223,6 +224,7 @@ class Solo12Vanilla(BaseTask):
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
         self.ee_contact = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) > 0.2
         self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
+        self.ee_vel_global = self.rigid_body_state[:, self.feet_indices, 7:10]
         ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
         ee_local_[:, :, 0:2] -= self.root_states[:, 0:2].unsqueeze(1)
         for i in range(len(self.feet_indices)):
@@ -410,6 +412,12 @@ class Solo12Vanilla(BaseTask):
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         feet_slip = torch.sum(feet_move * feet_low, dim=1)
         return torch.exp(-torch.square(feet_slip / sigma))
+
+    def _reward_feet_slip_v(self, sigma):
+        feet_low = self.ee_global[:, :, 2] < sigma[0]
+        feet_vel_xy = torch.norm(self.ee_vel_global[:, :, :2], p=2, dim=2)
+        feet_slip_v = torch.sum(feet_vel_xy * feet_low, dim=1)
+        return torch.exp(-torch.square(feet_slip_v / sigma[1]))
 
     def _reward_dof_vel(self, sigma):
         return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
