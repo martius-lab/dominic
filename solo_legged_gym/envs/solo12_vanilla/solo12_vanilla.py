@@ -406,16 +406,16 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_feet_slip(self, sigma):
-        feet_low = self.ee_global[:, :, 2] < 0.04
+        feet_low = self.ee_global[:, :, 2] < 0.03
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         feet_slip = torch.sum(feet_move * feet_low, dim=1)
         return torch.exp(-torch.square(feet_slip / sigma))
 
-    # def _reward_dof_vel(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
-    #
-    # def _reward_dof_acc(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
+    def _reward_dof_vel(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
+
+    def _reward_dof_acc(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
     def _reward_stand_still(self, sigma):
         not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)

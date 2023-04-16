@@ -222,7 +222,7 @@
           ],
           "joint_targets_rate": [
             "task",
-            0.6
+            0.8
           ],
           "lin_vel_x": [
             "task",
@@ -243,6 +243,10 @@
           "stand_still": [
             "task",
             1.0
+          ],
+          "torques": [
+            "task",
+            10.0
           ]
         }
       },

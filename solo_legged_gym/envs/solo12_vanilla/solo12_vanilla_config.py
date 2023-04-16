@@ -94,8 +94,9 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             joint_targets_rate = ["task", 0.8]
             feet_slip = ["task", 0.1]
             stand_still = ["task", 1.0]
-            # torques = ["task", 10.0]
-            # dof_acc = ["regularizer", 0.1]
+            torques = ["task", 10.0]
+            # dof_acc = ["task", 1500]
+            # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
 
         class scales:
