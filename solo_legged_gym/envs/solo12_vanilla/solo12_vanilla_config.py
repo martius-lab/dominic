@@ -31,18 +31,18 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
         default_joint_angles = {  # = target angles [rad] when action = 0.0
-            "FL_HAA": 0.0,
-            "HL_HAA": 0.0,
-            "FR_HAA": 0.0,
-            "HR_HAA": 0.0,
-            "FL_HFE": 0.6,
-            "HL_HFE": -0.6,
-            "FR_HFE": 0.6,
-            "HR_HFE": -0.6,
-            "FL_KFE": -1.4,
-            "HL_KFE": 1.4,
-            "FR_KFE": -1.4,
-            "HR_KFE": 1.4,
+            "FL_HAA": 0.05,
+            "HL_HAA": 0.05,
+            "FR_HAA": -0.05,
+            "HR_HAA": -0.05,
+            "FL_HFE": 0.4,
+            "HL_HFE": -0.4,
+            "FR_HFE": 0.4,
+            "HR_HFE": -0.4,
+            "FL_KFE": -1.0,
+            "HL_KFE": 1.0,
+            "FR_KFE": -1.0,
+            "HR_KFE": 1.0,
         }
 
     class control(BaseEnvCfg.control):
@@ -59,7 +59,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        terminate_after_contacts_on = ["base", "SHOULDER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
