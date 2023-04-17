@@ -413,8 +413,7 @@ class Solo12Vanilla(BaseTask):
         return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.7) / 0.7
 
     def _reward_joint_targets_rate(self, sigma):
-        sigma_ = sigma[0] + self.command_mag * sigma[1]
-        return torch.exp(-torch.square(self.joint_targets_rate / sigma_))
+        return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_feet_slip(self, sigma):
         feet_low = self.ee_global[:, :, 2] < sigma[0]

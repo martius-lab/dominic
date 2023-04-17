@@ -59,7 +59,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        terminate_after_contacts_on = ["base", "SHOULDER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -91,11 +91,11 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_xy = ["task", 3.0]
 
             joint_default = ["task", 1.5]
-            joint_targets_rate = ["task", [0.4, 0.4]]
+            joint_targets_rate = ["task", 0.8]
             stand_still = ["task", 1.0]
             feet_slip = ["task", [0.03, 0.1]]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            torques = ["task", [5.0, 5.0]]
+            torques = ["task", [6.0, 4.0]]
             # dof_acc = ["task", 1500]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'scaled_sigma'
 
         # load
         load_run = -1  # -1 = last run

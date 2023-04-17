@@ -43,9 +43,9 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "baseline",
+        "run_name": "scaled_sigma",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true
       }
     },
     "env_cfg": {
@@ -69,8 +69,7 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER",
-          "UPPER"
+          "SHOULDER"
         ],
         "thickness": 0.01
       },
@@ -226,10 +225,7 @@
           ],
           "joint_targets_rate": [
             "task",
-            [
-              0.4,
-              0.4
-            ]
+            0.8
           ],
           "lin_vel_x": [
             "task",
@@ -254,8 +250,8 @@
           "torques": [
             "task",
             [
-              5.0,
-              5.0
+              6.0,
+              4.0
             ]
           ]
         }
