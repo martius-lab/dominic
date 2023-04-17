@@ -408,10 +408,10 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_feet_slip(self, sigma):
-        feet_low = self.ee_global[:, :, 2] < 0.03
+        feet_low = self.ee_global[:, :, 2] < sigma[0]
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         feet_slip = torch.sum(feet_move * feet_low, dim=1)
-        return torch.exp(-torch.square(feet_slip / sigma))
+        return torch.exp(-torch.square(feet_slip / sigma[1]))
 
     def _reward_feet_slip_v(self, sigma):
         feet_low = self.ee_global[:, :, 2] < sigma[0]

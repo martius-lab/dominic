@@ -214,7 +214,10 @@
           ],
           "feet_slip": [
             "task",
-            0.1
+            [
+              0.03,
+              0.1
+            ]
           ],
           "joint_default": [
             "task",
