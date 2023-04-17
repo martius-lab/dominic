@@ -438,8 +438,7 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_torques(self, sigma):
-        sigma_ = sigma[0] + self.command_mag * sigma[1]
-        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma_))
+        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
     #
     # def _reward_feet_air_time(self, sigma):
     #     # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
