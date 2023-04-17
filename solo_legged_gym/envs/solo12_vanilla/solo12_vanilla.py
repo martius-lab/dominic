@@ -12,6 +12,13 @@ class Solo12Vanilla(BaseTask):
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
 
         self.command_ranges = class_to_dict(self.cfg.commands.ranges)
+        self.command_max = torch.norm(torch.Tensor([
+            np.max([np.abs(self.command_ranges["lin_vel_x"][0]), np.abs(self.command_ranges["lin_vel_x"][1])]),
+            np.max([np.abs(self.command_ranges["lin_vel_y"][0]), np.abs(self.command_ranges["lin_vel_y"][1])]),
+            np.max([np.abs(self.command_ranges["ang_vel_yaw"][0]), np.abs(self.command_ranges["ang_vel_yaw"][1])])
+        ]), p=2).item()
+        self.command_mag = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
+
         self.add_noise = self.cfg.observations.add_noise
         if self.add_noise:
             self.noise_scale_vec = self._get_noise_scale_vec()
@@ -231,6 +238,7 @@ class Solo12Vanilla(BaseTask):
             self.ee_local[:, i, :] = quat_rotate_inverse(get_quat_yaw(self.base_quat), ee_local_[:, i, :])
         self.joint_targets_rate = torch.norm(self.last_joint_targets - self.joint_targets, p=2, dim=1)
         self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
+        self.command_mag = torch.norm(self.commands, dim=-1, p=2) / self.command_max
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],
@@ -405,7 +413,8 @@ class Solo12Vanilla(BaseTask):
         return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.7) / 0.7
 
     def _reward_joint_targets_rate(self, sigma):
-        return torch.exp(-torch.square(self.joint_targets_rate / sigma))
+        sigma_ = sigma[0] + self.command_mag * sigma[1]
+        return torch.exp(-torch.square(self.joint_targets_rate / sigma_))
 
     def _reward_feet_slip(self, sigma):
         feet_low = self.ee_global[:, :, 2] < sigma[0]
@@ -430,7 +439,8 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_torques(self, sigma):
-        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+        sigma_ = sigma[0] + self.command_mag * sigma[1]
+        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma_))
     #
     # def _reward_feet_air_time(self, sigma):
     #     # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
