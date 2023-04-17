@@ -95,7 +95,7 @@ class Solo12DominoEnvCfg(BaseEnvCfg):
             stand_still = ["task", 1.0]
             feet_slip = ["task", [0.03, 0.1]]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            torques = ["task", [6.0, 4.0]]
+            torques = ["task", 6.0]
             # dof_acc = ["task", 1500]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
@@ -103,7 +103,7 @@ class Solo12DominoEnvCfg(BaseEnvCfg):
         class scales:
             task = 1.0
 
-        base_height_target = 0.22
+        base_height_target = 0.25
 
     class observations:
         add_noise = False
