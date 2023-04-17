@@ -1,7 +1,7 @@
 from solo_legged_gym.envs import BaseEnvCfg
 
 
-class Solo12DOMINOEnvCfg(BaseEnvCfg):
+class Solo12SACEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
@@ -119,8 +119,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
                 gravity = 0.05
 
 
-class Solo12DOMINOTrainCfg:
-    algorithm_name = 'DOMINO'
+class Solo12SACTrainCfg:
+    algorithm_name = 'SAC'
 
     class network:
         policy_init_noise_std = 1.0
@@ -151,8 +151,8 @@ class Solo12DOMINOTrainCfg:
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
-        experiment_name = 'solo12_domino'
-        run_name = 'baseline'
+        experiment_name = 'solo12_sac'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run

@@ -7,7 +7,7 @@ from solo_legged_gym.envs import BaseTask
 from solo_legged_gym.utils import class_to_dict, get_quat_yaw
 
 
-class Solo12DOMINO(BaseTask):
+class Solo12SAC(BaseTask):
     def __init__(self, cfg, sim_params, physics_engine, sim_device, headless):
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
 
@@ -74,7 +74,6 @@ class Solo12DOMINO(BaseTask):
         self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
         self.ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                          requires_grad=False)
-
         self.actuator_lag_buffer = torch.zeros(self.num_envs, self.cfg.domain_rand.actuator_lag_steps + 1, 12,
                                                dtype=torch.float, device=self.device, requires_grad=False)
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
@@ -435,8 +434,7 @@ class Solo12DOMINO(BaseTask):
         return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
     def _reward_stand_still(self, sigma):
-        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (
-                    torch.norm(self.commands, dim=1) < 0.1)
+        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
         return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_torques(self, sigma):
