@@ -43,7 +43,7 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "scaled_sigma",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true
       }
@@ -191,7 +191,7 @@
         }
       },
       "rewards": {
-        "base_height_target": 0.22,
+        "base_height_target": 0.25,
         "max_contact_force": 100.0,
         "scales": {
           "task": 1.0
@@ -249,10 +249,7 @@
           ],
           "torques": [
             "task",
-            [
-              6.0,
-              4.0
-            ]
+            6.0
           ]
         }
       },
