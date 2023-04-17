@@ -103,7 +103,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         class scales:
             task = 1.0
 
-        base_height_target = 0.22
+        base_height_target = 0.25
 
     class observations:
         add_noise = False
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
