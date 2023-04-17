@@ -40,10 +40,10 @@
         "checkpoint": -1,
         "experiment_name": "solo12_vanilla",
         "load_run": -1,
-        "max_iterations": 100,
+        "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "baseline",
+        "run_name": "scaled_sigma",
         "save_interval": 50,
         "wandb": true
       }
@@ -69,8 +69,7 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER",
-          "UPPER"
+          "SHOULDER"
         ],
         "thickness": 0.01
       },
@@ -147,10 +146,10 @@
           0.0
         ],
         "default_joint_angles": {
-          "FL_HAA": 0.0,
-          "HL_HAA": 0.0,
-          "FR_HAA": 0.0,
-          "HR_HAA": 0.0,
+          "FL_HAA": 0.05,
+          "HL_HAA": 0.05,
+          "FR_HAA": -0.05,
+          "HR_HAA": -0.05,
           "FL_HFE": 0.6,
           "HL_HFE": -0.6,
           "FR_HFE": 0.6,
@@ -215,7 +214,10 @@
           ],
           "feet_slip": [
             "task",
-            0.1
+            [
+              0.03,
+              0.1
+            ]
           ],
           "joint_default": [
             "task",
@@ -247,7 +249,10 @@
           ],
           "torques": [
             "task",
-            10.0
+            [
+              6.0,
+              4.0
+            ]
           ]
         }
       },

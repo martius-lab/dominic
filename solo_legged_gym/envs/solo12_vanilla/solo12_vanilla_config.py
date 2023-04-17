@@ -1,4 +1,4 @@
-from solo_legged_gym.envs import BaseEnvCfg, BaseTrainCfg
+from solo_legged_gym.envs import BaseEnvCfg
 
 
 class Solo12VanillaEnvCfg(BaseEnvCfg):
@@ -31,10 +31,10 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
         default_joint_angles = {  # = target angles [rad] when action = 0.0
-            "FL_HAA": 0.0,
-            "HL_HAA": 0.0,
-            "FR_HAA": 0.0,
-            "HR_HAA": 0.0,
+            "FL_HAA": 0.05,
+            "HL_HAA": 0.05,
+            "FR_HAA": -0.05,
+            "HR_HAA": -0.05,
             "FL_HFE": 0.6,
             "HL_HFE": -0.6,
             "FR_HFE": 0.6,
@@ -59,7 +59,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        terminate_after_contacts_on = ["base", "SHOULDER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -92,25 +92,16 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
             joint_default = ["task", 1.5]
             joint_targets_rate = ["task", 0.8]
-            feet_slip = ["task", 0.1]
             stand_still = ["task", 1.0]
-            torques = ["task", 10.0]
-            # dof_acc = ["regularizer", 0.1]
-            # dof_vel
-
+            feet_slip = ["task", [0.03, 0.1]]
+            # feet_slip_v = ["task", [0.03, 3.0]]
+            torques = ["task", [6.0, 4.0]]
+            # dof_acc = ["task", 1500]
+            # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
-
-            # torque: penalize torque
-            # work: penalize work
-
-            # collision
-            # torques
 
         class scales:
             task = 1.0
-            # pose = 1.0
-            # regularizer = 1.2
-            # feet = 0.75
 
         base_height_target = 0.22
 
@@ -161,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'scaled_sigma'
 
         # load
         load_run = -1  # -1 = last run
