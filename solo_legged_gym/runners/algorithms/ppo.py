@@ -93,16 +93,16 @@ class PPO:
 
         tot_iter = self.num_learning_iterations
         for it in range(self.current_learning_iteration, tot_iter):
-            start = time.time()
 
             # Rollout
+            start = time.time()
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
                     actions = self.policy.act(previous_obs).detach()
                     obs, rewards, dones, infos = self.env.step(actions)
-                    self.process_env_step(previous_obs, actions, rewards, dones, infos)
                     obs = self.obs_normalizer(obs)
+                    self.process_env_step(previous_obs, actions, rewards, dones, infos)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
@@ -115,15 +115,13 @@ class PPO:
                         cur_reward_sum[new_ids] = 0
                         cur_episode_length[new_ids] = 0
 
-                stop = time.time()
-                collection_time = stop - start
-
-                # Learning step
-                start = stop
-
                 last_values = self.value.evaluate(obs).detach()
                 self.rollout_buffer.compute_returns(last_values, self.a_cfg.gamma, self.a_cfg.lam)
+            stop = time.time()
+            collection_time = stop - start
 
+            # Learning update
+            start = stop
             mean_value_loss, mean_surrogate_loss = self.update()
             stop = time.time()
             learn_time = stop - start
@@ -151,9 +149,8 @@ class PPO:
         self.transition.observations = obs
         self.transition.rewards = rewards.clone()
         self.transition.dones = dones
-        if 'time_outs' in infos:
-            self.transition.rewards += self.a_cfg.gamma * torch.squeeze(
-                self.transition.values * infos['time_outs'].unsqueeze(1).to(self.device), 1)
+        self.transition.rewards += self.a_cfg.gamma * torch.squeeze(
+            self.transition.values * infos['time_outs'].unsqueeze(1).to(self.device), 1)
         self.rollout_buffer.add_transitions(self.transition)
         self.transition.clear()
 

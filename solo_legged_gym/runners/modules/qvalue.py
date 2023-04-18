@@ -2,20 +2,21 @@ import torch
 import torch.nn as nn
 
 
-class Value(nn.Module):
+class QValue(nn.Module):
     def __init__(self,
                  num_obs,
+                 num_actions,
                  hidden_dims=[256, 256, 256],
                  activation='elu',
                  **kwargs):
         if kwargs:
-            print("Value.__init__ got unexpected arguments, which will be ignored: " + str(
+            print("QValue.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
-        super(Value, self).__init__()
+        super(QValue, self).__init__()
 
         activation = get_activation(activation)
 
-        mlp_input_dim = num_obs
+        mlp_input_dim = num_obs + num_actions
 
         # Value function
         layers = []
@@ -27,13 +28,13 @@ class Value(nn.Module):
             else:
                 layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
                 layers.append(activation)
-        self.value = nn.Sequential(*layers)
+        self.qvalue = nn.Sequential(*layers)
 
-        print(f"Value MLP: {self.value}")
+        print(f"Q-Value MLP: {self.qvalue}")
 
     @staticmethod
+    # not used at the moment
     def init_weights(sequential, scales):
-        # not used at the moment
         [torch.nn.init.orthogonal_(module.weight, gain=scales[idx]) for idx, module in
          enumerate(mod for mod in sequential if isinstance(mod, nn.Linear))]
 
@@ -45,9 +46,9 @@ class Value(nn.Module):
         # not used at the moment
         raise NotImplementedError
 
-    def evaluate(self, observations):
-        value = self.value(observations)
-        return value
+    def evaluate(self, observations, actions):
+        qvalue = self.qvalue(torch.cat([observations, actions], dim=-1))
+        return qvalue
 
 
 def get_activation(act_name):

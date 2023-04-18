@@ -7,20 +7,19 @@
     },
     "train_cfg": {
       "algorithm": {
-        "clip_param": 0.2,
-        "desired_kl": 0.01,
-        "entropy_coef": 0.01,
+        "buffer_size": 1000000.0,
+        "ent_coef": "auto",
         "gamma": 0.99,
-        "lam": 0.95,
-        "learning_rate": 0.001,
-        "max_grad_norm": 1.0,
+        "learning_rate": 0.0003,
+        "mini_batch_size": 256,
+        "num_critic": 2,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "schedule": "adaptive",
-        "use_clipped_value_loss": true,
-        "value_loss_coef": 1.0
+        "target_entropy": "auto",
+        "tau": 0.005
       },
-      "algorithm_name": "PPO",
+      "algorithm_name": "SAC",
       "network": {
         "policy_activation": "elu",
         "policy_hidden_dims": [
@@ -29,8 +28,8 @@
           128
         ],
         "policy_init_noise_std": 1.0,
-        "value_activation": "elu",
-        "value_hidden_dims": [
+        "qvalue_activation": "elu",
+        "qvalue_hidden_dims": [
           512,
           256,
           128
@@ -45,7 +44,7 @@
         "num_steps_per_env": 24,
         "run_name": "test",
         "save_interval": 50,
-        "wandb": true
+        "wandb": false
       }
     },
     "env_cfg": {
