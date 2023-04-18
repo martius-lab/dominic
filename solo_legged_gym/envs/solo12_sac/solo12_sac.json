@@ -8,7 +8,7 @@
     "train_cfg": {
       "algorithm": {
         "buffer_size": 1000000.0,
-        "ent_coef": "auto",
+        "ent_coef": "auto_0.1",
         "gamma": 0.99,
         "learning_rate": 0.0003,
         "mini_batch_size": 256,
@@ -27,7 +27,7 @@
           256,
           128
         ],
-        "policy_init_noise_std": 1.0,
+        "policy_init_noise_std": 0.1,
         "qvalue_activation": "elu",
         "qvalue_hidden_dims": [
           512,

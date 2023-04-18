@@ -83,8 +83,12 @@ class SAC:
 
         self.ent_coef = self.a_cfg.ent_coef
         self.ent_coef_optimizer = None
-        if self.ent_coef == "auto":
-            self.log_ent_coef = torch.log(torch.ones(1, device=self.device) * 1.0).requires_grad_(True)
+        if isinstance(self.ent_coef, str) and self.ent_coef.startswith("auto"):
+            init_value = 1.0
+            if "_" in self.ent_coef:
+                init_value = float(self.ent_coef.split("_")[1])
+                assert init_value > 0.0, "The initial value of ent_coef must be greater than 0"
+            self.log_ent_coef = torch.log(torch.ones(1, device=self.device) * init_value).requires_grad_(True)
             self.ent_coef_optimizer = torch.optim.Adam([self.log_ent_coef], lr=self.learning_rate)
         else:
             self.ent_coef_tensor = torch.tensor(self.ent_coef, device=self.device)
