@@ -123,7 +123,7 @@ class Solo12SACTrainCfg:
     algorithm_name = 'SAC'
 
     class network:
-        log_std_init = -3
+        log_std_init = 0.0
         policy_hidden_dims = [512, 256, 128]
         policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         qvalue_hidden_dims = [512, 256, 128]
@@ -133,11 +133,11 @@ class Solo12SACTrainCfg:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 'auto'  # 'auto'
+        ent_coef = 'auto_1e-3'  # 'auto'
         # policy_optimizer_lr = 1e-3
         # qvalues_optimizer_lr = 3e-4
         # ent_coef_optimizer_lr = 3e-4
-        learning_rate = 3e-4  # 5.e-4
+        learning_rate = 1e-3  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
         mini_batch_size = 256
         num_learning_epochs = 5
