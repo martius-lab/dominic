@@ -62,11 +62,11 @@ class SAC:
             self.obs_normalizer = torch.nn.Identity()  # no normalization
 
         # set up optimizer
-        self.learning_rate = self.a_cfg.learning_rate
+        # self.learning_rate = self.a_cfg.learning_rate
         self.policy_optimizer = optim.Adam(self.policy.parameters(),
-                                           lr=self.learning_rate)
+                                           lr=self.a_cfg.policy_optimizer_lr)
         self.qvalues_optimizer = optim.Adam(self.qvalues.parameters(),
-                                            lr=self.learning_rate)  # why two optimizers?
+                                            lr=self.a_cfg.qvalues_optimizer_lr)
 
         # set up replay buffer
         self.replay_buffer = ReplayBuffer(num_envs=self.env.num_envs,
@@ -89,7 +89,7 @@ class SAC:
                 init_value = float(self.ent_coef.split("_")[1])
                 assert init_value > 0.0, "The initial value of ent_coef must be greater than 0"
             self.log_ent_coef = torch.log(torch.ones(1, device=self.device) * init_value).requires_grad_(True)
-            self.ent_coef_optimizer = torch.optim.Adam([self.log_ent_coef], lr=self.learning_rate)
+            self.ent_coef_optimizer = torch.optim.Adam([self.log_ent_coef], lr=self.a_cfg.ent_coef_optimizer_lr)
         else:
             self.ent_coef_tensor = torch.tensor(self.ent_coef, device=self.device)
 
@@ -183,15 +183,15 @@ class SAC:
         self.transition.clear()
 
     def update(self):
-        optimizers = [self.policy_optimizer, self.qvalues_optimizer]
-        if self.ent_coef_optimizer is not None:
-            optimizers += [self.ent_coef_optimizer]
+        # optimizers = [self.policy_optimizer, self.qvalues_optimizer]
+        # if self.ent_coef_optimizer is not None:
+        #     optimizers += [self.ent_coef_optimizer]
 
-        if self.a_cfg.schedule == "adaptive":
-            self.learning_rate = max(1e-5, (1 - self.learn_percentage) * self.a_cfg.learning_rate)
-            for optimizer in optimizers:
-                for param_group in optimizer.param_groups:
-                    param_group["lr"] = self.learning_rate
+        # if self.a_cfg.schedule == "adaptive":
+        #     self.learning_rate = max(1e-5, (1 - self.learn_percentage) * self.a_cfg.learning_rate)
+        #     for optimizer in optimizers:
+        #         for param_group in optimizer.param_groups:
+        #             param_group["lr"] = self.learning_rate
 
         mean_ent_coef_loss = 0
         mean_ent_coef = 0
@@ -212,8 +212,7 @@ class SAC:
             ent_coef_loss = None
             if self.ent_coef_optimizer is not None and self.log_ent_coef is not None:
                 ent_coef = torch.exp(self.log_ent_coef.detach())
-                ent_coef_loss = -(self.log_ent_coef * (
-                        actions_pi_log_prob.reshape(-1, 1) + self.target_entropy).detach()).mean()
+                ent_coef_loss = -(self.log_ent_coef * (actions_pi_log_prob.reshape(-1, 1) + self.target_entropy).detach()).mean()
                 mean_ent_coef_loss += ent_coef_loss.item()
             else:
                 ent_coef = self.ent_coef_tensor
@@ -291,7 +290,7 @@ class SAC:
         self.writer.add_scalar('Learning/mean_ent_coef', locs['mean_ent_coef'], locs['it'])
         self.writer.add_scalar('Learning/mean_actor_loss', locs['mean_actor_loss'], locs['it'])
         self.writer.add_scalar('Learning/mean_critic_loss', locs['mean_critic_loss'], locs['it'])
-        self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
+        # self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])

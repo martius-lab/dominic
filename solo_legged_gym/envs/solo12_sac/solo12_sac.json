@@ -8,14 +8,15 @@
     "train_cfg": {
       "algorithm": {
         "buffer_size": 1000000.0,
-        "ent_coef": "auto_0.1",
+        "ent_coef": "auto_0.01",
+        "ent_coef_optimizer_lr": 0.0003,
         "gamma": 0.99,
-        "learning_rate": 0.0003,
         "mini_batch_size": 256,
         "num_critic": 2,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
-        "schedule": "adaptive",
+        "policy_optimizer_lr": 0.001,
+        "qvalues_optimizer_lr": 0.0003,
         "target_entropy": "auto",
         "tau": 0.005
       },
@@ -27,7 +28,7 @@
           256,
           128
         ],
-        "policy_init_noise_std": 0.1,
+        "policy_init_noise_std": 1.0,
         "qvalue_activation": "elu",
         "qvalue_hidden_dims": [
           512,
@@ -44,7 +45,7 @@
         "num_steps_per_env": 24,
         "run_name": "test",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true
       }
     },
     "env_cfg": {
