@@ -45,7 +45,7 @@
         "num_steps_per_env": 24,
         "run_name": "baseline",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true
       }
     },
     "env_cfg": {
@@ -216,7 +216,7 @@
             "task",
             [
               0.03,
-              0.1
+              0.2
             ]
           ],
           "joint_default": [
