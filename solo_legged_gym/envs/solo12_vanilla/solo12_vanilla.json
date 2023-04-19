@@ -43,9 +43,9 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "test",
+        "run_name": "baseline",
         "save_interval": 50,
-        "wandb": true
+        "wandb": false
       }
     },
     "env_cfg": {
@@ -206,7 +206,7 @@
           ],
           "ang_vel_z": [
             "task",
-            0.2
+            0.4
           ],
           "ang_xy": [
             "task",

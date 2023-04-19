@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-from torch.distributions import Normal
 from solo_legged_gym.runners.utils.distributions import DiagGaussianDistribution
 
 
-class Policy(nn.Module):
+class PPOPolicy(nn.Module):
     def __init__(self,
                  num_obs,
                  num_actions,
@@ -13,9 +12,9 @@ class Policy(nn.Module):
                  log_std_init=0.0,
                  **kwargs):
         if kwargs:
-            print("Policy.__init__ got unexpected arguments, which will be ignored: " + str(
+            print("PPOPolicy.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
-        super(Policy, self).__init__()
+        super(PPOPolicy, self).__init__()
 
         activation = get_activation(activation)
 
@@ -33,9 +32,9 @@ class Policy(nn.Module):
         self.distribution = DiagGaussianDistribution(action_dim=num_actions)
         self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1], log_std_init=log_std_init)
 
-        print(f"Policy Latent MLP: {self.policy_latent_net}")
-        print(f"Policy Action Mean: {self.action_mean_net}")
-        print(f"Policy Action log std: {self.log_std}")
+        print(f"Policy Latent MLP: {self.policy_latent_net}\n")
+        print(f"Policy Action Mean: {self.action_mean_net}\n")
+        print(f"Policy Action log std: {self.log_std}\n")
 
     def reset(self, dones=None):
         pass

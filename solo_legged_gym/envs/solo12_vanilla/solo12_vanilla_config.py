@@ -83,7 +83,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         class terms:  # [group, sigma]
             lin_vel_x = ["task", 0.2]
             lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.2]
+            ang_vel_z = ["task", 0.4]
 
             lin_z = ["task", 0.4]
             lin_vel_z = ["task", 1.0]
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'test'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
