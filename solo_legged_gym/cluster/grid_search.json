@@ -16,7 +16,7 @@
     "forbidden_hostnames": []
   },
   "fixed_params": {
-    "__import_promise__": "solo_legged_gym/envs/solo12_vanilla/solo12_vanilla.json"
+    "__import_promise__": "solo_legged_gym/envs/solo12_sac/solo12_sac.json"
   },
 
   "remove_jobs_dir": false,
@@ -25,8 +25,16 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-     "param": "solo_legged_gym.env_cfg.domain_rand.push_robots",
-     "values": [false, true]
+     "param": "solo_legged_gym.train_cfg.algorithm.learning_rate",
+     "values": [1e-5, 1e-4, 1e-3, 1e-2]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.ent_coef",
+     "values": ["auto", "auto_1e-1", "auto_1e-2", "auto_1e-3", "auto_1e-4"]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.network.log_std_init",
+     "values": [-4, -3, -2, -1, 0]
     }
   ]
 }
