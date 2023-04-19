@@ -8,9 +8,9 @@
     "run_as_module": false
   },
   "cluster_requirements": {
-    "request_cpus": 10,
+    "request_cpus": 2,
     "request_gpus": 1,
-    "memory_in_mb": 20000,
+    "memory_in_mb": 10000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 15,
     "forbidden_hostnames": []
@@ -26,15 +26,15 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.learning_rate",
-     "values": [1e-5, 1e-4, 1e-3, 1e-2]
+     "values": [1e-5, 1e-4, 1e-3]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.ent_coef",
-     "values": ["auto", "auto_1e-1", "auto_1e-2", "auto_1e-3", "auto_1e-4"]
+     "values": ["auto", "auto_1e-1", "auto_1e-2", "auto_1e-3"]
     },
     {
      "param": "solo_legged_gym.train_cfg.network.log_std_init",
-     "values": [-4, -3, -2, -1, 0]
+     "values": [-3, -2, -1, 0]
     }
   ]
 }
