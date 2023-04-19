@@ -151,27 +151,28 @@ def update_train_cfg_from_args(train_cfg, args):
     return train_cfg
 
 
-def export_policy_as_jit(policy, normalizer, path, filename="policy.pt"):
-    policy_exporter = TorchPolicyExporter(policy, normalizer)
+def export_policy_as_jit(policy_latent, action, normalizer, path, filename="policy.pt"):
+    policy_exporter = TorchPolicyExporter(policy_latent, action, normalizer)
     policy_exporter.export(path, filename)
 
 
-def export_policy_as_onnx(policy, normalizer, path, filename="policy.onnx"):
-    policy_exporter = OnnxPolicyExporter(policy, normalizer)
+def export_policy_as_onnx(policy_latent, action, normalizer, path, filename="policy.onnx"):
+    policy_exporter = OnnxPolicyExporter(policy_latent, action, normalizer)
     policy_exporter.export(path, filename)
 
 
 class TorchPolicyExporter(torch.nn.Module):
-    def __init__(self, policy, normalizer=None):
+    def __init__(self, policy_latent, action, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
         else:
             self.normalizer = torch.nn.Identity()
-        self.policy = copy.deepcopy(policy)
+        self.policy_latent = copy.deepcopy(policy_latent)
+        self.action = copy.deepcopy(action)
 
     def forward(self, x):
-        return self.policy(self.normalizer(x))
+        return self.action(self.policy_latent(self.normalizer(x)))
 
     @torch.jit.export
     def reset(self):
@@ -186,20 +187,21 @@ class TorchPolicyExporter(torch.nn.Module):
 
 
 class OnnxPolicyExporter(torch.nn.Module):
-    def __init__(self, policy, normalizer=None):
+    def __init__(self, policy_latent, action, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
         else:
             self.normalizer = torch.nn.Identity()
-        self.policy = copy.deepcopy(policy)
+        self.policy_latent = copy.deepcopy(policy_latent)
+        self.action = copy.deepcopy(action)
 
     def forward(self, x):
-        return self.policy(self.normalizer(x))
+        return self.action(self.policy_latent(self.normalizer(x)))
 
     def export(self, path, filename):
         self.to("cpu")
-        obs = torch.zeros(1, self.policy[0].in_features)
+        obs = torch.zeros(1, self.policy_latent[0].in_features)
         torch.onnx.export(
             self,
             obs,

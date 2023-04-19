@@ -34,7 +34,7 @@ class PPO:
                              num_actions=self.env.num_actions,
                              hidden_dims=self.n_cfg.policy_hidden_dims,
                              activation=self.n_cfg.policy_activation,
-                             init_noise_std=self.n_cfg.policy_init_noise_std).to(self.device)
+                             log_std_init=self.n_cfg.log_std_init).to(self.device)
 
         self.value = Value(num_obs=self.env.num_obs,
                            hidden_dims=self.n_cfg.value_hidden_dims,
@@ -99,10 +99,10 @@ class PPO:
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
-                    actions = self.policy.act(previous_obs).detach()
+                    actions, log_prob = self.policy.act(previous_obs)
                     obs, rewards, dones, infos = self.env.step(actions)
                     obs = self.obs_normalizer(obs)
-                    self.process_env_step(previous_obs, actions, rewards, dones, infos)
+                    self.process_env_step(previous_obs, actions, log_prob, rewards, dones, infos)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
@@ -140,9 +140,9 @@ class PPO:
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)))
         return self.avg_score
 
-    def process_env_step(self, obs, actions, rewards, dones, infos):
-        self.transition.actions = actions
-        self.transition.actions_log_prob = self.policy.get_actions_log_prob(self.transition.actions).detach()
+    def process_env_step(self, obs, actions, log_prob, rewards, dones, infos):
+        self.transition.actions = actions.detach()
+        self.transition.actions_log_prob = log_prob.detach()
         self.transition.action_mean = self.policy.action_mean.detach()
         self.transition.action_sigma = self.policy.action_std.detach()
         self.transition.values = self.value.evaluate(obs).detach()
@@ -170,8 +170,8 @@ class PPO:
         ) in generator:
 
             # using the current policy
-            self.policy.act(obs_batch)
-            actions_log_prob_batch = self.policy.get_actions_log_prob(actions_batch)
+            _, _ = self.policy.act(obs_batch)  # update the distribution
+            actions_log_prob_batch = self.policy.distribution.log_prob(actions_batch)
             value_batch = self.value.evaluate(obs_batch)
             mu_batch = self.policy.action_mean
             sigma_batch = self.policy.action_std
@@ -254,7 +254,7 @@ class PPO:
                 value = torch.mean(infotensor)
                 self.writer.add_scalar('Episode/' + key, value, locs['it'])
                 ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
-        mean_std = self.policy.std.mean()
+        mean_std = self.policy.action_std.mean()
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
         self.writer.add_scalar('Learning/value_function_loss', locs['mean_value_loss'], locs['it'])

@@ -54,8 +54,8 @@ class keyboard_play:
                 "policies",
             )
             name = "policy"
-            export_policy_as_jit(self.runner.policy.policy, self.runner.obs_normalizer, path, filename=f"{name}.pt")
-            export_policy_as_onnx(self.runner.policy.policy, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
+            export_policy_as_jit(self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.pt")
+            export_policy_as_onnx(self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
             print("--------------------------")
             print("Exported policy to: ", path)
             policy_jit_path = os.path.join(

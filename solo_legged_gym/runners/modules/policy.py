@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
+from solo_legged_gym.runners.utils.distributions import DiagGaussianDistribution
 
 
 class Policy(nn.Module):
@@ -9,7 +10,7 @@ class Policy(nn.Module):
                  num_actions,
                  hidden_dims=[256, 256, 256],
                  activation='elu',
-                 init_noise_std=1.0,
+                 log_std_init=0.0,
                  **kwargs):
         if kwargs:
             print("Policy.__init__ got unexpected arguments, which will be ignored: " + str(
@@ -24,29 +25,17 @@ class Policy(nn.Module):
         layers = []
         layers.append(nn.Linear(mlp_input_dim, hidden_dims[0]))
         layers.append(activation)
-        for l in range(len(hidden_dims)):
-            if l == len(hidden_dims) - 1:
-                layers.append(nn.Linear(hidden_dims[l], num_actions))
-            else:
-                layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
-                layers.append(activation)
-        self.policy = nn.Sequential(*layers)
+        for l in range(len(hidden_dims)-1):
+            layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
+            layers.append(activation)
+        self.policy_latent_net = nn.Sequential(*layers)
 
-        print(f"Policy MLP: {self.policy}")
+        self.distribution = DiagGaussianDistribution(action_dim=num_actions)
+        self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1], log_std_init=log_std_init)
 
-        # Action noise
-        # action_std = torch.concat((1.0 * torch.ones(12), 0.1 * torch.ones(5)))
-        # self.std = nn.Parameter(action_std)
-        self.std = nn.Parameter(init_noise_std * torch.ones(num_actions))
-        self.distribution = None
-        # disable args validation for speedup
-        Normal.set_default_validate_args = False
-
-    @staticmethod
-    # not used at the moment
-    def init_weights(sequential, scales):
-        [torch.nn.init.orthogonal_(module.weight, gain=scales[idx]) for idx, module in
-         enumerate(mod for mod in sequential if isinstance(mod, nn.Linear))]
+        print(f"Policy Latent MLP: {self.policy_latent_net}")
+        print(f"Policy Action Mean: {self.action_mean_net}")
+        print(f"Policy Action log std: {self.log_std}")
 
     def reset(self, dones=None):
         pass
@@ -56,30 +45,24 @@ class Policy(nn.Module):
 
     @property
     def action_mean(self):
-        return self.distribution.mean
+        return self.distribution.mode()
 
     @property
     def action_std(self):
-        return self.distribution.stddev
+        return torch.ones_like(self.action_mean) * self.log_std.exp()
 
     @property
     def entropy(self):
-        return self.distribution.entropy().sum(dim=-1)
-
-    def update_distribution(self, observations):
-        mean = self.policy(observations)
-        self.distribution = Normal(mean, mean * 0. + self.std)
+        return self.distribution.entropy()
 
     def act(self, observations):
-        self.update_distribution(observations)
-        return self.distribution.sample()
-
-    def get_actions_log_prob(self, actions):
-        return self.distribution.log_prob(actions).sum(dim=-1)
+        # return actions and log_prob
+        mean = self.action_mean_net(self.policy_latent_net(observations))
+        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
 
     def act_inference(self, observations):
-        actions_mean = self.policy(observations)
-        return actions_mean
+        mean = self.action_mean_net(self.policy_latent_net(observations))
+        return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
 
 
 def get_activation(act_name):

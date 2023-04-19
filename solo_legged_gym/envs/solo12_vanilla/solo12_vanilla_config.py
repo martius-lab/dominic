@@ -123,7 +123,7 @@ class Solo12VanillaTrainCfg:
     algorithm_name = 'PPO'
 
     class network:
-        policy_init_noise_std = 1.0
+        log_std_init = 0.0
         policy_hidden_dims = [512, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [512, 256, 128]
