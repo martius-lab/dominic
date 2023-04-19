@@ -83,7 +83,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
         class terms:  # [group, sigma]
             lin_vel_x = ["task", 0.2]
             lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.2]
+            ang_vel_z = ["task", 0.4]
 
             lin_z = ["task", 0.4]
             lin_vel_z = ["task", 1.0]
@@ -123,17 +123,17 @@ class Solo12SACTrainCfg:
     algorithm_name = 'SAC'
 
     class network:
-        policy_init_noise_std = 1.0  # -3
+        log_std_init = -3
         policy_hidden_dims = [512, 256, 128]
-        policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         qvalue_hidden_dims = [512, 256, 128]
-        qvalue_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        qvalue_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 'auto_0.01'  # 'auto'
+        ent_coef = 'auto'  # 'auto'
         # policy_optimizer_lr = 1e-3
         # qvalues_optimizer_lr = 3e-4
         # ent_coef_optimizer_lr = 3e-4

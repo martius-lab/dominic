@@ -38,7 +38,7 @@ class SAC:
                                 num_actions=self.env.num_actions,
                                 hidden_dims=self.n_cfg.policy_hidden_dims,
                                 activation=self.n_cfg.policy_activation,
-                                init_noise_std=self.n_cfg.policy_init_noise_std).to(self.device)
+                                log_std_init=self.n_cfg.log_std_init).to(self.device)
 
         self.qvalues = QValues(num_obs=self.env.num_obs,
                                num_actions=self.env.num_actions,
@@ -131,7 +131,7 @@ class SAC:
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
-                    actions = self.policy.act(previous_obs).detach()
+                    actions, _ = self.policy.act(previous_obs)
                     obs, rewards, dones, infos = self.env.step(actions)
                     obs = self.obs_normalizer(obs)
                     self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
@@ -207,8 +207,7 @@ class SAC:
              ) in generator:
 
             # actions by the current policy
-            actions_pi = self.policy.act(obs_batch)
-            actions_pi_log_prob = self.policy.get_actions_log_prob(actions_pi)
+            actions_pi, actions_pi_log_prob = self.policy.act(obs_batch)
 
             ent_coef_loss = None
             if self.ent_coef_optimizer is not None and self.log_ent_coef is not None:
@@ -228,8 +227,7 @@ class SAC:
                 self.ent_coef_optimizer.step()
 
             with torch.no_grad():
-                next_actions_pi = self.policy.act(next_obs_batch)
-                next_actions_pi_log_prob = self.policy.get_actions_log_prob(next_actions_pi)
+                next_actions_pi, next_actions_pi_log_prob = self.policy.act(next_obs_batch)
                 next_q_values = torch.cat(self.qvalues_target.evaluate(next_obs_batch, next_actions_pi), dim=1)
                 next_q_values, _ = torch.min(next_q_values, dim=1, keepdim=True)
                 next_q_values = next_q_values - ent_coef * next_actions_pi_log_prob.reshape(-1, 1)
@@ -285,7 +283,7 @@ class SAC:
                 value = torch.mean(infotensor)
                 self.writer.add_scalar('Episode/' + key, value, locs['it'])
                 ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
-        mean_std = self.policy.std.mean()
+        mean_std = self.policy.action_std.mean()
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
         self.writer.add_scalar('Learning/mean_ent_coef_loss', locs['mean_ent_coef_loss'], locs['it'])
