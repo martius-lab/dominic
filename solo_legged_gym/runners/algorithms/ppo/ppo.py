@@ -99,7 +99,7 @@ class PPO:
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
-                    actions, log_prob = self.policy.act(previous_obs)
+                    actions, log_prob = self.policy.act_and_log_prob(previous_obs)
                     obs, rewards, dones, infos = self.env.step(actions)
                     obs = self.obs_normalizer(obs)
                     self.process_env_step(previous_obs, actions, log_prob, rewards, dones, infos)
@@ -171,7 +171,7 @@ class PPO:
         ) in generator:
 
             # using the current policy
-            _, _ = self.policy.act(obs_batch)  # update the distribution
+            _, _ = self.policy.act_and_log_prob(obs_batch)  # update the distribution
             actions_log_prob_batch = self.policy.distribution.log_prob(actions_batch)
             value_batch = self.value.evaluate(obs_batch)
             mu_batch = self.policy.action_mean

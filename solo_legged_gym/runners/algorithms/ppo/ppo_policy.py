@@ -44,17 +44,17 @@ class PPOPolicy(nn.Module):
 
     @property
     def action_mean(self):
-        return self.distribution.mode()
+        return self.distribution.distribution.mean
 
     @property
     def action_std(self):
-        return torch.ones_like(self.action_mean) * self.log_std.exp()
+        return self.distribution.distribution.stddev
 
     @property
     def entropy(self):
         return self.distribution.entropy()
 
-    def act(self, observations):
+    def act_and_log_prob(self, observations):
         # return actions and log_prob
         mean = self.action_mean_net(self.policy_latent_net(observations))
         return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)

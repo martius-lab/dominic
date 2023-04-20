@@ -14,7 +14,6 @@ class SACPolicy(nn.Module):
                  num_actions,
                  hidden_dims=[256, 256, 256],
                  activation='elu',
-                 log_std_init=0.0,
                  **kwargs):
         if kwargs:
             print("SACPolicy.__init__ got unexpected arguments, which will be ignored: " + str(
@@ -58,17 +57,19 @@ class SACPolicy(nn.Module):
         log_std = torch.clamp(self.log_std_net(policy_latent), LOG_STD_MIN, LOG_STD_MAX)
         return mean_actions, log_std
 
-    def act(self, observations):
+    def act_and_log_prob(self, observations):
         # return actions and log_prob
         mean_actions, log_std = self.get_action_dist_params(observations)
         return self.distribution.log_prob_from_params(mean_actions=mean_actions, log_std=log_std)
 
+    def act(self, observations):
+        # return actions and log_prob
+        mean_actions, log_std = self.get_action_dist_params(observations)
+        return self.distribution.actions_from_params(mean_actions=mean_actions, log_std=log_std, deterministic=False)
+
     def act_inference(self, observations):
         mean_actions, log_std = self.get_action_dist_params(observations)
         return self.distribution.actions_from_params(mean_actions=mean_actions, log_std=log_std, deterministic=True)
-
-    def get_actions_log_prob(self, actions):
-        return self.distribution.log_prob(actions).sum(dim=-1)
 
 
 def get_activation(act_name):

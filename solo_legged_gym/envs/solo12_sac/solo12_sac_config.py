@@ -51,7 +51,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
         torque_limits = 2.5
         dof_vel_limits = 10.0  # not used anyway...
-        scale_joint_target = 0.25
+        scale_joint_target = 1.0
         clip_joint_target = 100.
         decimation = 4
 
@@ -123,11 +123,10 @@ class Solo12SACTrainCfg:
     algorithm_name = 'SAC'
 
     class network:
-        log_std_init = 0.0
         policy_hidden_dims = [512, 256, 128]
-        policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         qvalue_hidden_dims = [512, 256, 128]
-        qvalue_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        qvalue_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params

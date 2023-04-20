@@ -37,8 +37,7 @@ class SAC:
         self.policy = SACPolicy(num_obs=self.env.num_obs,
                                 num_actions=self.env.num_actions,
                                 hidden_dims=self.n_cfg.policy_hidden_dims,
-                                activation=self.n_cfg.policy_activation,
-                                log_std_init=self.n_cfg.log_std_init).to(self.device)
+                                activation=self.n_cfg.policy_activation).to(self.device)
 
         self.qvalues = QValues(num_obs=self.env.num_obs,
                                num_actions=self.env.num_actions,
@@ -131,7 +130,7 @@ class SAC:
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
-                    actions, _ = self.policy.act(previous_obs)
+                    actions = self.policy.act(previous_obs)
                     obs, rewards, dones, infos = self.env.step(actions)
                     obs = self.obs_normalizer(obs)
                     self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
@@ -207,13 +206,13 @@ class SAC:
              ) in generator:
 
             # actions by the current policy
-            actions_pi, actions_pi_log_prob = self.policy.act(obs_batch)
+            actions_pi, actions_pi_log_prob = self.policy.act_and_log_prob(obs_batch)
 
             ent_coef_loss = None
             if self.ent_coef_optimizer is not None and self.log_ent_coef is not None:
                 ent_coef = torch.exp(self.log_ent_coef.detach())
-                ent_coef_loss = -(self.log_ent_coef * (
-                            actions_pi_log_prob.reshape(-1, 1) + self.target_entropy).detach()).mean()
+                ent_coef_loss = (self.log_ent_coef * (-actions_pi_log_prob.reshape(-1, 1) - self.target_entropy).detach()
+                                 ).mean()
                 mean_ent_coef_loss += ent_coef_loss.item()
             else:
                 ent_coef = self.ent_coef_tensor
@@ -227,7 +226,7 @@ class SAC:
                 self.ent_coef_optimizer.step()
 
             with torch.no_grad():
-                next_actions_pi, next_actions_pi_log_prob = self.policy.act(next_obs_batch)
+                next_actions_pi, next_actions_pi_log_prob = self.policy.act_and_log_prob(next_obs_batch)
                 next_q_values = torch.cat(self.qvalues_target.evaluate(next_obs_batch, next_actions_pi), dim=1)
                 next_q_values, _ = torch.min(next_q_values, dim=1, keepdim=True)
                 next_q_values = next_q_values - ent_coef * next_actions_pi_log_prob.reshape(-1, 1)
