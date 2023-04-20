@@ -51,7 +51,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
         torque_limits = 2.5
         dof_vel_limits = 10.0  # not used anyway...
-        scale_joint_target = 1.0
+        scale_joint_target = 2.0
         clip_joint_target = 100.
         decimation = 4
 
@@ -99,9 +99,11 @@ class Solo12SACEnvCfg(BaseEnvCfg):
             # dof_acc = ["task", 1500]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
+            # termination = ["termination", None]
 
         class scales:
             task = 1.0
+            # termination = -100.0
 
         base_height_target = 0.25
 
@@ -132,11 +134,11 @@ class Solo12SACTrainCfg:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 'auto_1e-3'  # 'auto'
+        ent_coef = 1e-3  # 'auto', 'auto_1e-3'
         # policy_optimizer_lr = 1e-3
-        # qvalues_optimizer_lr = 3e-4
-        # ent_coef_optimizer_lr = 3e-4
-        learning_rate = 1e-3  # 5.e-4
+        # qvalues_optimizer_lr = 5e-3
+        # ent_coef_optimizer_lr = 5e-3
+        learning_rate = 3e-4  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
         mini_batch_size = 256
         num_learning_epochs = 5
@@ -153,7 +155,7 @@ class Solo12SACTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'test'
+        run_name = 'as_base'
 
         # load
         load_run = -1  # -1 = last run

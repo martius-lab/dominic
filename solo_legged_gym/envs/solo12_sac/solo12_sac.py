@@ -130,10 +130,8 @@ class Solo12SAC(BaseTask):
     def pre_physics_step(self, actions):
         self.actions = actions
 
-        clip_joint_target = self.cfg.control.clip_joint_target
         scale_joint_target = self.cfg.control.scale_joint_target
-        self.joint_targets = torch.clip(actions * scale_joint_target, -clip_joint_target, clip_joint_target).to(
-            self.device)
+        self.joint_targets = (actions * scale_joint_target).to(self.device)
 
     def step(self, actions, pause=False):
         self.pre_physics_step(actions)
@@ -451,3 +449,7 @@ class Solo12SAC(BaseTask):
     #     rew_airTime *= torch.norm(self.commands[:, :2], dim=1) > 0.1  # no reward for zero command
     #     self.feet_air_time *= ~contact_filter  # if in contact, reset to zero
     #     return rew_airTime
+
+    def _reward_termination(self, sigma):
+        # Terminal reward / penalty
+        return self.reset_buf * ~self.time_out_buf

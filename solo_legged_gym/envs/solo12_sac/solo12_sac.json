@@ -8,9 +8,9 @@
     "train_cfg": {
       "algorithm": {
         "buffer_size": 1000000.0,
-        "ent_coef": "auto_1e-3",
+        "ent_coef": 0.001,
         "gamma": 0.99,
-        "learning_rate": 0.001,
+        "learning_rate": 0.1,
         "mini_batch_size": 256,
         "num_critic": 2,
         "num_learning_epochs": 5,
@@ -21,13 +21,13 @@
       },
       "algorithm_name": "SAC",
       "network": {
-        "policy_activation": "relu",
+        "policy_activation": "elu",
         "policy_hidden_dims": [
           512,
           256,
           128
         ],
-        "qvalue_activation": "relu",
+        "qvalue_activation": "elu",
         "qvalue_hidden_dims": [
           512,
           256,
@@ -41,9 +41,9 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "test",
+        "run_name": "fixed_alpha",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true
       }
     },
     "env_cfg": {
@@ -67,7 +67,8 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER"
+          "SHOULDER",
+          "UPPER"
         ],
         "thickness": 0.01
       },
@@ -100,7 +101,7 @@
         },
         "decimation": 4,
         "dof_vel_limits": 10.0,
-        "scale_joint_target": 1.0,
+        "scale_joint_target": 1.5,
         "stiffness": {
           "HAA": 5.0,
           "HFE": 5.0,
@@ -192,7 +193,8 @@
         "base_height_target": 0.25,
         "max_contact_force": 100.0,
         "scales": {
-          "task": 1.0
+          "task": 1.0,
+          "termination": -100.0
         },
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
@@ -209,17 +211,6 @@
           "ang_xy": [
             "task",
             0.6
-          ],
-          "feet_slip": [
-            "task",
-            [
-              0.03,
-              0.1
-            ]
-          ],
-          "joint_default": [
-            "task",
-            1.5
           ],
           "joint_targets_rate": [
             "task",
@@ -241,9 +232,9 @@
             "task",
             0.4
           ],
-          "stand_still": [
-            "task",
-            1.0
+          "termination": [
+            "termination",
+            null
           ],
           "torques": [
             "task",

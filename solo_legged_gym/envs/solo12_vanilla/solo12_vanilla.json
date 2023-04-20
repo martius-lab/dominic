@@ -45,7 +45,7 @@
         "num_steps_per_env": 24,
         "run_name": "baseline",
         "save_interval": 50,
-        "wandb": true
+        "wandb": false
       }
     },
     "env_cfg": {

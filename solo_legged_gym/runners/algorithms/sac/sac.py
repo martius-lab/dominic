@@ -150,7 +150,7 @@ class SAC:
 
             # Learning update
             start = stop
-            mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss = self.update()
+            mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi = self.update()
             stop = time.time()
             learn_time = stop - start
 
@@ -196,6 +196,8 @@ class SAC:
         mean_ent_coef = 0
         mean_actor_loss = 0
         mean_critic_loss = 0
+        mean_ent_coef_actions_pi_log_prob = 0
+        mean_min_qvalues_pi = 0
         generator = self.replay_buffer.mini_batch_generator(self.a_cfg.mini_batch_size, self.a_cfg.num_mini_batches,
                                                             self.a_cfg.num_learning_epochs)
         for (obs_batch,
@@ -247,6 +249,8 @@ class SAC:
             min_qvalues_pi, _ = torch.min(qvalues_pi, dim=1, keepdim=True)
             actor_loss = (ent_coef * actions_pi_log_prob - min_qvalues_pi).mean()
             mean_actor_loss += actor_loss.item()
+            mean_ent_coef_actions_pi_log_prob += (ent_coef * actions_pi_log_prob).mean().item()
+            mean_min_qvalues_pi += min_qvalues_pi.mean().item()
 
             # Optimize the actor
             self.policy_optimizer.zero_grad()
@@ -260,8 +264,11 @@ class SAC:
         mean_ent_coef /= num_updates
         mean_actor_loss /= num_updates
         mean_critic_loss /= num_updates
+        mean_ent_coef_actions_pi_log_prob /= num_updates
+        mean_min_qvalues_pi /= num_updates
 
-        return mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss
+        return mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, \
+            mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -289,6 +296,8 @@ class SAC:
         self.writer.add_scalar('Learning/mean_ent_coef', locs['mean_ent_coef'], locs['it'])
         self.writer.add_scalar('Learning/mean_actor_loss', locs['mean_actor_loss'], locs['it'])
         self.writer.add_scalar('Learning/mean_critic_loss', locs['mean_critic_loss'], locs['it'])
+        self.writer.add_scalar('Learning/mean_ent_coef_actions_pi_log_prob', locs['mean_ent_coef_actions_pi_log_prob'], locs['it'])
+        self.writer.add_scalar('Learning/mean_min_qvalues_pi', locs['mean_min_qvalues_pi'], locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
