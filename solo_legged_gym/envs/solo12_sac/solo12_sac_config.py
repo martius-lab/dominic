@@ -5,7 +5,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
-        num_envs = 4096
+        num_envs = 1
         num_observations = 48
         num_actions = 12
         episode_length_s = 20  # episode length in seconds
@@ -59,7 +59,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER"]
+        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -86,16 +86,16 @@ class Solo12SACEnvCfg(BaseEnvCfg):
             ang_vel_z = ["task", 0.4]
 
             lin_z = ["task", 0.4]
-            lin_vel_z = ["task", 1.0]
+            # lin_vel_z = ["task", 1.0]
             ang_xy = ["task", 0.6]
-            ang_vel_xy = ["task", 3.0]
+            # ang_vel_xy = ["task", 3.0]
 
-            joint_default = ["task", 1.5]
-            joint_targets_rate = ["task", 0.8]
-            stand_still = ["task", 1.0]
-            feet_slip = ["task", [0.03, 0.1]]
+            # joint_default = ["task", 1.5]
+            # joint_targets_rate = ["task", 0.8]
+            # stand_still = ["task", 1.0]
+            # feet_slip = ["task", [0.03, 0.1]]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            torques = ["task", 6.0]
+            # torques = ["task", 6.0]
             # dof_acc = ["task", 1500]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
@@ -134,28 +134,28 @@ class Solo12SACTrainCfg:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 1e-3  # 'auto', 'auto_1e-3'
-        policy_optimizer_lr = 1e-3
-        qvalues_optimizer_lr = 3e-3
+        ent_coef = 'auto_1e-3'  # 'auto', 'auto_1e-3'
+        # policy_optimizer_lr = 1e-3
+        # qvalues_optimizer_lr = 3e-3
         # ent_coef_optimizer_lr = 5e-3
-        learning_rate = 3e-4  # 5.e-4
+        learning_rate = 1e-3  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
-        mini_batch_size = 1024
-        num_learning_epochs = 5
-        num_mini_batches = 50
+        mini_batch_size = 256
+        num_learning_epochs = 1
+        num_mini_batches = 1
         gamma = 0.99
         tau = 0.005
         num_critic = 2
 
     class runner:
-        num_steps_per_env = 24  # per iteration
+        num_steps_per_env = 1000  # per iteration
         max_iterations = 1000  # number of policy updates
-        normalize_observation = True  # it will make the training much faster
+        normalize_observation = False  # it will make the training much faster
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'as_base'
+        run_name = 'one_env_no_norm'
 
         # load
         load_run = -1  # -1 = last run
