@@ -135,14 +135,14 @@ class Solo12SACTrainCfg:
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
         ent_coef = 1e-3  # 'auto', 'auto_1e-3'
-        # policy_optimizer_lr = 1e-3
-        # qvalues_optimizer_lr = 5e-3
+        policy_optimizer_lr = 1e-3
+        qvalues_optimizer_lr = 3e-3
         # ent_coef_optimizer_lr = 5e-3
         learning_rate = 3e-4  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
-        mini_batch_size = 256
+        mini_batch_size = 1024
         num_learning_epochs = 5
-        num_mini_batches = 4
+        num_mini_batches = 50
         gamma = 0.99
         tau = 0.005
         num_critic = 2

@@ -63,9 +63,9 @@ class SAC:
         # set up optimizer
         self.learning_rate = self.a_cfg.learning_rate
         self.policy_optimizer = optim.Adam(self.policy.parameters(),
-                                           lr=self.learning_rate)
+                                           lr=self.a_cfg.policy_optimizer_lr)
         self.qvalues_optimizer = optim.Adam(self.qvalues.parameters(),
-                                            lr=self.learning_rate)
+                                            lr=self.a_cfg.qvalues_optimizer_lr)
 
         # set up replay buffer
         self.replay_buffer = ReplayBuffer(num_envs=self.env.num_envs,
