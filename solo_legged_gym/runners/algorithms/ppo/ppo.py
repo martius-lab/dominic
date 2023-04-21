@@ -1,3 +1,4 @@
+import json
 import time
 import os
 from collections import deque
@@ -9,6 +10,8 @@ import torch.optim as optim
 import torch.nn as nn
 
 from torch.utils.tensorboard import SummaryWriter
+
+from solo_legged_gym.utils import class_to_dict
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
 from solo_legged_gym.runners.algorithms.ppo.ppo_policy import PPOPolicy
 from solo_legged_gym.runners.modules.value import Value
@@ -318,9 +321,6 @@ class PPO:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
         torch.save(saved_dict, path)
 
-        # Upload model to external logging service
-        if self.r_cfg.wandb: self.writer.save_model(path, self.current_learning_iteration)
-
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
@@ -360,7 +360,12 @@ class PPO:
             return
         # initialize writer
         if self.r_cfg.wandb:
-            self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.r_cfg)
+            self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.r_cfg, group=self.r_cfg.wandb_group)
             self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
         else:
             self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
+
+        print(json.dumps(class_to_dict(self.env.cfg), indent=2, default=str))
+        print(json.dumps(class_to_dict(self.r_cfg), indent=2, default=str))
+        print(json.dumps(class_to_dict(self.a_cfg), indent=2, default=str))
+        print(json.dumps(class_to_dict(self.n_cfg), indent=2, default=str))
