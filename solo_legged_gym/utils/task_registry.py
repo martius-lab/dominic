@@ -61,6 +61,7 @@ class TaskRegistry:
             # update the json file for cluster running only!!!
             env_cfg_dict = class_to_dict(env_cfg)
             train_cfg.runner.wandb_group = "cluster"
+            train_cfg.runner.wandb = True
             train_cfg_dict = class_to_dict(train_cfg)
             cfg = {
                 "solo_legged_gym": {

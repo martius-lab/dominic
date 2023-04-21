@@ -162,5 +162,5 @@ class Solo12SACTrainCfg:
         checkpoint = -1  # -1 = last saved model
 
         wandb = False
-        wandb_group = None
+        wandb_group = "test"
 
