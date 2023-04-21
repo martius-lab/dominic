@@ -42,11 +42,11 @@
         "load_run": -1,
         "max_iterations": 1000,
         "normalize_observation": true,
-        "num_steps_per_env": 1000,
-        "run_name": "large_lr_test",
+        "num_steps_per_env": 500,
+        "run_name": "cluster_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230421_134433"
+        "wandb_group": "cluster_20230421_155502"
       }
     },
     "env_cfg": {
@@ -134,9 +134,9 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 20,
+        "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 10,
+        "num_envs": 20,
         "num_observations": 48,
         "play": false
       },

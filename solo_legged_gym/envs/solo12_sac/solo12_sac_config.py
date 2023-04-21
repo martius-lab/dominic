@@ -5,10 +5,10 @@ class Solo12SACEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
-        num_envs = 10
+        num_envs = 20
         num_observations = 48
         num_actions = 12
-        episode_length_s = 20  # episode length in seconds
+        episode_length_s = 10  # episode length in seconds
         play = False
         debug = False
 
@@ -148,14 +148,14 @@ class Solo12SACTrainCfg:
         num_critic = 2
 
     class runner:
-        num_steps_per_env = 1000  # per iteration
+        num_steps_per_env = 500  # per iteration
         max_iterations = 1000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'large_lr_test'
+        run_name = 'cluster_test'
 
         # load
         load_run = -1  # -1 = last run
