@@ -10,7 +10,7 @@ except ModuleNotFoundError:
 
 
 class WandbSummaryWriter(SummaryWriter):
-    def __init__(self, log_dir: str, flush_secs: int, cfg):
+    def __init__(self, log_dir: str, flush_secs: int, cfg, group=None):
         super().__init__(log_dir, flush_secs)
 
         try:
@@ -29,14 +29,8 @@ class WandbSummaryWriter(SummaryWriter):
 
         project_log_path = os.path.dirname(os.path.abspath(log_dir))
         run_name = os.path.basename(os.path.abspath(log_dir))
-        wandb.init(project=project, entity=entity, dir=project_log_path)
+        wandb.init(project=project, entity=entity, dir=project_log_path, group=group)
         wandb.run.name = run_name + "-" + wandb.run.name.split("-")[-1]
-
-    def store_config(self, env_cfg, runner_cfg, algorithm_cfg, policy_cfg):
-        wandb.config.update({"runner_cfg": runner_cfg})
-        wandb.config.update({"policy_cfg": policy_cfg})
-        wandb.config.update({"algorithm_cfg": algorithm_cfg})
-        wandb.config.update({"env_cfg": class_to_dict(env_cfg)})
 
     def add_scalar(self, tag, scalar_value, global_step=None, walltime=None, new_style=False):
         super().add_scalar(
@@ -52,7 +46,7 @@ class WandbSummaryWriter(SummaryWriter):
         wandb.finish()
 
     def log_config(self, env_cfg, runner_cfg, algorithm_cfg, policy_cfg):
-        self.store_config(env_cfg, runner_cfg, algorithm_cfg, policy_cfg)
-
-    def save_model(self, model_path, iter):
-        wandb.save(model_path)
+        wandb.config.update({"runner_cfg": class_to_dict(runner_cfg)})
+        wandb.config.update({"policy_cfg": class_to_dict(policy_cfg)})
+        wandb.config.update({"algorithm_cfg": class_to_dict(algorithm_cfg)})
+        wandb.config.update({"env_cfg": class_to_dict(env_cfg)})

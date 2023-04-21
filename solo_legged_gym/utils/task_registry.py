@@ -58,8 +58,9 @@ class TaskRegistry:
 
         if create_and_save:
             os.makedirs(log_dir)
-            # update the json file for cluster running
+            # update the json file for cluster running only!!!
             env_cfg_dict = class_to_dict(env_cfg)
+            train_cfg.runner.wandb_group = "cluster"
             train_cfg_dict = class_to_dict(train_cfg)
             cfg = {
                 "solo_legged_gym": {
@@ -76,6 +77,9 @@ class TaskRegistry:
             }
 
             with open(os.path.join(ROOT_DIR, 'envs', train_cfg.runner.experiment_name + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
+                json.dump(cfg, f, indent=2)
+
+            with open(os.path.join(log_dir + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
                 json.dump(cfg, f, indent=2)
 
         algorithm = eval(train_cfg.algorithm_name)

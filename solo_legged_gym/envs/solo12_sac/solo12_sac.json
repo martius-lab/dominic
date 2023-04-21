@@ -40,12 +40,13 @@
         "checkpoint": -1,
         "experiment_name": "solo12_sac",
         "load_run": -1,
-        "max_iterations": 1000,
+        "max_iterations": 500,
         "normalize_observation": true,
-        "num_steps_per_env": 1000,
-        "run_name": "test",
+        "num_steps_per_env": 250,
+        "run_name": "large_lr_test",
         "save_interval": 50,
-        "wandb": true
+        "wandb": true,
+        "wandb_group": "cluster"
       }
     },
     "env_cfg": {
@@ -133,9 +134,9 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 20,
+        "episode_length_s": 5,
         "num_actions": 12,
-        "num_envs": 10,
+        "num_envs": 40,
         "num_observations": 48,
         "play": false
       },
