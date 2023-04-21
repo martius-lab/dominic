@@ -8,26 +8,28 @@
     "train_cfg": {
       "algorithm": {
         "buffer_size": 1000000.0,
-        "ent_coef": "auto_1e-3",
+        "ent_coef": "auto_1e-2",
+        "ent_coef_optimizer_lr": 0.001,
         "gamma": 0.99,
-        "learning_rate": 0.001,
         "mini_batch_size": 256,
         "num_critic": 2,
         "num_learning_epochs": 1,
-        "num_mini_batches": 1,
+        "num_mini_batches": 200,
+        "policy_optimizer_lr": 0.0005,
+        "qvalues_optimizer_lr": 0.003,
         "schedule": "fixed",
         "target_entropy": "auto",
         "tau": 0.005
       },
       "algorithm_name": "SAC",
       "network": {
-        "policy_activation": "elu",
+        "policy_activation": "relu",
         "policy_hidden_dims": [
           512,
           256,
           128
         ],
-        "qvalue_activation": "elu",
+        "qvalue_activation": "relu",
         "qvalue_hidden_dims": [
           512,
           256,
@@ -39,9 +41,9 @@
         "experiment_name": "solo12_sac",
         "load_run": -1,
         "max_iterations": 1000,
-        "normalize_observation": false,
+        "normalize_observation": true,
         "num_steps_per_env": 1000,
-        "run_name": "one_env_no_norm",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true
       }
@@ -133,7 +135,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "num_actions": 12,
-        "num_envs": 1,
+        "num_envs": 10,
         "num_observations": 48,
         "play": false
       },

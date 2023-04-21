@@ -61,11 +61,11 @@ class SAC:
             self.obs_normalizer = torch.nn.Identity()  # no normalization
 
         # set up optimizer
-        self.learning_rate = self.a_cfg.learning_rate
+        # self.learning_rate = self.a_cfg.learning_rate
         self.policy_optimizer = optim.Adam(self.policy.parameters(),
-                                           lr=self.learning_rate)
+                                           lr=self.a_cfg.policy_optimizer_lr)
         self.qvalues_optimizer = optim.Adam(self.qvalues.parameters(),
-                                            lr=self.learning_rate)
+                                            lr=self.a_cfg.qvalues_optimizer_lr)
 
         # set up replay buffer
         self.replay_buffer = ReplayBuffer(num_envs=self.env.num_envs,
@@ -88,7 +88,7 @@ class SAC:
                 init_value = float(self.ent_coef.split("_")[1])
                 assert init_value > 0.0, "The initial value of ent_coef must be greater than 0"
             self.log_ent_coef = torch.log(torch.ones(1, device=self.device) * init_value).requires_grad_(True)
-            self.ent_coef_optimizer = torch.optim.Adam([self.log_ent_coef], lr=self.learning_rate)
+            self.ent_coef_optimizer = torch.optim.Adam([self.log_ent_coef], lr=self.a_cfg.ent_coef_optimizer_lr)
         else:
             self.ent_coef_tensor = torch.tensor(self.ent_coef, device=self.device)
 
@@ -108,9 +108,9 @@ class SAC:
         self.learn_percentage = 0.0
 
     def learn(self):
-        self.env.episode_length_buf = torch.randint_like(
-            self.env.episode_length_buf, high=int(self.env.max_episode_length)
-        )
+        # self.env.episode_length_buf = torch.randint_like(
+        #     self.env.episode_length_buf, high=int(self.env.max_episode_length)
+        # )
 
         obs = self.env.get_observations().to(self.device)
         self.train_mode()  # switch to train mode (for dropout for example)
@@ -125,47 +125,56 @@ class SAC:
 
         for it in range(self.current_learning_iteration, tot_iter):
             self.learn_percentage = (it - self.current_learning_iteration) / tot_iter
-            # Rollout
-            start = time.time()
-            with torch.inference_mode():
+
+            if it == 0:
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
-                    actions = self.policy.act(previous_obs)
+                    actions = 2 * torch.rand(self.env.num_envs, self.env.num_actions, requires_grad=False, device=self.device) - 1
                     obs, rewards, dones, infos = self.env.step(actions)
                     obs = self.obs_normalizer(obs)
                     self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
+            else:
+                # Rollout
+                start = time.time()
+                with torch.inference_mode():
+                    for i in range(self.num_steps_per_env):
+                        previous_obs = obs
+                        actions = self.policy.act(previous_obs)
+                        obs, rewards, dones, infos = self.env.step(actions)
+                        obs = self.obs_normalizer(obs)
+                        self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
 
-                    if self.log_dir is not None:
-                        if 'episode' in infos:
-                            ep_infos.append(infos['episode'])
-                        cur_reward_sum += rewards
-                        cur_episode_length += 1
-                        new_ids = (dones > 0).nonzero(as_tuple=False)
-                        rewbuffer.extend(cur_reward_sum[new_ids][:, 0].cpu().numpy().tolist())
-                        lenbuffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
-                        cur_reward_sum[new_ids] = 0
-                        cur_episode_length[new_ids] = 0
-            stop = time.time()
-            collection_time = stop - start
+                        if self.log_dir is not None:
+                            if 'episode' in infos:
+                                ep_infos.append(infos['episode'])
+                            cur_reward_sum += rewards
+                            cur_episode_length += 1
+                            new_ids = (dones > 0).nonzero(as_tuple=False)
+                            rewbuffer.extend(cur_reward_sum[new_ids][:, 0].cpu().numpy().tolist())
+                            lenbuffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
+                            cur_reward_sum[new_ids] = 0
+                            cur_episode_length[new_ids] = 0
+                stop = time.time()
+                collection_time = stop - start
 
-            # Learning update
-            start = stop
-            mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi = self.update()
-            stop = time.time()
-            learn_time = stop - start
+                # Learning update
+                start = stop
+                mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi, mean_num_dones = self.update()
+                stop = time.time()
+                learn_time = stop - start
 
-            if self.log_dir is not None:
-                rew_each_step = np.array(list(rewbuffer)) / np.array(list(lenbuffer))
-                len_percent_buffer = np.array(list(lenbuffer)) / self.env.max_episode_length
-                self.log(locals())
+                if self.log_dir is not None:
+                    rew_each_step = np.array(list(rewbuffer)) / np.array(list(lenbuffer))
+                    len_percent_buffer = np.array(list(lenbuffer)) / self.env.max_episode_length
+                    self.log(locals())
 
-            if it % self.save_interval == 0:
-                self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
+                if it % self.save_interval == 0:
+                    self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
 
-            if it >= tot_iter - 1:
-                if len(rewbuffer) > 0:
-                    self.avg_score = statistics.mean(rewbuffer)
-            ep_infos.clear()
+                if it >= tot_iter - 1:
+                    if len(rewbuffer) > 0:
+                        self.avg_score = statistics.mean(rewbuffer)
+                ep_infos.clear()
 
         self.current_learning_iteration += self.num_learning_iterations
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)))
@@ -186,11 +195,11 @@ class SAC:
         if self.ent_coef_optimizer is not None:
             optimizers += [self.ent_coef_optimizer]
 
-        if self.a_cfg.schedule == "adaptive":
-            self.learning_rate = max(1e-5, (1 - self.learn_percentage) * self.a_cfg.learning_rate)
-            for optimizer in optimizers:
-                for param_group in optimizer.param_groups:
-                    param_group["lr"] = self.learning_rate
+        # if self.a_cfg.schedule == "adaptive":
+        #     self.learning_rate = max(1e-5, (1 - self.learn_percentage) * self.a_cfg.learning_rate)
+        #     for optimizer in optimizers:
+        #         for param_group in optimizer.param_groups:
+        #             param_group["lr"] = self.learning_rate
 
         mean_ent_coef_loss = 0
         mean_ent_coef = 0
@@ -198,6 +207,7 @@ class SAC:
         mean_critic_loss = 0
         mean_ent_coef_actions_pi_log_prob = 0
         mean_min_qvalues_pi = 0
+        mean_num_dones = 0
         generator = self.replay_buffer.mini_batch_generator(self.a_cfg.mini_batch_size, self.a_cfg.num_mini_batches,
                                                             self.a_cfg.num_learning_epochs)
         for (obs_batch,
@@ -206,6 +216,8 @@ class SAC:
              rewards_batch,
              dones_batch,
              ) in generator:
+
+            mean_num_dones += torch.sum(dones_batch).item()
 
             # actions by the current policy
             actions_pi, actions_pi_log_prob = self.policy.act_and_log_prob(obs_batch)
@@ -233,6 +245,7 @@ class SAC:
                 next_q_values, _ = torch.min(next_q_values, dim=1, keepdim=True)
                 next_q_values = next_q_values - ent_coef * next_actions_pi_log_prob.reshape(-1, 1)
                 target_q_values = rewards_batch + (1 - dones_batch) * self.a_cfg.gamma * next_q_values
+                target_q_values = torch.clamp(target_q_values, min=0, max=1/(1-self.a_cfg.gamma))
 
             # Compute critic loss
             current_q_values = self.qvalues.evaluate(obs_batch, actions_batch)
@@ -266,9 +279,10 @@ class SAC:
         mean_critic_loss /= num_updates
         mean_ent_coef_actions_pi_log_prob /= num_updates
         mean_min_qvalues_pi /= num_updates
+        mean_num_dones /= num_updates
 
         return mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, \
-            mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi
+            mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi, mean_num_dones
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -298,7 +312,8 @@ class SAC:
         self.writer.add_scalar('Learning/mean_critic_loss', locs['mean_critic_loss'], locs['it'])
         self.writer.add_scalar('Learning/mean_ent_coef_actions_pi_log_prob', locs['mean_ent_coef_actions_pi_log_prob'], locs['it'])
         self.writer.add_scalar('Learning/mean_min_qvalues_pi', locs['mean_min_qvalues_pi'], locs['it'])
-        self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
+        self.writer.add_scalar('Learning/mean_num_dones', locs['mean_num_dones'], locs['it'])
+        # self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])

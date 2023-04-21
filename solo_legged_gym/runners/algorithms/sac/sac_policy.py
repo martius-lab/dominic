@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from solo_legged_gym.runners.utils.distributions import SquashedDiagGaussianDistribution
 
-LOG_STD_MAX = 2
+LOG_STD_MAX = 0
 LOG_STD_MIN = -20
 
 

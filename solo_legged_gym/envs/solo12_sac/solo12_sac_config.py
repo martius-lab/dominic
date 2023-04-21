@@ -5,7 +5,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
-        num_envs = 1
+        num_envs = 10
         num_observations = 48
         num_actions = 12
         episode_length_s = 20  # episode length in seconds
@@ -126,23 +126,23 @@ class Solo12SACTrainCfg:
 
     class network:
         policy_hidden_dims = [512, 256, 128]
-        policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         qvalue_hidden_dims = [512, 256, 128]
-        qvalue_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        qvalue_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 'auto_1e-3'  # 'auto', 'auto_1e-3'
-        # policy_optimizer_lr = 1e-3
-        # qvalues_optimizer_lr = 3e-3
-        # ent_coef_optimizer_lr = 5e-3
-        learning_rate = 1e-3  # 5.e-4
+        ent_coef = 'auto_1e-2'  # 'auto', 'auto_1e-3'
+        policy_optimizer_lr = 5e-4
+        qvalues_optimizer_lr = 3e-3
+        ent_coef_optimizer_lr = 1e-3
+        # learning_rate = 1e-3  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
         mini_batch_size = 256
         num_learning_epochs = 1
-        num_mini_batches = 1
+        num_mini_batches = 200
         gamma = 0.99
         tau = 0.005
         num_critic = 2
@@ -150,12 +150,12 @@ class Solo12SACTrainCfg:
     class runner:
         num_steps_per_env = 1000  # per iteration
         max_iterations = 1000  # number of policy updates
-        normalize_observation = False  # it will make the training much faster
+        normalize_observation = True  # it will make the training much faster
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'one_env_no_norm'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run

@@ -25,16 +25,16 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-     "param": "solo_legged_gym.train_cfg.algorithm.learning_rate",
+     "param": "solo_legged_gym.train_cfg.algorithm.policy_optimizer_lr",
+     "values": [1e-5, 5e-5, 1e-4, 5e-4, 1e-3]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.qvalues_optimizer_lr",
+     "values": [1e-5, 5e-5, 1e-4, 5e-4, 1e-3]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.ent_coef_optimizer_lr",
      "values": [1e-5, 1e-4, 1e-3]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.ent_coef",
-     "values": ["auto", "auto_1e-1", "auto_1e-2", "auto_1e-3"]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.network.log_std_init",
-     "values": [-3, -2, -1, 0]
     }
   ]
 }
