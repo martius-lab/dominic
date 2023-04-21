@@ -45,7 +45,8 @@
         "num_steps_per_env": 24,
         "run_name": "baseline",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true,
+        "wandb_group": "cluster_20230421_135653"
       }
     },
     "env_cfg": {
