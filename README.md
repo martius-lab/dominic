@@ -219,7 +219,10 @@ The low-level robot interface has been compiled and is ready to be used. To reco
 6. Obtain root access by executing `sudo -i`.
 
 7. Move the robot legs close to the zero position. Executing the script in `run_robot.bash` in the root panel. Use the keyboard to update commands.
-
+   ```bash
+   cd /home/robot/solo12_workspace/solo_legged_gym/solo_legged_gym/deployment
+   bash run_robot.bash
+   ```
    > Unlike Solo 8, the homing of the joints for Solo 12 is integrated and is executed at the beginning of each run. The joint offset values are remembered each time when powered on. Therefore, to redo homing, the robot should be rebooted entirely.
 
 ```
