@@ -16,7 +16,7 @@ import argparse
 class Solo12Controller:
     def __init__(self) -> None:
         log_root = os.path.join(ROOT_DIR, "logs", 'solo12_vanilla')
-        run_name = "20230419_104356_test"
+        run_name = "baseline"
         self.policy_path = os.path.join(log_root, run_name, "exported", "policies", "policy.pt")
         server_ip = socket.gethostbyname('octavius')
         self.tracker = Tracker(server_ip)
@@ -141,7 +141,7 @@ class Solo12Controller:
 
 
 if __name__ == "__main__":
-    num_steps = 5e6
+    num_steps = int(5e6)
     controller = Solo12Controller()
     controller.initialize()
     controller.run(num_steps)
