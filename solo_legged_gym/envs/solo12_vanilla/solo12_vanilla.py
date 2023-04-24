@@ -213,8 +213,8 @@ class Solo12Vanilla(BaseTask):
 
     def _get_noise_scale_vec(self):
         noise_vec = torch.zeros_like(self.obs_buf[0])
-        noise_scales = self.cfg.noise.scales
-        noise_level = self.cfg.noise.noise_level
+        noise_scales = self.cfg.observations.noise_scales
+        noise_level = self.cfg.observations.noise_level
         noise_vec[:3] = noise_scales.lin_vel
         noise_vec[3:6] = noise_scales.ang_vel
         noise_vec[6:18] = noise_scales.dof_pos

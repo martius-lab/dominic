@@ -64,20 +64,20 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         flip_visual_attachments = False
 
     class domain_rand(BaseEnvCfg.domain_rand):
-        randomize_friction = False
+        randomize_friction = True
         friction_range = [0.5, 1.25]
 
-        randomize_base_mass = False
+        randomize_base_mass = True
         added_mass_range = [-0.5, 0.5]
 
-        push_robots = False
+        push_robots = True
         push_interval_s = 15
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
 
-        actuator_lag = False
+        actuator_lag = True
         randomize_actuator_lag = False
-        actuator_lag_steps = 6  # the lag simulated would be actuator_lag_steps * dt * decimation
+        actuator_lag_steps = 7  # the lag simulated would be actuator_lag_steps * dt * decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
@@ -106,17 +106,16 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         base_height_target = 0.25
 
     class observations:
-        add_noise = False
+        add_noise = True
         noise_level = 1.0  # scales other values
         clip_observations = 100.
 
         class noise_scales:
-            class scales:
-                dof_pos = 0.01
-                dof_vel = 0.1
-                lin_vel = 0.2
-                ang_vel = 0.05
-                gravity = 0.05
+            dof_pos = 0.01
+            dof_vel = 0.1
+            lin_vel = 0.2
+            ang_vel = 0.05
+            gravity = 0.05
 
 
 class Solo12VanillaTrainCfg:
@@ -152,7 +151,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'changed_commands'
+        run_name = 'noisy_obs_random_lag_7'
 
         # load
         load_run = -1  # -1 = last run
