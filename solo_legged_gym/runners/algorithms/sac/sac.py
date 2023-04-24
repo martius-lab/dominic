@@ -15,7 +15,7 @@ from solo_legged_gym.utils import class_to_dict
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
 from solo_legged_gym.runners.storage.replay_buffer import ReplayBuffer
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
-from solo_legged_gym.runners.algorithms.sac.sac_policy import SACPolicy
+from solo_legged_gym.runners.algorithms.ppo.ppo_policy import PPOPolicy
 from solo_legged_gym.runners.modules.qvalues import QValues
 from solo_legged_gym.runners.utils.utils import polyak_update
 
@@ -37,7 +37,7 @@ class SAC:
         self.normalize_observation = self.r_cfg.normalize_observation
 
         # set up the networks
-        self.policy = SACPolicy(num_obs=self.env.num_obs,
+        self.policy = PPOPolicy(num_obs=self.env.num_obs,
                                 num_actions=self.env.num_actions,
                                 hidden_dims=self.n_cfg.policy_hidden_dims,
                                 activation=self.n_cfg.policy_activation).to(self.device)
@@ -111,9 +111,9 @@ class SAC:
         self.learn_percentage = 0.0
 
     def learn(self):
-        # self.env.episode_length_buf = torch.randint_like(
-        #     self.env.episode_length_buf, high=int(self.env.max_episode_length)
-        # )
+        self.env.episode_length_buf = torch.randint_like(
+            self.env.episode_length_buf, high=int(self.env.max_episode_length)
+        )
 
         obs = self.env.get_observations().to(self.device)
         self.train_mode()  # switch to train mode (for dropout for example)
