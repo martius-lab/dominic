@@ -54,11 +54,6 @@ class PPOPolicy(nn.Module):
     def entropy(self):
         return self.distribution.entropy()
 
-    def act(self, observations):
-        # return actions
-        mean = self.action_mean_net(self.policy_latent_net(observations))
-        return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=False)
-
     def act_and_log_prob(self, observations):
         # return actions and log_prob
         mean = self.action_mean_net(self.policy_latent_net(observations))
