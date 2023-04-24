@@ -15,6 +15,7 @@ isaacgym = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/isaacgym.git"}
 tensorboard = "^2.12.0"
 wandb = "*"
 pyqt5 = "*"
+ninja = "*"
 
 [tool.poetry.group.dev.dependencies]
 cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}
