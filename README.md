@@ -1,4 +1,4 @@
-### Installation
+## Installation
 1. Clone the repo:
     ```bash
     git clone git@gitlab.is.tue.mpg.de:autonomous-learning/solo_legged_gym.git
@@ -70,7 +70,7 @@
    ```
    you will be asked to paste the API keys, you can get it from your personal profile. 
 
-### Optional
+## Optional
 1. Open the project with PyCharm and choose python interpreter as poetry. 
 2. Configure PyCharm Run/Debug setting. 
    by setting the environment variables (important!)
@@ -87,7 +87,7 @@
      sudo apt install libpython3.8
      ```
 
-### RUN on local machine
+## RUN on local machine
 Run the scripts from the root directory (where `.venv` is). 
 1. use `scripts/train.py` to start training.
    For example:
@@ -153,7 +153,7 @@ Run the scripts from the root directory (where `.venv` is).
    ]
    ```
 
-### Cluster run
+## Cluster run
 run at least once on the local machine to update the json file specified in `env`
 
 ####  - Interactive debug on cluster
@@ -176,7 +176,66 @@ sudo apt install filezilla
 ```
 connect the cluster by specifying `SFTP` and port `22`. 
 
-### WIP
+## Deployment
+#### Solo 12 System
+
+The Solo 12 operating system runs on `Olympus`.
+
+```
+Username: robot
+Password: S0loeight
+```
+
+#### Hardware
+
+The hardware details are documented [here](https://github.com/open-dynamic-robot-initiative/open_robot_actuator_hardware).
+
+#### Software
+
+Set up `solo_legged_gym` environment in `~/solo12_workspace`.
+
+The low-level robot interface has been compiled and is ready to be used. To recompile the workspace, go to `~/ws_solo12/workspace` and do `colcon build`. Remember to import the ROS installation in by `source /opt/ros/foxy/setup.bash`.
+
+#### Operational Instruction
+
+1. Set up the [Vicon System](https://gitlab.is.tue.mpg.de/autonomous-learning/wiki/-/wikis/Vicon).
+
+2. Put the robot on the stand holder. Turn on the robot power supply and release the emergency stop.
+
+3. Set up robot configurations in `solo12_config.yml`.
+
+   > The workstation communicates with Solo 12 using an Ethernet cable. Set `network_interface` to the correct interface.
+
+   > To calibrate joint positions, measure `home_offset_rad` by running `ros2 run solo solo12_hardware_calibration network_interface` in `ws_solo12`.
+
+4. If you have already played the learned policy with `script/keyboard_play.py`, you should have the exported policy in the log folder where there should be a folder `exported`.
+   
+   > Change the load policy in `deployment/play.py`. 
+
+5. Adapt observation space in `_compute_observations()` and key commands in `_on_press()` in `deployment/play.py`.
+
+   > Please go through `deployment.py` to check other configurations (default joint positions, PD gains, etc.) and adapt where necessary.
+
+6. Obtain root access by executing `sudo -i`.
+
+7. Move the robot legs close to the zero position. Executing the script in `run_robot.bash` in the root panel. Use the keyboard to update commands.
+
+   > Unlike Solo 8, the homing of the joints for Solo 12 is integrated and is executed at the beginning of each run. The joint offset values are remembered each time when powered on. Therefore, to redo homing, the robot should be rebooted entirely.
+
+```
+#!/bin/bash
+
+source /home/robot/.bashrc
+source /home/robot/ws_solo12/workspace/install/setup.bash
+source /home/robot/solo12_workspace/solo_legged_gym/.venv/bin/activate
+cd /home/robot/solo12_workspace/solo_legged_gym/solo_legged_gym/deployment
+export DISPLAY=:1
+python play.py solo12_config.yml
+```
+
+8. Switch off the power supply, press the emergency stop, and switch off the Vicon system after experiments.
+
+## WIP
 1. Cluster optimization
 2. how to visualize the cluster training using tensorboard? (to limit the internet usage)
 
