@@ -97,7 +97,7 @@ class Solo12Controller:
                         torch.ones(12, dtype=torch.float, requires_grad=False) * 1.0).numpy()
             self.t = self.platform.append_desired_action(dof_zero_action)
             self._compute_observations()
-        print("[Solo 12] Initilization finished.")
+        print("[Solo 12] Initialization finished.")
 
     def _adapt_dofs(self, dof_item, dir=0):
         # Adapt from Isaac to real when dir = 0
@@ -141,7 +141,7 @@ class Solo12Controller:
 
 
 if __name__ == "__main__":
-    num_steps = 500000
+    num_steps = 5e6
     controller = Solo12Controller()
     controller.initialize()
     controller.run(num_steps)

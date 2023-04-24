@@ -18,6 +18,7 @@ pyqt5 = "*"
 
 [tool.poetry.group.dev.dependencies]
 cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}
+pyvicon = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/pyvicon.git"}
 
 [tool.black]
 line-length = 140
