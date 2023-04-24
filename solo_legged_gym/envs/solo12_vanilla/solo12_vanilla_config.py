@@ -159,4 +159,5 @@ class Solo12VanillaTrainCfg:
         checkpoint = -1  # -1 = last saved model
 
         wandb = False
+        wandb_group = 'test'
 
