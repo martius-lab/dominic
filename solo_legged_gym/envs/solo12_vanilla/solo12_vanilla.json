@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "baseline",
+        "run_name": "changed_commands",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230424_095915"
+        "wandb_group": "cluster_20230424_181446"
       }
     },
     "env_cfg": {
@@ -75,7 +75,7 @@
         "thickness": 0.01
       },
       "commands": {
-        "change_commands": false,
+        "change_commands": true,
         "change_interval_s": 10.0,
         "num_commands": 3,
         "ranges": {

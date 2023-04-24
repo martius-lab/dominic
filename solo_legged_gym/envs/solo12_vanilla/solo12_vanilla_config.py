@@ -17,7 +17,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = False
+        change_commands = True
         change_interval_s = 10.  # time before command are changed[s]
 
         class ranges:
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'changed_commands'
 
         # load
         load_run = -1  # -1 = last run
