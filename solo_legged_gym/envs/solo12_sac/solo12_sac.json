@@ -14,9 +14,9 @@
         "mini_batch_size": 256,
         "num_critic": 2,
         "num_learning_epochs": 1,
-        "num_mini_batches": 200,
+        "num_mini_batches": 500,
         "policy_optimizer_lr": 0.0005,
-        "qvalues_optimizer_lr": 0.003,
+        "qvalues_optimizer_lr": 0.001,
         "schedule": "fixed",
         "target_entropy": "auto",
         "tau": 0.005
@@ -46,7 +46,7 @@
         "run_name": "cluster_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230421_155502"
+        "wandb_group": "cluster_20230424_091941"
       }
     },
     "env_cfg": {

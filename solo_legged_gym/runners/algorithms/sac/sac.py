@@ -129,55 +129,55 @@ class SAC:
         for it in range(self.current_learning_iteration, tot_iter):
             self.learn_percentage = (it - self.current_learning_iteration) / tot_iter
 
-            if it == 0:
+            # if it == 0:
+            #     for i in range(self.num_steps_per_env):
+            #         previous_obs = obs
+            #         actions = 2 * torch.rand(self.env.num_envs, self.env.num_actions, requires_grad=False, device=self.device) - 1
+            #         obs, rewards, dones, infos = self.env.step(actions)
+            #         obs = self.obs_normalizer(obs)
+            #         self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
+            # else:
+            # Rollout
+            start = time.time()
+            with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     previous_obs = obs
-                    actions = 2 * torch.rand(self.env.num_envs, self.env.num_actions, requires_grad=False, device=self.device) - 1
+                    actions = self.policy.act(previous_obs)
                     obs, rewards, dones, infos = self.env.step(actions)
                     obs = self.obs_normalizer(obs)
                     self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
-            else:
-                # Rollout
-                start = time.time()
-                with torch.inference_mode():
-                    for i in range(self.num_steps_per_env):
-                        previous_obs = obs
-                        actions = self.policy.act(previous_obs)
-                        obs, rewards, dones, infos = self.env.step(actions)
-                        obs = self.obs_normalizer(obs)
-                        self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
 
-                        if self.log_dir is not None:
-                            if 'episode' in infos:
-                                ep_infos.append(infos['episode'])
-                            cur_reward_sum += rewards
-                            cur_episode_length += 1
-                            new_ids = (dones > 0).nonzero(as_tuple=False)
-                            rewbuffer.extend(cur_reward_sum[new_ids][:, 0].cpu().numpy().tolist())
-                            lenbuffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
-                            cur_reward_sum[new_ids] = 0
-                            cur_episode_length[new_ids] = 0
-                stop = time.time()
-                collection_time = stop - start
+                    if self.log_dir is not None:
+                        if 'episode' in infos:
+                            ep_infos.append(infos['episode'])
+                        cur_reward_sum += rewards
+                        cur_episode_length += 1
+                        new_ids = (dones > 0).nonzero(as_tuple=False)
+                        rewbuffer.extend(cur_reward_sum[new_ids][:, 0].cpu().numpy().tolist())
+                        lenbuffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
+                        cur_reward_sum[new_ids] = 0
+                        cur_episode_length[new_ids] = 0
+            stop = time.time()
+            collection_time = stop - start
 
-                # Learning update
-                start = stop
-                mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi, mean_num_dones = self.update()
-                stop = time.time()
-                learn_time = stop - start
+            # Learning update
+            start = stop
+            mean_ent_coef_loss, mean_ent_coef, mean_actor_loss, mean_critic_loss, mean_ent_coef_actions_pi_log_prob, mean_min_qvalues_pi, mean_num_dones = self.update()
+            stop = time.time()
+            learn_time = stop - start
 
-                if self.log_dir is not None:
-                    rew_each_step = np.array(list(rewbuffer)) / np.array(list(lenbuffer))
-                    len_percent_buffer = np.array(list(lenbuffer)) / self.env.max_episode_length
-                    self.log(locals())
+            if self.log_dir is not None:
+                rew_each_step = np.array(list(rewbuffer)) / np.array(list(lenbuffer))
+                len_percent_buffer = np.array(list(lenbuffer)) / self.env.max_episode_length
+                self.log(locals())
 
-                if it % self.save_interval == 0:
-                    self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
+            if it % self.save_interval == 0:
+                self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
 
-                if it >= tot_iter - 1:
-                    if len(rewbuffer) > 0:
-                        self.avg_score = statistics.mean(rewbuffer)
-                ep_infos.clear()
+            if it >= tot_iter - 1:
+                if len(rewbuffer) > 0:
+                    self.avg_score = statistics.mean(rewbuffer)
+            ep_infos.clear()
 
         self.current_learning_iteration += self.num_learning_iterations
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)))
