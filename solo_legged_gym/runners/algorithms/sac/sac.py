@@ -68,7 +68,8 @@ class SAC:
         self.policy_optimizer = optim.Adam(self.policy.parameters(),
                                            lr=self.a_cfg.policy_optimizer_lr)
         self.qvalues_optimizer = optim.Adam(self.qvalues.parameters(),
-                                            lr=self.a_cfg.qvalues_optimizer_lr)
+                                            lr=self.a_cfg.qvalues_optimizer_lr,
+                                            weight_decay=self.a_cfg.qvalues_weight_decay)
 
         # set up replay buffer
         self.replay_buffer = ReplayBuffer(num_envs=self.env.num_envs,
@@ -129,15 +130,6 @@ class SAC:
         for it in range(self.current_learning_iteration, tot_iter):
             self.learn_percentage = (it - self.current_learning_iteration) / tot_iter
 
-            # if it == 0:
-            #     for i in range(self.num_steps_per_env):
-            #         previous_obs = obs
-            #         actions = 2 * torch.rand(self.env.num_envs, self.env.num_actions, requires_grad=False, device=self.device) - 1
-            #         obs, rewards, dones, infos = self.env.step(actions)
-            #         obs = self.obs_normalizer(obs)
-            #         self.process_env_step(previous_obs, actions, obs, rewards, dones, infos)
-            # else:
-            # Rollout
             start = time.time()
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):

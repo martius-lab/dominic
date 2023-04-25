@@ -5,7 +5,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
-        num_envs = 20
+        num_envs = 100
         num_observations = 48
         num_actions = 12
         episode_length_s = 10  # episode length in seconds
@@ -86,16 +86,16 @@ class Solo12SACEnvCfg(BaseEnvCfg):
             ang_vel_z = ["task", 0.4]
 
             lin_z = ["task", 0.4]
-            # lin_vel_z = ["task", 1.0]
+            lin_vel_z = ["task", 1.0]
             ang_xy = ["task", 0.6]
-            # ang_vel_xy = ["task", 3.0]
+            ang_vel_xy = ["task", 3.0]
 
-            # joint_default = ["task", 1.5]
-            # joint_targets_rate = ["task", 0.8]
-            # stand_still = ["task", 1.0]
-            # feet_slip = ["task", [0.03, 0.1]]
+            joint_default = ["task", 1.5]
+            joint_targets_rate = ["task", 0.8]
+            stand_still = ["task", 1.0]
+            feet_slip = ["task", [0.03, 0.1]]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            # torques = ["task", 6.0]
+            torques = ["task", 6.0]
             # dof_acc = ["task", 1500]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
@@ -125,24 +125,25 @@ class Solo12SACTrainCfg:
     algorithm_name = 'SAC'
 
     class network:
-        policy_hidden_dims = [512, 256, 128]
+        policy_hidden_dims = [256, 256]
         policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        qvalue_hidden_dims = [512, 256, 128]
+        qvalue_hidden_dims = [256, 256]
         qvalue_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 'auto_1e-2'  # 'auto', 'auto_1e-3'
+        ent_coef = 'auto'  # 'auto', 'auto_1e-3'
         policy_optimizer_lr = 5e-4
         qvalues_optimizer_lr = 1e-3
+        qvalues_weight_decay = 1e-2
         ent_coef_optimizer_lr = 1e-3
         # learning_rate = 1e-3  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
         mini_batch_size = 256
         num_learning_epochs = 1
-        num_mini_batches = 500
+        num_mini_batches = 50
         gamma = 0.99
         tau = 0.005
         num_critic = 2
@@ -155,7 +156,7 @@ class Solo12SACTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'cluster_test'
+        run_name = 'hand_tuning'
 
         # load
         load_run = -1  # -1 = last run
