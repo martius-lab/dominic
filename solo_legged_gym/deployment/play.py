@@ -16,7 +16,7 @@ import argparse
 class Solo12Controller:
     def __init__(self) -> None:
         log_root = os.path.join(ROOT_DIR, "logs", 'solo12_vanilla')
-        run_name = "baseline"
+        run_name = "noisy_obs_random_lag_rand"
         self.policy_path = os.path.join(log_root, run_name, "exported", "policies", "policy.pt")
         server_ip = socket.gethostbyname('octavius')
         self.tracker = Tracker(server_ip)
@@ -82,8 +82,8 @@ class Solo12Controller:
     def step(self, actions):
         self.actions = actions
         # self.actions[:] = 0.0
+        dof_pos = actions * 0.25 + self.default_dof_pos
         for _ in range(self.decimation):
-            dof_pos = actions * 0.25 + self.default_dof_pos
             self.t = self.platform.append_desired_action(self._adapt_dofs(dof_pos, dir=0))
         self._compute_observations()
 
@@ -125,6 +125,8 @@ class Solo12Controller:
         dof_info = self.platform.get_observation(self.t)
         dof_pos = self._adapt_dofs(dof_info.joint_positions, dir=1)
         dof_vel = self._adapt_dofs(dof_info.joint_velocities, dir=1)
+
+        print((dof_pos - self.default_dof_pos).detach().cpu().numpy())
 
         self.observations = torch.cat(
             (

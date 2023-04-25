@@ -154,7 +154,7 @@ class Solo12VanillaTrainCfg:
         run_name = 'noisy_obs_random_lag_7'
 
         # load
-        load_run = -1  # -1 = last run
+        load_run = 'noisy_obs_random_lag_rand'  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
         wandb = False
