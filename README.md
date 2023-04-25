@@ -202,11 +202,22 @@ The low-level robot interface has been compiled and is ready to be used. To reco
 
 2. Put the robot on the stand holder. Turn on the robot power supply and release the emergency stop.
 
-3. Set up robot configurations in `solo12_config.yml`.
+   3. Set up robot configurations in `solo12_config.yml`.
 
-   > The workstation communicates with Solo 12 using an Ethernet cable. Set `network_interface` to the correct interface.
+   >    The workstation communicates with Solo 12 using an Ethernet cable. Set `network_interface` to the correct interface.
 
-   > To calibrate joint positions, measure `home_offset_rad` by running `ros2 run solo solo12_hardware_calibration network_interface` in `ws_solo12`.
+   >    For debuging at low level, go to the apptainer.
+   >    ```bash
+   >    ### go into apptainer
+   >    cd ws_solo12
+   >    sudo apptainer shell -e --bind=$(pwd) ~/solo_robot_latest.sif
+   >    
+   >    ### go into the interactive mode for testing
+   >    source /setup.bash
+   >    ```
+   >    (motor issue) running interactively by `ros2 run robot_interfaces_solo solo12_show_data workspace/solo12_config.yml`.
+   >       
+   >    (offset) measure `home_offset_rad` by running `ros2 run solo solo12_hardware_calibration network_interface`.
 
 4. If you have already played the learned policy with `script/keyboard_play.py`, you should have the exported policy in the log folder where there should be a folder `exported`.
    
