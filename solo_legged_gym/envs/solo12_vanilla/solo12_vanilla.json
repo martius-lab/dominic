@@ -46,7 +46,7 @@
         "run_name": "run_after_hw_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230425_213357"
+        "wandb_group": "cluster_20230425_233512"
       }
     },
     "env_cfg": {
