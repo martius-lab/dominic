@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "noisy_obs_random_lag_7",
+        "run_name": "run_after_hw_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230424_215542"
+        "wandb_group": "cluster_20230425_213357"
       }
     },
     "env_cfg": {
@@ -70,7 +70,8 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER"
+          "SHOULDER",
+          "UPPER"
         ],
         "thickness": 0.01
       },
@@ -112,7 +113,7 @@
         "torque_limits": 2.5
       },
       "domain_rand": {
-        "actuator_lag": true,
+        "actuator_lag": false,
         "actuator_lag_steps": 7,
         "added_mass_range": [
           -0.5,
@@ -125,10 +126,10 @@
         "max_push_avel_xyz": 0.5,
         "max_push_vel_xyz": 0.5,
         "push_interval_s": 15,
-        "push_robots": true,
+        "push_robots": false,
         "randomize_actuator_lag": false,
-        "randomize_base_mass": true,
-        "randomize_friction": true
+        "randomize_base_mass": false,
+        "randomize_friction": false
       },
       "env": {
         "debug": false,
@@ -178,7 +179,7 @@
         ]
       },
       "observations": {
-        "add_noise": true,
+        "add_noise": false,
         "clip_observations": 100.0,
         "noise_level": 1.0,
         "noise_scales": {
@@ -215,12 +216,8 @@
             "task",
             [
               0.03,
-              0.2
+              0.1
             ]
-          ],
-          "joint_default": [
-            "task",
-            1.5
           ],
           "joint_targets_rate": [
             "task",
