@@ -65,7 +65,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
 
     class domain_rand(BaseEnvCfg.domain_rand):
         randomize_friction = False
-        friction_range = [0.5, 1.25]
+        friction_range = [0.5, 1.5]
 
         randomize_base_mass = False
         added_mass_range = [-0.5, 0.5]
@@ -90,13 +90,13 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_xy = ["task", 0.6]
             ang_vel_xy = ["task", 3.0]
 
-            joint_targets_rate = ["task", 0.8]
+            joint_targets_rate = ["task", 2.0]
             stand_still = ["task", 1.0]
-            feet_slip = ["task", [0.03, 0.1]]
-            torques = ["task", 6.0]
+            feet_slip = ["task", [0.03, 0.2]]
+            # torques = ["task", 6.0]
             # joint_default = ["task", 1.5]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            # dof_acc = ["task", 1500]
+            dof_acc = ["task", 1000]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
 

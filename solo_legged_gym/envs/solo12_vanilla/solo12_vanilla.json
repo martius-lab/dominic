@@ -46,7 +46,7 @@
         "run_name": "run_after_hw_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230425_233512"
+        "wandb_group": "cluster_20230426_123040"
       }
     },
     "env_cfg": {
@@ -121,7 +121,7 @@
         ],
         "friction_range": [
           0.5,
-          1.25
+          1.5
         ],
         "max_push_avel_xyz": 0.5,
         "max_push_vel_xyz": 0.5,
@@ -212,16 +212,20 @@
             "task",
             0.6
           ],
+          "dof_acc": [
+            "task",
+            1000
+          ],
           "feet_slip": [
             "task",
             [
               0.03,
-              0.1
+              0.2
             ]
           ],
           "joint_targets_rate": [
             "task",
-            0.8
+            2.0
           ],
           "lin_vel_x": [
             "task",
@@ -242,10 +246,6 @@
           "stand_still": [
             "task",
             1.0
-          ],
-          "torques": [
-            "task",
-            6.0
           ]
         }
       },
