@@ -90,13 +90,14 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_xy = ["task", 0.6]
             ang_vel_xy = ["task", 3.0]
 
-            joint_targets_rate = ["task", 2.0]
+            joint_targets_rate = ["task", 1.0]
             stand_still = ["task", 1.0]
-            feet_slip = ["task", [0.03, 0.2]]
+            feet_slip = ["task", [0.03, 0.1]]
+            dof_acc = ["task", 1000]
+
             # torques = ["task", 6.0]
             # joint_default = ["task", 1.5]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            dof_acc = ["task", 1000]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
 
