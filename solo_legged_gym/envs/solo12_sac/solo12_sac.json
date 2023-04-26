@@ -45,10 +45,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "hand_tuning",
+        "run_name": "long",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230426_114204"
+        "wandb_group": "cluster_20230426_122205"
       }
     },
     "env_cfg": {
@@ -216,6 +216,10 @@
             "task",
             0.6
           ],
+          "dof_acc": [
+            "task",
+            1500
+          ],
           "feet_slip": [
             "task",
             [
@@ -225,7 +229,7 @@
           ],
           "joint_targets_rate": [
             "task",
-            1.0
+            2.0
           ],
           "lin_vel_x": [
             "task",

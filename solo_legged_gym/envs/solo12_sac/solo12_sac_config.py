@@ -157,7 +157,7 @@ class Solo12SACTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'hand_tuning'
+        run_name = 'long'
 
         # load
         load_run = -1  # -1 = last run
