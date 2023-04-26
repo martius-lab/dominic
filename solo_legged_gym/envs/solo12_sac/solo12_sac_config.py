@@ -125,32 +125,32 @@ class Solo12SACTrainCfg:
     algorithm_name = 'SAC'
 
     class network:
-        policy_hidden_dims = [512, 256, 128]
-        policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        qvalue_hidden_dims = [512, 256, 128]
-        qvalue_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        policy_hidden_dims = [256, 256]
+        policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        qvalue_hidden_dims = [256, 256]
+        qvalue_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params
         buffer_size = 1e6
         target_entropy = 'auto'  # 'auto' = -dim(actions)
-        ent_coef = 'auto_1.0'  # 'auto', 'auto_1e-3'
+        ent_coef = 'auto_0.5'  # 'auto', 'auto_1e-3'
         policy_optimizer_lr = 5e-4
         policy_weight_decay = 1e-2
-        qvalues_optimizer_lr = 5e-4
+        qvalues_optimizer_lr = 1e-3
         qvalues_weight_decay = 1e-2
-        ent_coef_optimizer_lr = 5e-6
+        ent_coef_optimizer_lr = 1e-4
         # learning_rate = 1e-3  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
         mini_batch_size = 256
         num_learning_epochs = 1
-        num_mini_batches = 400
+        num_mini_batches = 200
         gamma = 0.99
         tau = 0.005
         num_critic = 2
 
     class runner:
-        num_steps_per_env = 24  # per iteration
+        num_steps_per_env = 12  # per iteration
         max_iterations = 1000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
