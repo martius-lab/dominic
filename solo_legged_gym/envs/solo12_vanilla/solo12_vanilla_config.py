@@ -91,7 +91,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_xy = ["task", 3.0]
 
             joint_targets_rate = ["task", 1.0]
-            stand_still = ["task", 1.0]
+            stand_still = ["task", 0.5]
             feet_slip = ["task", [0.03, 0.1]]
             dof_acc = ["task", 1000]
 

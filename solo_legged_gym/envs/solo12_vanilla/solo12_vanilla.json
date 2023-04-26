@@ -46,7 +46,7 @@
         "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230426_144103"
+        "wandb_group": "cluster_20230426_145628"
       }
     },
     "env_cfg": {
@@ -245,7 +245,7 @@
           ],
           "stand_still": [
             "task",
-            1.0
+            0.5
           ]
         }
       },
