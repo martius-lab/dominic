@@ -46,7 +46,7 @@
         "run_name": "run_after_hw_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230426_123040"
+        "wandb_group": "cluster_20230426_134330"
       }
     },
     "env_cfg": {
@@ -220,12 +220,12 @@
             "task",
             [
               0.03,
-              0.2
+              0.1
             ]
           ],
           "joint_targets_rate": [
             "task",
-            2.0
+            1.0
           ],
           "lin_vel_x": [
             "task",
