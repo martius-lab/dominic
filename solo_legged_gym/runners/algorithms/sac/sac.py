@@ -66,7 +66,8 @@ class SAC:
         # set up optimizer
         # self.learning_rate = self.a_cfg.learning_rate
         self.policy_optimizer = optim.Adam(self.policy.parameters(),
-                                           lr=self.a_cfg.policy_optimizer_lr)
+                                           lr=self.a_cfg.policy_optimizer_lr,
+                                           weight_decay=self.a_cfg.policy_weight_decay)
         self.qvalues_optimizer = optim.Adam(self.qvalues.parameters(),
                                             lr=self.a_cfg.qvalues_optimizer_lr,
                                             weight_decay=self.a_cfg.qvalues_weight_decay)

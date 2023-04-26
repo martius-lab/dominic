@@ -26,19 +26,11 @@
   "hyperparam_list": [
     {
      "param": ["solo_legged_gym.train_cfg.algorithm.qvalues_optimizer_lr", "solo_legged_gym.train_cfg.algorithm.policy_optimizer_lr"],
-     "values": [[3e-3, 1e-3], [5e-4, 1e-4], [1e-3, 5e-4]]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.gamma",
-     "values": [0.9, 0.95, 0.99]
+     "values": [[5e-4, 1e-3], [5e-4, 5e-4], [1e-4, 5e-4]]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.tau",
      "values": [0.005, 0.01, 0.05]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.num_mini_batches",
-     "values": [200, 500, 1000]
     }
   ]
 }

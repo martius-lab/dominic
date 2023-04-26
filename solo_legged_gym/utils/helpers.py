@@ -122,6 +122,7 @@ def get_load_path(root, load_run=-1, checkpoint=-1):
         runs.sort()
         if 'exported' in runs: runs.remove('exported')
         if 'wandb' in runs: runs.remove('wandb')
+        if 'cluster' in runs: runs.remove('cluster')
         last_run = os.path.join(root, runs[-1])
     except:
         raise ValueError("No runs in this directory: " + root)

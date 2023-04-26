@@ -8,15 +8,16 @@
     "train_cfg": {
       "algorithm": {
         "buffer_size": 1000000.0,
-        "ent_coef": "auto",
-        "ent_coef_optimizer_lr": 0.001,
+        "ent_coef": "auto_1.0",
+        "ent_coef_optimizer_lr": 5e-06,
         "gamma": 0.99,
         "mini_batch_size": 256,
         "num_critic": 2,
         "num_learning_epochs": 1,
-        "num_mini_batches": 50,
+        "num_mini_batches": 400,
         "policy_optimizer_lr": 0.0005,
-        "qvalues_optimizer_lr": 0.001,
+        "policy_weight_decay": 0.01,
+        "qvalues_optimizer_lr": 0.0005,
         "qvalues_weight_decay": 0.01,
         "schedule": "fixed",
         "target_entropy": "auto",
@@ -24,15 +25,17 @@
       },
       "algorithm_name": "SAC",
       "network": {
-        "policy_activation": "relu",
+        "policy_activation": "elu",
         "policy_hidden_dims": [
+          512,
           256,
-          256
+          128
         ],
-        "qvalue_activation": "relu",
+        "qvalue_activation": "elu",
         "qvalue_hidden_dims": [
+          512,
           256,
-          256
+          128
         ]
       },
       "runner": {
@@ -41,11 +44,11 @@
         "load_run": -1,
         "max_iterations": 1000,
         "normalize_observation": true,
-        "num_steps_per_env": 500,
+        "num_steps_per_env": 24,
         "run_name": "hand_tuning",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230425_112926"
+        "wandb_group": "cluster_20230426_114204"
       }
     },
     "env_cfg": {
@@ -135,7 +138,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 100,
+        "num_envs": 4096,
         "num_observations": 48,
         "play": false
       },
@@ -203,7 +206,7 @@
         "terms": {
           "ang_vel_xy": [
             "task",
-            3.0
+            6.0
           ],
           "ang_vel_z": [
             "task",
@@ -220,13 +223,9 @@
               0.1
             ]
           ],
-          "joint_default": [
-            "task",
-            1.5
-          ],
           "joint_targets_rate": [
             "task",
-            0.8
+            1.0
           ],
           "lin_vel_x": [
             "task",
@@ -247,10 +246,6 @@
           "stand_still": [
             "task",
             1.0
-          ],
-          "torques": [
-            "task",
-            6.0
           ]
         }
       },
