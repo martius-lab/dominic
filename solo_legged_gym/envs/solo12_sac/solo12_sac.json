@@ -45,10 +45,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "long",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230426_122205"
+        "wandb_group": "cluster_20230426_174920"
       }
     },
     "env_cfg": {
@@ -206,7 +206,7 @@
         "terms": {
           "ang_vel_xy": [
             "task",
-            6.0
+            3.0
           ],
           "ang_vel_z": [
             "task",
@@ -218,7 +218,7 @@
           ],
           "dof_acc": [
             "task",
-            1500
+            4000
           ],
           "feet_slip": [
             "task",
@@ -249,7 +249,7 @@
           ],
           "stand_still": [
             "task",
-            1.0
+            0.5
           ]
         }
       },

@@ -249,7 +249,7 @@ class Solo12SAC(BaseTask):
                                                      self.command_ranges["ang_vel_yaw"][1], (len(env_ids), 1),
                                                      device=self.device).squeeze(1)
         # clip the small command to zero
-        self.commands[env_ids, :] *= torch.any(self.commands[env_ids, :] >= 0.1, dim=1).unsqueeze(1)
+        self.commands[env_ids, :] *= torch.any(torch.abs(self.commands[env_ids, :]) >= 0.1, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
 

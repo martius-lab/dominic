@@ -88,15 +88,15 @@ class Solo12SACEnvCfg(BaseEnvCfg):
             lin_z = ["task", 0.4]
             lin_vel_z = ["task", 1.0]
             ang_xy = ["task", 0.6]
-            ang_vel_xy = ["task", 6.0]
+            ang_vel_xy = ["task", 3.0]
 
-            joint_targets_rate = ["task", 1.0]
-            stand_still = ["task", 1.0]
+            joint_targets_rate = ["task", 2.0]
+            stand_still = ["task", 0.5]
             feet_slip = ["task", [0.03, 0.1]]
+            dof_acc = ["task", 4000]
             # torques = ["task", 4.0]
             # joint_default = ["task", 3.0]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            # dof_acc = ["task", 1500]
             # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
             # termination = ["termination", None]
@@ -157,7 +157,7 @@ class Solo12SACTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'long'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
