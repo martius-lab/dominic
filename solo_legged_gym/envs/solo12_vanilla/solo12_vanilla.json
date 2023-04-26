@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "run_after_hw_test",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230426_134330"
+        "wandb_group": "cluster_20230426_144103"
       }
     },
     "env_cfg": {
