@@ -64,20 +64,20 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         flip_visual_attachments = False
 
     class domain_rand(BaseEnvCfg.domain_rand):
-        randomize_friction = False
+        randomize_friction = True
         friction_range = [0.5, 1.5]
 
-        randomize_base_mass = False
-        added_mass_range = [-0.5, 0.5]
+        randomize_base_mass = True
+        added_mass_range = [-0.2, 0.2]
 
-        push_robots = False
+        push_robots = True
         push_interval_s = 15
-        max_push_vel_xyz = 0.5
-        max_push_avel_xyz = 0.5
+        max_push_vel_xyz = 0.2
+        max_push_avel_xyz = 0.2
 
         actuator_lag = False
         randomize_actuator_lag = False
-        actuator_lag_steps = 7  # the lag simulated would be actuator_lag_steps * dt * decimation
+        actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt * decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
@@ -85,13 +85,13 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             lin_vel_y = ["task", 0.2]
             ang_vel_z = ["task", 0.4]
 
-            lin_z = ["task", 0.4]
+            lin_z = ["task", 0.1]
             lin_vel_z = ["task", 1.0]
-            ang_xy = ["task", 0.6]
+            ang_xy = ["task", 0.2]
             ang_vel_xy = ["task", 3.0]
 
-            joint_targets_rate = ["task", 1.0]
-            stand_still = ["task", 0.5]
+            joint_targets_rate = ["task", 2.0]
+            stand_still = ["task", 0.1]
             feet_slip = ["task", [0.03, 0.1]]
             dof_acc = ["task", 1000]
 
@@ -107,7 +107,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         base_height_target = 0.25
 
     class observations:
-        add_noise = False
+        add_noise = True
         noise_level = 1.0  # scales other values
         clip_observations = 100.
 
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'baseline'
+        run_name = 'rand'
 
         # load
         load_run = -1  # -1 = last run

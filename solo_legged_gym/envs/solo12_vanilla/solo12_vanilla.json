@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "baseline",
+        "run_name": "rand",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230426_145628"
+        "wandb_group": "cluster_20230427_170441"
       }
     },
     "env_cfg": {
@@ -114,22 +114,22 @@
       },
       "domain_rand": {
         "actuator_lag": false,
-        "actuator_lag_steps": 7,
+        "actuator_lag_steps": 3,
         "added_mass_range": [
-          -0.5,
-          0.5
+          -0.2,
+          0.2
         ],
         "friction_range": [
           0.5,
           1.5
         ],
-        "max_push_avel_xyz": 0.5,
-        "max_push_vel_xyz": 0.5,
+        "max_push_avel_xyz": 0.2,
+        "max_push_vel_xyz": 0.2,
         "push_interval_s": 15,
-        "push_robots": false,
+        "push_robots": true,
         "randomize_actuator_lag": false,
-        "randomize_base_mass": false,
-        "randomize_friction": false
+        "randomize_base_mass": true,
+        "randomize_friction": true
       },
       "env": {
         "debug": false,
@@ -179,7 +179,7 @@
         ]
       },
       "observations": {
-        "add_noise": false,
+        "add_noise": true,
         "clip_observations": 100.0,
         "noise_level": 1.0,
         "noise_scales": {
@@ -210,7 +210,7 @@
           ],
           "ang_xy": [
             "task",
-            0.6
+            0.2
           ],
           "dof_acc": [
             "task",
@@ -225,7 +225,7 @@
           ],
           "joint_targets_rate": [
             "task",
-            1.0
+            2.0
           ],
           "lin_vel_x": [
             "task",
@@ -241,11 +241,11 @@
           ],
           "lin_z": [
             "task",
-            0.4
+            0.1
           ],
           "stand_still": [
             "task",
-            0.5
+            0.1
           ]
         }
       },
