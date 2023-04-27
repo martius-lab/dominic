@@ -8,7 +8,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 48
         num_actions = 12
-        episode_length_s = 10  # episode length in seconds
+        episode_length_s = 20  # episode length in seconds
         play = False
         debug = False
 
@@ -17,7 +17,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = False
+        change_commands = True
         change_interval_s = 10.  # time before command are changed[s]
 
         class ranges:
@@ -65,7 +65,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
 
     class domain_rand(BaseEnvCfg.domain_rand):
         randomize_friction = False
-        friction_range = [0.5, 1.25]
+        friction_range = [0.5, 1.5]
 
         randomize_base_mass = False
         added_mass_range = [-0.5, 0.5]
@@ -90,7 +90,7 @@ class Solo12SACEnvCfg(BaseEnvCfg):
             ang_xy = ["task", 0.6]
             ang_vel_xy = ["task", 3.0]
 
-            joint_targets_rate = ["task", 2.0]
+            joint_targets_rate = ["task", 4.0]
             stand_still = ["task", 0.5]
             feet_slip = ["task", [0.03, 0.1]]
             dof_acc = ["task", 4000]
@@ -125,10 +125,10 @@ class Solo12SACTrainCfg:
     algorithm_name = 'SAC'
 
     class network:
-        policy_hidden_dims = [256, 256]
-        policy_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        qvalue_hidden_dims = [256, 256]
-        qvalue_activation = 'relu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        policy_hidden_dims = [512, 256, 128]
+        policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        qvalue_hidden_dims = [512, 256, 128]
+        qvalue_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params
@@ -139,25 +139,25 @@ class Solo12SACTrainCfg:
         policy_weight_decay = 1e-2
         qvalues_optimizer_lr = 1e-3
         qvalues_weight_decay = 1e-2
-        ent_coef_optimizer_lr = 1e-4
+        ent_coef_optimizer_lr = 1e-5
         # learning_rate = 1e-3  # 5.e-4
         schedule = 'fixed'  # could be adaptive, fixed
         mini_batch_size = 256
         num_learning_epochs = 1
-        num_mini_batches = 200
+        num_mini_batches = 1000
         gamma = 0.99
         tau = 0.005
         num_critic = 2
 
     class runner:
-        num_steps_per_env = 12  # per iteration
+        num_steps_per_env = 24  # per iteration
         max_iterations = 1000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_sac'
-        run_name = 'test'
+        run_name = 'colored'
 
         # load
         load_run = -1  # -1 = last run

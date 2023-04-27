@@ -14,6 +14,7 @@ class SACPolicy(nn.Module):
                  num_actions,
                  hidden_dims=[256, 256, 256],
                  activation='elu',
+                 device='cpu',
                  **kwargs):
         if kwargs:
             print("SACPolicy.__init__ got unexpected arguments, which will be ignored: " + str(

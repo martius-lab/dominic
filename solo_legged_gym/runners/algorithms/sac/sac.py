@@ -40,7 +40,8 @@ class SAC:
         self.policy = SACPolicy(num_obs=self.env.num_obs,
                                 num_actions=self.env.num_actions,
                                 hidden_dims=self.n_cfg.policy_hidden_dims,
-                                activation=self.n_cfg.policy_activation).to(self.device)
+                                activation=self.n_cfg.policy_activation,
+                                device=self.device).to(self.device)
 
         self.qvalues = QValues(num_obs=self.env.num_obs,
                                num_actions=self.env.num_actions,
