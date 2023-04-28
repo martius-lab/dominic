@@ -35,7 +35,7 @@ def plot(args):
     df.command_az.iloc[START:END].plot(ax=axes[1, 2], label='command_az')
     df.base_avel_z.iloc[START:END].plot(ax=axes[1, 2], label='base_avel_z')
 
-    ax = axes[2, 2]
+    ax = axes[2, 0]
     colors = [(1, 1, 1),
               (0.12109375, 0.46484375, 0.703125),
               (0.99609375, 0.49609375, 0.0546875),
@@ -48,10 +48,11 @@ def plot(args):
     ax.set_yticks(np.arange(4))
     ax.set_yticklabels(['contact_FL', 'contact_FR', 'contact_RL', 'contact_RR'])
 
-    df.joint_targets_rate.iloc[START:END].plot(ax=axes[3, 0], label='joint_targets_rate')
-    df.torques.iloc[START:END].plot(ax=axes[3, 1], label='torques')
-    df.dof_vel.iloc[START:END].plot(ax=axes[3, 2], label='dof_vel')
-    df.dof_acc.iloc[START:END].plot(ax=axes[4, 0], label='dof_acc')
+    df.torques.iloc[START:END].plot(ax=axes[3, 0], label='feet_contact_force')
+    df.joint_targets_rate.iloc[START:END].plot(ax=axes[3, 1], label='joint_targets_rate')
+    df.torques.iloc[START:END].plot(ax=axes[3, 2], label='torques')
+    df.dof_vel.iloc[START:END].plot(ax=axes[4, 0], label='dof_vel')
+    df.dof_acc.iloc[START:END].plot(ax=axes[4, 1], label='dof_acc')
 
     for ax in fig.get_axes():
         ax.legend()

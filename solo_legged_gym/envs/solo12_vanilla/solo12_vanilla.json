@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "rand",
+        "run_name": "why",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230427_170441"
+        "wandb_group": "cluster_20230428_093140"
       }
     },
     "env_cfg": {
@@ -113,7 +113,7 @@
         "torque_limits": 2.5
       },
       "domain_rand": {
-        "actuator_lag": false,
+        "actuator_lag": true,
         "actuator_lag_steps": 3,
         "added_mass_range": [
           -0.2,
@@ -202,19 +202,23 @@
         "terms": {
           "ang_vel_xy": [
             "task",
-            3.0
+            1.6
           ],
           "ang_vel_z": [
             "task",
-            0.4
+            0.3
           ],
           "ang_xy": [
             "task",
-            0.2
+            0.4
           ],
           "dof_acc": [
             "task",
-            1000
+            3000
+          ],
+          "dof_vel": [
+            "task",
+            300
           ],
           "feet_slip": [
             "task",
@@ -225,27 +229,31 @@
           ],
           "joint_targets_rate": [
             "task",
-            2.0
+            3.0
           ],
           "lin_vel_x": [
             "task",
-            0.2
+            0.3
           ],
           "lin_vel_y": [
             "task",
-            0.2
+            0.3
           ],
           "lin_vel_z": [
             "task",
-            1.0
+            0.8
           ],
           "lin_z": [
             "task",
-            0.1
+            0.2
           ],
           "stand_still": [
             "task",
             0.1
+          ],
+          "torques": [
+            "task",
+            30.0
           ]
         }
       },

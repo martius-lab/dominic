@@ -75,30 +75,30 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         max_push_vel_xyz = 0.2
         max_push_avel_xyz = 0.2
 
-        actuator_lag = False
+        actuator_lag = True
         randomize_actuator_lag = False
-        actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt * decimation
+        actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = ["task", 0.2]
-            lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.4]
+            lin_vel_x = ["task", 0.3]
+            lin_vel_y = ["task", 0.3]
+            ang_vel_z = ["task", 0.3]
 
-            lin_z = ["task", 0.1]
-            lin_vel_z = ["task", 1.0]
-            ang_xy = ["task", 0.2]
-            ang_vel_xy = ["task", 3.0]
+            lin_z = ["task", 0.2]
+            lin_vel_z = ["task", 0.8]
+            ang_xy = ["task", 0.4]
+            ang_vel_xy = ["task", 1.6]
 
-            joint_targets_rate = ["task", 2.0]
             stand_still = ["task", 0.1]
             feet_slip = ["task", [0.03, 0.1]]
-            dof_acc = ["task", 1000]
-
-            # torques = ["task", 6.0]
+            dof_acc = ["task", 3000]
+            dof_vel = ["task", 300]
+            torques = ["task", 30.0]
+            joint_targets_rate = ["task", 3.0]
+            # feet_contact_force = ["task", 3.0]
             # joint_default = ["task", 1.5]
             # feet_slip_v = ["task", [0.03, 3.0]]
-            # dof_vel = ["task", 80]
             # feet_air_time = ["feet", None]
 
         class scales:
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'rand'
+        run_name = 'why'
 
         # load
         load_run = -1  # -1 = last run

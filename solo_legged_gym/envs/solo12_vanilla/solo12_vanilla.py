@@ -78,9 +78,11 @@ class Solo12Vanilla(BaseTask):
                                                dtype=torch.float, device=self.device, requires_grad=False)
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
                                                 size=[self.num_envs], device=self.device)
+        self.feet_contact_force = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
+                                              device=self.device, requires_grad=False)
 
-        self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
-                                         device=self.device, requires_grad=False)
+        # self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
+        #                                  device=self.device, requires_grad=False)
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device,
                                          requires_grad=False)
 
@@ -102,7 +104,7 @@ class Solo12Vanilla(BaseTask):
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
-        self.feet_air_time[env_ids] = 0.
+        # self.feet_air_time[env_ids] = 0.
 
         self.episode_length_buf[env_ids] = 0
 
@@ -229,7 +231,8 @@ class Solo12Vanilla(BaseTask):
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
-        self.ee_contact = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) > 0.2
+        self.feet_contact_force = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1)
+        self.ee_contact = self.feet_contact_force > 0.2
         self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
         self.ee_vel_global = self.rigid_body_state[:, self.feet_indices, 7:10]
         ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
@@ -434,11 +437,16 @@ class Solo12Vanilla(BaseTask):
         return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
     def _reward_stand_still(self, sigma):
-        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (torch.norm(self.commands, dim=1) < 0.1)
+        not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (
+                    torch.norm(self.commands, dim=1) < 0.1)
         return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_torques(self, sigma):
         return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+
+    def _reward_feet_contact_force(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.feet_contact_force, p=2, dim=1) / sigma))
+
     #
     # def _reward_feet_air_time(self, sigma):
     #     # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
