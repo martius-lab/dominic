@@ -75,15 +75,15 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
 
-        actuator_lag = True
-        randomize_actuator_lag = True
+        actuator_lag = False
+        randomize_actuator_lag = False
         actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
             lin_vel_x = ["task", 0.2]
             lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.4]
+            ang_vel_z = ["task", 0.3]
 
             lin_z = ["task", 0.4]
             lin_vel_z = ["task", 1.0]
@@ -91,7 +91,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_xy = ["task", 3.0]
 
             stand_still = ["task", 0.2]
-            feet_slip = ["task", [0.03, 0.2]]
+            feet_slip = ["task", [0.04, 0.2]]
             # dof_acc = ["task", 2000.0]
             torques = ["task", 6.0]
             joint_targets_rate = ["task", 0.8]
@@ -112,11 +112,11 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         clip_observations = 100.
 
         class noise_scales:
-            dof_pos = 0.01
+            dof_pos = 0.05
             dof_vel = 0.1
             lin_vel = 0.2
-            ang_vel = 0.05
-            gravity = 0.05
+            ang_vel = 0.2
+            gravity = 0.1
 
 
 class Solo12VanillaTrainCfg:
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'before'
+        run_name = 'before_tuned'
 
         # load
         load_run = -1  # -1 = last run
