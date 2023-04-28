@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "why",
+        "run_name": "giveup",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230428_093140"
+        "wandb_group": "cluster_20230428_112606"
       }
     },
     "env_cfg": {
@@ -70,8 +70,7 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER",
-          "UPPER"
+          "SHOULDER"
         ],
         "thickness": 0.01
       },
@@ -113,18 +112,18 @@
         "torque_limits": 2.5
       },
       "domain_rand": {
-        "actuator_lag": true,
+        "actuator_lag": false,
         "actuator_lag_steps": 3,
         "added_mass_range": [
-          -0.2,
-          0.2
+          -0.5,
+          0.5
         ],
         "friction_range": [
           0.5,
           1.5
         ],
-        "max_push_avel_xyz": 0.2,
-        "max_push_vel_xyz": 0.2,
+        "max_push_avel_xyz": 0.5,
+        "max_push_vel_xyz": 0.5,
         "push_interval_s": 15,
         "push_robots": true,
         "randomize_actuator_lag": false,
@@ -202,58 +201,54 @@
         "terms": {
           "ang_vel_xy": [
             "task",
-            1.6
+            3.0
           ],
           "ang_vel_z": [
             "task",
-            0.3
+            0.4
           ],
           "ang_xy": [
             "task",
-            0.4
+            0.6
           ],
           "dof_acc": [
             "task",
-            3000
-          ],
-          "dof_vel": [
-            "task",
-            300
+            1500.0
           ],
           "feet_slip": [
             "task",
             [
               0.03,
-              0.1
+              0.2
             ]
           ],
           "joint_targets_rate": [
             "task",
-            3.0
+            0.8
           ],
           "lin_vel_x": [
             "task",
-            0.3
+            0.2
           ],
           "lin_vel_y": [
             "task",
-            0.3
+            0.2
           ],
           "lin_vel_z": [
             "task",
-            0.8
+            1.0
           ],
           "lin_z": [
             "task",
-            0.2
+            0.4
           ],
           "stand_still": [
             "task",
-            0.1
+            1.0
           ],
           "torques": [
             "task",
-            30.0
+            6.0
           ]
         }
       },

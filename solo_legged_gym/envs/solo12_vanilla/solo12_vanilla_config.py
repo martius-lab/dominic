@@ -59,7 +59,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        terminate_after_contacts_on = ["base", "SHOULDER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -68,34 +68,34 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         friction_range = [0.5, 1.5]
 
         randomize_base_mass = True
-        added_mass_range = [-0.2, 0.2]
+        added_mass_range = [-0.5, 0.5]
 
         push_robots = True
         push_interval_s = 15
-        max_push_vel_xyz = 0.2
-        max_push_avel_xyz = 0.2
+        max_push_vel_xyz = 0.5
+        max_push_avel_xyz = 0.5
 
-        actuator_lag = True
+        actuator_lag = False
         randomize_actuator_lag = False
         actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = ["task", 0.3]
-            lin_vel_y = ["task", 0.3]
-            ang_vel_z = ["task", 0.3]
+            lin_vel_x = ["task", 0.2]
+            lin_vel_y = ["task", 0.2]
+            ang_vel_z = ["task", 0.4]
 
-            lin_z = ["task", 0.2]
-            lin_vel_z = ["task", 0.8]
-            ang_xy = ["task", 0.4]
-            ang_vel_xy = ["task", 1.6]
+            lin_z = ["task", 0.4]
+            lin_vel_z = ["task", 1.0]
+            ang_xy = ["task", 0.6]
+            ang_vel_xy = ["task", 3.0]
 
-            stand_still = ["task", 0.1]
-            feet_slip = ["task", [0.03, 0.1]]
-            dof_acc = ["task", 3000]
-            dof_vel = ["task", 300]
-            torques = ["task", 30.0]
-            joint_targets_rate = ["task", 3.0]
+            stand_still = ["task", 1.0]
+            feet_slip = ["task", [0.03, 0.2]]
+            dof_acc = ["task", 1500.0]
+            # dof_vel = ["task", 80.0]
+            torques = ["task", 6.0]
+            joint_targets_rate = ["task", 0.8]
             # feet_contact_force = ["task", 3.0]
             # joint_default = ["task", 1.5]
             # feet_slip_v = ["task", [0.03, 3.0]]
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'why'
+        run_name = 'giveup'
 
         # load
         load_run = -1  # -1 = last run
