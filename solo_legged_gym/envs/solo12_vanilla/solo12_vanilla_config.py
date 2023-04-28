@@ -26,7 +26,7 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
-        pos = [0.0, 0.0, 0.45]  # x,y,z [m]
+        pos = [0.0, 0.0, 0.35]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -75,30 +75,30 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
 
-        actuator_lag = False
-        randomize_actuator_lag = False
+        actuator_lag = True
+        randomize_actuator_lag = True
         actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
             lin_vel_x = ["task", 0.2]
             lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.3]
+            ang_vel_z = ["task", 0.2]
 
-            lin_z = ["task", 0.4]
-            lin_vel_z = ["task", 1.0]
+            lin_z = ["task", 0.2]
+            # lin_vel_z = ["task", 1.0]
             ang_xy = ["task", 0.6]
-            ang_vel_xy = ["task", 3.0]
+            # ang_vel_xy = ["task", 3.0]
 
-            stand_still = ["task", 0.2]
-            feet_slip = ["task", [0.04, 0.2]]
+            stand_still = ["task", 1e-2]
+            feet_slip = ["task", [0.05, 0.1, 0.4]]
+            # feet_slip_v = ["task", [0.04, 0.8]]
             # dof_acc = ["task", 2000.0]
-            torques = ["task", 6.0]
+            # torques = ["task", 6.0]
             joint_targets_rate = ["task", 0.8]
             # dof_vel = ["task", 50.0]
             # feet_contact_force = ["task", 3.0]
-            joint_default = ["task", 1.5]
-            # feet_slip_v = ["task", [0.03, 3.0]]
+            # joint_default = ["task", 1.5]
             # feet_air_time = ["feet", None]
 
         class scales:
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'before_tuned'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
