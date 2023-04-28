@@ -46,7 +46,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230428_214630"
+        "wandb_group": "cluster_20230428_235249"
       }
     },
     "env_cfg": {
@@ -212,7 +212,7 @@
             [
               0.05,
               0.1,
-              0.4
+              0.9
             ]
           ],
           "joint_targets_rate": [
@@ -234,6 +234,10 @@
           "stand_still": [
             "task",
             0.01
+          ],
+          "torques": [
+            "task",
+            10.0
           ]
         }
       },
