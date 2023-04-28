@@ -93,9 +93,9 @@ class Solo12VanillaEnvCfg(BaseEnvCfg):
             stand_still = ["task", 1.0]
             feet_slip = ["task", [0.03, 0.2]]
             dof_acc = ["task", 1500.0]
-            # dof_vel = ["task", 80.0]
             torques = ["task", 6.0]
             joint_targets_rate = ["task", 0.8]
+            # dof_vel = ["task", 100.0]
             # feet_contact_force = ["task", 3.0]
             # joint_default = ["task", 1.5]
             # feet_slip_v = ["task", [0.03, 3.0]]
@@ -152,7 +152,7 @@ class Solo12VanillaTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_vanilla'
-        run_name = 'giveup'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
