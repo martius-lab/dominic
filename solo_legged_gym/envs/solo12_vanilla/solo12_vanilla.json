@@ -43,10 +43,10 @@
         "max_iterations": 1000,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "baseline",
+        "run_name": "before",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230428_115036"
+        "wandb_group": "cluster_20230428_141927"
       }
     },
     "env_cfg": {
@@ -112,7 +112,7 @@
         "torque_limits": 2.5
       },
       "domain_rand": {
-        "actuator_lag": false,
+        "actuator_lag": true,
         "actuator_lag_steps": 3,
         "added_mass_range": [
           -0.5,
@@ -126,7 +126,7 @@
         "max_push_vel_xyz": 0.5,
         "push_interval_s": 15,
         "push_robots": true,
-        "randomize_actuator_lag": false,
+        "randomize_actuator_lag": true,
         "randomize_base_mass": true,
         "randomize_friction": true
       },
@@ -168,7 +168,7 @@
         "pos": [
           0.0,
           0.0,
-          0.35
+          0.45
         ],
         "rot": [
           0.0,
@@ -211,16 +211,16 @@
             "task",
             0.6
           ],
-          "dof_acc": [
-            "task",
-            1500.0
-          ],
           "feet_slip": [
             "task",
             [
               0.03,
               0.2
             ]
+          ],
+          "joint_default": [
+            "task",
+            1.5
           ],
           "joint_targets_rate": [
             "task",
@@ -244,7 +244,7 @@
           ],
           "stand_still": [
             "task",
-            1.0
+            0.2
           ],
           "torques": [
             "task",
