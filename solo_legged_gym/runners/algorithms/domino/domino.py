@@ -15,7 +15,7 @@ from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
 from solo_legged_gym.runners.algorithms.domino.domino_policy import DOMINOPolicy
 from solo_legged_gym.runners.modules.value import Value
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
-from solo_legged_gym.runners.storage.rollout_buffer import RolloutBuffer
+from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuffer
 
 
 class DOMINO:
@@ -38,14 +38,27 @@ class DOMINO:
                                    activation=self.n_cfg.policy_activation,
                                    log_std_init=self.n_cfg.log_std_init).to(self.device)
 
-        self.value = Value(num_obs=self.env.num_obs,
-                           hidden_dims=self.n_cfg.value_hidden_dims,
-                           activation=self.n_cfg.value_activation).to(self.device)
+        self.ext_value = Value(num_obs=self.env.num_obs,
+                               hidden_dims=self.n_cfg.value_hidden_dims,
+                               activation=self.n_cfg.value_activation).to(self.device)
+
+        self.int_value = Value(num_obs=self.env.num_obs,
+                               hidden_dims=self.n_cfg.value_hidden_dims,
+                               activation=self.n_cfg.value_activation).to(self.device)
+
+        # set up Lagrangian multipliers
+        # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
+        self.lagrange = nn.Parameter(torch.zeros(self.env.num_skills - 1), requires_grad=True)
+
+        # set up moving averages
+        self.avg_values = torch.zeros(self.env.num_skills, 1, device=self.device, requires_grad=False)
+        self.avg_features = torch.ones(self.env.num_skills, self.env.num_features, device=self.device,
+                                       requires_grad=False) * (1 / self.env.num_features)
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
-        self.normalize_observation = self.r_cfg.normalize_observation
 
+        self.normalize_observation = self.r_cfg.normalize_observation
         if self.normalize_observation:
             self.obs_normalizer = EmpiricalNormalization(shape=self.env.num_obs,
                                                          until=int(1.0e8)).to(self.device)
@@ -57,13 +70,19 @@ class DOMINO:
                                             num_transitions_per_env=self.num_steps_per_env,
                                             obs_shape=[self.env.num_obs],
                                             actions_shape=[self.env.num_actions],
+                                            features_shape=[self.env.num_features],
                                             device=self.device)
         self.transition = RolloutBuffer.Transition()
 
         # set up optimizer
         self.learning_rate = self.a_cfg.learning_rate
-        self.optimizer = optim.Adam(list(self.policy.parameters()) + list(self.value.parameters()),
+        self.optimizer = optim.Adam(list(self.policy.parameters()) +
+                                    list(self.ext_value.parameters()) +
+                                    list(self.int_value.parameters()),
                                     lr=self.learning_rate)
+
+        self.lagrange_learning_rate = self.a_cfg.lagrange_learning_rate
+        self.lagrange_optimizer = optim.Adam(self.lagrange, lr=self.lagrange_learning_rate)
 
         # Log
         self.log_dir = log_dir
@@ -84,13 +103,17 @@ class DOMINO:
             self.env.episode_length_buf, high=int(self.env.max_episode_length)
         )
 
-        obs = self.env.get_observations().to(self.device)
+        new_obs = self.obs_normalizer(self.env.get_observations().to(self.device))
+        new_skills = self.env.skills.to(self.device)
+
         self.train_mode()  # switch to train mode (for dropout for example)
 
         ep_infos = []
-        rew_buffer = deque(maxlen=100)
+        ext_rew_buffer = deque(maxlen=100)
+        int_rew_buffer = deque(maxlen=100)
         len_buffer = deque(maxlen=100)
-        cur_reward_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
+        cur_ext_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
+        cur_int_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
 
         tot_iter = self.num_learning_iterations
@@ -100,25 +123,34 @@ class DOMINO:
             start = time.time()
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
-                    previous_obs = obs
-                    actions, log_prob = self.policy.act_and_log_prob(previous_obs)
-                    obs, rewards, dones, infos = self.env.step(actions)
-                    obs = self.obs_normalizer(obs)
-                    self.process_env_step(previous_obs, actions, log_prob, rewards, dones, infos)
+                    obs = new_obs
+                    skills = new_skills
+                    # use last obs to get the actions
+                    actions, log_prob = self.policy.act_and_log_prob(obs)
+                    new_obs, new_skills, features, ext_rew, dones, infos = self.env.step(actions)
+                    # features should be part of the outcome of the actions
+                    # TODO: compute int_rew with skills(int) and features (calculate from skills instead of new skills)
+                    self.process_env_step(obs, actions, ext_rew, int_rew, skills, features, log_prob, dones, infos)
+                    # normalize new obs
+                    new_obs = self.obs_normalizer(new_obs)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
                             ep_infos.append(infos['episode'])
-                        cur_reward_sum += rewards
+                        cur_ext_rew_sum += ext_rew
+                        cur_int_rew_sum += int_rew
                         cur_episode_length += 1
                         new_ids = (dones > 0).nonzero(as_tuple=False)
-                        rew_buffer.extend(cur_reward_sum[new_ids][:, 0].cpu().numpy().tolist())
+                        ext_rew_buffer.extend(cur_ext_rew_sum[new_ids][:, 0].cpu().numpy().tolist())
+                        int_rew_buffer.extend(cur_int_rew_sum[new_ids][:, 0].cpu().numpy().tolist())
                         len_buffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
-                        cur_reward_sum[new_ids] = 0
+                        cur_ext_rew_sum[new_ids] = 0
+                        cur_int_rew_sum[new_ids] = 0
                         cur_episode_length[new_ids] = 0
 
-                last_values = self.value.evaluate(obs).detach()
-                self.rollout_buffer.compute_returns(last_values, self.a_cfg.gamma, self.a_cfg.lam)
+                last_ext_values = self.ext_value.evaluate(obs).detach()
+                last_int_values = self.int_value.evaluate(obs).detach()
+                self.rollout_buffer.compute_returns(last_ext_values, last_int_values, self.a_cfg.gamma, self.a_cfg.lam)
             stop = time.time()
             collection_time = stop - start
 
@@ -131,62 +163,91 @@ class DOMINO:
                 self.log(locals())
             if it % self.save_interval == 0:
                 self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
-            if it >= tot_iter - 1:
-                if len(rew_buffer) > 0:
-                    self.avg_score = statistics.mean(rew_buffer)
             ep_infos.clear()
 
         self.current_learning_iteration += self.num_learning_iterations
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)))
-        return self.avg_score
+        # score not implemented yet
+        return 0
 
-    def process_env_step(self, obs, actions, log_prob, rewards, dones, infos):
+    def process_env_step(self, obs, actions, ext_rew, int_rew, skills, features, log_prob, dones, infos):
+        self.transition.observations = obs
+
         self.transition.actions = actions.detach()
         self.transition.actions_log_prob = log_prob.detach()
         self.transition.action_mean = self.policy.action_mean.detach()
         self.transition.action_sigma = self.policy.action_std.detach()
-        self.transition.values = self.value.evaluate(obs).detach()
-        self.transition.observations = obs
-        self.transition.rewards = rewards.clone()
+
+        self.transition.ext_rew = ext_rew.clone()
+        self.transition.ext_rew += self.a_cfg.gamma * torch.squeeze(
+            self.transition.ext_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)  # bootstrap for timeouts
+
+        self.transition.int_rew = int_rew.clone()
+        self.transition.int_rew += self.a_cfg.gamma * torch.squeeze(
+            self.transition.int_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)  # bootstrap for timeouts
+
+        self.transition.ext_values = self.ext_value.evaluate(obs).detach()
+        self.transition.int_values = self.int_value.evaluate(obs).detach()
+
         self.transition.dones = dones
-        self.transition.rewards += self.a_cfg.gamma * torch.squeeze(
-            self.transition.values * infos['time_outs'].unsqueeze(1).to(self.device), 1)
+        self.transition.skills = skills
+        self.transition.features = features
+
         self.rollout_buffer.add_transitions(self.transition)
         self.transition.clear()
 
+    def get_lagrange_coeff(self, skills):
+        lagrange_coeff = torch.zeros_like(skills)
+        lagrange_coeff[skills > 0] = self.lagrange[skills[skills > 0] - 1]
+        lagrange_coeff = torch.sigmoid(lagrange_coeff)
+        lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
+        return lagrange_coeff
+
     def update(self):
         mean_value_loss = 0
+        mean_ext_value_loss = 0
+        mean_int_value_loss = 0
         mean_surrogate_loss = 0
+        mean_lagrange_loss = 0
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
-        for (
-                obs_batch,
-                actions_batch,
-                target_values_batch,
-                advantages_batch,
-                returns_batch,
-                old_actions_log_prob_batch,
-                old_mu_batch,
-                old_sigma_batch,
-        ) in generator:
+        for (obs,
+             actions,
+             target_ext_values,
+             target_int_values,
+             ext_advantages,
+             int_advantages,
+             ext_returns,
+             int_returns,
+             old_actions_log_prob,
+             old_mu,
+             old_sigma,
+             skills,
+             features,
+             ) in generator:
 
             # using the current policy
-            _, _ = self.policy.act_and_log_prob(obs_batch)  # update the distribution
-            actions_log_prob_batch = self.policy.distribution.log_prob(actions_batch)
-            value_batch = self.value.evaluate(obs_batch)
+            _, _ = self.policy.act_and_log_prob(obs)  # update the distribution
+            actions_log_prob_batch = self.policy.distribution.log_prob(actions)
+            ext_value = self.ext_value.evaluate(obs)
+            int_value = self.int_value.evaluate(obs)
             mu_batch = self.policy.action_mean
             sigma_batch = self.policy.action_std
             entropy_batch = self.policy.entropy
+
+            # combine advantages
+            lagrange_coeff = self.get_lagrange_coeff(skills)
+            advantages = lagrange_coeff * ext_advantages + (1 - lagrange_coeff) * int_advantages
 
             # KL
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
                 with torch.inference_mode():
                     kl = torch.sum(
-                        torch.log(sigma_batch / old_sigma_batch + 1.0e-5)
-                        + (torch.square(old_sigma_batch) + torch.square(old_mu_batch - mu_batch))
+                        torch.log(sigma_batch / old_sigma + 1.0e-5)
+                        + (torch.square(old_sigma) + torch.square(old_mu - mu_batch))
                         / (2.0 * torch.square(sigma_batch))
                         - 0.5,
-                        axis=-1,
+                        dim=-1,
                     )
                     kl_mean = torch.mean(kl)
 
@@ -199,41 +260,65 @@ class DOMINO:
                         param_group["lr"] = self.learning_rate
 
             # Surrogate loss
-            ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob_batch))
-            surrogate = -torch.squeeze(advantages_batch) * ratio
-            surrogate_clipped = -torch.squeeze(advantages_batch) * torch.clamp(
+            ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob))
+            surrogate = -torch.squeeze(advantages) * ratio
+            surrogate_clipped = -torch.squeeze(advantages) * torch.clamp(
                 ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
             )
             surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
 
             # Value function loss
             if self.a_cfg.use_clipped_value_loss:
-                value_clipped = target_values_batch + (value_batch - target_values_batch).clamp(
+                ext_value_clipped = target_ext_values + (ext_value - target_ext_values).clamp(
                     -self.a_cfg.clip_param, self.a_cfg.clip_param
                 )
-                value_losses = (value_batch - returns_batch).pow(2)
-                value_losses_clipped = (value_clipped - returns_batch).pow(2)
-                value_loss = torch.max(value_losses, value_losses_clipped).mean()
+                int_value_clipped = target_int_values + (int_value - target_int_values).clamp(
+                    -self.a_cfg.clip_param, self.a_cfg.clip_param
+                )
+                ext_value_loss = torch.max((ext_value - ext_returns).pow(2),
+                                           (ext_value_clipped - ext_returns).pow(2)).mean()
+                int_value_loss = torch.max((int_value - int_returns).pow(2),
+                                           (int_value_clipped - int_returns).pow(2)).mean()
             else:
-                value_loss = (returns_batch - value_batch).pow(2).mean()
+                ext_value_loss = (ext_returns - ext_value).pow(2).mean()
+                int_value_loss = (int_returns - int_value).pow(2).mean()
 
-            loss = surrogate_loss + \
-                   self.a_cfg.value_loss_coef * value_loss - \
-                   self.a_cfg.entropy_coef * entropy_batch.mean()
+            value_loss = ext_value_loss + int_value_loss
+
+            weighted_loss = surrogate_loss + \
+                            self.a_cfg.value_loss_coef * value_loss - \
+                            self.a_cfg.entropy_coef * entropy_batch.mean()
 
             # Gradient step
             self.optimizer.zero_grad()
-            loss.backward()
-            nn.utils.clip_grad_norm_(list(self.policy.parameters()) + list(self.value.parameters()),
+            weighted_loss.backward()
+            nn.utils.clip_grad_norm_(list(self.policy.parameters()) +
+                                     list(self.ext_value.parameters()) +
+                                     list(self.int_value.parameters()),
                                      self.a_cfg.max_grad_norm)
             self.optimizer.step()
 
             mean_value_loss += value_loss.item()
+            mean_ext_value_loss += ext_value_loss.item()
+            mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
+
+            # Lagrange loss
+            lagrange_loss = torch.sum(torch.sigmoid(self.lagrange) *
+                                      (self.avg_values[1:] - self.a_cfg.alpha * self.avg_values[0]), dim=-1)
+            lagrange_loss.backward()
+            self.lagrange_optimizer.step()
+            mean_lagrange_loss += lagrange_loss
+
+            # update moving average
+            # TODO: what exactly are we averaging?
 
         num_updates = self.a_cfg.num_learning_epochs * self.a_cfg.num_mini_batches
         mean_value_loss /= num_updates
+        mean_ext_value_loss /= num_updates
+        mean_int_value_loss /= num_updates
         mean_surrogate_loss /= num_updates
+        mean_lagrange_loss /= num_updates
         self.rollout_buffer.clear()
 
         return mean_value_loss, mean_surrogate_loss
@@ -267,13 +352,14 @@ class DOMINO:
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
-        if len(locs['rew_buffer']) > 0:
-            self.writer.add_scalar('Train/mean_reward', statistics.mean(locs['rew_buffer']), locs['it'])
+        if len(locs['len_buffer']) > 0:
+            self.writer.add_scalar('Train/mean_extrinsic_reward', statistics.mean(locs['ext_rew_buffer']), locs['it'])
+            self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']), locs['it'])
 
         str = f" \033[1m Learning iteration {locs['it']}/{self.current_learning_iteration + self.num_learning_iterations} \033[0m "
 
-        if len(locs['rew_buffer']) > 0:
+        if len(locs['len_buffer']) > 0:
             log_string = (f"""{'#' * width}\n"""
                           f"""{str.center(width, ' ')}\n\n"""
                           f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
@@ -281,7 +367,8 @@ class DOMINO:
                           f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
                           f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
-                          f"""{'Mean reward:':>{pad}} {statistics.mean(locs['rew_buffer']):.2f}\n"""
+                          f"""{'Mean extrinsic reward:':>{pad}} {statistics.mean(locs['ext_rew_buffer']):.2f}\n"""
+                          f"""{'Mean intrinsic reward:':>{pad}} {statistics.mean(locs['int_rew_buffer']):.2f}\n"""
                           f"""{'Mean episode length:':>{pad}} {statistics.mean(locs['len_buffer']):.2f}\n""")
         else:
             log_string = (f"""{'#' * width}\n"""
@@ -304,7 +391,8 @@ class DOMINO:
     def save(self, path, infos=None):
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
-            "value_state_dict": self.value.state_dict(),
+            "extrinsic_value_state_dict": self.ext_value.state_dict(),
+            "intrinsic_value_state_dict": self.int_value.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "iter": self.current_learning_iteration,
             "infos": infos,
@@ -316,7 +404,8 @@ class DOMINO:
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
-        self.value.load_state_dict(loaded_dict["value_state_dict"])
+        self.ext_value.load_state_dict(loaded_dict["extrinsic_value_state_dict"])
+        self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
         if load_optimizer:
@@ -337,13 +426,15 @@ class DOMINO:
 
     def train_mode(self):
         self.policy.train()
-        self.value.train()
+        self.ext_value.train()
+        self.int_value.train()
         if self.normalize_observation:
             self.obs_normalizer.train()
 
     def eval_mode(self):
         self.policy.eval()
-        self.value.eval()
+        self.ext_value.eval()
+        self.int_value.eval()
         if self.normalize_observation:
             self.obs_normalizer.eval()
 

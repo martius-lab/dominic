@@ -16,7 +16,7 @@ from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
 from solo_legged_gym.runners.algorithms.ppo.ppo_policy import PPOPolicy
 from solo_legged_gym.runners.modules.value import Value
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
-from solo_legged_gym.runners.storage.rollout_buffer import RolloutBuffer
+from solo_legged_gym.runners.algorithms.ppo.rollout_buffer import RolloutBuffer
 
 
 class PPO:

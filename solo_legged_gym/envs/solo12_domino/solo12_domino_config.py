@@ -6,8 +6,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 48
+        num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands
         num_actions = 12
+        num_features = 33
         episode_length_s = 20  # episode length in seconds
         play = False
         debug = False
@@ -17,8 +18,12 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = True
-        change_interval_s = 10.  # time before command are changed[s]
+        change_commands = False
+        change_commands_interval_s = 10.  # time before command are changed[s]
+
+        num_skills = 5  # latent space
+        change_skills = False
+        change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
@@ -64,18 +69,18 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         flip_visual_attachments = False
 
     class domain_rand(BaseEnvCfg.domain_rand):
-        randomize_friction = True
+        randomize_friction = False
         friction_range = [0.5, 1.5]
 
-        randomize_base_mass = True
+        randomize_base_mass = False
         added_mass_range = [-0.5, 0.5]
 
-        push_robots = True
+        push_robots = False
         push_interval_s = 15
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
 
-        actuator_lag = True
+        actuator_lag = False
         randomize_actuator_lag = True
         actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
@@ -107,9 +112,10 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         base_height_target = 0.25
 
     class observations:
-        add_noise = True
+        clip_obs = False
+        clip_limit = 100.
+        add_noise = False
         noise_level = 1.0  # scales other values
-        clip_observations = 100.
 
         class noise_scales:
             dof_pos = 0.05
@@ -139,8 +145,10 @@ class Solo12DOMINOTrainCfg:
         num_mini_batches = 4  # mini batch size = num_envs * nsteps / nminibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
-        gamma = 0.99
-        lam = 0.95
+        lagrange_learning_rate = 1.e-3
+        alpha = 0.9  # optimality ratio
+        gamma = 0.99  # discount factor
+        lam = 0.95  # GAE coeff
         desired_kl = 0.01
         max_grad_norm = 1.
 

@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as func
 import numpy as np
 from isaacgym import gymtorch
 from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz
@@ -10,7 +11,7 @@ from solo_legged_gym.utils import class_to_dict, get_quat_yaw
 class Solo12DOMINO(BaseTask):
     def __init__(self, cfg, sim_params, physics_engine, sim_device, headless):
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
-
+        self.num_commands = self.cfg.commands.num_commands
         self.command_ranges = class_to_dict(self.cfg.commands.ranges)
         self.command_max = torch.norm(torch.Tensor([
             np.max([np.abs(self.command_ranges["lin_vel_x"][0]), np.abs(self.command_ranges["lin_vel_x"][1])]),
@@ -18,6 +19,9 @@ class Solo12DOMINO(BaseTask):
             np.max([np.abs(self.command_ranges["ang_vel_yaw"][0]), np.abs(self.command_ranges["ang_vel_yaw"][1])])
         ]), p=2).item()
         self.command_mag = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
+
+        self.num_skills = self.cfg.commands.num_skills
+        self.skills = torch.zeros(self.num_envs, 1, dtype=torch.int8, device=self.device, requires_grad=False)
 
         self.add_noise = self.cfg.observations.add_noise
         if self.add_noise:
@@ -27,12 +31,19 @@ class Solo12DOMINO(BaseTask):
             self.push_interval = np.ceil(self.cfg.domain_rand.push_interval_s / self.dt)
         self.change_commands = self.cfg.commands.change_commands
         if self.change_commands:
-            self.change_interval = np.ceil(self.cfg.commands.change_interval_s / self.dt)
+            self.change_commands_interval = np.ceil(self.cfg.commands.change_commands_interval_s / self.dt)
+        self.change_skills = self.cfg.commands.change_skills
+        if self.change_skills:
+            self.change_skills_interval = np.ceil(self.cfg.commands.change_skills_intervals_s / self.dt)
+
         self._set_default_dof_pos()
         self._prepare_reward()
 
     def _init_buffers(self):
         super()._init_buffers()
+        self.num_features = self.cfg.env.num_features
+        self.feature_buf = torch.zeros(self.num_envs, self.num_features, device=self.device, dtype=torch.float)
+
         self.HAA_indices = torch.tensor(
             [i for i in range(self.num_dof) if "HAA" not in self.dof_names[i]],
             device=self.device,
@@ -81,8 +92,6 @@ class Solo12DOMINO(BaseTask):
         self.feet_contact_force = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
                                               device=self.device, requires_grad=False)
 
-        # self.feet_air_time = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
-        #                                  device=self.device, requires_grad=False)
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device,
                                          requires_grad=False)
 
@@ -94,6 +103,7 @@ class Solo12DOMINO(BaseTask):
         self._reset_dofs(env_ids)
         self._reset_root_states(env_ids)
         self._resample_commands(env_ids)
+        self._resample_skills(env_ids)
         self._refresh_quantities()
 
         # reset buffers
@@ -104,7 +114,6 @@ class Solo12DOMINO(BaseTask):
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
-        # self.feet_air_time[env_ids] = 0.
 
         self.episode_length_buf[env_ids] = 0
 
@@ -127,7 +136,10 @@ class Solo12DOMINO(BaseTask):
     def reset(self):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
-        _, _, _, _ = self.step(torch.zeros(self.num_envs, self.num_actions, device=self.device, requires_grad=False))
+        _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
+                                                 self.num_actions,
+                                                 device=self.device,
+                                                 requires_grad=False))
 
     def pre_physics_step(self, actions):
         self.actions = actions
@@ -154,7 +166,8 @@ class Solo12DOMINO(BaseTask):
                 self.gym.fetch_results(self.sim, True)
             self.gym.refresh_dof_state_tensor(self.sim)
         self.post_physics_step()
-        return self.obs_buf, self.rew_buf, self.reset_buf, self.extras
+        # the skills are separated from the obs because we do not want to normalize it.
+        return self.obs_buf, self.skills, self.feature_buf, self.rew_buf, self.reset_buf, self.extras
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -170,9 +183,14 @@ class Solo12DOMINO(BaseTask):
         self.compute_reward()
 
         if self.change_commands:
-            env_ids_change_commands = (self.episode_length_buf % self.change_interval == 0).nonzero(
+            env_ids_change_commands = (self.episode_length_buf % self.change_commands_interval == 0).nonzero(
                 as_tuple=False).flatten()
             self._resample_commands(env_ids_change_commands)
+
+        if self.change_skills:
+            env_ids_change_skills = (self.episode_length_buf % self.change_skills_interval == 0).nonzero(
+                as_tuple=False).flatten()
+            self._resample_skills(env_ids_change_skills)
 
         if self.push_robots and (self.common_step_counter % self.push_interval == 0):
             self._push_robots()
@@ -181,14 +199,12 @@ class Solo12DOMINO(BaseTask):
         self.reset_idx(env_ids_reset)
 
         self.compute_observations()
+        self.compute_features()
 
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
         self.last_joint_targets[:] = self.joint_targets[:]
         self.last_ee_global[:] = self.ee_global[:]
-
-        clip_obs = self.cfg.observations.clip_observations
-        self.obs_buf = torch.clip(self.obs_buf, -clip_obs, clip_obs)
 
     def _check_termination(self):
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1.,
@@ -197,21 +213,32 @@ class Solo12DOMINO(BaseTask):
         self.reset_buf |= self.time_out_buf
 
     def compute_observations(self):
+        encoded_skills = 2 * (0.5 - func.one_hot(self.skills, num_classes=self.num_skills))
         self.obs_buf = torch.cat((self.base_lin_vel,  # 3
                                   self.base_ang_vel,  # 3
                                   (self.dof_pos - self.default_dof_pos),  # 12
                                   self.dof_vel,  # 12
                                   self.projected_gravity,  # 3
-                                  self.actions,  # 12
-                                  self.commands,  # 3
+                                  self.actions,
+                                  self.commands,
+                                  encoded_skills,
                                   ), dim=-1)
         # add noise if needed
         if self.add_noise:
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
 
         # clip the observation if needed
-        clip_obs = self.cfg.observations.clip_observations
-        self.obs_buf = torch.clip(self.obs_buf, -clip_obs, clip_obs)
+        if self.cfg.observations.clip_observations:
+            self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
+
+    def compute_features(self):
+        self.feature_buf = torch.cat((self.base_lin_vel,  # 3
+                                      self.base_ang_vel,  # 3
+                                      (self.dof_pos - self.default_dof_pos),  # 12
+                                      self.dof_vel,  # 12
+                                      self.projected_gravity,  # 3
+                                      ), dim=-1)
+        # no noise added, no clipping
 
     def _get_noise_scale_vec(self):
         noise_vec = torch.zeros_like(self.obs_buf[0])
@@ -222,8 +249,6 @@ class Solo12DOMINO(BaseTask):
         noise_vec[6:18] = noise_scales.dof_pos
         noise_vec[18:30] = noise_scales.dof_vel
         noise_vec[30:33] = noise_scales.gravity
-        noise_vec[33:45] = 0.  # previous actions
-        noise_vec[45:48] = 0.  # commands
         return noise_vec * noise_level
 
     def _refresh_quantities(self):
@@ -257,6 +282,12 @@ class Solo12DOMINO(BaseTask):
         self.commands[env_ids, :] *= torch.any(torch.abs(self.commands[env_ids, :]) >= 0.1, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
+
+    def _resample_skills(self, env_ids):
+        self.skills = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
+
+        if self.cfg.env.play:
+            self.skills[env_ids, :] = 0
 
     def _compute_torques(self, joint_targets):
         # pd controller
@@ -439,7 +470,7 @@ class Solo12DOMINO(BaseTask):
 
     def _reward_stand_still(self, sigma):
         not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (
-                    torch.norm(self.commands, dim=1) < 0.1)
+                torch.norm(self.commands, dim=1) < 0.1)
         return torch.exp(-torch.square(not_stand / sigma))
 
     def _reward_torques(self, sigma):
@@ -447,16 +478,3 @@ class Solo12DOMINO(BaseTask):
 
     def _reward_feet_contact_force(self, sigma):
         return torch.exp(-torch.square(torch.norm(self.feet_contact_force, p=2, dim=1) / sigma))
-
-    #
-    # def _reward_feet_air_time(self, sigma):
-    #     # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
-    #     contact = self.contact_forces[:, self.feet_indices, 2] > 1.
-    #     contact_filter = torch.logical_or(contact, self.last_contacts)
-    #     self.last_contacts = contact
-    #     first_contact = (self.feet_air_time > 0.) * contact_filter
-    #     self.feet_air_time += self.dt
-    #     rew_airTime = torch.sum((self.feet_air_time - 0.5) * first_contact, dim=1) # reward only on first contact with the ground
-    #     rew_airTime *= torch.norm(self.commands[:, :2], dim=1) > 0.1  # no reward for zero command
-    #     self.feet_air_time *= ~contact_filter  # if in contact, reset to zero
-    #     return rew_airTime
