@@ -48,6 +48,7 @@ def plot(args):
     ax.set_yticks(np.arange(4))
     ax.set_yticklabels(['contact_FL', 'contact_FR', 'contact_RL', 'contact_RR'])
 
+    df.skill.iloc[START:END].plot(ax=axes[2, 1], label='skills')
     df.torques.iloc[START:END].plot(ax=axes[3, 0], label='feet_contact_force')
     df.joint_targets_rate.iloc[START:END].plot(ax=axes[3, 1], label='joint_targets_rate')
     df.torques.iloc[START:END].plot(ax=axes[3, 2], label='torques')

@@ -12,7 +12,7 @@ import csv
 
 EXPORT_POLICY = True
 LOG_DATA = True
-REAL_TIME = True
+REAL_TIME = False
 np.set_printoptions(precision=2)
 
 
@@ -88,8 +88,17 @@ class keyboard_play:
             "reset command": "x",
             "reset robot": "r",
         }
+        self.skill_control = {}
+        for i in range(self.env.num_skills):
+            key = "skill " + str(i)
+            value = str(i)
+            self.skill_control[key] = value
 
         for action, key in self.keyboard_control.items():
+            key_enum = getattr(gymapi.KeyboardInput, f"KEY_{key.upper()}")
+            self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
+
+        for action, key in self.skill_control.items():
             key_enum = getattr(gymapi.KeyboardInput, f"KEY_{key.upper()}")
             self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
 
@@ -103,7 +112,7 @@ class keyboard_play:
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
-        self.obs, _, _, _ = self.env.step(self.policy(self.obs.detach()).detach())
+        self.obs, _, _, _, _, _ = self.env.step(self.policy(self.obs.detach()).detach())
         self.update_keyboard_command()
         if LOG_DATA:
             self.log_data()
@@ -120,6 +129,7 @@ class keyboard_play:
                   'base_vel_x', 'base_vel_y', 'base_vel_z',
                   'base_avel_x', 'base_avel_y', 'base_avel_z',
                   'contact_FL', 'contact_FR', 'contact_RL', 'contact_RR',
+                  'skill',
                   'feet_contact_force',
                   'joint_targets_rate', 'torques', 'dof_vel', 'dof_acc'
                   ]
@@ -135,6 +145,7 @@ class keyboard_play:
         data.extend(self.env.base_lin_vel[0, :].tolist())
         data.extend(self.env.base_ang_vel[0, :].tolist())
         data.extend(map(lambda x: 1 if x else 0, self.env.ee_contact[0, :].tolist()))
+        data.append(self.env.skills[0].item())
         data.append(torch.norm(self.env.feet_contact_force[0, :], p=2).item())
         data.append(self.env.joint_targets_rate[0].item())
         data.append(torch.norm(self.env.torques[0, :], p=2).item())
@@ -165,6 +176,8 @@ class keyboard_play:
                 self.env.commands[:, 2] += 0.1
             elif event.action == "e" and event.value > 0:
                 self.env.commands[:, 2] -= 0.1
+            elif event.action in list(self.skill_control.values()) and event.value > 0:
+                self.env.skills[:] = int(event.action)
 
             if event.value > 0 and event.action in list(self.keyboard_control.values()):
                 self.env.commands = torch.round(self.env.commands * 10) / 10
@@ -172,6 +185,8 @@ class keyboard_play:
                 print(list(self.keyboard_control.keys())[list(self.keyboard_control.values()).index(event.action)] +
                       ", now the command is " +
                       np.array2string(self.env.commands[0, :].cpu().detach().numpy().astype(float)))
+            if event.value > 0 and event.action in list(self.skill_control.values()):
+                print(list(self.skill_control.keys())[list(self.skill_control.values()).index(event.action)])
 
 
 if __name__ == "__main__":
