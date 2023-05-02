@@ -16,7 +16,7 @@
     "forbidden_hostnames": []
   },
   "fixed_params": {
-    "__import_promise__": "solo_legged_gym/envs/solo12_sac/solo12_sac.json"
+    "__import_promise__": "solo_legged_gym/envs/solo12_domino/solo12_domino.json"
   },
 
   "remove_jobs_dir": false,
