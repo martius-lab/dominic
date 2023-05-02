@@ -54,7 +54,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230502_154652"
+        "wandb_group": "cluster_20230502_161457"
       }
     },
     "env_cfg": {
