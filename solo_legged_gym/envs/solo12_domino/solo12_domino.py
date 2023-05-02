@@ -232,8 +232,11 @@ class Solo12DOMINO(BaseTask):
             self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
 
     def compute_features(self):
-        self.feature_buf = torch.cat(((self.dof_pos - self.default_dof_pos),  # 12
+        self.feature_buf = torch.cat((self.base_lin_vel,  # 3
+                                      self.base_ang_vel,  # 3
+                                      (self.dof_pos - self.default_dof_pos),  # 12
                                       self.dof_vel,  # 12
+                                      self.projected_gravity,  # 3
                                       ), dim=-1)
         # no noise added, no clipping
 

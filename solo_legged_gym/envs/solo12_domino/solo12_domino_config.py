@@ -8,7 +8,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands
         num_actions = 12
-        num_features = 24
+        num_features = 33
         episode_length_s = 20  # episode length in seconds
         play = False
         debug = False
@@ -142,10 +142,10 @@ class Solo12DOMINOTrainCfg:
         clip_param = 0.2
         entropy_coef = 0.01
         num_learning_epochs = 5
-        num_mini_batches = 4  # mini batch size = num_envs * nsteps / nminibatches
+        num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
-        lagrange_learning_rate = 1.e-3
+        lagrange_learning_rate = 1.e-4
         alpha = 0.9  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -162,11 +162,12 @@ class Solo12DOMINOTrainCfg:
         num_steps_per_env = 24  # per iteration
         max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
+        normalize_features = False
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test'
+        run_name = 'test_state'
 
         # load
         load_run = -1  # -1 = last run

@@ -19,6 +19,7 @@ from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuff
 
 torch.autograd.set_detect_anomaly(True)
 
+
 class DOMINO:
     def __init__(self,
                  env,
@@ -65,6 +66,13 @@ class DOMINO:
                                                          until=int(1.0e8)).to(self.device)
         else:
             self.obs_normalizer = torch.nn.Identity()  # no normalization
+
+        self.normalize_features = self.r_cfg.normalize_features
+        if self.normalize_features:
+            self.feat_normalizer = EmpiricalNormalization(shape=self.env.num_features,
+                                                          until=int(1.0e8)).to(self.device)
+        else:
+            self.feat_normalizer = torch.nn.Identity()  # no normalization
 
         # set up rollout buffer
         self.rollout_buffer = RolloutBuffer(num_envs=self.env.num_envs,
@@ -130,6 +138,7 @@ class DOMINO:
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     new_obs, new_skills, features, ext_rew, dones, infos = self.env.step(actions)
                     # features should be part of the outcome of the actions
+                    features = self.feat_normalizer(features)
                     int_rew = self.get_intrinsic_reward(skills, features)
                     self.process_env_step(obs, actions, ext_rew, int_rew, skills, features, log_prob, dones, infos)
                     # normalize new obs
@@ -158,7 +167,7 @@ class DOMINO:
             # Learning update
             start = stop
             mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, \
-                mean_lagrange_loss = self.update()
+                mean_lagrange_loss, mean_lagrange_coeff = self.update()
             stop = time.time()
             learn_time = stop - start
             if self.log_dir is not None:
@@ -222,8 +231,10 @@ class DOMINO:
 
     def update_moving_avg(self, skills, ext_returns, features):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
-        encoded_ext_returns = torch.mean(encoded_skills * ext_returns.unsqueeze(-1).repeat(1, self.env.num_skills), dim=0)
-        encoded_features = torch.mean(encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1), dim=0)
+        encoded_ext_returns = torch.mean(encoded_skills * ext_returns.unsqueeze(-1).repeat(1, self.env.num_skills),
+                                         dim=0)
+        encoded_features = torch.mean(
+            encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1), dim=0)
 
         # TODO: maybe we need to deal with situation more carefully where one skill is not sampled with generator
         self.avg_ext_values = self.a_cfg.avg_values_decay_factor * self.avg_ext_values + \
@@ -238,6 +249,7 @@ class DOMINO:
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
         mean_lagrange_loss = 0
+        mean_lagrange_coeff = 0
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
         for (obs,
@@ -268,6 +280,7 @@ class DOMINO:
             with torch.inference_mode():
                 lagrange_coeff = self.get_lagrange_coeff(skills)
             advantages = lagrange_coeff * ext_advantages + (1 - lagrange_coeff) * int_advantages
+            mean_lagrange_coeff += lagrange_coeff.mean()
 
             # KL
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -350,9 +363,10 @@ class DOMINO:
         mean_int_value_loss /= num_updates
         mean_surrogate_loss /= num_updates
         mean_lagrange_loss /= num_updates
+        mean_lagrange_coeff /= num_updates
         self.rollout_buffer.clear()
 
-        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_loss
+        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_loss, mean_lagrange_coeff
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -381,6 +395,7 @@ class DOMINO:
         self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
         self.writer.add_scalar('Learning/lagrange_loss', locs['mean_lagrange_loss'], locs['it'])
+        self.writer.add_scalar('Learning/lagrange_coeff', locs['mean_lagrange_coeff'], locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
@@ -402,6 +417,7 @@ class DOMINO:
                           f"""{'Extrinsic value function loss:':>{pad}} {locs['mean_ext_value_loss']:.4f}\n"""
                           f"""{'Intrinsic value function loss:':>{pad}} {locs['mean_int_value_loss']:.4f}\n"""
                           f"""{'Lagrange loss:':>{pad}} {locs['mean_lagrange_loss']:.4f}\n"""
+                          f"""{'Lagrange coefficient:':>{pad}} {locs['mean_lagrange_coeff']:.4f}\n"""
                           f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
                           f"""{'Mean extrinsic reward:':>{pad}} {statistics.mean(locs['ext_rew_buffer']):.2f}\n"""
@@ -416,6 +432,7 @@ class DOMINO:
                           f"""{'Extrinsic value function loss:':>{pad}} {locs['mean_ext_value_loss']:.4f}\n"""
                           f"""{'Intrinsic value function loss:':>{pad}} {locs['mean_int_value_loss']:.4f}\n"""
                           f"""{'Lagrange loss:':>{pad}} {locs['mean_lagrange_loss']:.4f}\n"""
+                          f"""{'Lagrange coefficient:':>{pad}} {locs['mean_lagrange_coeff']:.4f}\n"""
                           f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n""")
 
@@ -439,6 +456,8 @@ class DOMINO:
         }
         if self.normalize_observation:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
+        if self.normalize_features:
+            saved_dict["feat_norm_state_dict"] = self.feat_normalizer.state_dict()
         torch.save(saved_dict, path)
 
     def load(self, path, load_optimizer=True):
@@ -448,6 +467,8 @@ class DOMINO:
         self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
+        if self.normalize_features:
+            self.feat_normalizer.load_state_dict(loaded_dict["feat_norm_state_dict"])
         if load_optimizer:
             self.optimizer.load_state_dict(loaded_dict["optimizer_state_dict"])
         self.current_learning_iteration = loaded_dict["iter"]
@@ -470,6 +491,8 @@ class DOMINO:
         self.int_value.train()
         if self.normalize_observation:
             self.obs_normalizer.train()
+        if self.normalize_features:
+            self.feat_normalizer.train()
 
     def eval_mode(self):
         self.policy.eval()
@@ -477,6 +500,8 @@ class DOMINO:
         self.int_value.eval()
         if self.normalize_observation:
             self.obs_normalizer.eval()
+        if self.normalize_features:
+            self.feat_normalizer.eval()
 
     def init_writer(self, play):
         if play:
