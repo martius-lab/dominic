@@ -157,7 +157,8 @@ class DOMINO:
 
             # Learning update
             start = stop
-            mean_value_loss, mean_surrogate_loss = self.update()
+            mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, \
+                mean_lagrange_loss = self.update()
             stop = time.time()
             learn_time = stop - start
             if self.log_dir is not None:
@@ -198,11 +199,13 @@ class DOMINO:
         self.transition.clear()
 
     def get_intrinsic_reward(self, skills, features):
-        latents = self.avg_features[skills]  # num_envs * num_features
-        nearest_latents_idx = torch.argmin(torch.norm((latents.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
-                                                       self.avg_features.unsqueeze(0).repeat(self.env.num_envs, 1, 1)),
-                                                      dim=2, p=2), dim=-1)  # num_envs
-        nearst_latents = self.avg_features[nearest_latents_idx]  # num_envs * num_features
+        latents = self.avg_features[skills]  # num_samples * num_features
+        latents_dist = torch.norm((latents.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
+                                   self.avg_features.unsqueeze(0).repeat(self.env.num_envs, 1, 1)),
+                                  dim=2, p=2)
+
+        _, nearest_latents_idx = torch.kthvalue(latents_dist, k=2, dim=-1)  # num_samples
+        nearst_latents = self.avg_features[nearest_latents_idx]  # num_samples * num_features
         psi_diff = latents - nearst_latents
         norm_diff = torch.norm(psi_diff, p=2, dim=-1) / self.a_cfg.target_d
         c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
@@ -349,7 +352,7 @@ class DOMINO:
         mean_lagrange_loss /= num_updates
         self.rollout_buffer.clear()
 
-        return mean_value_loss, mean_surrogate_loss
+        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_loss
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -374,7 +377,10 @@ class DOMINO:
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
         self.writer.add_scalar('Learning/value_function_loss', locs['mean_value_loss'], locs['it'])
+        self.writer.add_scalar('Learning/ext_value_function_loss', locs['mean_ext_value_loss'], locs['it'])
+        self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
+        self.writer.add_scalar('Learning/lagrange_loss', locs['mean_lagrange_loss'], locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
@@ -393,6 +399,9 @@ class DOMINO:
                           f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
                               'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
                           f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
+                          f"""{'Extrinsic value function loss:':>{pad}} {locs['mean_ext_value_loss']:.4f}\n"""
+                          f"""{'Intrinsic value function loss:':>{pad}} {locs['mean_int_value_loss']:.4f}\n"""
+                          f"""{'Lagrange loss:':>{pad}} {locs['mean_lagrange_loss']:.4f}\n"""
                           f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
                           f"""{'Mean extrinsic reward:':>{pad}} {statistics.mean(locs['ext_rew_buffer']):.2f}\n"""
@@ -404,6 +413,9 @@ class DOMINO:
                           f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
                               'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
                           f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
+                          f"""{'Extrinsic value function loss:':>{pad}} {locs['mean_ext_value_loss']:.4f}\n"""
+                          f"""{'Intrinsic value function loss:':>{pad}} {locs['mean_int_value_loss']:.4f}\n"""
+                          f"""{'Lagrange loss:':>{pad}} {locs['mean_lagrange_loss']:.4f}\n"""
                           f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n""")
 
