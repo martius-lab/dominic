@@ -25,12 +25,12 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-     "param": ["solo_legged_gym.train_cfg.algorithm.qvalues_optimizer_lr", "solo_legged_gym.train_cfg.algorithm.policy_optimizer_lr"],
-     "values": [[5e-4, 1e-3], [5e-4, 5e-4], [1e-4, 5e-4]]
+     "param": "solo_legged_gym.train_cfg.algorithm.alpha",
+     "values": [0.7, 0.8, 0.9]
     },
     {
-     "param": "solo_legged_gym.train_cfg.algorithm.tau",
-     "values": [0.005, 0.01, 0.05]
+     "param": "solo_legged_gym.train_cfg.algorithm.lagrange_learning_rate",
+     "values": [1e-4, 1e-3, 1e-2, 1e-1]
     }
   ]
 }

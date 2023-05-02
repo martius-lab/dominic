@@ -54,7 +54,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230502_142123"
+        "wandb_group": "cluster_20230502_154652"
       }
     },
     "env_cfg": {
@@ -147,7 +147,7 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 33,
+        "num_features": 24,
         "num_observations": 53,
         "play": false
       },

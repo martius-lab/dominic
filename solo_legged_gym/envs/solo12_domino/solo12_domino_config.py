@@ -8,7 +8,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands
         num_actions = 12
-        num_features = 33
+        num_features = 24
         episode_length_s = 20  # episode length in seconds
         play = False
         debug = False
