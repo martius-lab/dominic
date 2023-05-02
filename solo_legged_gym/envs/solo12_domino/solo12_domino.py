@@ -21,7 +21,7 @@ class Solo12DOMINO(BaseTask):
         self.command_mag = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
 
         self.num_skills = self.cfg.commands.num_skills
-        self.skills = torch.zeros(self.num_envs, 1, dtype=torch.int8, device=self.device, requires_grad=False)
+        self.skills = torch.zeros(self.num_envs, dtype=torch.long, device=self.device, requires_grad=False)
 
         self.add_noise = self.cfg.observations.add_noise
         if self.add_noise:
@@ -228,7 +228,7 @@ class Solo12DOMINO(BaseTask):
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
 
         # clip the observation if needed
-        if self.cfg.observations.clip_observations:
+        if self.cfg.observations.clip_obs:
             self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
 
     def compute_features(self):
@@ -284,10 +284,10 @@ class Solo12DOMINO(BaseTask):
             self.commands[:] = 0.0
 
     def _resample_skills(self, env_ids):
-        self.skills = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
+        self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
 
         if self.cfg.env.play:
-            self.skills[env_ids, :] = 0
+            self.skills[env_ids] = 0
 
     def _compute_torques(self, joint_targets):
         # pd controller

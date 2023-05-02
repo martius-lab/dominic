@@ -7,20 +7,28 @@
     },
     "train_cfg": {
       "algorithm": {
+        "alpha": 0.9,
+        "attractive_coeff": 0,
+        "attractive_power": 3,
+        "avg_features_decay_factor": 0.99,
+        "avg_values_decay_factor": 0.9,
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
         "gamma": 0.99,
+        "lagrange_learning_rate": 0.001,
         "lam": 0.95,
         "learning_rate": 0.001,
         "max_grad_norm": 1.0,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
+        "repulsive_power": 0,
         "schedule": "adaptive",
+        "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
       },
-      "algorithm_name": "PPO",
+      "algorithm_name": "DOMINO",
       "network": {
         "log_std_init": 0.0,
         "policy_activation": "elu",
@@ -46,7 +54,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230428_235249"
+        "wandb_group": "cluster_20230502_135408"
       }
     },
     "env_cfg": {
@@ -75,9 +83,12 @@
         "thickness": 0.01
       },
       "commands": {
-        "change_commands": true,
-        "change_interval_s": 10.0,
+        "change_commands": false,
+        "change_commands_interval_s": 10.0,
+        "change_skills": false,
+        "change_skills_intervals_s": 10.0,
         "num_commands": 3,
+        "num_skills": 5,
         "ranges": {
           "ang_vel_yaw": [
             -1.0,
@@ -112,7 +123,7 @@
         "torque_limits": 2.5
       },
       "domain_rand": {
-        "actuator_lag": true,
+        "actuator_lag": false,
         "actuator_lag_steps": 3,
         "added_mass_range": [
           -0.5,
@@ -125,10 +136,10 @@
         "max_push_avel_xyz": 0.5,
         "max_push_vel_xyz": 0.5,
         "push_interval_s": 15,
-        "push_robots": true,
+        "push_robots": false,
         "randomize_actuator_lag": true,
-        "randomize_base_mass": true,
-        "randomize_friction": true
+        "randomize_base_mass": false,
+        "randomize_friction": false
       },
       "env": {
         "debug": false,
@@ -136,7 +147,8 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_observations": 48,
+        "num_features": 33,
+        "num_observations": 53,
         "play": false
       },
       "init_member_classes": {},
@@ -178,8 +190,9 @@
         ]
       },
       "observations": {
-        "add_noise": true,
-        "clip_observations": 100.0,
+        "add_noise": false,
+        "clip_limit": 100.0,
+        "clip_obs": false,
         "noise_level": 1.0,
         "noise_scales": {
           "ang_vel": 0.2,

@@ -151,6 +151,12 @@ class Solo12DOMINOTrainCfg:
         lam = 0.95  # GAE coeff
         desired_kl = 0.01
         max_grad_norm = 1.
+        avg_values_decay_factor = 0.9
+        avg_features_decay_factor = 0.99
+        target_d = 1.0  # l_0 in VDW force
+        attractive_power = 3
+        repulsive_power = 0
+        attractive_coeff = 0
 
     class runner:
         num_steps_per_env = 24  # per iteration

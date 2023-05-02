@@ -7,7 +7,7 @@ import statistics
 import torch
 import torch.optim as optim
 import torch.nn as nn
-
+import torch.nn.functional as func
 from torch.utils.tensorboard import SummaryWriter
 
 from solo_legged_gym.utils import class_to_dict
@@ -17,6 +17,7 @@ from solo_legged_gym.runners.modules.value import Value
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
 from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuffer
 
+torch.autograd.set_detect_anomaly(True)
 
 class DOMINO:
     def __init__(self,
@@ -48,10 +49,10 @@ class DOMINO:
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
-        self.lagrange = nn.Parameter(torch.zeros(self.env.num_skills - 1), requires_grad=True)
+        self.lagrange = nn.Parameter(torch.zeros(self.env.num_skills - 1, device=self.device), requires_grad=True)
 
         # set up moving averages
-        self.avg_values = torch.zeros(self.env.num_skills, 1, device=self.device, requires_grad=False)
+        self.avg_ext_values = torch.zeros(self.env.num_skills, device=self.device, requires_grad=False)
         self.avg_features = torch.ones(self.env.num_skills, self.env.num_features, device=self.device,
                                        requires_grad=False) * (1 / self.env.num_features)
 
@@ -82,7 +83,7 @@ class DOMINO:
                                     lr=self.learning_rate)
 
         self.lagrange_learning_rate = self.a_cfg.lagrange_learning_rate
-        self.lagrange_optimizer = optim.Adam(self.lagrange, lr=self.lagrange_learning_rate)
+        self.lagrange_optimizer = optim.Adam([self.lagrange], lr=self.lagrange_learning_rate)
 
         # Log
         self.log_dir = log_dir
@@ -129,7 +130,7 @@ class DOMINO:
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     new_obs, new_skills, features, ext_rew, dones, infos = self.env.step(actions)
                     # features should be part of the outcome of the actions
-                    # TODO: compute int_rew with skills(int) and features (calculate from skills instead of new skills)
+                    int_rew = self.get_intrinsic_reward(skills, features)
                     self.process_env_step(obs, actions, ext_rew, int_rew, skills, features, log_prob, dones, infos)
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
@@ -178,6 +179,9 @@ class DOMINO:
         self.transition.action_mean = self.policy.action_mean.detach()
         self.transition.action_sigma = self.policy.action_std.detach()
 
+        self.transition.ext_values = self.ext_value.evaluate(obs).detach()
+        self.transition.int_values = self.int_value.evaluate(obs).detach()
+
         self.transition.ext_rew = ext_rew.clone()
         self.transition.ext_rew += self.a_cfg.gamma * torch.squeeze(
             self.transition.ext_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)  # bootstrap for timeouts
@@ -186,9 +190,6 @@ class DOMINO:
         self.transition.int_rew += self.a_cfg.gamma * torch.squeeze(
             self.transition.int_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)  # bootstrap for timeouts
 
-        self.transition.ext_values = self.ext_value.evaluate(obs).detach()
-        self.transition.int_values = self.int_value.evaluate(obs).detach()
-
         self.transition.dones = dones
         self.transition.skills = skills
         self.transition.features = features
@@ -196,12 +197,37 @@ class DOMINO:
         self.rollout_buffer.add_transitions(self.transition)
         self.transition.clear()
 
+    def get_intrinsic_reward(self, skills, features):
+        latents = self.avg_features[skills]  # num_envs * num_features
+        nearest_latents_idx = torch.argmin(torch.norm((latents.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
+                                                       self.avg_features.unsqueeze(0).repeat(self.env.num_envs, 1, 1)),
+                                                      dim=2, p=2), dim=-1)  # num_envs
+        nearst_latents = self.avg_features[nearest_latents_idx]  # num_envs * num_features
+        psi_diff = latents - nearst_latents
+        norm_diff = torch.norm(psi_diff, p=2, dim=-1) / self.a_cfg.target_d
+        c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
+            self.a_cfg.attractive_coeff * torch.pow(norm_diff, self.a_cfg.attractive_power)
+        int_rew = c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
+        return int_rew
+
     def get_lagrange_coeff(self, skills):
-        lagrange_coeff = torch.zeros_like(skills)
+        lagrange_coeff = torch.zeros_like(skills).to(torch.float32)
         lagrange_coeff[skills > 0] = self.lagrange[skills[skills > 0] - 1]
         lagrange_coeff = torch.sigmoid(lagrange_coeff)
         lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
+
+    def update_moving_avg(self, skills, ext_returns, features):
+        encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
+        encoded_ext_returns = torch.mean(encoded_skills * ext_returns.unsqueeze(-1).repeat(1, self.env.num_skills), dim=0)
+        encoded_features = torch.mean(encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1), dim=0)
+
+        # TODO: maybe we need to deal with situation more carefully where one skill is not sampled with generator
+        self.avg_ext_values = self.a_cfg.avg_values_decay_factor * self.avg_ext_values + \
+                              (1 - self.a_cfg.avg_values_decay_factor) * encoded_ext_returns
+
+        self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
+                            (1 - self.a_cfg.avg_features_decay_factor) * encoded_features
 
     def update(self):
         mean_value_loss = 0
@@ -236,7 +262,8 @@ class DOMINO:
             entropy_batch = self.policy.entropy
 
             # combine advantages
-            lagrange_coeff = self.get_lagrange_coeff(skills)
+            with torch.inference_mode():
+                lagrange_coeff = self.get_lagrange_coeff(skills)
             advantages = lagrange_coeff * ext_advantages + (1 - lagrange_coeff) * int_advantages
 
             # KL
@@ -305,13 +332,14 @@ class DOMINO:
 
             # Lagrange loss
             lagrange_loss = torch.sum(torch.sigmoid(self.lagrange) *
-                                      (self.avg_values[1:] - self.a_cfg.alpha * self.avg_values[0]), dim=-1)
+                                      (self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1),
+                                      dim=-1)
             lagrange_loss.backward()
             self.lagrange_optimizer.step()
             mean_lagrange_loss += lagrange_loss
 
             # update moving average
-            # TODO: what exactly are we averaging?
+            self.update_moving_avg(skills.squeeze(-1), ext_returns.squeeze(-1), features)
 
         num_updates = self.a_cfg.num_learning_epochs * self.a_cfg.num_mini_batches
         mean_value_loss /= num_updates

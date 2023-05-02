@@ -51,7 +51,7 @@ class RolloutBuffer:
         self.ext_advantages = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device)
         self.int_advantages = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device)
 
-        self.skills = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device)
+        self.skills = torch.zeros(num_transitions_per_env, num_envs, 1, dtype=torch.long, device=self.device)
         self.features = torch.zeros(num_transitions_per_env, num_envs, *features_shape, device=self.device)
 
         self.num_transitions_per_env = num_transitions_per_env
