@@ -232,11 +232,8 @@ class Solo12DOMINO(BaseTask):
             self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
 
     def compute_features(self):
-        self.feature_buf = torch.cat((self.base_lin_vel,  # 3
-                                      self.base_ang_vel,  # 3
-                                      (self.dof_pos - self.default_dof_pos),  # 12
-                                      self.dof_vel,  # 12
-                                      self.projected_gravity,  # 3
+        self.feature_buf = torch.cat((self.base_lin_vel[:, 2:3],  # 3
+                                      self.base_ang_vel[:, :2],  # 3
                                       ), dim=-1)
         # no noise added, no clipping
 
@@ -319,7 +316,7 @@ class Solo12DOMINO(BaseTask):
         if self.cfg.env.play:
             self.dof_pos[env_ids] = self.default_dof_pos
         else:
-            self.dof_pos[env_ids] = self.default_dof_pos + torch_rand_float(-0.2, 0.2, (len(env_ids), self.num_dof),
+            self.dof_pos[env_ids] = self.default_dof_pos + torch_rand_float(-0.5, 0.5, (len(env_ids), self.num_dof),
                                                                             device=self.device)
 
         self.dof_vel[env_ids] = 0.

@@ -8,7 +8,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands
         num_actions = 12
-        num_features = 33
+        num_features = 3
         episode_length_s = 20  # episode length in seconds
         play = False
         debug = False
@@ -86,19 +86,19 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = ["task", 0.2]
-            lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.2]
+            lin_vel_x = ["task", 0.3]
+            lin_vel_y = ["task", 0.3]
+            ang_vel_z = ["task", 0.3]
 
             lin_z = ["task", 0.2]
             # lin_vel_z = ["task", 1.0]
             ang_xy = ["task", 0.6]
             # ang_vel_xy = ["task", 3.0]
 
-            stand_still = ["task", 1e-2]
+            # stand_still = ["task", 1e-2]
             feet_slip = ["task", [0.05, 0.1, 1.4]]
             # feet_slip_v = ["task", [0.04, 0.8]]
-            # dof_acc = ["task", 2000.0]
+            # dof_acc = ["task", 4000.0]
             torques = ["task", 10.0]
             joint_targets_rate = ["task", 0.8]
             # dof_vel = ["task", 50.0]
@@ -145,7 +145,7 @@ class Solo12DOMINOTrainCfg:
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
-        lagrange_learning_rate = 1.e-4
+        lagrange_learning_rate = 1.e-3
         alpha = 0.9  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -162,13 +162,12 @@ class Solo12DOMINOTrainCfg:
         num_steps_per_env = 24  # per iteration
         max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
-        normalize_features = False
-        normalize_int_rew = True
+        normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'normalize_int_rew'
+        run_name = 'lin_ang_vel'
 
         # load
         load_run = -1  # -1 = last run
