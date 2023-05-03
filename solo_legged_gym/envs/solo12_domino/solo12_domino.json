@@ -52,10 +52,10 @@
         "normalize_features": false,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "test_state",
+        "run_name": "normalize_int_rew",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230502_232125"
+        "wandb_group": "cluster_20230503_135445"
       }
     },
     "env_cfg": {
@@ -92,16 +92,16 @@
         "num_skills": 5,
         "ranges": {
           "ang_vel_yaw": [
-            -1.0,
-            1.0
+            0.0,
+            0.0
           ],
           "lin_vel_x": [
             -1.0,
             1.0
           ],
           "lin_vel_y": [
-            -1.0,
-            1.0
+            0.0,
+            0.0
           ]
         }
       },
@@ -226,12 +226,8 @@
             [
               0.05,
               0.1,
-              0.9
+              1.4
             ]
-          ],
-          "joint_default": [
-            "task",
-            1.5
           ],
           "joint_targets_rate": [
             "task",

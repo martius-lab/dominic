@@ -27,8 +27,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
-            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
+            lin_vel_y = [0.0, 0.0]  # min max [m/s]
+            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.35]  # x,y,z [m]
@@ -96,7 +96,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # ang_vel_xy = ["task", 3.0]
 
             stand_still = ["task", 1e-2]
-            feet_slip = ["task", [0.05, 0.1, 0.9]]
+            feet_slip = ["task", [0.05, 0.1, 1.4]]
             # feet_slip_v = ["task", [0.04, 0.8]]
             # dof_acc = ["task", 2000.0]
             torques = ["task", 10.0]
@@ -163,11 +163,12 @@ class Solo12DOMINOTrainCfg:
         max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = False
+        normalize_int_rew = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test_state'
+        run_name = 'normalize_int_rew'
 
         # load
         load_run = -1  # -1 = last run

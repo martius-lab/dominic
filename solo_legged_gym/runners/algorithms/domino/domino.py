@@ -219,7 +219,11 @@ class DOMINO:
         norm_diff = torch.norm(psi_diff, p=2, dim=-1) / self.a_cfg.target_d
         c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
             self.a_cfg.attractive_coeff * torch.pow(norm_diff, self.a_cfg.attractive_power)
-        int_rew = c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
+        if self.r_cfg.normalize_int_rew:
+            int_rew = c * torch.sum(func.normalize(features, dim=0) * func.normalize(psi_diff, dim=0),
+                                    dim=-1) / self.env.num_features
+        else:
+            int_rew = c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
         return int_rew
 
     def get_lagrange_coeff(self, skills):
