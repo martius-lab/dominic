@@ -91,9 +91,16 @@ class Solo12DOMINO(BaseTask):
                                                 size=[self.num_envs], device=self.device)
         self.feet_contact_force = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
                                               device=self.device, requires_grad=False)
-
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device,
                                          requires_grad=False)
+        self.contact_buffer_length = self.cfg.env.contact_buffer_length
+        self.ee_contact_buffer = torch.zeros(self.num_envs, 4, self.contact_buffer_length, dtype=torch.long,
+                                             device=self.device, requires_grad=False)
+        self.ee_contact_freq = torch.fft.fftfreq(self.contact_buffer_length).to(self.device)
+        self.ee_contact_main_freq = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device,
+                                                requires_grad=False)
+        self.ee_contact_main_freq_phase = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device,
+                                                      requires_grad=False)
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -114,6 +121,7 @@ class Solo12DOMINO(BaseTask):
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
+        self.ee_contact_buffer[env_ids] = 0
 
         self.episode_length_buf[env_ids] = 0
 
@@ -232,9 +240,13 @@ class Solo12DOMINO(BaseTask):
             self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
 
     def compute_features(self):
-        self.feature_buf = torch.cat((self.base_lin_vel[:, 2:3],  # 3
-                                      self.base_ang_vel[:, :2],  # 3
-                                      ), dim=-1)
+        min_freq, _ = torch.min(self.ee_contact_main_freq, dim=-1)
+        phase_offset = torch.concatenate(((self.ee_contact_main_freq_phase[:, 1] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
+                                          (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
+                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1)), dim=-1)
+        phase_offset[phase_offset >= np.pi] -= np.pi
+        phase_offset[phase_offset < -np.pi] += np.pi
+        self.feature_buf = phase_offset
         # no noise added, no clipping
 
     def _get_noise_scale_vec(self):
@@ -254,7 +266,7 @@ class Solo12DOMINO(BaseTask):
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
         self.feet_contact_force = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1)
-        self.ee_contact = self.feet_contact_force > 0.2
+        self.ee_contact = self.feet_contact_force > 0.1
         self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
         self.ee_vel_global = self.rigid_body_state[:, self.feet_indices, 7:10]
         ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
@@ -264,6 +276,15 @@ class Solo12DOMINO(BaseTask):
         self.joint_targets_rate = torch.norm(self.last_joint_targets - self.joint_targets, p=2, dim=1)
         self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
         self.command_mag = torch.norm(self.commands, dim=-1, p=2) / self.command_max
+
+        # contact buffer: 1 in contact, -1 in swing, 0 placeholder
+        self.ee_contact_buffer = torch.cat((self.ee_contact_buffer[:, :, 1:],
+                                            (self.ee_contact * 2 - 1).to(torch.long).unsqueeze(-1)), dim=-1)
+        ee_contact_fft = torch.fft.fft(self.ee_contact_buffer, dim=2)
+        _, main_freq_idx = torch.max(ee_contact_fft.abs(), dim=2)
+        self.ee_contact_main_freq = self.ee_contact_freq[main_freq_idx]
+        self.ee_contact_main_freq_phase = ee_contact_fft.angle()[
+            torch.arange(self.num_envs).unsqueeze(-1), torch.arange(4).unsqueeze(0), main_freq_idx]
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],
@@ -316,8 +337,9 @@ class Solo12DOMINO(BaseTask):
         if self.cfg.env.play:
             self.dof_pos[env_ids] = self.default_dof_pos
         else:
-            self.dof_pos[env_ids] = self.default_dof_pos + torch_rand_float(-0.5, 0.5, (len(env_ids), self.num_dof),
-                                                                            device=self.device)
+            self.dof_pos[env_ids] = self.default_dof_pos
+            self.dof_pos[env_ids][:, [1, 2, 4, 5, 7, 8, 10, 11]] += torch_rand_float(-0.25, 0.25, (len(env_ids), 8),
+                                                                                     device=self.device)
 
         self.dof_vel[env_ids] = 0.
         env_ids_int32 = env_ids.to(dtype=torch.int32)
