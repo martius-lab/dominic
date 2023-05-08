@@ -243,7 +243,10 @@ class Solo12DOMINO(BaseTask):
         min_freq, _ = torch.min(self.ee_contact_main_freq, dim=-1)
         phase_offset = torch.concatenate(((self.ee_contact_main_freq_phase[:, 1] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
                                           (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1)), dim=-1)
+                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
+                                          (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
+                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
+                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 2]).unsqueeze(-1),), dim=-1)
         phase_offset[phase_offset >= np.pi] -= np.pi
         phase_offset[phase_offset < -np.pi] += np.pi
         self.feature_buf = phase_offset
@@ -282,6 +285,10 @@ class Solo12DOMINO(BaseTask):
                                             (self.ee_contact * 2 - 1).to(torch.long).unsqueeze(-1)), dim=-1)
         ee_contact_fft = torch.fft.fft(self.ee_contact_buffer, dim=2)
         _, main_freq_idx = torch.max(ee_contact_fft.abs(), dim=2)
+
+        # test
+        main_freq_idx[:] = 2
+
         self.ee_contact_main_freq = self.ee_contact_freq[main_freq_idx]
         self.ee_contact_main_freq_phase = ee_contact_fft.angle()[
             torch.arange(self.num_envs).unsqueeze(-1), torch.arange(4).unsqueeze(0), main_freq_idx]

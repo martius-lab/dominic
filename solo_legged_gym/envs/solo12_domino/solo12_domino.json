@@ -52,10 +52,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "test_gait",
+        "run_name": "test_main_freq_1.0",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230507_084358"
+        "wandb_group": "cluster_20230508_115414"
       }
     },
     "env_cfg": {
@@ -84,7 +84,7 @@
         "thickness": 0.01
       },
       "commands": {
-        "change_commands": false,
+        "change_commands": true,
         "change_commands_interval_s": 10.0,
         "change_skills": false,
         "change_skills_intervals_s": 10.0,
@@ -92,16 +92,16 @@
         "num_skills": 5,
         "ranges": {
           "ang_vel_yaw": [
-            0.0,
-            0.0
+            -1.0,
+            1.0
           ],
           "lin_vel_x": [
             -1.0,
             1.0
           ],
           "lin_vel_y": [
-            0.0,
-            0.0
+            -1.0,
+            1.0
           ]
         }
       },
@@ -137,10 +137,10 @@
         "max_push_avel_xyz": 0.5,
         "max_push_vel_xyz": 0.5,
         "push_interval_s": 15,
-        "push_robots": false,
+        "push_robots": true,
         "randomize_actuator_lag": true,
-        "randomize_base_mass": false,
-        "randomize_friction": false
+        "randomize_base_mass": true,
+        "randomize_friction": true
       },
       "env": {
         "contact_buffer_length": 100,
@@ -149,7 +149,7 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 3,
+        "num_features": 6,
         "num_observations": 53,
         "play": false
       },
@@ -192,7 +192,7 @@
         ]
       },
       "observations": {
-        "add_noise": false,
+        "add_noise": true,
         "clip_limit": 100.0,
         "clip_obs": false,
         "noise_level": 1.0,
@@ -233,6 +233,10 @@
               0.15,
               1.35
             ]
+          ],
+          "joint_default": [
+            "task",
+            2.0
           ],
           "joint_targets_rate": [
             "task",

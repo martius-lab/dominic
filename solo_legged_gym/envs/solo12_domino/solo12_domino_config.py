@@ -8,7 +8,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 3
+        num_features = 6
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
         play = False
@@ -19,7 +19,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = False
+        change_commands = True
         change_commands_interval_s = 10.  # time before command are changed[s]
 
         num_skills = 5  # latent space
@@ -28,8 +28,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [0.0, 0.0]  # min max [m/s]
-            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
+            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
+            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.35]  # x,y,z [m]
@@ -70,13 +70,13 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         flip_visual_attachments = False
 
     class domain_rand(BaseEnvCfg.domain_rand):
-        randomize_friction = False
+        randomize_friction = True
         friction_range = [0.5, 1.5]
 
-        randomize_base_mass = False
+        randomize_base_mass = True
         added_mass_range = [-0.5, 0.5]
 
-        push_robots = False
+        push_robots = True
         push_interval_s = 15
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
@@ -104,7 +104,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             joint_targets_rate = ["task", 0.8]
             # dof_vel = ["task", 50.0]
             # feet_contact_force = ["task", 3.0]
-            # joint_default = ["task", 1.5]
+            joint_default = ["task", 2.0]
             # feet_air_time = ["feet", None]
 
         class scales:
@@ -115,7 +115,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
     class observations:
         clip_obs = False
         clip_limit = 100.
-        add_noise = False
+        add_noise = True
         noise_level = 1.0  # scales other values
 
         class noise_scales:
@@ -168,7 +168,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test_gait'
+        run_name = 'test_main_freq_1.0'
 
         # load
         load_run = -1  # -1 = last run
