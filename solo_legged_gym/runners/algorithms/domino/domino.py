@@ -400,6 +400,8 @@ class DOMINO:
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
         for i in range(len(mean_lagrange_coeffs)):
             self.writer.add_scalar(f'Learning/lagrange_coeff_{i}', mean_lagrange_coeffs[i], locs['it'])
+        for i in range(self.env.num_skills - 1):
+            self.writer.add_scalar(f'Learning/lagrange_{i}', self.lagrange[i].item(), locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
