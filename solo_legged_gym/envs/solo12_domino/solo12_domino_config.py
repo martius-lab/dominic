@@ -19,7 +19,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = True
+        change_commands = False
         change_commands_interval_s = 10.  # time before command are changed[s]
 
         num_skills = 5  # latent space
@@ -27,12 +27,12 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
-            lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
-            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
+            lin_vel_x = [0.5, 0.5]  # min max [m/s]
+            lin_vel_y = [0.0, 0.0]  # min max [m/s]
+            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
-        pos = [0.0, 0.0, 0.35]  # x,y,z [m]
+        pos = [0.0, 0.0, 0.45]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -81,39 +81,42 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
 
-        actuator_lag = False
+        actuator_lag = True
         randomize_actuator_lag = True
         actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = ["task", 0.2]
-            lin_vel_y = ["task", 0.2]
-            ang_vel_z = ["task", 0.3]
+            lin_vel_x = "[0, 0.15]"
+            lin_vel_y = "[0, 0.15]"
+            ang_vel_z = "[0, 0.3]"
 
-            lin_z = ["task", 0.1]
-            lin_vel_z = ["task", 2.0]
-            ang_xy = ["task", 0.4]
-            ang_vel_xy = ["task", 8.0]
+            lin_z = "[0, 0.1]"
+            lin_vel_z = "[0, 1.5]"
+            ang_xy = "[0, 0.4]"
+            ang_vel_xy = "[0, 6.0]"
 
-            stand_still = ["task", 0.05]
-            feet_slip = ["task", [0.05, 0.15, 1.35]]
-            # feet_slip_v = ["task", [0.04, 0.8]]
-            # dof_acc = ["task", 4000.0]
-            # torques = ["task", 10.0]
-            joint_targets_rate = ["task", 0.8]
-            # dof_vel = ["task", 50.0]
-            # feet_contact_force = ["task", 3.0]
-            joint_default = ["task", 2.0]
-            # feet_air_time = ["feet", None]
+            stand_still = "[0, 0.01]"
+            # stand_still_h = "[0, 0.05]"
+            feet_slip = "[0, [0.04, 0.2, 1.3]]"
+            # dof_acc = "[0, 3000.0]"
+            # torques = "[0, 10.0]"
+            joint_targets_rate = "[0, 0.8]"
+            # feet_contact_force = "[0, 20.0]"
+            # joint_default = "[0, 1.5]"
 
-        class scales:
-            task = 1.0
+            # feet_slip_h = "[0, [0.01, 0.01]]"
+            # feet_slip_v = "[0, [0.04, 0.8]]"
+            # dof_vel = "[0, 50.0]"
+            # feet_air_time = "[0, None]"
+
+        # task
+        scales = [1.0,]
 
         base_height_target = 0.25
 
     class observations:
-        clip_obs = False
+        clip_obs = True
         clip_limit = 100.
         add_noise = True
         noise_level = 1.0  # scales other values
@@ -168,7 +171,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test_main_freq_1.0'
+        run_name = 'forward_.5'
 
         # load
         load_run = -1  # -1 = last run

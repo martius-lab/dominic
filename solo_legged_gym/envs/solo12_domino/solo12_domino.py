@@ -403,12 +403,12 @@ class Solo12DOMINO(BaseTask):
 
     def _prepare_reward(self):
         self.reward_terms = class_to_dict(self.cfg.rewards.terms)
-        self.reward_scales = class_to_dict(self.cfg.rewards.scales)
+        self.reward_scales = self.cfg.rewards.scales
         self.reward_groups = {}
-        for group, scale in self.reward_scales.items():
-            self.reward_groups[group] = []
+        for i in range(len(self.reward_scales)):
+            self.reward_groups[str(int(i))] = []
         for name, info in self.reward_terms.items():
-            group = eval(info)[0]
+            group = str(int(eval(info)[0]))
             self.reward_groups[group].append(name)
 
         self.episode_term_sums = {
@@ -424,7 +424,7 @@ class Solo12DOMINO(BaseTask):
     def compute_reward(self):
         self.rew_buf[:] = 0.
         for group_name, terms in self.reward_groups.items():
-            group_scale = self.reward_scales[group_name]
+            group_scale = self.reward_scales[int(group_name)]
             self.group_reward = torch.ones(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
             for i in range(len(terms)):
                 reward_name = terms[i]
@@ -436,6 +436,7 @@ class Solo12DOMINO(BaseTask):
             self.group_reward *= group_scale
             self.episode_group_sums[group_name] += self.group_reward
             self.rew_buf += self.group_reward
+
 
     # ------------------------------------------------------------------------------------------------------------------
 
