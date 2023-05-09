@@ -408,7 +408,7 @@ class Solo12DOMINO(BaseTask):
         for group, scale in self.reward_scales.items():
             self.reward_groups[group] = []
         for name, info in self.reward_terms.items():
-            group = info[0]
+            group = eval(info)[0]
             self.reward_groups[group].append(name)
 
         self.episode_term_sums = {
@@ -429,7 +429,7 @@ class Solo12DOMINO(BaseTask):
             for i in range(len(terms)):
                 reward_name = terms[i]
                 reward_function = getattr(self, '_reward_' + reward_name)
-                reward_sigma = self.reward_terms[reward_name][1]
+                reward_sigma = eval(self.reward_terms[reward_name])[1]
                 term_reward = reward_function(reward_sigma)
                 self.episode_term_sums[reward_name] += term_reward
                 self.group_reward *= term_reward

@@ -231,17 +231,17 @@ class DOMINO:
 
     def update_moving_avg(self, skills, ext_returns, features):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
-        encoded_ext_returns = torch.mean(encoded_skills * ext_returns.unsqueeze(-1).repeat(1, self.env.num_skills),
-                                         dim=0)
-        encoded_features = torch.mean(
-            encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1), dim=0)
+        encoded_ext_returns = encoded_skills * ext_returns.unsqueeze(-1).repeat(1, self.env.num_skills)
+        encoded_features = encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1)
 
-        # TODO: maybe we need to deal with situation more carefully where one skill is not sampled with generator
+        mean_encoded_ext_returns = encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0)
+        mean_encoded_features = encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1)
+
         self.avg_ext_values = self.a_cfg.avg_values_decay_factor * self.avg_ext_values + \
-                              (1 - self.a_cfg.avg_values_decay_factor) * encoded_ext_returns
+                              (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
 
         self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
-                            (1 - self.a_cfg.avg_features_decay_factor) * encoded_features
+                            (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
 
     def update(self):
         mean_value_loss = 0
