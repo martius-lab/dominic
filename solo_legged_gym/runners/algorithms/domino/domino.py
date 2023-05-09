@@ -3,6 +3,7 @@ import time
 import os
 from collections import deque
 import statistics
+import numpy as np
 
 import torch
 import torch.optim as optim
@@ -167,7 +168,7 @@ class DOMINO:
             # Learning update
             start = stop
             mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, \
-                mean_lagrange_loss, mean_lagrange_coeff = self.update()
+                mean_lagrange_losses, mean_lagrange_coeffs = self.update()
             stop = time.time()
             learn_time = stop - start
             if self.log_dir is not None:
@@ -248,8 +249,8 @@ class DOMINO:
         mean_ext_value_loss = 0
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
-        mean_lagrange_loss = 0
-        mean_lagrange_coeff = 0
+        mean_lagrange_coeffs = np.zeros(self.env.num_skills)
+        mean_lagrange_losses = np.zeros(self.env.num_skills - 1)
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
         for (obs,
@@ -280,7 +281,7 @@ class DOMINO:
             with torch.inference_mode():
                 lagrange_coeff = self.get_lagrange_coeff(skills)
             advantages = lagrange_coeff * ext_advantages + (1 - lagrange_coeff) * int_advantages
-            mean_lagrange_coeff += lagrange_coeff.mean()
+            mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff, dim=0) / torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).cpu().detach().numpy()
 
             # KL
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -347,12 +348,11 @@ class DOMINO:
             mean_surrogate_loss += surrogate_loss.item()
 
             # Lagrange loss
-            lagrange_loss = torch.sum(torch.sigmoid(self.lagrange) *
-                                      (self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1),
-                                      dim=-1)
+            lagrange_losses = torch.sigmoid(self.lagrange) * (self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1)
+            lagrange_loss = torch.sum(lagrange_losses, dim=-1)
             lagrange_loss.backward()
             self.lagrange_optimizer.step()
-            mean_lagrange_loss += lagrange_loss
+            mean_lagrange_losses += lagrange_losses.cpu().detach().numpy()
 
             # update moving average
             self.update_moving_avg(skills.squeeze(-1), ext_returns.squeeze(-1), features)
@@ -362,11 +362,11 @@ class DOMINO:
         mean_ext_value_loss /= num_updates
         mean_int_value_loss /= num_updates
         mean_surrogate_loss /= num_updates
-        mean_lagrange_loss /= num_updates
-        mean_lagrange_coeff /= num_updates
+        mean_lagrange_losses /= num_updates
+        mean_lagrange_coeffs /= num_updates
         self.rollout_buffer.clear()
 
-        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_loss, mean_lagrange_coeff
+        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_losses, mean_lagrange_coeffs
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -394,8 +394,12 @@ class DOMINO:
         self.writer.add_scalar('Learning/ext_value_function_loss', locs['mean_ext_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
-        self.writer.add_scalar('Learning/lagrange_loss', locs['mean_lagrange_loss'], locs['it'])
-        self.writer.add_scalar('Learning/lagrange_coeff', locs['mean_lagrange_coeff'], locs['it'])
+        mean_lagrange_losses = locs['mean_lagrange_losses']
+        for i in range(len(mean_lagrange_losses)):
+            self.writer.add_scalar(f'Learning/lagrange_loss_{i}', mean_lagrange_losses[i], locs['it'])
+        mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
+        for i in range(len(mean_lagrange_coeffs)):
+            self.writer.add_scalar(f'Learning/lagrange_coeff_{i}', mean_lagrange_coeffs[i], locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
@@ -413,12 +417,6 @@ class DOMINO:
                           f"""{title.center(width, ' ')}\n\n"""
                           f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
                               'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
-                          f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
-                          f"""{'Extrinsic value function loss:':>{pad}} {locs['mean_ext_value_loss']:.4f}\n"""
-                          f"""{'Intrinsic value function loss:':>{pad}} {locs['mean_int_value_loss']:.4f}\n"""
-                          f"""{'Lagrange loss:':>{pad}} {locs['mean_lagrange_loss']:.4f}\n"""
-                          f"""{'Lagrange coefficient:':>{pad}} {locs['mean_lagrange_coeff']:.4f}\n"""
-                          f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
                           f"""{'Mean extrinsic reward:':>{pad}} {statistics.mean(locs['ext_rew_buffer']):.2f}\n"""
                           f"""{'Mean intrinsic reward:':>{pad}} {statistics.mean(locs['int_rew_buffer']):.2f}\n"""
@@ -428,11 +426,6 @@ class DOMINO:
                           f"""{title.center(width, ' ')}\n\n"""
                           f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
                               'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
-                          f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
-                          f"""{'Extrinsic value function loss:':>{pad}} {locs['mean_ext_value_loss']:.4f}\n"""
-                          f"""{'Intrinsic value function loss:':>{pad}} {locs['mean_int_value_loss']:.4f}\n"""
-                          f"""{'Lagrange loss:':>{pad}} {locs['mean_lagrange_loss']:.4f}\n"""
-                          f"""{'Lagrange coefficient:':>{pad}} {locs['mean_lagrange_coeff']:.4f}\n"""
                           f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
                           f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n""")
 

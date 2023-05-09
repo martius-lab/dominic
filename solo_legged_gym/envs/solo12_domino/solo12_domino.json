@@ -55,7 +55,7 @@
         "run_name": "forward_.5",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230509_123034"
+        "wandb_group": "cluster_20230509_154832"
       }
     },
     "env_cfg": {
