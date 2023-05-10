@@ -97,11 +97,12 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             ang_vel_xy = "[0, 6.0]"
 
             stand_still = "[0, 0.01]"
-            # stand_still_h = "[0, 0.05]"
             feet_slip = "[0, [0.04, 0.2, 1.3]]"
+            joint_targets_rate = "[0, 0.8]"
+
+            # stand_still_h = "[0, 0.05]"
             # dof_acc = "[0, 3000.0]"
             # torques = "[0, 10.0]"
-            joint_targets_rate = "[0, 0.8]"
             # feet_contact_force = "[0, 20.0]"
             # joint_default = "[0, 1.5]"
 

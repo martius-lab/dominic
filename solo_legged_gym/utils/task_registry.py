@@ -54,7 +54,7 @@ class TaskRegistry:
         train_cfg = update_train_cfg_from_args(train_cfg, args)
 
         log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
-        log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + train_cfg.runner.run_name)
+        log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '_' + train_cfg.runner.run_name)
 
         if create_and_save:
             os.makedirs(log_dir)
