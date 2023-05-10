@@ -396,12 +396,12 @@ class DOMINO:
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
         mean_lagrange_losses = locs['mean_lagrange_losses']
         for i in range(len(mean_lagrange_losses)):
-            self.writer.add_scalar(f'Learning/lagrange_loss_{i}', mean_lagrange_losses[i], locs['it'])
+            self.writer.add_scalar(f'Skill/lagrange_loss_{i}', mean_lagrange_losses[i], locs['it'])
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
         for i in range(len(mean_lagrange_coeffs)):
-            self.writer.add_scalar(f'Learning/lagrange_coeff_{i}', mean_lagrange_coeffs[i], locs['it'])
+            self.writer.add_scalar(f'Skill/lagrange_coeff_{i}', mean_lagrange_coeffs[i], locs['it'])
         for i in range(self.env.num_skills - 1):
-            self.writer.add_scalar(f'Learning/lagrange_{i}', self.lagrange[i].item(), locs['it'])
+            self.writer.add_scalar(f'Skill/lagrange_{i}', self.lagrange[i].item(), locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
