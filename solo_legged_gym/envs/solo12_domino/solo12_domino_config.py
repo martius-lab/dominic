@@ -82,7 +82,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         max_push_avel_xyz = 0.5
 
         actuator_lag = True
-        randomize_actuator_lag = True
+        randomize_actuator_lag = False
         actuator_lag_steps = 3  # the lag simulated would be actuator_lag_steps * dt / decimation
 
     class rewards(BaseEnvCfg.rewards):
