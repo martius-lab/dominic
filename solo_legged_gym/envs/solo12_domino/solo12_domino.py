@@ -175,7 +175,7 @@ class Solo12DOMINO(BaseTask):
             self.gym.refresh_dof_state_tensor(self.sim)
         self.post_physics_step()
         # the skills are separated from the obs because we do not want to normalize it.
-        return self.obs_buf, self.skills, self.feature_buf, self.rew_buf, self.reset_buf, self.extras
+        return self.obs_buf, self.skills, self.feature_buf, self.rew_buf, self.group_rew_buf, self.reset_buf, self.extras
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -400,9 +400,9 @@ class Solo12DOMINO(BaseTask):
 
     def _prepare_reward(self):
         self.reward_terms = class_to_dict(self.cfg.rewards.terms)
-        self.reward_scales = self.cfg.rewards.scales
+        self.reward_powers = self.cfg.rewards.powers
         self.reward_groups = {}
-        for i in range(len(self.reward_scales)):
+        for i in range(len(self.reward_powers)):
             self.reward_groups[str(int(i))] = []
         for name, info in self.reward_terms.items():
             group = str(int(eval(info)[0]))
@@ -416,24 +416,25 @@ class Solo12DOMINO(BaseTask):
             for name in self.reward_groups.keys()}
 
         # allocate
-        self.group_reward = torch.ones(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
+        self.group_rew_buf = torch.ones(self.num_envs, len(self.reward_powers), dtype=torch.float, device=self.device,
+                                        requires_grad=False)
 
     def compute_reward(self):
-        self.rew_buf[:] = 0.
+        self.rew_buf[:] = 1.0
         for group_name, terms in self.reward_groups.items():
-            group_scale = self.reward_scales[int(group_name)]
-            self.group_reward = torch.ones(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
+            group_idx = int(group_name)
+            group_power = self.reward_powers[group_idx]
+            self.group_rew_buf[:, group_idx] = 1.0
             for i in range(len(terms)):
                 reward_name = terms[i]
                 reward_function = getattr(self, '_reward_' + reward_name)
                 reward_sigma = eval(self.reward_terms[reward_name])[1]
                 term_reward = reward_function(reward_sigma)
                 self.episode_term_sums[reward_name] += term_reward
-                self.group_reward *= term_reward
-            self.group_reward *= group_scale
-            self.episode_group_sums[group_name] += self.group_reward
-            self.rew_buf += self.group_reward
-
+                self.group_rew_buf[:, group_idx] *= term_reward
+            self.group_rew_buf[:, group_idx] = torch.pow(self.group_rew_buf[:, group_idx], group_power)
+            self.episode_group_sums[group_name] += self.group_rew_buf[:, group_idx]
+            self.rew_buf *= self.group_rew_buf[:, group_idx]
 
     # ------------------------------------------------------------------------------------------------------------------
 

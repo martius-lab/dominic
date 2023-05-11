@@ -91,10 +91,10 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             lin_vel_y = "[0, 0.15]"
             ang_vel_z = "[0, 0.3]"
 
-            lin_z = "[0, 0.1]"
-            lin_vel_z = "[0, 1.5]"
-            ang_xy = "[0, 0.4]"
-            ang_vel_xy = "[0, 6.0]"
+            lin_z = "[1, 0.1]"
+            lin_vel_z = "[1, 1.5]"
+            ang_xy = "[1, 0.4]"
+            ang_vel_xy = "[1, 6.0]"
 
             stand_still = "[0, 0.01]"
             feet_slip = "[0, [0.04, 0.2, 1.3]]"
@@ -111,8 +111,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # dof_vel = "[0, 50.0]"
             # feet_air_time = "[0, None]"
 
-        # task
-        scales = [1.0]
+        # task / motion
+        powers = [1, 1]
 
         base_height_target = 0.25
 
@@ -150,9 +150,9 @@ class Solo12DOMINOTrainCfg:
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
-        init_lagrange = 1.0  # coeff = sigmoid(init_lagrange)
+        init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
         lagrange_learning_rate = 1.e-3
-        sigmoid_scale = 20
+        sigmoid_scale = 30
         alpha = 0.9  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff

@@ -138,7 +138,7 @@ class DOMINO:
                     skills = new_skills
                     # use last obs to get the actions
                     actions, log_prob = self.policy.act_and_log_prob(obs)
-                    new_obs, new_skills, features, ext_rew, dones, infos = self.env.step(actions)
+                    new_obs, new_skills, features, ext_rew, group_rew, dones, infos = self.env.step(actions)
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
                     int_rew = self.get_intrinsic_reward(skills, features)
