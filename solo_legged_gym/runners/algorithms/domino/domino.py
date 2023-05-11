@@ -51,7 +51,8 @@ class DOMINO:
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
-        self.lagrange = nn.Parameter(torch.zeros(self.env.num_skills - 1, device=self.device), requires_grad=True)
+        self.lagrange = nn.Parameter(torch.ones(self.env.num_skills - 1,
+                                                device=self.device) * self.a_cfg.init_lagrange, requires_grad=True)
 
         # set up moving averages
         self.avg_ext_values = torch.zeros(self.env.num_skills, device=self.device, requires_grad=False)
@@ -168,7 +169,7 @@ class DOMINO:
             # Learning update
             start = stop
             mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, \
-                mean_lagrange_losses, mean_lagrange_coeffs = self.update()
+                mean_lagrange_losses, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update()
             stop = time.time()
             learn_time = stop - start
             if self.log_dir is not None:
@@ -226,7 +227,7 @@ class DOMINO:
     def get_lagrange_coeff(self, skills):
         lagrange_coeff = torch.zeros_like(skills).to(torch.float32)
         lagrange_coeff[skills > 0] = self.lagrange[skills[skills > 0] - 1]
-        lagrange_coeff = torch.sigmoid(lagrange_coeff)
+        lagrange_coeff = torch.sigmoid(lagrange_coeff / self.a_cfg.sigmoid_scale)
         lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
@@ -250,6 +251,7 @@ class DOMINO:
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
         mean_lagrange_coeffs = np.zeros(self.env.num_skills)
+        mean_constraint_satisfaction = np.zeros(self.env.num_skills - 1)
         mean_lagrange_losses = np.zeros(self.env.num_skills - 1)
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
@@ -348,11 +350,12 @@ class DOMINO:
             mean_surrogate_loss += surrogate_loss.item()
 
             # Lagrange loss
-            lagrange_losses = torch.sigmoid(self.lagrange) * (self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1)
+            lagrange_losses = self.lagrange * (self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1)
             lagrange_loss = torch.sum(lagrange_losses, dim=-1)
             lagrange_loss.backward()
             self.lagrange_optimizer.step()
             mean_lagrange_losses += lagrange_losses.cpu().detach().numpy()
+            mean_constraint_satisfaction += (self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).cpu().detach().numpy()
 
             # update moving average
             self.update_moving_avg(skills.squeeze(-1), ext_returns.squeeze(-1), features)
@@ -364,9 +367,10 @@ class DOMINO:
         mean_surrogate_loss /= num_updates
         mean_lagrange_losses /= num_updates
         mean_lagrange_coeffs /= num_updates
+        mean_constraint_satisfaction /= num_updates
         self.rollout_buffer.clear()
 
-        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_losses, mean_lagrange_coeffs
+        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_losses, mean_lagrange_coeffs, mean_constraint_satisfaction
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -397,6 +401,9 @@ class DOMINO:
         mean_lagrange_losses = locs['mean_lagrange_losses']
         for i in range(len(mean_lagrange_losses)):
             self.writer.add_scalar(f'Skill/lagrange_loss_{i}', mean_lagrange_losses[i], locs['it'])
+        mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
+        for i in range(len(mean_lagrange_losses)):
+            self.writer.add_scalar(f'Skill/constraint_satisfaction_{i}', mean_constraint_satisfaction[i], locs['it'])
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
         for i in range(len(mean_lagrange_coeffs)):
             self.writer.add_scalar(f'Skill/lagrange_coeff_{i}', mean_lagrange_coeffs[i], locs['it'])

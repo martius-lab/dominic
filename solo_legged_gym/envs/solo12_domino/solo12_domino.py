@@ -286,9 +286,6 @@ class Solo12DOMINO(BaseTask):
         ee_contact_fft = torch.fft.fft(self.ee_contact_buffer, dim=2)
         _, main_freq_idx = torch.max(ee_contact_fft.abs(), dim=2)
 
-        # test
-        main_freq_idx[:] = 2
-
         self.ee_contact_main_freq = self.ee_contact_freq[main_freq_idx]
         self.ee_contact_main_freq_phase = ee_contact_fft.angle()[
             torch.arange(self.num_envs).unsqueeze(-1), torch.arange(4).unsqueeze(0), main_freq_idx]

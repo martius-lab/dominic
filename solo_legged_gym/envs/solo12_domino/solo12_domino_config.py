@@ -112,7 +112,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # feet_air_time = "[0, None]"
 
         # task
-        scales = [1.0,]
+        scales = [1.0]
 
         base_height_target = 0.25
 
@@ -150,7 +150,9 @@ class Solo12DOMINOTrainCfg:
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
-        lagrange_learning_rate = 5.e-4
+        init_lagrange = 1.0  # coeff = sigmoid(init_lagrange)
+        lagrange_learning_rate = 1.e-3
+        sigmoid_scale = 20
         alpha = 0.9  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -172,7 +174,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'forward_.5'
+        run_name = 'bl'
 
         # load
         load_run = -1  # -1 = last run

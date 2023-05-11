@@ -16,7 +16,8 @@
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
         "gamma": 0.99,
-        "lagrange_learning_rate": 0.0005,
+        "init_lagrange": 1.0,
+        "lagrange_learning_rate": 0.001,
         "lam": 0.95,
         "learning_rate": 0.001,
         "max_grad_norm": 1.0,
@@ -24,6 +25,7 @@
         "num_mini_batches": 4,
         "repulsive_power": 0,
         "schedule": "adaptive",
+        "sigmoid_scale": 20,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -52,10 +54,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "forward_.5",
+        "run_name": "bl",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230510_103108"
+        "wandb_group": "cluster_20230511_084612"
       }
     },
     "env_cfg": {
@@ -96,8 +98,8 @@
             0.0
           ],
           "lin_vel_x": [
-            0.5,
-            0.5
+            -1.0,
+            1.0
           ],
           "lin_vel_y": [
             0.0,
@@ -138,7 +140,7 @@
         "max_push_vel_xyz": 0.5,
         "push_interval_s": 15,
         "push_robots": true,
-        "randomize_actuator_lag": true,
+        "randomize_actuator_lag": false,
         "randomize_base_mass": true,
         "randomize_friction": true
       },
