@@ -144,10 +144,10 @@ class Solo12DOMINO(BaseTask):
     def reset(self):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
-        _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
-                                                 self.num_actions,
-                                                 device=self.device,
-                                                 requires_grad=False))
+        _, _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
+                                                    self.num_actions,
+                                                    device=self.device,
+                                                    requires_grad=False))
 
     def pre_physics_step(self, actions):
         self.actions = actions
@@ -241,12 +241,13 @@ class Solo12DOMINO(BaseTask):
 
     def compute_features(self):
         min_freq, _ = torch.min(self.ee_contact_main_freq, dim=-1)
-        phase_offset = torch.concatenate(((self.ee_contact_main_freq_phase[:, 1] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-                                          (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-                                          (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
-                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
-                                          (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 2]).unsqueeze(-1),), dim=-1)
+        phase_offset = torch.concatenate(
+            ((self.ee_contact_main_freq_phase[:, 1] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
+             (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
+             (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
+             (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
+             (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
+             (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 2]).unsqueeze(-1),), dim=-1)
         phase_offset[phase_offset >= np.pi] -= np.pi
         phase_offset[phase_offset < -np.pi] += np.pi
         self.feature_buf = phase_offset

@@ -57,7 +57,7 @@
         "run_name": "bl",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230511_122035"
+        "wandb_group": "cluster_20230511_123053"
       }
     },
     "env_cfg": {
