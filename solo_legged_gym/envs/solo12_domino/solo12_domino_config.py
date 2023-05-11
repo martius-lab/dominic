@@ -151,10 +151,10 @@ class Solo12DOMINOTrainCfg:
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
-        lagrange_learning_rate = 1.e-3
-        sigmoid_scale = 1.0
-        intrinsic_rew_scale = 1.0
-        alpha = 0.9  # optimality ratio
+        lagrange_learning_rate = 3.e-3
+        sigmoid_scale = 30.0
+        intrinsic_rew_scale = 5.0
+        alpha = 0.8  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01
@@ -175,7 +175,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'base'
+        run_name = 'test_fixloose'
 
         # load
         load_run = -1  # -1 = last run

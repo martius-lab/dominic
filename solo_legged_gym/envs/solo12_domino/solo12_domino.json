@@ -7,7 +7,7 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": 0.9,
+        "alpha": 0.8,
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
@@ -17,8 +17,8 @@
         "entropy_coef": 0.01,
         "gamma": 0.99,
         "init_lagrange": 0.0,
-        "intrinsic_rew_scale": 10.0,
-        "lagrange_learning_rate": 0.001,
+        "intrinsic_rew_scale": 5.0,
+        "lagrange_learning_rate": 0.003,
         "lam": 0.95,
         "learning_rate": 0.001,
         "max_grad_norm": 1.0,
@@ -26,7 +26,7 @@
         "num_mini_batches": 4,
         "repulsive_power": 0,
         "schedule": "adaptive",
-        "sigmoid_scale": 1.0,
+        "sigmoid_scale": 30.0,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -55,10 +55,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "always_extrinsic",
+        "run_name": "test_fixloose",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230511_181232"
+        "wandb_group": "cluster_20230511_220052"
       }
     },
     "env_cfg": {
