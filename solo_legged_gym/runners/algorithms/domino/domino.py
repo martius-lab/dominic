@@ -141,7 +141,7 @@ class DOMINO:
                     new_obs, new_skills, features, ext_rew, group_rew, dones, infos = self.env.step(actions)
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
-                    int_rew = self.get_intrinsic_reward(skills, features)
+                    int_rew = self.a_cfg.intrinsic_rew_scale * self.get_intrinsic_reward(skills, features)
                     self.process_env_step(obs, actions, ext_rew, int_rew, skills, features, log_prob, dones, infos)
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
@@ -283,7 +283,9 @@ class DOMINO:
             with torch.inference_mode():
                 lagrange_coeff = self.get_lagrange_coeff(skills)
             advantages = lagrange_coeff * ext_advantages + (1 - lagrange_coeff) * int_advantages
-            mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff, dim=0) / torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).cpu().detach().numpy()
+            mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff,
+                                               dim=0) / torch.sum(func.one_hot(skills.squeeze(1)),
+                                                                  dim=0)).cpu().detach().numpy()
 
             # KL
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -421,22 +423,10 @@ class DOMINO:
 
         title = f" \033[1m Learning iteration {locs['it']}/{self.current_learning_iteration + self.num_learning_iterations} \033[0m "
 
-        if len(locs['len_buffer']) > 0:
-            log_string = (f"""{'#' * width}\n"""
-                          f"""{title.center(width, ' ')}\n\n"""
-                          f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
-                              'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
-                          f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
-                          f"""{'Mean extrinsic reward:':>{pad}} {statistics.mean(locs['ext_rew_buffer']):.2f}\n"""
-                          f"""{'Mean intrinsic reward:':>{pad}} {statistics.mean(locs['int_rew_buffer']):.2f}\n"""
-                          f"""{'Mean episode length:':>{pad}} {statistics.mean(locs['len_buffer']):.2f}\n""")
-        else:
-            log_string = (f"""{'#' * width}\n"""
-                          f"""{title.center(width, ' ')}\n\n"""
-                          f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
-                              'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
-                          f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
-                          f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n""")
+        log_string = (f"""{'#' * width}\n"""
+                      f"""{title.center(width, ' ')}\n\n"""
+                      f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
+                          'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n""")
 
         log_string += ep_string
         log_string += (f"""{'-' * width}\n"""

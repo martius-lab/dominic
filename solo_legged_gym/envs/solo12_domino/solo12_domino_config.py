@@ -87,18 +87,18 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[0, 0.15]"
-            lin_vel_y = "[0, 0.15]"
+            lin_vel_x = "[0, 0.2]"
+            lin_vel_y = "[0, 0.2]"
             ang_vel_z = "[0, 0.3]"
 
             lin_z = "[1, 0.1]"
-            lin_vel_z = "[1, 1.5]"
+            lin_vel_z = "[1, 2.0]"
             ang_xy = "[1, 0.4]"
-            ang_vel_xy = "[1, 6.0]"
+            ang_vel_xy = "[1, 8.0]"
 
             stand_still = "[0, 0.01]"
             feet_slip = "[0, [0.04, 0.2, 1.3]]"
-            joint_targets_rate = "[0, 0.8]"
+            joint_targets_rate = "[0, 1.0]"
 
             # stand_still_h = "[0, 0.05]"
             # dof_acc = "[0, 3000.0]"
@@ -152,7 +152,8 @@ class Solo12DOMINOTrainCfg:
         schedule = 'adaptive'  # could be adaptive, fixed
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
         lagrange_learning_rate = 1.e-3
-        sigmoid_scale = 30
+        sigmoid_scale = 1.0
+        intrinsic_rew_scale = 1.0
         alpha = 0.9  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -174,7 +175,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'group_rew'
+        run_name = 'base'
 
         # load
         load_run = -1  # -1 = last run

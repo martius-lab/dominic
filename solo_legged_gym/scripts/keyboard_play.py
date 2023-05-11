@@ -112,7 +112,7 @@ class keyboard_play:
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
-        self.obs, _, _, _, _, _ = self.env.step(self.policy(self.obs.detach()).detach())
+        self.obs, _, _, _, _, _, _ = self.env.step(self.policy(self.obs.detach()).detach())
         self.update_keyboard_command()
         if LOG_DATA:
             self.log_data()

@@ -17,6 +17,7 @@
         "entropy_coef": 0.01,
         "gamma": 0.99,
         "init_lagrange": 0.0,
+        "intrinsic_rew_scale": 10.0,
         "lagrange_learning_rate": 0.001,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -25,7 +26,7 @@
         "num_mini_batches": 4,
         "repulsive_power": 0,
         "schedule": "adaptive",
-        "sigmoid_scale": 30,
+        "sigmoid_scale": 1.0,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -54,10 +55,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "group_rew",
+        "run_name": "always_extrinsic",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230511_123215"
+        "wandb_group": "cluster_20230511_181232"
       }
     },
     "env_cfg": {
@@ -217,14 +218,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": "[1, 6.0]",
+          "ang_vel_xy": "[1, 8.0]",
           "ang_vel_z": "[0, 0.3]",
           "ang_xy": "[1, 0.4]",
           "feet_slip": "[0, [0.04, 0.2, 1.3]]",
-          "joint_targets_rate": "[0, 0.8]",
-          "lin_vel_x": "[0, 0.15]",
-          "lin_vel_y": "[0, 0.15]",
-          "lin_vel_z": "[1, 1.5]",
+          "joint_targets_rate": "[0, 1.0]",
+          "lin_vel_x": "[0, 0.2]",
+          "lin_vel_y": "[0, 0.2]",
+          "lin_vel_z": "[1, 2.0]",
           "lin_z": "[1, 0.1]",
           "stand_still": "[0, 0.01]"
         }
