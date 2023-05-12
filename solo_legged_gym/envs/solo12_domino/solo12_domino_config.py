@@ -87,14 +87,14 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[0, 0.2]"
-            lin_vel_y = "[0, 0.2]"
-            ang_vel_z = "[0, 0.3]"
+            lin_vel_x = "[1, 0.15]"
+            lin_vel_y = "[1, 0.15]"
+            ang_vel_z = "[1, 0.2]"
 
             lin_z = "[1, 0.1]"
-            lin_vel_z = "[1, 2.0]"
+            lin_vel_z = "[1, 1.5]"
             ang_xy = "[1, 0.4]"
-            ang_vel_xy = "[1, 8.0]"
+            ang_vel_xy = "[1, 6.0]"
 
             stand_still = "[0, 0.01]"
             feet_slip = "[0, [0.04, 0.2, 1.3]]"
@@ -111,7 +111,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # dof_vel = "[0, 50.0]"
             # feet_air_time = "[0, None]"
 
-        # task / motion
+        # loose / fixed
         powers = [1, 1]
 
         base_height_target = 0.25
@@ -150,17 +150,22 @@ class Solo12DOMINOTrainCfg:
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # could be adaptive, fixed
+
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
-        lagrange_learning_rate = 3.e-3
-        sigmoid_scale = 30.0
-        intrinsic_rew_scale = 5.0
+        lagrange_learning_rate = 1.e-3
+        sigmoid_scale = 1.0
+        intrinsic_rew_scale = 4.0
+        clip_lagrange = 20  # None
+
         alpha = 0.8  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01
         max_grad_norm = 1.
+
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99
+
         target_d = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
@@ -175,7 +180,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test_fixloose'
+        run_name = 'clip'
 
         # load
         load_run = -1  # -1 = last run

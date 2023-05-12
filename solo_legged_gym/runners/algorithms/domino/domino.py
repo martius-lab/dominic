@@ -49,10 +49,6 @@ class DOMINO:
                                  hidden_dims=self.n_cfg.value_hidden_dims,
                                  activation=self.n_cfg.value_activation).to(self.device)
 
-        self.ext_value = Value(num_obs=self.env.num_obs,
-                               hidden_dims=self.n_cfg.value_hidden_dims,
-                               activation=self.n_cfg.value_activation).to(self.device)
-
         self.int_value = Value(num_obs=self.env.num_obs,
                                hidden_dims=self.n_cfg.value_hidden_dims,
                                activation=self.n_cfg.value_activation).to(self.device)
@@ -96,7 +92,6 @@ class DOMINO:
         # set up optimizer
         self.learning_rate = self.a_cfg.learning_rate
         self.optimizer = optim.Adam(list(self.policy.parameters()) +
-                                    list(self.ext_value.parameters()) +
                                     list(self.int_value.parameters()) +
                                     list(self.fixed_value.parameters()) +
                                     list(self.loose_value.parameters()),
@@ -132,12 +127,10 @@ class DOMINO:
         ep_infos = []
         fixed_rew_buffer = deque(maxlen=100)
         loose_rew_buffer = deque(maxlen=100)
-        ext_rew_buffer = deque(maxlen=100)
         int_rew_buffer = deque(maxlen=100)
         len_buffer = deque(maxlen=100)
         cur_fixed_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_loose_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
-        cur_ext_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_int_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
 
@@ -152,14 +145,14 @@ class DOMINO:
                     skills = new_skills
                     # use last obs to get the actions
                     actions, log_prob = self.policy.act_and_log_prob(obs)
-                    new_obs, new_skills, features, ext_rew, group_rew, dones, infos = self.env.step(actions)
+                    new_obs, new_skills, features, group_rew, dones, infos = self.env.step(actions)
                     fixed_rew = group_rew[:, 0]
                     loose_rew = group_rew[:, 1]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
                     int_rew = self.a_cfg.intrinsic_rew_scale * self.get_intrinsic_reward(skills, features)
-                    self.process_env_step(obs, actions, ext_rew, int_rew, fixed_rew, loose_rew, skills, features,
-                                          log_prob, dones, infos)
+                    self.process_env_step(obs, actions, int_rew, fixed_rew, loose_rew, skills, features, log_prob,
+                                          dones, infos)
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
 
@@ -168,34 +161,30 @@ class DOMINO:
                             ep_infos.append(infos['episode'])
                         cur_fixed_rew_sum += fixed_rew
                         cur_loose_rew_sum += loose_rew
-                        cur_ext_rew_sum += ext_rew
                         cur_int_rew_sum += int_rew
                         cur_episode_length += 1
                         new_ids = (dones > 0).nonzero(as_tuple=False)
                         fixed_rew_buffer.extend(cur_fixed_rew_sum[new_ids][:, 0].cpu().numpy().tolist())
                         loose_rew_buffer.extend(cur_loose_rew_sum[new_ids][:, 0].cpu().numpy().tolist())
-                        ext_rew_buffer.extend(cur_ext_rew_sum[new_ids][:, 0].cpu().numpy().tolist())
                         int_rew_buffer.extend(cur_int_rew_sum[new_ids][:, 0].cpu().numpy().tolist())
                         len_buffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
                         cur_fixed_rew_sum[new_ids] = 0
                         cur_loose_rew_sum[new_ids] = 0
-                        cur_ext_rew_sum[new_ids] = 0
                         cur_int_rew_sum[new_ids] = 0
                         cur_episode_length[new_ids] = 0
 
                 last_fixed_values = self.fixed_value.evaluate(obs).detach()
                 last_loose_values = self.loose_value.evaluate(obs).detach()
-                last_ext_values = self.ext_value.evaluate(obs).detach()
                 last_int_values = self.int_value.evaluate(obs).detach()
-                self.rollout_buffer.compute_returns(last_ext_values, last_int_values, last_fixed_values,
-                                                    last_loose_values, self.a_cfg.gamma, self.a_cfg.lam)
+                self.rollout_buffer.compute_returns(last_int_values, last_fixed_values, last_loose_values,
+                                                    self.a_cfg.gamma, self.a_cfg.lam)
             stop = time.time()
             collection_time = stop - start
 
             # Learning update
             start = stop
-            mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_fixed_value_loss, mean_loose_value_loss, \
-                mean_surrogate_loss, mean_lagrange_losses, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update()
+            mean_value_loss, mean_int_value_loss, mean_fixed_value_loss, mean_loose_value_loss, mean_surrogate_loss, \
+                mean_lagrange_losses, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update()
             stop = time.time()
             learn_time = stop - start
             if self.log_dir is not None:
@@ -209,7 +198,7 @@ class DOMINO:
         # score not implemented yet
         return 0
 
-    def process_env_step(self, obs, actions, ext_rew, int_rew, fixed_rew, loose_rew, skills, features, log_prob, dones,
+    def process_env_step(self, obs, actions, int_rew, fixed_rew, loose_rew, skills, features, log_prob, dones,
                          infos):
         self.transition.observations = obs
 
@@ -218,14 +207,9 @@ class DOMINO:
         self.transition.action_mean = self.policy.action_mean.detach()
         self.transition.action_sigma = self.policy.action_std.detach()
 
-        self.transition.ext_values = self.ext_value.evaluate(obs).detach()
         self.transition.int_values = self.int_value.evaluate(obs).detach()
         self.transition.fixed_values = self.fixed_value.evaluate(obs).detach()
         self.transition.loose_values = self.loose_value.evaluate(obs).detach()
-
-        self.transition.ext_rew = ext_rew.clone()
-        self.transition.ext_rew += self.a_cfg.gamma * torch.squeeze(
-            self.transition.ext_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)  # bootstrap for timeouts
 
         self.transition.int_rew = int_rew.clone()
         self.transition.int_rew += self.a_cfg.gamma * torch.squeeze(
@@ -268,23 +252,22 @@ class DOMINO:
         lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
-    def update_moving_avg(self, skills, ext_returns, features):
+    def update_moving_avg(self, skills, loose_returns, features):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
-        encoded_ext_returns = encoded_skills * ext_returns.unsqueeze(-1).repeat(1, self.env.num_skills)
+        encoded_loose_returns = encoded_skills * loose_returns.unsqueeze(-1).repeat(1, self.env.num_skills)
         encoded_features = encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1)
 
-        mean_encoded_ext_returns = encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0)
+        mean_encoded_loose_returns = encoded_loose_returns.sum(dim=0) / encoded_skills.sum(dim=0)
         mean_encoded_features = encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1)
 
         self.avg_loose_values = self.a_cfg.avg_values_decay_factor * self.avg_loose_values + \
-                                (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
+                                (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_loose_returns
 
         self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
                             (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
 
     def update(self):
         mean_value_loss = 0
-        mean_ext_value_loss = 0
         mean_int_value_loss = 0
         mean_fixed_value_loss = 0
         mean_loose_value_loss = 0
@@ -296,15 +279,12 @@ class DOMINO:
                                                              self.a_cfg.num_learning_epochs)
         for (obs,
              actions,
-             target_ext_values,
              target_int_values,
              target_fixed_values,
              target_loose_values,
-             ext_advantages,
              int_advantages,
              fixed_advantages,
              loose_advantages,
-             ext_returns,
              int_returns,
              fixed_returns,
              loose_returns,
@@ -318,7 +298,6 @@ class DOMINO:
             # using the current policy
             _, _ = self.policy.act_and_log_prob(obs)  # update the distribution
             actions_log_prob_batch = self.policy.distribution.log_prob(actions)
-            ext_value = self.ext_value.evaluate(obs)
             int_value = self.int_value.evaluate(obs)
             fixed_value = self.fixed_value.evaluate(obs)
             loose_value = self.loose_value.evaluate(obs)
@@ -364,9 +343,6 @@ class DOMINO:
 
             # Value function loss
             if self.a_cfg.use_clipped_value_loss:
-                ext_value_clipped = target_ext_values + (ext_value - target_ext_values).clamp(
-                    -self.a_cfg.clip_param, self.a_cfg.clip_param
-                )
                 int_value_clipped = target_int_values + (int_value - target_int_values).clamp(
                     -self.a_cfg.clip_param, self.a_cfg.clip_param
                 )
@@ -377,8 +353,6 @@ class DOMINO:
                     -self.a_cfg.clip_param, self.a_cfg.clip_param
                 )
 
-                ext_value_loss = torch.max((ext_value - ext_returns).pow(2),
-                                           (ext_value_clipped - ext_returns).pow(2)).mean()
                 int_value_loss = torch.max((int_value - int_returns).pow(2),
                                            (int_value_clipped - int_returns).pow(2)).mean()
                 fixed_value_loss = torch.max((fixed_value - fixed_returns).pow(2),
@@ -387,12 +361,11 @@ class DOMINO:
                                              (loose_value_clipped - loose_returns).pow(2)).mean()
 
             else:
-                ext_value_loss = (ext_returns - ext_value).pow(2).mean()
                 int_value_loss = (int_returns - int_value).pow(2).mean()
                 fixed_value_loss = (fixed_returns - fixed_value).pow(2).mean()
                 loose_value_loss = (loose_returns - loose_value).pow(2).mean()
 
-            value_loss = ext_value_loss + int_value_loss + fixed_value_loss + loose_value_loss
+            value_loss = int_value_loss + fixed_value_loss + loose_value_loss
 
             weighted_loss = surrogate_loss + \
                             self.a_cfg.value_loss_coef * value_loss - \
@@ -402,7 +375,6 @@ class DOMINO:
             self.optimizer.zero_grad()
             weighted_loss.backward()
             nn.utils.clip_grad_norm_(list(self.policy.parameters()) +
-                                     list(self.ext_value.parameters()) +
                                      list(self.int_value.parameters()) +
                                      list(self.fixed_value.parameters()) +
                                      list(self.loose_value.parameters()),
@@ -410,7 +382,6 @@ class DOMINO:
             self.optimizer.step()
 
             mean_value_loss += value_loss.item()
-            mean_ext_value_loss += ext_value_loss.item()
             mean_int_value_loss += int_value_loss.item()
             mean_fixed_value_loss += fixed_value_loss.item()
             mean_loose_value_loss += loose_value_loss.item()
@@ -422,16 +393,21 @@ class DOMINO:
             lagrange_loss = torch.sum(lagrange_losses, dim=-1)
             lagrange_loss.backward()
             self.lagrange_optimizer.step()
+
+            if self.a_cfg.clip_lagrange is not None:
+                self.lagrange.data = torch.clamp(self.lagrange.data,
+                                                 min=-self.a_cfg.clip_lagrange,
+                                                 max=self.a_cfg.clip_lagrange)
+
             mean_lagrange_losses += lagrange_losses.cpu().detach().numpy()
             mean_constraint_satisfaction += (
                     self.avg_loose_values[1:] - self.a_cfg.alpha * self.avg_loose_values[0]).cpu().detach().numpy()
 
             # update moving average
-            self.update_moving_avg(skills.squeeze(-1), ext_returns.squeeze(-1), features)
+            self.update_moving_avg(skills.squeeze(-1), loose_returns.squeeze(-1), features)
 
         num_updates = self.a_cfg.num_learning_epochs * self.a_cfg.num_mini_batches
         mean_value_loss /= num_updates
-        mean_ext_value_loss /= num_updates
         mean_int_value_loss /= num_updates
         mean_fixed_value_loss /= num_updates
         mean_loose_value_loss /= num_updates
@@ -441,9 +417,8 @@ class DOMINO:
         mean_constraint_satisfaction /= num_updates
         self.rollout_buffer.clear()
 
-        return mean_value_loss, mean_ext_value_loss, mean_int_value_loss, mean_fixed_value_loss, \
-            mean_loose_value_loss, mean_surrogate_loss, mean_lagrange_losses, mean_lagrange_coeffs, \
-            mean_constraint_satisfaction
+        return mean_value_loss, mean_int_value_loss, mean_fixed_value_loss, mean_loose_value_loss, \
+            mean_surrogate_loss, mean_lagrange_losses, mean_lagrange_coeffs, mean_constraint_satisfaction
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -468,7 +443,6 @@ class DOMINO:
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
         self.writer.add_scalar('Learning/value_function_loss', locs['mean_value_loss'], locs['it'])
-        self.writer.add_scalar('Learning/ext_value_function_loss', locs['mean_ext_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/fixed_value_function_loss', locs['mean_fixed_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/loose_value_function_loss', locs['mean_loose_value_loss'], locs['it'])
@@ -490,7 +464,6 @@ class DOMINO:
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
         if len(locs['len_buffer']) > 0:
-            self.writer.add_scalar('Train/mean_extrinsic_reward', statistics.mean(locs['ext_rew_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_fixed_reward', statistics.mean(locs['fixed_rew_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_loose_reward', statistics.mean(locs['loose_rew_buffer']), locs['it'])
@@ -515,10 +488,9 @@ class DOMINO:
     def save(self, path, infos=None):
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
-            "extrinsic_value_state_dict": self.ext_value.state_dict(),
             "intrinsic_value_state_dict": self.int_value.state_dict(),
-            "fixed_value_state_dict": self.ext_value.state_dict(),
-            "loose_value_state_dict": self.int_value.state_dict(),
+            "fixed_value_state_dict": self.fixed_value.state_dict(),
+            "loose_value_state_dict": self.loose_value.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "iter": self.current_learning_iteration,
             "infos": infos,
@@ -532,7 +504,6 @@ class DOMINO:
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
-        self.ext_value.load_state_dict(loaded_dict["extrinsic_value_state_dict"])
         self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
         self.fixed_value.load_state_dict(loaded_dict["fixed_value_state_dict"])
         self.loose_value.load_state_dict(loaded_dict["loose_value_state_dict"])
@@ -558,7 +529,6 @@ class DOMINO:
 
     def train_mode(self):
         self.policy.train()
-        self.ext_value.train()
         self.int_value.train()
         if self.normalize_observation:
             self.obs_normalizer.train()
@@ -567,7 +537,6 @@ class DOMINO:
 
     def eval_mode(self):
         self.policy.eval()
-        self.ext_value.eval()
         self.int_value.eval()
         if self.normalize_observation:
             self.obs_normalizer.eval()

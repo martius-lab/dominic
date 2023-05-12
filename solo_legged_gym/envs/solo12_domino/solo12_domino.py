@@ -144,7 +144,7 @@ class Solo12DOMINO(BaseTask):
     def reset(self):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
-        _, _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
+        _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
                                                     self.num_actions,
                                                     device=self.device,
                                                     requires_grad=False))
@@ -175,7 +175,7 @@ class Solo12DOMINO(BaseTask):
             self.gym.refresh_dof_state_tensor(self.sim)
         self.post_physics_step()
         # the skills are separated from the obs because we do not want to normalize it.
-        return self.obs_buf, self.skills, self.feature_buf, self.rew_buf, self.group_rew_buf, self.reset_buf, self.extras
+        return self.obs_buf, self.skills, self.feature_buf, self.group_rew_buf, self.reset_buf, self.extras
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
