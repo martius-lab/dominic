@@ -26,19 +26,11 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.lagrange_learning_rate",
-     "values": [5e-4, 1e-3, 5e-3]
+     "values": [5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.sigmoid_scale",
-     "values": [1.0, 5.0]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.fixed_rew_scale",
-     "values": [1.0, 0.5, 0.3, 0.2, 0.1, 0.05]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.scale_fixed_advantages",
-     "values": [true, false]
+     "values": [1.0, 5.0, 10.0, 20.0, 30.0, 50.0]
     }
   ]
 }
