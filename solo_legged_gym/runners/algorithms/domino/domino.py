@@ -146,7 +146,7 @@ class DOMINO:
                     # use last obs to get the actions
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     new_obs, new_skills, features, group_rew, dones, infos = self.env.step(actions)
-                    fixed_rew = group_rew[:, 0]
+                    fixed_rew = self.a_cfg.fixed_rew_scale * group_rew[:, 0]
                     loose_rew = group_rew[:, 1]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
@@ -308,7 +308,12 @@ class DOMINO:
             # combine advantages
             with torch.inference_mode():
                 lagrange_coeff = self.get_lagrange_coeff(skills)
-            advantages = fixed_advantages + lagrange_coeff * loose_advantages + (1 - lagrange_coeff) * int_advantages
+            if self.a_cfg.scale_fixed_advantages:
+                advantages = (1 - lagrange_coeff) * fixed_advantages + lagrange_coeff * loose_advantages + (
+                        1 - lagrange_coeff) * int_advantages
+            else:
+                advantages = fixed_advantages + lagrange_coeff * loose_advantages + (
+                        1 - lagrange_coeff) * int_advantages
             mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff,
                                                dim=0) / torch.sum(func.one_hot(skills.squeeze(1)),
                                                                   dim=0)).cpu().detach().numpy()

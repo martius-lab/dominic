@@ -97,10 +97,19 @@ class Solo12DOMINO(BaseTask):
         self.ee_contact_buffer = torch.zeros(self.num_envs, 4, self.contact_buffer_length, dtype=torch.long,
                                              device=self.device, requires_grad=False)
         self.ee_contact_freq = torch.fft.fftfreq(self.contact_buffer_length).to(self.device)
-        self.ee_contact_main_freq = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device,
-                                                requires_grad=False)
-        self.ee_contact_main_freq_phase = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device,
-                                                      requires_grad=False)
+        self.ee_contact_focus_freq = self.cfg.env.contact_focus_freq
+        self.ee_contact_focus_freq_idx = torch.zeros(len(self.ee_contact_focus_freq), dtype=torch.long,
+                                                     device=self.device, requires_grad=False)
+        for i in range(len(self.ee_contact_focus_freq)):
+            self.ee_contact_focus_freq_idx[i] = \
+                (self.ee_contact_freq == self.ee_contact_focus_freq[i]).nonzero(as_tuple=True)[0]
+
+        self.ee_contact_focus_freq_mag = torch.zeros(self.num_envs, 4, len(self.ee_contact_focus_freq),
+                                                     dtype=torch.float, device=self.device,
+                                                     requires_grad=False)
+        self.ee_contact_focus_freq_phase = torch.zeros(self.num_envs, 4, len(self.ee_contact_focus_freq),
+                                                       dtype=torch.float, device=self.device,
+                                                       requires_grad=False)
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -145,9 +154,9 @@ class Solo12DOMINO(BaseTask):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
-                                                    self.num_actions,
-                                                    device=self.device,
-                                                    requires_grad=False))
+                                                 self.num_actions,
+                                                 device=self.device,
+                                                 requires_grad=False))
 
     def pre_physics_step(self, actions):
         self.actions = actions
@@ -240,17 +249,22 @@ class Solo12DOMINO(BaseTask):
             self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
 
     def compute_features(self):
-        min_freq, _ = torch.min(self.ee_contact_main_freq, dim=-1)
-        phase_offset = torch.concatenate(
-            ((self.ee_contact_main_freq_phase[:, 1] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-             (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-             (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 0]).unsqueeze(-1),
-             (self.ee_contact_main_freq_phase[:, 2] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
-             (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 1]).unsqueeze(-1),
-             (self.ee_contact_main_freq_phase[:, 3] - self.ee_contact_main_freq_phase[:, 2]).unsqueeze(-1),), dim=-1)
-        phase_offset[phase_offset >= np.pi] -= np.pi
-        phase_offset[phase_offset < -np.pi] += np.pi
-        self.feature_buf = phase_offset
+        focus_freq_mags = self.ee_contact_focus_freq_mag.view(self.num_envs, -1)
+        focus_freq_phase_offsets = torch.concatenate(
+            ((self.ee_contact_focus_freq_phase[:, 1, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
+             (self.ee_contact_focus_freq_phase[:, 2, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
+             (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
+             (self.ee_contact_focus_freq_phase[:, 2, :] - self.ee_contact_focus_freq_phase[:, 1, :]),
+             (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 1, :]),
+             (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 2, :]),
+             ), dim=-1)
+
+        focus_freq_phase_offsets[focus_freq_phase_offsets >= np.pi] -= np.pi
+        focus_freq_phase_offsets[focus_freq_phase_offsets < -np.pi] += np.pi
+
+        self.feature_buf = torch.concatenate(
+            (focus_freq_mags,
+             focus_freq_phase_offsets), dim=-1)
         # no noise added, no clipping
 
     def _get_noise_scale_vec(self):
@@ -284,12 +298,9 @@ class Solo12DOMINO(BaseTask):
         # contact buffer: 1 in contact, -1 in swing, 0 placeholder
         self.ee_contact_buffer = torch.cat((self.ee_contact_buffer[:, :, 1:],
                                             (self.ee_contact * 2 - 1).to(torch.long).unsqueeze(-1)), dim=-1)
-        ee_contact_fft = torch.fft.fft(self.ee_contact_buffer, dim=2)
-        _, main_freq_idx = torch.max(ee_contact_fft.abs(), dim=2)
-
-        self.ee_contact_main_freq = self.ee_contact_freq[main_freq_idx]
-        self.ee_contact_main_freq_phase = ee_contact_fft.angle()[
-            torch.arange(self.num_envs).unsqueeze(-1), torch.arange(4).unsqueeze(0), main_freq_idx]
+        ee_contact_fft = torch.fft.fft(self.ee_contact_buffer, dim=2)  # num_envs * 4 * buf_len
+        self.ee_contact_focus_freq_mag = ee_contact_fft[:, :, self.ee_contact_focus_freq_idx].abs()
+        self.ee_contact_focus_freq_phase = ee_contact_fft[:, :, self.ee_contact_focus_freq_idx].angle()
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],

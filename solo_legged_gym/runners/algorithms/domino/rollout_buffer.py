@@ -103,8 +103,10 @@ class RolloutBuffer:
                 next_loose_values = self.loose_values[step + 1]
             next_is_not_terminal = 1.0 - self.dones[step].float()
             int_delta = self.int_rew[step] + next_is_not_terminal * gamma * next_int_values - self.int_values[step]
-            fixed_delta = self.fixed_rew[step] + next_is_not_terminal * gamma * next_fixed_values - self.fixed_values[step]
-            loose_delta = self.loose_rew[step] + next_is_not_terminal * gamma * next_loose_values - self.loose_values[step]
+            fixed_delta = self.fixed_rew[step] + next_is_not_terminal * gamma * next_fixed_values - self.fixed_values[
+                step]
+            loose_delta = self.loose_rew[step] + next_is_not_terminal * gamma * next_loose_values - self.loose_values[
+                step]
             int_advantage = int_delta + next_is_not_terminal * gamma * lam * int_advantage
             fixed_advantage = fixed_delta + next_is_not_terminal * gamma * lam * fixed_advantage
             loose_advantage = loose_delta + next_is_not_terminal * gamma * lam * loose_advantage
@@ -117,8 +119,10 @@ class RolloutBuffer:
         self.fixed_advantages = self.fixed_returns - self.fixed_values
         self.loose_advantages = self.loose_returns - self.loose_values
         self.int_advantages = (self.int_advantages - self.int_advantages.mean()) / (self.int_advantages.std() + 1e-8)
-        self.fixed_advantages = (self.fixed_advantages - self.fixed_advantages.mean()) / (self.fixed_advantages.std() + 1e-8)
-        self.loose_advantages = (self.loose_advantages - self.loose_advantages.mean()) / (self.loose_advantages.std() + 1e-8)
+        self.fixed_advantages = (self.fixed_advantages - self.fixed_advantages.mean()) / (
+                    self.fixed_advantages.std() + 1e-8)
+        self.loose_advantages = (self.loose_advantages - self.loose_advantages.mean()) / (
+                    self.loose_advantages.std() + 1e-8)
 
     def mini_batch_generator(self, num_mini_batches, num_epochs=8):
         batch_size = self.num_envs * self.num_transitions_per_env

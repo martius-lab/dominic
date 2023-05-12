@@ -16,6 +16,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
+        "fixed_rew_scale": 1.0,
         "gamma": 0.99,
         "init_lagrange": 0.0,
         "intrinsic_rew_scale": 4.0,
@@ -26,6 +27,7 @@
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "repulsive_power": 0,
+        "scale_fixed_advantages": true,
         "schedule": "adaptive",
         "sigmoid_scale": 1.0,
         "target_d": 1.0,
@@ -56,10 +58,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "clip",
+        "run_name": "brand_new",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230512_111345"
+        "wandb_group": "cluster_20230512_121348"
       }
     },
     "env_cfg": {
@@ -148,12 +150,20 @@
       },
       "env": {
         "contact_buffer_length": 100,
+        "contact_focus_freq": [
+          0.01,
+          0.02,
+          0.04,
+          -0.01,
+          -0.02,
+          -0.04
+        ],
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 6,
+        "num_features": 60,
         "num_observations": 53,
         "play": false
       },

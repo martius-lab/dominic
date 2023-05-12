@@ -8,9 +8,12 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 6
+        num_features = 10 * 6  # (6 + 4) * # focus_freq
+
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
+        contact_focus_freq = [0.01, 0.02, 0.04, -0.01, -0.02, -0.04]
+
         play = False
         debug = False
 
@@ -111,7 +114,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # dof_vel = "[0, 50.0]"
             # feet_air_time = "[0, None]"
 
-        # loose / fixed
+        # 1 loose / 0 fixed
         powers = [1, 1]
 
         base_height_target = 0.25
@@ -154,8 +157,10 @@ class Solo12DOMINOTrainCfg:
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
         lagrange_learning_rate = 1.e-3
         sigmoid_scale = 1.0
+        fixed_rew_scale = 1.0
         intrinsic_rew_scale = 4.0
         clip_lagrange = 20  # None
+        scale_fixed_advantages = True
 
         alpha = 0.8  # optimality ratio
         gamma = 0.99  # discount factor
@@ -180,7 +185,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'clip'
+        run_name = 'brand_new'
 
         # load
         load_run = -1  # -1 = last run
@@ -188,4 +193,3 @@ class Solo12DOMINOTrainCfg:
 
         wandb = False
         wandb_group = 'test'
-
