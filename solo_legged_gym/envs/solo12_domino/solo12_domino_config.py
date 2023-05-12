@@ -8,7 +8,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 10 * 6  # (6 + 4) * # focus_freq
+        num_features = 6 * 6  # (6) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
@@ -90,9 +90,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[1, 0.15]"
-            lin_vel_y = "[1, 0.15]"
-            ang_vel_z = "[1, 0.2]"
+            lin_vel_x = "[0, 0.15]"
+            lin_vel_y = "[0, 0.15]"
+            ang_vel_z = "[0, 0.2]"
 
             lin_z = "[1, 0.1]"
             lin_vel_z = "[1, 1.5]"
@@ -155,12 +155,12 @@ class Solo12DOMINOTrainCfg:
         schedule = 'adaptive'  # could be adaptive, fixed
 
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
-        lagrange_learning_rate = 1.e-3
-        sigmoid_scale = 1.0
+        lagrange_learning_rate = 5.e-3
+        sigmoid_scale = 5.0
         fixed_rew_scale = 1.0
         intrinsic_rew_scale = 4.0
         clip_lagrange = 20  # None
-        scale_fixed_advantages = True
+        scale_fixed_advantages = False
 
         alpha = 0.8  # optimality ratio
         gamma = 0.99  # discount factor

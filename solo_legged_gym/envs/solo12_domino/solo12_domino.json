@@ -16,20 +16,20 @@
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
-        "fixed_rew_scale": 1.0,
+        "fixed_rew_scale": 0.2,
         "gamma": 0.99,
         "init_lagrange": 0.0,
         "intrinsic_rew_scale": 4.0,
-        "lagrange_learning_rate": 0.001,
+        "lagrange_learning_rate": 0.005,
         "lam": 0.95,
         "learning_rate": 0.001,
         "max_grad_norm": 1.0,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "repulsive_power": 0,
-        "scale_fixed_advantages": true,
+        "scale_fixed_advantages": false,
         "schedule": "adaptive",
-        "sigmoid_scale": 1.0,
+        "sigmoid_scale": 5.0,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -61,7 +61,7 @@
         "run_name": "brand_new",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230512_121348"
+        "wandb_group": "cluster_20230512_145517"
       }
     },
     "env_cfg": {
@@ -163,7 +163,7 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 60,
+        "num_features": 36,
         "num_observations": 53,
         "play": false
       },
