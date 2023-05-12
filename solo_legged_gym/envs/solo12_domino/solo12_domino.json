@@ -19,7 +19,7 @@
         "fixed_rew_scale": 1.0,
         "gamma": 0.99,
         "init_lagrange": 0.0,
-        "intrinsic_rew_scale": 4.0,
+        "intrinsic_rew_scale": 20.0,
         "lagrange_learning_rate": 0.01,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -61,7 +61,7 @@
         "run_name": "brand_new",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230512_155842"
+        "wandb_group": "cluster_20230512_165036"
       }
     },
     "env_cfg": {

@@ -158,7 +158,7 @@ class Solo12DOMINOTrainCfg:
         lagrange_learning_rate = 1.e-2
         sigmoid_scale = 30.0
         fixed_rew_scale = 1.0
-        intrinsic_rew_scale = 4.0
+        intrinsic_rew_scale = 20.0  # TODO
         clip_lagrange = 50  # None
         scale_fixed_advantages = False
 
