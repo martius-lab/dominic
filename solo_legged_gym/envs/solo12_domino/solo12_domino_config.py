@@ -31,8 +31,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [0.0, 0.0]  # min max [m/s]
-            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
+            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
+            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.45]  # x,y,z [m]
@@ -95,8 +95,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             ang_vel_z = "[0, 0.3]"
 
             stand_still = "[0, 0.01]"
-            feet_slip = "[0, [0.06, 0.15, 1.35]]"
+            feet_slip = "[0, [0.04, 0.2, 1.3]]"
             joint_targets_rate = "[0, 0.8]"
+            dof_acc = "[0, 4000.0]"
 
             lin_z = "[1, 0.1]"
             lin_vel_z = "[1, 1.5]"
@@ -104,7 +105,6 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             ang_vel_xy = "[1, 6.0]"
 
             # stand_still_h = "[0, 0.05]"
-            # dof_acc = "[0, 3000.0]"
             # torques = "[0, 10.0]"
             # feet_contact_force = "[0, 20.0]"
             # joint_default = "[0, 1.5]"
@@ -156,9 +156,9 @@ class Solo12DOMINOTrainCfg:
 
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
         lagrange_learning_rate = 1.e-2
-        sigmoid_scale = 30.0
-        fixed_rew_scale = 1.0
-        intrinsic_rew_scale = 20.0  # TODO
+        sigmoid_scale = 10.0
+        fixed_rew_scale = 0.5
+        intrinsic_rew_scale = 40.0
         clip_lagrange = 50  # None
         scale_fixed_advantages = False
 
@@ -185,7 +185,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'brand_new'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
