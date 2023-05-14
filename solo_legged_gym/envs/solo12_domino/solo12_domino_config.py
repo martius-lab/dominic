@@ -97,7 +97,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # stand_still = "[0, 0.01]"
             feet_slip = "[1, [0.04, 0.1, 1.4]]"
             joint_targets_rate = "[1, 0.8]"
-            dof_acc = "[1, 3000.0]"
+            # dof_acc = "[1, 3000.0]"
 
             lin_z = "[0, 0.1]"
             # lin_vel_z = "[1, 1.5]"
@@ -154,21 +154,18 @@ class Solo12DOMINOTrainCfg:
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
-        schedule = 'adaptive'  # could be adaptive, fixed
+        schedule = 'adaptive'  # adaptive, fixed
 
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
         lagrange_learning_rate = 1.e-3
         sigmoid_scale = 2.0
-        clip_lagrange = 'auto'  # None or 'auto' = 5 / sigmoid_scale
-        fixed_rew_scale = 10.0
-        loose_rew_scale = 1.0  # good to fix it, need to change lagrange hyperparams each time this is changed.
-        intrinsic_rew_scale = 100.0
-        scale_fixed_advantages = False
+        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        intrinsic_rew_scale = 40.0
 
         alpha = 0.9  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
-        desired_kl = 0.01
+        desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
         avg_values_decay_factor = 0.9
@@ -188,7 +185,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'back_to_black'
+        run_name = 'new_era'
 
         # load
         load_run = -1  # -1 = last run
