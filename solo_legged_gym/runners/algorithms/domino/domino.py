@@ -147,7 +147,7 @@ class DOMINO:
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     new_obs, new_skills, features, group_rew, dones, infos = self.env.step(actions)
                     fixed_rew = self.a_cfg.fixed_rew_scale * group_rew[:, 0]
-                    loose_rew = group_rew[:, 1]
+                    loose_rew = self.a_cfg.loose_rew_scale * group_rew[:, 1]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
                     int_rew = self.a_cfg.intrinsic_rew_scale * self.get_intrinsic_reward(skills, features)
@@ -248,7 +248,7 @@ class DOMINO:
     def get_lagrange_coeff(self, skills):
         lagrange_coeff = torch.zeros_like(skills).to(torch.float32)
         lagrange_coeff[skills > 0] = self.lagrange[skills[skills > 0] - 1]
-        lagrange_coeff = torch.sigmoid(lagrange_coeff / self.a_cfg.sigmoid_scale)
+        lagrange_coeff = torch.sigmoid(lagrange_coeff * self.a_cfg.sigmoid_scale)
         lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
@@ -400,9 +400,13 @@ class DOMINO:
             self.lagrange_optimizer.step()
 
             if self.a_cfg.clip_lagrange is not None:
+                if self.a_cfg.clip_lagrange == 'auto':
+                    clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
+                else:
+                    clip_lagrange_threshold = self.a_cfg.clip_lagrange
                 self.lagrange.data = torch.clamp(self.lagrange.data,
-                                                 min=-self.a_cfg.clip_lagrange,
-                                                 max=self.a_cfg.clip_lagrange)
+                                                 min=-clip_lagrange_threshold,
+                                                 max=clip_lagrange_threshold)
 
             mean_lagrange_losses += lagrange_losses.cpu().detach().numpy()
             mean_constraint_satisfaction += (

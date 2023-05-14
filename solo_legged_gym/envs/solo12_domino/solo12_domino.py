@@ -468,6 +468,12 @@ class Solo12DOMINO(BaseTask):
         lin_vel_z = self.base_lin_vel[:, 2]
         return torch.exp(-torch.square(lin_vel_z / sigma))
 
+    def _reward_lin_acc_z(self, sigma):
+        lin_vel_z = self.base_lin_vel[:, 2]
+        last_lin_vel_z = self.last_root_vel[:, 2]
+        lin_acc_z = torch.abs(lin_vel_z - last_lin_vel_z)
+        return torch.exp(-torch.square(lin_acc_z / sigma))
+
     def _reward_ang_xy(self, sigma):
         ang_xy = torch.stack(list(get_euler_xyz(self.base_quat)[:2]), dim=1)
         ang_xy = torch.norm(ang_xy, p=2, dim=1)
@@ -476,6 +482,12 @@ class Solo12DOMINO(BaseTask):
     def _reward_ang_vel_xy(self, sigma):
         ang_vel_xy = torch.norm(self.base_ang_vel[:, :2], p=2, dim=1)
         return torch.exp(-torch.square(ang_vel_xy / sigma))
+
+    def _reward_ang_acc_xy(self, sigma):
+        ang_vel_xy = self.base_ang_vel[:, :2]
+        last_ang_vel_xy = self.last_root_vel[:, 3:5]
+        ang_acc_xy = torch.norm(ang_vel_xy - last_ang_vel_xy, p=2, dim=1)
+        return torch.exp(-torch.square(ang_acc_xy / sigma))
 
     def _reward_joint_default(self, sigma):
         joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)

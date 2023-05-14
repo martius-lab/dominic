@@ -12,24 +12,25 @@
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
-        "clip_lagrange": 50,
+        "clip_lagrange": "auto",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
-        "fixed_rew_scale": 0.5,
+        "fixed_rew_scale": 10.0,
         "gamma": 0.99,
         "init_lagrange": 0.0,
-        "intrinsic_rew_scale": 40.0,
-        "lagrange_learning_rate": 0.01,
+        "intrinsic_rew_scale": 100.0,
+        "lagrange_learning_rate": 0.001,
         "lam": 0.95,
         "learning_rate": 0.001,
+        "loose_rew_scale": 1.0,
         "max_grad_norm": 1.0,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "repulsive_power": 0,
         "scale_fixed_advantages": false,
         "schedule": "adaptive",
-        "sigmoid_scale": 10.0,
+        "sigmoid_scale": 2.0,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -54,14 +55,14 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino",
         "load_run": -1,
-        "max_iterations": 3000,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "test",
+        "run_name": "back_to_black",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230512_232639"
+        "wandb_group": "cluster_20230514_102343"
       }
     },
     "env_cfg": {
@@ -85,7 +86,8 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER"
+          "SHOULDER",
+          "UPPER"
         ],
         "thickness": 0.01
       },
@@ -229,17 +231,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": "[1, 6.0]",
           "ang_vel_z": "[0, 0.3]",
           "ang_xy": "[1, 0.4]",
-          "dof_acc": "[0, 4000.0]",
-          "feet_slip": "[0, [0.04, 0.2, 1.3]]",
-          "joint_targets_rate": "[0, 0.8]",
-          "lin_vel_x": "[0, 0.2]",
-          "lin_vel_y": "[0, 0.2]",
-          "lin_vel_z": "[1, 1.5]",
-          "lin_z": "[1, 0.1]",
-          "stand_still": "[0, 0.01]"
+          "dof_acc": "[1, 3000.0]",
+          "feet_slip": "[1, [0.04, 0.1, 1.4]]",
+          "joint_targets_rate": "[1, 0.8]",
+          "lin_vel_x": "[0, 0.15]",
+          "lin_vel_y": "[0, 0.15]",
+          "lin_z": "[0, 0.1]"
         }
       },
       "seed": 42,

@@ -68,7 +68,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER"]
+        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -90,19 +90,21 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[0, 0.2]"
-            lin_vel_y = "[0, 0.2]"
+            lin_vel_x = "[0, 0.15]"
+            lin_vel_y = "[0, 0.15]"
             ang_vel_z = "[0, 0.3]"
 
-            stand_still = "[0, 0.01]"
-            feet_slip = "[0, [0.04, 0.2, 1.3]]"
-            joint_targets_rate = "[0, 0.8]"
-            dof_acc = "[0, 4000.0]"
+            # stand_still = "[0, 0.01]"
+            feet_slip = "[1, [0.04, 0.1, 1.4]]"
+            joint_targets_rate = "[1, 0.8]"
+            dof_acc = "[1, 3000.0]"
 
-            lin_z = "[1, 0.1]"
-            lin_vel_z = "[1, 1.5]"
+            lin_z = "[0, 0.1]"
+            # lin_vel_z = "[1, 1.5]"
+            # lin_acc_z = "[1, 10]"
             ang_xy = "[1, 0.4]"
-            ang_vel_xy = "[1, 6.0]"
+            # ang_vel_xy = "[1, 6.0]"
+            # ang_acc_xy = "[1, 40]"
 
             # stand_still_h = "[0, 0.05]"
             # torques = "[0, 10.0]"
@@ -155,11 +157,12 @@ class Solo12DOMINOTrainCfg:
         schedule = 'adaptive'  # could be adaptive, fixed
 
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
-        lagrange_learning_rate = 1.e-2
-        sigmoid_scale = 10.0
-        fixed_rew_scale = 0.5
-        intrinsic_rew_scale = 40.0
-        clip_lagrange = 50  # None
+        lagrange_learning_rate = 1.e-3
+        sigmoid_scale = 2.0
+        clip_lagrange = 'auto'  # None or 'auto' = 5 / sigmoid_scale
+        fixed_rew_scale = 10.0
+        loose_rew_scale = 1.0  # good to fix it, need to change lagrange hyperparams each time this is changed.
+        intrinsic_rew_scale = 100.0
         scale_fixed_advantages = False
 
         alpha = 0.9  # optimality ratio
@@ -178,14 +181,14 @@ class Solo12DOMINOTrainCfg:
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 3000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test'
+        run_name = 'back_to_black'
 
         # load
         load_run = -1  # -1 = last run
