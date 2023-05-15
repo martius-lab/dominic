@@ -95,16 +95,16 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             ang_vel_z = "[0, 0.3]"
 
             # stand_still = "[0, 0.01]"
-            feet_slip = "[1, [0.04, 0.1, 1.4]]"
+            feet_slip = "[1, [0.04, 0.15, 1.35]]"
             joint_targets_rate = "[1, 0.8]"
             # dof_acc = "[1, 3000.0]"
 
-            lin_z = "[0, 0.1]"
+            lin_z = "[1, 0.1]"
             # lin_vel_z = "[1, 1.5]"
-            # lin_acc_z = "[1, 10]"
+            # lin_acc_z = "[0, 10]"
             ang_xy = "[1, 0.4]"
             # ang_vel_xy = "[1, 6.0]"
-            # ang_acc_xy = "[1, 40]"
+            # ang_acc_xy = "[0, 40]"
 
             # stand_still_h = "[0, 0.05]"
             # torques = "[0, 10.0]"
@@ -158,8 +158,8 @@ class Solo12DOMINOTrainCfg:
 
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
         lagrange_learning_rate = 1.e-3
-        sigmoid_scale = 2.0
-        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        sigmoid_scale = 5.0
+        clip_lagrange = 'auto'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 40.0
 
         alpha = 0.9  # optimality ratio
@@ -178,14 +178,14 @@ class Solo12DOMINOTrainCfg:
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 3000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'new_era'
+        run_name = 'basic'
 
         # load
         load_run = -1  # -1 = last run
