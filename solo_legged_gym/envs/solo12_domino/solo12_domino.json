@@ -12,14 +12,14 @@
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
-        "clip_lagrange": "auto",
+        "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
         "gamma": 0.99,
         "init_lagrange": 0.0,
         "intrinsic_rew_scale": 40.0,
-        "lagrange_learning_rate": 0.001,
+        "lagrange_learning_rate": 0.01,
         "lam": 0.95,
         "learning_rate": 0.001,
         "max_grad_norm": 1.0,
@@ -27,7 +27,7 @@
         "num_mini_batches": 4,
         "repulsive_power": 0,
         "schedule": "adaptive",
-        "sigmoid_scale": 5.0,
+        "sigmoid_scale": 0.5,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -59,7 +59,7 @@
         "run_name": "basic",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230515_074027"
+        "wandb_group": "cluster_20230516_111814"
       }
     },
     "env_cfg": {
@@ -150,11 +150,9 @@
       "env": {
         "contact_buffer_length": 100,
         "contact_focus_freq": [
-          0.01,
-          0.02,
+          0.03,
           0.04,
-          -0.01,
-          -0.02,
+          -0.03,
           -0.04
         ],
         "debug": false,
@@ -162,7 +160,7 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 36,
+        "num_features": 24,
         "num_observations": 53,
         "play": false
       },

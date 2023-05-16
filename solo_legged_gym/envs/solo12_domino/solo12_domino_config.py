@@ -8,17 +8,18 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 6 * 6  # (6) * # focus_freq
+        num_features = 6 * 4  # (6) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.01, 0.02, 0.04, -0.01, -0.02, -0.04]
+        contact_focus_freq = [0.03, 0.04, -0.03, -0.04]
 
         play = False
         debug = False
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
+        # ref_pos_b = [1, 1, 0.5]
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
@@ -157,9 +158,9 @@ class Solo12DOMINOTrainCfg:
         schedule = 'adaptive'  # adaptive, fixed
 
         init_lagrange = 0.0  # coeff = sigmoid(init_lagrange)
-        lagrange_learning_rate = 1.e-3
-        sigmoid_scale = 5.0
-        clip_lagrange = 'auto'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        lagrange_learning_rate = 1.e-2
+        sigmoid_scale = 0.5
+        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 40.0
 
         alpha = 0.9  # optimality ratio
