@@ -12,7 +12,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.03, 0.04, -0.03, -0.04]
+        contact_focus_freq = [0.01, 0.02, 0.03, 0.04]
 
         play = False
         debug = False
@@ -91,17 +91,17 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[0, 0.2]"
-            lin_vel_y = "[0, 0.2]"
-            ang_vel_z = "[0, 0.4]"
+            lin_vel_x = "[1, 0.2]"
+            lin_vel_y = "[1, 0.2]"
+            ang_vel_z = "[1, 0.4]"
 
-            feet_slip = "[0, [0.06, 0.05, 3.0]]"
+            feet_slip = "[1, [0.06, 0.05, 3.0]]"
             joint_targets_rate = "[0, 0.8]"
             # stand_still = "[0, 0.01]"
             # dof_acc = "[1, 3000.0]"
 
-            lin_z = "[1, 0.1]"
-            ang_xy = "[1, 0.2]"
+            lin_z = "[0, 0.1]"
+            ang_xy = "[0, 0.2]"
             lin_vel_z = "[1, 1.0]"
             ang_vel_xy = "[1, 2.0]"
             # lin_acc_z = "[0, 10]"
@@ -186,7 +186,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test'
+        run_name = 'test2'
 
         # load
         load_run = -1  # -1 = last run
