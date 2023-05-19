@@ -91,20 +91,20 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[0, 0.15]"
-            lin_vel_y = "[0, 0.15]"
-            ang_vel_z = "[0, 0.3]"
+            lin_vel_x = "[0, 0.2]"
+            lin_vel_y = "[0, 0.2]"
+            ang_vel_z = "[0, 0.4]"
 
+            feet_slip = "[0, [0.06, 0.05, 3.0]]"
+            joint_targets_rate = "[0, 0.8]"
             # stand_still = "[0, 0.01]"
-            feet_slip = "[1, [0.04, 0.15, 1.35]]"
-            joint_targets_rate = "[1, 0.8]"
             # dof_acc = "[1, 3000.0]"
 
             lin_z = "[1, 0.1]"
-            # lin_vel_z = "[1, 1.5]"
+            ang_xy = "[1, 0.2]"
+            lin_vel_z = "[1, 1.0]"
+            ang_vel_xy = "[1, 2.0]"
             # lin_acc_z = "[0, 10]"
-            ang_xy = "[1, 0.4]"
-            # ang_vel_xy = "[1, 6.0]"
             # ang_acc_xy = "[0, 40]"
 
             # stand_still_h = "[0, 0.05]"
@@ -120,7 +120,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         # 0 fixed / 1 loose
         powers = [1, 1]
 
-        base_height_target = 0.25
+        base_height_target = 0.27
 
     class observations:
         clip_obs = True
@@ -163,7 +163,7 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 40.0
 
-        alpha = 0.9  # optimality ratio
+        alpha = 0.8  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -186,7 +186,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'basic'
+        run_name = 'trial'
 
         # load
         load_run = -1  # -1 = last run
