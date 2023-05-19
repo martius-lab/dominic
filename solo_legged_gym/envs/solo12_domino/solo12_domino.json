@@ -7,7 +7,7 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": 0.9,
+        "alpha": 0.8,
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
@@ -56,10 +56,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "basic",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230516_111814"
+        "wandb_group": "cluster_20230519_101538"
       }
     },
     "env_cfg": {
@@ -83,14 +83,13 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER",
-          "UPPER"
+          "SHOULDER"
         ],
         "thickness": 0.01
       },
       "commands": {
-        "change_commands": false,
-        "change_commands_interval_s": 10.0,
+        "change_commands": true,
+        "change_commands_interval_s": 5.0,
         "change_skills": false,
         "change_skills_intervals_s": 10.0,
         "num_commands": 3,
@@ -216,7 +215,7 @@
         }
       },
       "rewards": {
-        "base_height_target": 0.25,
+        "base_height_target": 0.27,
         "max_contact_force": 100.0,
         "powers": [
           1,
@@ -226,12 +225,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_z": "[0, 0.3]",
-          "ang_xy": "[1, 0.4]",
-          "feet_slip": "[1, [0.04, 0.15, 1.35]]",
-          "joint_targets_rate": "[1, 0.8]",
-          "lin_vel_x": "[0, 0.15]",
-          "lin_vel_y": "[0, 0.15]",
+          "ang_vel_xy": "[1, 2.0]",
+          "ang_vel_z": "[0, 0.4]",
+          "ang_xy": "[1, 0.2]",
+          "feet_slip": "[0, [0.06, 0.05, 3.0]]",
+          "joint_targets_rate": "[0, 0.8]",
+          "lin_vel_x": "[0, 0.2]",
+          "lin_vel_y": "[0, 0.2]",
+          "lin_vel_z": "[1, 1.0]",
           "lin_z": "[1, 0.1]"
         }
       },

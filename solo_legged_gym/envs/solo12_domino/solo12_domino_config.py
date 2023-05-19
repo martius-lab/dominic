@@ -23,8 +23,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        change_commands = False
-        change_commands_interval_s = 10.  # time before command are changed[s]
+        change_commands = True
+        change_commands_interval_s = 5.  # time before command are changed[s]
 
         num_skills = 5  # latent space
         change_skills = False
@@ -186,7 +186,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'trial'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
