@@ -95,8 +95,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             lin_vel_y = "[1, 0.2]"
             ang_vel_z = "[1, 0.4]"
 
-            feet_slip = "[1, [0.06, 0.05, 3.0]]"
-            joint_targets_rate = "[0, 0.8]"
+            feet_slip = "[1, [0.06, 0.1, 3.0]]"
+            joint_targets_rate = "[0, 1.0]"
             # stand_still = "[0, 0.01]"
             # dof_acc = "[1, 3000.0]"
 
