@@ -8,23 +8,23 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 6 * 4  # (6) * # focus_freq
+        num_features = 6 * 6  # (6) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.01, 0.02, 0.03, 0.04]
+        contact_focus_freq = [0.02, 0.03, 0.04, -0.02, -0.03, -0.04]
 
         play = False
         debug = False
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
-        # ref_pos_b = [1, 1, 0.5]
+        ref_pos_b = [1, 1, 0.5]
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
         change_commands = True
-        change_commands_interval_s = 5.  # time before command are changed[s]
+        change_commands_interval_s = 10.  # time before command are changed[s]
 
         num_skills = 5  # latent space
         change_skills = False
@@ -91,14 +91,13 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[1, 0.1]"
-            lin_vel_y = "[1, 0.1]"
-            ang_vel_z = "[1, 0.2]"
+            lin_vel_x = "[1, 0.2]"
+            lin_vel_y = "[1, 0.2]"
+            ang_vel_z = "[1, 0.4]"
 
             feet_slip = "[0, [0.06, 0.05, 3.0]]"
+            feet_height = "[0, [0.06, 0.2]]"
             joint_targets_rate = "[0, 0.8]"
-            # stand_still = "[0, 0.01]"
-            # dof_acc = "[1, 3000.0]"
 
             lin_z = "[0, 0.1]"
             ang_xy = "[0, 0.2]"
@@ -107,6 +106,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
+            # stand_still = "[0, 0.01]"
+            # dof_acc = "[1, 3000.0]"
             # stand_still_h = "[0, 0.05]"
             # torques = "[0, 10.0]"
             # feet_contact_force = "[0, 20.0]"
@@ -130,7 +131,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         class noise_scales:
             dof_pos = 0.05
-            dof_vel = 0.1
+            dof_vel = 1.0
             lin_vel = 0.2
             ang_vel = 0.2
             gravity = 0.1
@@ -161,9 +162,10 @@ class Solo12DOMINOTrainCfg:
         lagrange_learning_rate = 1.e-2
         sigmoid_scale = 0.5
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        intrinsic_rew_scale = 40.0
+        intrinsic_rew_scale = 60.0
+        constraint_margin = 0.5  # 0.5
 
-        alpha = 0.8  # optimality ratio
+        alpha = 0.7  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -186,7 +188,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'constraint_margin'
+        run_name = 'new_baseline'
 
         # load
         load_run = -1  # -1 = last run

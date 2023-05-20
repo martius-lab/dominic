@@ -12,7 +12,7 @@ import csv
 
 EXPORT_POLICY = True
 LOG_DATA = True
-REAL_TIME = False
+REAL_TIME = True
 np.set_printoptions(precision=2)
 
 
@@ -27,9 +27,9 @@ class keyboard_play:
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
         env_cfg.domain_rand.push_robots = False
-        env_cfg.domain_rand.actuator_lag = False
+        env_cfg.domain_rand.actuator_lag = True
         env_cfg.domain_rand.randomize_actuator_lag = False
-        env_cfg.domain_rand.actuator_lag_steps = 6
+        env_cfg.domain_rand.actuator_lag_steps = 3
         env_cfg.commands.change_commands = False
 
         env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)

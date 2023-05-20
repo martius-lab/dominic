@@ -329,7 +329,8 @@ class DOMINO:
             # combine advantages
             with torch.inference_mode():
                 lagrange_coeff = self.get_lagrange_coeff(skills)
-            advantages = 0.3 * fixed_advantages + lagrange_coeff * loose_advantages + (1 - lagrange_coeff) * int_advantages
+            advantages = 0.5 * fixed_advantages + lagrange_coeff * loose_advantages + (
+                        1 - lagrange_coeff) * int_advantages
             mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff,
                                                dim=0) / torch.sum(func.one_hot(skills.squeeze(1)),
                                                                   dim=0)).cpu().detach().numpy()
@@ -417,8 +418,8 @@ class DOMINO:
             mean_surrogate_loss += surrogate_loss.item()
 
             # Lagrange loss
-            lagrange_losses = self.lagrange * (
-                    self.avg_loose_values[1:] - self.a_cfg.alpha * self.avg_loose_values[0] - 0.5).squeeze(-1)
+            lagrange_losses = self.lagrange * (self.avg_loose_values[1:] - self.a_cfg.alpha * self.avg_loose_values[0] -
+                                               self.a_cfg.constraint_margin).squeeze(-1)
             lagrange_loss = torch.sum(lagrange_losses, dim=-1)
             lagrange_loss.backward()
             self.lagrange_optimizer.step()
