@@ -17,6 +17,7 @@
         "constraint_margin": 0.5,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
+        "fixed_adv_coeff": 0.4,
         "gamma": 0.99,
         "init_lagrange": 0.0,
         "intrinsic_rew_scale": 60.0,
@@ -57,10 +58,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "new_baseline",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230520_214607"
+        "wandb_group": "cluster_20230521_220926"
       }
     },
     "env_cfg": {
@@ -84,7 +85,8 @@
         "self_collisions": 1,
         "terminate_after_contacts_on": [
           "base",
-          "SHOULDER"
+          "SHOULDER",
+          "UPPER"
         ],
         "thickness": 0.01
       },
@@ -94,7 +96,7 @@
         "change_skills": false,
         "change_skills_intervals_s": 10.0,
         "num_commands": 3,
-        "num_skills": 5,
+        "num_skills": 8,
         "ranges": {
           "ang_vel_yaw": [
             -1.0,
@@ -153,17 +155,15 @@
           0.02,
           0.03,
           0.04,
-          -0.02,
-          -0.03,
-          -0.04
+          0.05
         ],
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 36,
-        "num_observations": 53,
+        "num_features": 24,
+        "num_observations": 56,
         "play": false
       },
       "init_member_classes": {},
@@ -228,7 +228,7 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": "[1, 2.0]",
+          "ang_vel_xy": "[1, 8.0]",
           "ang_vel_z": "[1, 0.4]",
           "ang_xy": "[0, 0.2]",
           "feet_height": "[0, [0.06, 0.2]]",
@@ -236,7 +236,7 @@
           "joint_targets_rate": "[0, 0.8]",
           "lin_vel_x": "[1, 0.2]",
           "lin_vel_y": "[1, 0.2]",
-          "lin_vel_z": "[1, 1.0]",
+          "lin_vel_z": "[1, 4.0]",
           "lin_z": "[0, 0.1]"
         }
       },

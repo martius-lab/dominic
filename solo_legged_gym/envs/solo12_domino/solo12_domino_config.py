@@ -6,13 +6,13 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 33 + 12 + 3 + 5  # #states + #actions + #commands + #skills
+        num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 6 * 6  # (6) * # focus_freq
+        num_features = 6 * 4  # (6) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.02, 0.03, 0.04, -0.02, -0.03, -0.04]
+        contact_focus_freq = [0.02, 0.03, 0.04, 0.05]
 
         play = False
         debug = False
@@ -26,7 +26,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_commands = True
         change_commands_interval_s = 10.  # time before command are changed[s]
 
-        num_skills = 5  # latent space
+        num_skills = 8  # latent space
         change_skills = False
         change_skills_intervals_s = 10.  # time before skills are changed[s]
 
@@ -69,7 +69,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER"]
+        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -101,8 +101,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
             lin_z = "[0, 0.1]"
             ang_xy = "[0, 0.2]"
-            lin_vel_z = "[1, 1.0]"
-            ang_vel_xy = "[1, 2.0]"
+            lin_vel_z = "[1, 2.0]"
+            ang_vel_xy = "[1, 6.0]"
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -164,6 +164,7 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 60.0
         constraint_margin = 0.5  # 0.5
+        fixed_adv_coeff = 0.4
 
         alpha = 0.7  # optimality ratio
         gamma = 0.99  # discount factor
@@ -188,7 +189,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'new_baseline'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run

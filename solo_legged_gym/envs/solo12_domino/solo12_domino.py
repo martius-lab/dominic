@@ -102,7 +102,7 @@ class Solo12DOMINO(BaseTask):
                                                      device=self.device, requires_grad=False)
         for i in range(len(self.ee_contact_focus_freq)):
             self.ee_contact_focus_freq_idx[i] = \
-                (self.ee_contact_freq == self.ee_contact_focus_freq[i]).nonzero(as_tuple=True)[0]
+                (abs(self.ee_contact_freq - self.ee_contact_focus_freq[i]) < 1e-4).nonzero(as_tuple=True)[0]
 
         self.ee_contact_focus_freq_mag = torch.zeros(self.num_envs, 4, len(self.ee_contact_focus_freq),
                                                      dtype=torch.float, device=self.device,
