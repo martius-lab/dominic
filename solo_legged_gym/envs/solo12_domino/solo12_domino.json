@@ -14,7 +14,7 @@
         "avg_values_decay_factor": 0.9,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
-        "constraint_margin": 0.5,
+        "constraint_margin": 0.4,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
         "fixed_adv_coeff": 0.4,
@@ -54,14 +54,14 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino",
         "load_run": -1,
-        "max_iterations": 3000,
+        "max_iterations": 5000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
         "run_name": "bl",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230522_100100"
+        "wandb_group": "cluster_20230522_222736"
       }
     },
     "env_cfg": {
@@ -228,15 +228,15 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": "[1, 8.0]",
+          "ang_vel_xy": "[1, 6.0]",
           "ang_vel_z": "[1, 0.4]",
-          "ang_xy": "[0, 0.2]",
-          "feet_height": "[0, [0.06, 0.2]]",
-          "feet_slip": "[0, [0.06, 0.05, 3.0]]",
+          "ang_xy": "[0, 0.4]",
+          "feet_height": "[0, [0.04, 0.2]]",
+          "feet_slip": "[0, [0.04, 0.1, 3.0]]",
           "joint_targets_rate": "[0, 0.8]",
           "lin_vel_x": "[1, 0.2]",
           "lin_vel_y": "[1, 0.2]",
-          "lin_vel_z": "[1, 4.0]",
+          "lin_vel_z": "[1, 2.0]",
           "lin_z": "[0, 0.1]"
         }
       },

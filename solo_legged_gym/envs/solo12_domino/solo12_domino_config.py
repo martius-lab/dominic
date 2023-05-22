@@ -95,14 +95,14 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             lin_vel_y = "[1, 0.2]"
             ang_vel_z = "[1, 0.4]"
 
-            feet_slip = "[0, [0.06, 0.05, 3.0]]"
-            feet_height = "[0, [0.06, 0.2]]"
+            feet_slip = "[0, [0.04, 0.1, 3.0]]"
+            feet_height = "[0, [0.04, 0.2]]"
             joint_targets_rate = "[0, 0.8]"
 
             lin_z = "[0, 0.1]"
-            ang_xy = "[0, 0.2]"  # 0.3, 0.4?
-            lin_vel_z = "[1, 4.0]"
-            ang_vel_xy = "[1, 8.0]"
+            ang_xy = "[0, 0.4]"
+            lin_vel_z = "[1, 2.0]"
+            ang_vel_xy = "[1, 6.0]"
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -163,7 +163,7 @@ class Solo12DOMINOTrainCfg:
         sigmoid_scale = 0.5
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 60.0
-        constraint_margin = 0.5  # 0.5
+        constraint_margin = 0.4  # 0.5
         fixed_adv_coeff = 0.4
 
         alpha = 0.7  # optimality ratio
@@ -182,7 +182,7 @@ class Solo12DOMINOTrainCfg:
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 3000  # number of policy updates
+        max_iterations = 5000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
