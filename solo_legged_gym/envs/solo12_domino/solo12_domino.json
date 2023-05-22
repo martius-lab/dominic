@@ -58,10 +58,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "baseline",
+        "run_name": "bl",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230521_220926"
+        "wandb_group": "cluster_20230522_100100"
       }
     },
     "env_cfg": {

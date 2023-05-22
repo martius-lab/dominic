@@ -100,9 +100,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 0.8]"
 
             lin_z = "[0, 0.1]"
-            ang_xy = "[0, 0.2]"
-            lin_vel_z = "[1, 2.0]"
-            ang_vel_xy = "[1, 6.0]"
+            ang_xy = "[0, 0.2]"  # 0.3, 0.4?
+            lin_vel_z = "[1, 4.0]"
+            ang_vel_xy = "[1, 8.0]"
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -189,7 +189,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'baseline'
+        run_name = 'bl'
 
         # load
         load_run = -1  # -1 = last run
