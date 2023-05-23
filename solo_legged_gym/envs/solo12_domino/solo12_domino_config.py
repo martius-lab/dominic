@@ -32,8 +32,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
-            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
+            lin_vel_y = [0.0, 0.0]  # min max [m/s]
+            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.45]  # x,y,z [m]
@@ -91,18 +91,18 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[1, 0.2]"
-            lin_vel_y = "[1, 0.2]"
-            ang_vel_z = "[1, 0.4]"
+            lin_vel_x = "[0, 0.3]"
+            lin_vel_y = "[0, 0.2]"
+            ang_vel_z = "[0, 0.2]"
 
             feet_slip = "[0, [0.04, 0.1, 3.0]]"
             feet_height = "[0, [0.04, 0.2]]"
             joint_targets_rate = "[0, 0.8]"
 
-            lin_z = "[0, 0.1]"
-            ang_xy = "[0, 0.4]"
-            lin_vel_z = "[1, 2.0]"
-            ang_vel_xy = "[1, 6.0]"
+            lin_z = "[0, 0.3]"
+            ang_xy = "[0, 1.2]"
+            lin_vel_z = "[1, 0.8]"
+            ang_vel_xy = "[1, 2.4]"
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -163,8 +163,8 @@ class Solo12DOMINOTrainCfg:
         sigmoid_scale = 0.5
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 60.0
-        constraint_margin = 0.4  # 0.5
-        fixed_adv_coeff = 0.4
+        constraint_margin = 1.0  # 0.5
+        fixed_adv_coeff = 1.0
 
         alpha = 0.7  # optimality ratio
         gamma = 0.99  # discount factor
@@ -189,7 +189,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'bl'
+        run_name = 'tune'
 
         # load
         load_run = -1  # -1 = last run
