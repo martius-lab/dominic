@@ -20,7 +20,7 @@
         "constraint_margin": 1.0,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": 1.0,
+        "fixed_adv_coeff": 0.5,
         "gamma": 0.99,
         "intrinsic_rew_scale": 60.0,
         "lagrange_learning_rate": 0.01,
@@ -63,7 +63,7 @@
         "run_name": "debug",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230524_150752"
+        "wandb_group": "cluster_20230524_152134"
       }
     },
     "env_cfg": {
@@ -233,14 +233,14 @@
         "terms": {
           "ang_vel_xy": "[2, 2.4]",
           "ang_vel_z": "[1, 0.6]",
-          "ang_xy": "[1, 0.6]",
+          "ang_xy": "[0, 0.6]",
           "feet_height": "[0, [0.06, 0.2]]",
           "feet_slip": "[0, [0.06, 0.1, 3.0]]",
           "joint_targets_rate": "[0, 0.8]",
           "lin_vel_x": "[1, 0.3]",
           "lin_vel_y": "[1, 0.3]",
           "lin_vel_z": "[2, 0.8]",
-          "lin_z": "[1, 0.2]"
+          "lin_z": "[0, 0.2]"
         }
       },
       "seed": 42,
