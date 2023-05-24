@@ -7,7 +7,10 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": 0.7,
+        "alpha": [
+          0.9,
+          0.7
+        ],
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
@@ -19,7 +22,6 @@
         "entropy_coef": 0.01,
         "fixed_adv_coeff": 1.0,
         "gamma": 0.99,
-        "init_lagrange": 0.0,
         "intrinsic_rew_scale": 60.0,
         "lagrange_learning_rate": 0.01,
         "lam": 0.95,
@@ -58,10 +60,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "tune",
+        "run_name": "debug",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230523_215802"
+        "wandb_group": "cluster_20230524_150752"
       }
     },
     "env_cfg": {
@@ -99,16 +101,16 @@
         "num_skills": 8,
         "ranges": {
           "ang_vel_yaw": [
-            -0.5,
-            0.5
+            -1.0,
+            1.0
           ],
           "lin_vel_x": [
             -1.0,
             1.0
           ],
           "lin_vel_y": [
-            0.0,
-            0.0
+            -1.0,
+            1.0
           ]
         }
       },
@@ -222,22 +224,23 @@
         "max_contact_force": 100.0,
         "powers": [
           1,
+          1,
           1
         ],
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": "[1, 2.4]",
-          "ang_vel_z": "[0, 0.2]",
-          "ang_xy": "[0, 1.2]",
-          "feet_height": "[0, [0.04, 0.2]]",
-          "feet_slip": "[0, [0.04, 0.1, 3.0]]",
+          "ang_vel_xy": "[2, 2.4]",
+          "ang_vel_z": "[1, 0.6]",
+          "ang_xy": "[1, 0.6]",
+          "feet_height": "[0, [0.06, 0.2]]",
+          "feet_slip": "[0, [0.06, 0.1, 3.0]]",
           "joint_targets_rate": "[0, 0.8]",
-          "lin_vel_x": "[0, 0.3]",
-          "lin_vel_y": "[0, 0.2]",
-          "lin_vel_z": "[1, 0.8]",
-          "lin_z": "[0, 0.3]"
+          "lin_vel_x": "[1, 0.3]",
+          "lin_vel_y": "[1, 0.3]",
+          "lin_vel_z": "[2, 0.8]",
+          "lin_z": "[1, 0.2]"
         }
       },
       "seed": 42,
