@@ -32,8 +32,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
         class ranges:
             lin_vel_x = [-1.0, 1.0]  # min max [m/s]
-            lin_vel_y = [-1.0, 1.0]  # min max [m/s]
-            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
+            lin_vel_y = [0.0, 0.0]  # min max [m/s]
+            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.45]  # x,y,z [m]
@@ -92,17 +92,18 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
             lin_vel_x = "[1, 0.3]"
-            lin_vel_y = "[1, 0.3]"
             ang_vel_z = "[1, 0.6]"
 
-            feet_slip = "[0, [0.06, 0.1, 3.0]]"
-            feet_height = "[0, [0.06, 0.2]]"
+            feet_slip = "[0, [0.04, 0.1, 3.0]]"
+            feet_height = "[0, [0.04, 0.2]]"
             joint_targets_rate = "[0, 0.8]"
 
-            lin_z = "[0, 0.2]"
+            lin_z = "[0, 0.1]"
             ang_xy = "[0, 0.6]"
-            lin_vel_z = "[2, 0.8]"
-            ang_vel_xy = "[2, 2.4]"
+
+            lin_vel_y = "[2, 0.4]"
+            lin_vel_z = "[2, 0.4]"
+            ang_vel_xy = "[2, 1.2]"
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -152,7 +153,7 @@ class Solo12DOMINOTrainCfg:
         value_loss_coef = 1.0
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.01
+        entropy_coef = 0.02
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
         learning_rate = 1.e-3  # 5.e-4
@@ -162,10 +163,9 @@ class Solo12DOMINOTrainCfg:
         sigmoid_scale = 0.5
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 60.0
-        constraint_margin = 1.0  # 0.5
-        fixed_adv_coeff = 0.5
-
-        alpha = [0.9, 0.7]  # optimality ratio
+        fixed_adv_coeff = 0.4
+        constraint_margin = [1.0, 5.0]  # 0.5
+        alpha = [0.9, 0.5]  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -188,7 +188,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'debug'
+        run_name = 'forward_turning'
 
         # load
         load_run = -1  # -1 = last run
