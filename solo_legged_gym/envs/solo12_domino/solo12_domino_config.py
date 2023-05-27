@@ -164,7 +164,7 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 60.0
         fixed_adv_coeff = 0.4
-        constraint_margin = [1.0, 5.0]  # 0.5
+        constraint_margin = "[1.0, 0.0]"  # 0.5
         alpha = [0.9, 0.5]  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -188,7 +188,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'forward_turning'
+        run_name = 'nomargin'
 
         # load
         load_run = -1  # -1 = last run

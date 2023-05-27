@@ -26,7 +26,11 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
-     "values": [1.0, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0]
+     "values": [1.0, 5.0, 10.0, 30.0, 60.0]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
+     "values": ["auto_2", "auto_3", "auto_4", "auto_5"]
     }
   ]
 }
