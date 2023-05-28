@@ -25,12 +25,16 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-     "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
-     "values": [1.0, 5.0, 10.0, 30.0, 60.0]
+     "param": "solo_legged_gym.train_cfg.algorithm.entropy_coef",
+     "values": [0.01, 0.02, 0.025, 0.03, 0.04]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
      "values": ["auto_2", "auto_3", "auto_4", "auto_5"]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.constraint_margin",
+     "values": ["[1.0, 0.0]", "[1.0, 0.1]", "[1.0, 0.5]", "[1.0, 1.0]"]
     }
   ]
 }
