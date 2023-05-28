@@ -7,17 +7,14 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": [
-          0.9,
-          0.5
-        ],
+        "alpha": "[0.9, 0.5]",
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
-        "constraint_margin": "[1.0, 0.0]",
+        "constraint_margin": "[1.0, 1.0]",
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.4,
@@ -60,10 +57,10 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "margin",
+        "run_name": "alpha",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230528_091012"
+        "wandb_group": "cluster_20230528_212149"
       }
     },
     "env_cfg": {
@@ -233,14 +230,14 @@
         "terms": {
           "ang_vel_xy": "[2, 1.2]",
           "ang_vel_z": "[1, 0.6]",
-          "ang_xy": "[0, 0.6]",
+          "ang_xy": "[2, 0.2]",
           "feet_height": "[0, [0.04, 0.4]]",
           "feet_slip": "[0, [0.04, 0.2, 3.0]]",
           "joint_targets_rate": "[0, 0.8]",
           "lin_vel_x": "[1, 0.3]",
           "lin_vel_y": "[2, 0.4]",
           "lin_vel_z": "[2, 0.4]",
-          "lin_z": "[0, 0.1]"
+          "lin_z": "[2, 0.1]"
         }
       },
       "seed": 42,
