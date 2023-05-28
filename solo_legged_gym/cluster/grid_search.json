@@ -26,11 +26,11 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.entropy_coef",
-     "values": [0.01, 0.02, 0.025, 0.03, 0.04]
+     "values": [0.02, 0.025, 0.03]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
-     "values": ["auto_2", "auto_3", "auto_4", "auto_5"]
+     "values": ["auto_2", "auto_5"]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.constraint_margin",
