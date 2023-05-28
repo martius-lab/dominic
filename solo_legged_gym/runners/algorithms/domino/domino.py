@@ -387,7 +387,7 @@ class DOMINO:
             lagrange_loss = 0.0
             for i in range(self.num_ext_values - 1):
                 lagrange_losses = self.lagranges[i] * (
-                        self.avg_ext_values[i][1:] - self.a_cfg.alpha[i] * self.avg_ext_values[i][0] -
+                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0] -
                         eval(self.a_cfg.constraint_margin)[i]).squeeze(-1)
                 lagrange_loss += torch.sum(lagrange_losses, dim=-1)
             lagrange_loss.backward()
@@ -409,7 +409,7 @@ class DOMINO:
 
             for i in range(self.num_ext_values - 1):
                 mean_constraint_satisfaction[i] += (
-                        self.avg_ext_values[i][1:] - self.a_cfg.alpha[i] * self.avg_ext_values[i][0]).cpu().detach().numpy()
+                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).cpu().detach().numpy()
 
             # update moving average
             self.update_moving_avg(skills.squeeze(-1),

@@ -98,8 +98,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             feet_height = "[0, [0.04, 0.4]]"
             joint_targets_rate = "[0, 0.8]"
 
-            lin_z = "[0, 0.1]"
-            ang_xy = "[0, 0.6]"
+            lin_z = "[2, 0.1]"
+            ang_xy = "[2, 0.2]"
 
             lin_vel_y = "[2, 0.4]"
             lin_vel_z = "[2, 0.4]"
@@ -164,8 +164,8 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         intrinsic_rew_scale = 60.0  # does not matter actually, need to scale the constraint margin accordingly
         fixed_adv_coeff = 0.4
-        constraint_margin = "[1.0, 0.0]"  # 0.5
-        alpha = [0.9, 0.5]  # optimality ratio
+        constraint_margin = "[1.0, 1.0]"  # 0.5
+        alpha = "[0.9, 0.5]"  # optimality ratio
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -188,7 +188,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'margin'
+        run_name = 'alpha'
 
         # load
         load_run = -1  # -1 = last run
