@@ -262,7 +262,17 @@ class Solo12DOMINO(BaseTask):
         focus_freq_phase_offsets[focus_freq_phase_offsets >= np.pi] -= np.pi
         focus_freq_phase_offsets[focus_freq_phase_offsets < -np.pi] += np.pi
 
-        self.feature_buf = focus_freq_phase_offsets
+        self.feature_buf = torch.cat((self.base_lin_vel[:, 1:3],  # 3
+                                      self.base_ang_vel[:, 0:2],  # 3
+                                      # (self.dof_pos - self.default_dof_pos),  # 12
+                                      # self.dof_vel,  # 12
+                                      # self.projected_gravity,  # 3
+                                      # self.actions,
+                                      # self.commands,
+                                      # encoded_skills,
+                                      # focus_freq_mags,  # num_focus_freq * 4
+                                      focus_freq_phase_offsets  # num_focus_freq * 6
+                                      ), dim=-1)
         # no noise added, no clipping
 
     def _get_noise_scale_vec(self):

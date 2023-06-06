@@ -229,12 +229,12 @@ class DOMINO:
         latents = self.avg_features[skills]  # num_samples * num_features
         latents_dist = torch.norm((latents.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
                                    self.avg_features.unsqueeze(0).repeat(self.env.num_envs, 1, 1)),
-                                  dim=2, p=2)
+                                  dim=2, p=1)
 
         _, nearest_latents_idx = torch.kthvalue(latents_dist, k=2, dim=-1)  # num_samples
         nearst_latents = self.avg_features[nearest_latents_idx]  # num_samples * num_features
         psi_diff = latents - nearst_latents
-        norm_diff = torch.norm(psi_diff, p=2, dim=-1) / self.a_cfg.target_d
+        norm_diff = torch.norm(psi_diff, p=1, dim=-1) / self.a_cfg.target_d
         c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
             self.a_cfg.attractive_coeff * torch.pow(norm_diff, self.a_cfg.attractive_power)
         int_rew = c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features

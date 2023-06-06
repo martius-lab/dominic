@@ -7,14 +7,14 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": "[0.9, 0.5]",
+        "alpha": "[0.7, 0.3]",
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
-        "clip_lagrange": "auto_2",
+        "clip_lagrange": "auto",
         "clip_param": 0.2,
-        "constraint_margin": "[1.0, 1.0]",
+        "constraint_margin": "[0.5, 0.5]",
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.4,
@@ -53,14 +53,14 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino",
         "load_run": -1,
-        "max_iterations": 5000,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "now",
+        "run_name": "p1",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230605_145859"
+        "wandb_group": "cluster_20230606_160929"
       }
     },
     "env_cfg": {
@@ -162,7 +162,7 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 30,
+        "num_features": 34,
         "num_observations": 56,
         "play": false
       },
@@ -236,7 +236,7 @@
           "feet_slip": "[0, [0.04, 0.2, 3.0]]",
           "joint_targets_rate": "[0, 0.8]",
           "lin_vel_x": "[1, 0.3]",
-          "lin_vel_y": "[2, 0.4]",
+          "lin_vel_y": "[1, 0.3]",
           "lin_vel_z": "[2, 0.4]",
           "lin_z": "[2, 0.1]"
         }
