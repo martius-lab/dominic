@@ -14,7 +14,7 @@
         "avg_values_decay_factor": 0.9,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
-        "constraint_margin": "[1.0, 0.5]",
+        "constraint_margin": 1.0,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.4,
@@ -54,13 +54,13 @@
         "experiment_name": "solo12_domino",
         "load_run": -1,
         "max_iterations": 2000,
-        "normalize_features": false,
+        "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "run_name": "newnew",
+        "run_name": "new_ideas2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230606_182109"
+        "wandb_group": "cluster_20230607_212740"
       }
     },
     "env_cfg": {
@@ -154,15 +154,14 @@
           0.02,
           0.03,
           0.04,
-          0.05,
-          0.06
+          0.05
         ],
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 34,
+        "num_features": 28,
         "num_observations": 56,
         "play": false
       },
@@ -218,7 +217,7 @@
         }
       },
       "rewards": {
-        "base_height_target": 0.27,
+        "base_height_target": 0.25,
         "max_contact_force": 100.0,
         "powers": [
           1,
@@ -231,12 +230,12 @@
         "terms": {
           "ang_vel_xy": "[2, 1.2]",
           "ang_vel_z": "[1, 0.6]",
-          "ang_xy": "[2, 0.2]",
-          "feet_height": "[0, [0.04, 0.4]]",
+          "ang_xy": "[2, 0.3]",
+          "feet_height": "[0, [0.04, 0.2]]",
           "feet_slip": "[0, [0.04, 0.2, 3.0]]",
-          "joint_targets_rate": "[0, 0.8]",
+          "joint_targets_rate": "[0, 1.0]",
           "lin_vel_x": "[1, 0.3]",
-          "lin_vel_y": "[2, 0.4]",
+          "lin_vel_y": "[1, 0.3]",
           "lin_vel_z": "[2, 0.4]",
           "lin_z": "[2, 0.1]"
         }
