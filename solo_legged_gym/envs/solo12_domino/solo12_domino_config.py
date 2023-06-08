@@ -20,7 +20,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
     class viewer(BaseEnvCfg.viewer):
         overview = True
         ref_pos_b = [1, 1, 0.5]
-        record_camera_imgs = False
+        record_camera_imgs = True
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
@@ -194,6 +194,10 @@ class Solo12DOMINOTrainCfg:
         # load
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
+
+        record_gif = True  # need to enable env.viewer.record_camera_imgs
+        record_gif_interval = 50
+        record_iters = 5  # should be int * num_steps_per_env
 
         wandb = False
         wandb_group = 'test'

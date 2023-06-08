@@ -4,6 +4,7 @@ import os
 from collections import deque
 import statistics
 import numpy as np
+import wandb
 
 import torch
 import torch.optim as optim
@@ -137,9 +138,16 @@ class DOMINO:
         cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
 
         tot_iter = self.num_learning_iterations
+        filming = False
+        filming_imgs = []
+        filming_iter_counter = 0
+
         for it in range(self.current_learning_iteration, tot_iter):
             # Rollout
             start = time.time()
+            if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
+                filming = True
+
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     obs = new_obs
@@ -154,6 +162,9 @@ class DOMINO:
                     self.process_env_step(obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos)
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
+
+                    if filming:
+                        filming_imgs.append(self.env.camera_image)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
@@ -186,6 +197,17 @@ class DOMINO:
                 mean_constraint_satisfaction = self.update()
             stop = time.time()
             learn_time = stop - start
+
+            if filming:
+                filming_iter_counter += 1
+                if filming_iter_counter == self.r_cfg.record_iters:
+                    export_imgs = np.array(filming_imgs)
+                    if self.r_cfg.wandb:
+                        wandb.log({'Learning/video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
+                    del export_imgs
+                    filming = False
+                    filming_imgs = []
+                    filming_iter_counter = 0
 
             if self.log_dir is not None:
                 self.log(locals())

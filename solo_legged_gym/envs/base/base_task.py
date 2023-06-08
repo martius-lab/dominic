@@ -79,17 +79,14 @@ class BaseTask:
         camera_props.width = self.cfg.viewer.camera_width
         camera_props.height = self.cfg.viewer.camera_height
         self.camera_props = camera_props
-        self.image_env_idxs = self.cfg.viewer.camera_env_list
-        self.camera_sensors = [self.gym.create_camera_sensor(
-            self.envs[idx], self.camera_props) for idx in self.image_env_idxs]
-        self.images_per_env = np.zeros((len(self.image_env_idxs), self.camera_props.height, self.camera_props.width, 4), dtype=np.uint8)
+        self.image_env = self.cfg.viewer.camera_env
+        self.camera_sensors = self.gym.create_camera_sensor(self.envs[self.image_env], self.camera_props)
+        self.camera_image = np.zeros((self.camera_props.height, self.camera_props.width, 4), dtype=np.uint8)
 
     def _get_img(self):
-        for i, env_idx in enumerate(self.image_env_idxs):
-            self.images_per_env[i] = self.gym.get_camera_image(self.sim, self.envs[env_idx], self.camera_sensors[i],
-                                                               gymapi.IMAGE_COLOR).reshape((self.camera_props.height,
-                                                                                            self.camera_props.width, 4))
-
+        self.camera_image = self.gym.get_camera_image(self.sim, self.envs[self.image_env], self.camera_sensors,
+                                                      gymapi.IMAGE_COLOR).reshape((self.camera_props.height,
+                                                                                   self.camera_props.width, 4))
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -117,22 +114,16 @@ class BaseTask:
             self.gym.fetch_results(self.sim, True)
 
         if self.cfg.viewer.record_camera_imgs:
-            cam_envs = [self.envs[idx] for idx in self.image_env_idxs]
-            for i in range(len(self.image_env_idxs)):
-                # for env, sensor in zip(cam_envs, self.camera_sensors):
-                env = cam_envs[i]
-                sensor = self.camera_sensors[i]
-                env_id = self.image_env_idxs[i]
-                ref_pos = [self.root_states[env_id, 0].item() + self.cfg.viewer.ref_pos_b[0],
-                           self.root_states[env_id, 1].item() + self.cfg.viewer.ref_pos_b[1],
-                           self.cfg.viewer.ref_pos_b[2]]
-                ref_lookat = [self.root_states[env_id, 0].item(),
-                              self.root_states[env_id, 1].item(),
-                              0.2]
-                cam_pos = gymapi.Vec3(ref_pos[0], ref_pos[1], ref_pos[2])
-                cam_target = gymapi.Vec3(ref_lookat[0], ref_lookat[1], ref_lookat[2])
+            ref_pos = [self.root_states[self.image_env, 0].item() + self.cfg.viewer.camera_pos_b[0],
+                       self.root_states[self.image_env, 1].item() + self.cfg.viewer.camera_pos_b[1],
+                       self.cfg.viewer.camera_pos_b[2]]
+            ref_lookat = [self.root_states[self.image_env, 0].item(),
+                          self.root_states[self.image_env, 1].item(),
+                          0.2]
+            cam_pos = gymapi.Vec3(ref_pos[0], ref_pos[1], ref_pos[2])
+            cam_target = gymapi.Vec3(ref_lookat[0], ref_lookat[1], ref_lookat[2])
 
-                self.gym.set_camera_location(sensor, env, cam_pos, cam_target)
+            self.gym.set_camera_location(self.camera_sensors, self.envs[self.image_env], cam_pos, cam_target)
 
         if self.viewer:
             # check for window closed
@@ -164,9 +155,10 @@ class BaseTask:
                         if self.overview:
                             self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
                         else:
-                            ref_pos = [self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
-                                       self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
-                                       self.cfg.viewer.ref_pos_b[2]]
+                            ref_pos = [
+                                self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                                self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                                self.cfg.viewer.ref_pos_b[2]]
                             ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
                                           self.root_states[self.cfg.viewer.ref_env, 1].item(),
                                           0.2]

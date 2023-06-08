@@ -123,7 +123,8 @@ class BaseEnvCfg(ABCConfig):
         camera_horizontal_fov = 75.0
         camera_width = 500
         camera_height = 500
-        camera_env_list = [0]
+        camera_env = 0
+        camera_pos_b = [0.5, 0.5, 0.5]
         record_camera_imgs = False
 
 

@@ -57,10 +57,13 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
+        "record_gif": true,
+        "record_gif_interval": 50,
+        "record_iters": 5,
         "run_name": "new_ideas2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230608_111328"
+        "wandb_group": "cluster_20230608_124843"
       }
     },
     "env_cfg": {
@@ -270,11 +273,14 @@
         "static_friction": 1.0
       },
       "viewer": {
-        "camera_env_list": [
-          0
-        ],
+        "camera_env": 0,
         "camera_height": 500,
         "camera_horizontal_fov": 75.0,
+        "camera_pos_b": [
+          0.5,
+          0.5,
+          0.5
+        ],
         "camera_width": 500,
         "overview": true,
         "overview_lookat": [
@@ -287,7 +293,7 @@
           -5,
           4
         ],
-        "record_gifs": true,
+        "record_camera_imgs": true,
         "ref_env": 0,
         "ref_pos_b": [
           1,
