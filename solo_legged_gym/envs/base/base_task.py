@@ -44,6 +44,7 @@ class BaseTask:
         self.gym.prepare_sim(self.sim)
 
         self._init_buffers()
+        self._set_camera_recording()
 
         self.enable_viewer_sync = True
         self.overview = self.cfg.viewer.overview
@@ -72,6 +73,24 @@ class BaseTask:
             self.gym.subscribe_viewer_keyboard_event(
                 self.viewer, gymapi.KEY_B, "toggle_overview")
 
+    def _set_camera_recording(self):
+        camera_props = gymapi.CameraProperties()
+        camera_props.horizontal_fov = self.cfg.viewer.camera_horizontal_fov
+        camera_props.width = self.cfg.viewer.camera_width
+        camera_props.height = self.cfg.viewer.camera_height
+        self.camera_props = camera_props
+        self.image_env_idxs = self.cfg.viewer.camera_env_list
+        self.camera_sensors = [self.gym.create_camera_sensor(
+            self.envs[idx], self.camera_props) for idx in self.image_env_idxs]
+        self.images_per_env = np.zeros((len(self.image_env_idxs), self.camera_props.height, self.camera_props.width, 4), dtype=np.uint8)
+
+    def _get_img(self):
+        for i, env_idx in enumerate(self.image_env_idxs):
+            self.images_per_env[i] = self.gym.get_camera_image(self.sim, self.envs[env_idx], self.camera_sensors[i],
+                                                               gymapi.IMAGE_COLOR).reshape((self.camera_props.height,
+                                                                                            self.camera_props.width, 4))
+
+
     def reset_idx(self, env_ids):
         """Reset selected robots"""
         raise NotImplementedError
@@ -93,6 +112,28 @@ class BaseTask:
         return self.obs_buf
 
     def render(self, sync_frame_time=True):
+        # fetch results
+        if self.device != 'cpu':
+            self.gym.fetch_results(self.sim, True)
+
+        if self.cfg.viewer.record_camera_imgs:
+            cam_envs = [self.envs[idx] for idx in self.image_env_idxs]
+            for i in range(len(self.image_env_idxs)):
+                # for env, sensor in zip(cam_envs, self.camera_sensors):
+                env = cam_envs[i]
+                sensor = self.camera_sensors[i]
+                env_id = self.image_env_idxs[i]
+                ref_pos = [self.root_states[env_id, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                           self.root_states[env_id, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                           self.cfg.viewer.ref_pos_b[2]]
+                ref_lookat = [self.root_states[env_id, 0].item(),
+                              self.root_states[env_id, 1].item(),
+                              0.2]
+                cam_pos = gymapi.Vec3(ref_pos[0], ref_pos[1], ref_pos[2])
+                cam_target = gymapi.Vec3(ref_lookat[0], ref_lookat[1], ref_lookat[2])
+
+                self.gym.set_camera_location(sensor, env, cam_pos, cam_target)
+
         if self.viewer:
             # check for window closed
             if self.gym.query_viewer_has_closed(self.viewer):
@@ -107,10 +148,6 @@ class BaseTask:
                 elif evt.action == "toggle_overview" and evt.value > 0:
                     self.overview = not self.overview
                     self.viewer_set = False
-
-            # fetch results
-            if self.device != 'cpu':
-                self.gym.fetch_results(self.sim, True)
 
             # step graphics
             if self.enable_viewer_sync:
@@ -135,12 +172,22 @@ class BaseTask:
                                           0.2]
                             self._set_camera(ref_pos, ref_lookat)
                         self.viewer_set = True
-                self.gym.step_graphics(self.sim)
+            else:
+                self.gym.poll_viewer_events(self.viewer)
+
+        if self.cfg.viewer.record_camera_imgs or (self.viewer and self.enable_viewer_sync):
+            self.gym.step_graphics(self.sim)
+
+            if self.cfg.viewer.record_camera_imgs:
+                self.gym.render_all_camera_sensors(self.sim)
+                self.gym.start_access_image_tensors(self.sim)
+                self._get_img()
+                self.gym.end_access_image_tensors(self.sim)
+
+            if self.viewer and self.enable_viewer_sync:
                 self.gym.draw_viewer(self.viewer, self.sim, True)
                 if sync_frame_time:
                     self.gym.sync_frame_time(self.sim)
-            else:
-                self.gym.poll_viewer_events(self.viewer)
 
     # ------------------------------------------------------------------------------------------------------------------
 

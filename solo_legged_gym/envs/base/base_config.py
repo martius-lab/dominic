@@ -120,6 +120,11 @@ class BaseEnvCfg(ABCConfig):
         overview = True
         overview_pos = [-5, -5, 4]  # [m]
         overview_lookat = [50, 50, 2]  # [m]
+        camera_horizontal_fov = 75.0
+        camera_width = 500
+        camera_height = 500
+        camera_env_list = [0]
+        record_camera_imgs = False
 
 
 class BaseTrainCfg(ABCConfig):

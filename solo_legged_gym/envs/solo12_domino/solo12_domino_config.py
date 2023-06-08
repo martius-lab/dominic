@@ -20,6 +20,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
     class viewer(BaseEnvCfg.viewer):
         overview = True
         ref_pos_b = [1, 1, 0.5]
+        record_camera_imgs = False
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
