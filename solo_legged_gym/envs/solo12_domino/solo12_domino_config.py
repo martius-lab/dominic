@@ -8,7 +8,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 6 * 4 + 4  # (6 + 4) * # focus_freq
+        num_features = 10 * 4  # (6 + 4) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
@@ -102,8 +102,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
             lin_z = "[2, 0.1]"
             ang_xy = "[2, 0.3]"
-            lin_vel_z = "[2, 0.4]"
-            ang_vel_xy = "[2, 1.2]"
+            lin_vel_z = "[2, 0.3]"
+            ang_vel_xy = "[2, 1.0]"
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -169,7 +169,7 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_3'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = "[0.9, 0.5]"  # optimality ratio
 
         avg_values_decay_factor = 0.9
@@ -189,13 +189,13 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'new_ideas2'
+        run_name = 'more'
 
         # load
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
-        record_gif = True  # need to enable env.viewer.record_camera_imgs
+        record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
         record_iters = 5  # should be int * num_steps_per_env
 
