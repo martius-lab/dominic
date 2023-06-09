@@ -97,7 +97,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             ang_vel_z = "[1, 0.6]"
 
             joint_targets_rate = "[0, 1.0]"
-            feet_slip = "[0, [0.04, 0.2, 3.0]]"
+            feet_slip = "[0, [0.04, 0.3, 3.0]]"
             feet_height = "[0, [0.04, 0.2]]"
 
             lin_z = "[2, 0.1]"
@@ -169,8 +169,8 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_3'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        alpha = "[0.9, 0.5]"  # optimality ratio
+        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        alpha = "[0.9, 0.6]"  # optimality ratio
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99
@@ -199,5 +199,5 @@ class Solo12DOMINOTrainCfg:
         record_gif_interval = 50
         record_iters = 5  # should be int * num_steps_per_env
 
-        wandb = False
+        wandb = False  # by default is false, set to true from command line
         wandb_group = 'test'

@@ -115,14 +115,15 @@ class BaseEnvCfg(ABCConfig):
 
     # viewer camera:
     class viewer:
+        enable_viewer = True
         ref_env = 0
         ref_pos_b = [1, 1, 1]
         overview = True
         overview_pos = [-5, -5, 4]  # [m]
         overview_lookat = [50, 50, 2]  # [m]
         camera_horizontal_fov = 75.0
-        camera_width = 500
-        camera_height = 500
+        camera_width = 960
+        camera_height = 720
         camera_env = 0
         camera_pos_b = [0.5, 0.5, 0.5]
         record_camera_imgs = False

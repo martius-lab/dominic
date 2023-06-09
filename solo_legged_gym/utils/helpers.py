@@ -18,29 +18,13 @@ def get_args() -> argparse.Namespace:
             "help": "Start testing from a checkpoint. Overrides config file if provided.",
         },
         {
-            "name": "--load_run",
-            "type": str,
-            "help": "Name of the run to load when resume=True. If -1: will load the last run. Overrides config file if provided.",
+            "name": "--dv",
+            "action": "store_false",
+            "default": True,
+            "help": "Disable viewer",
         },
         {
-            "name": "--checkpoint",
-            "type": int,
-            "help": "Saved model checkpoint number. If -1: will load the last checkpoint. Overrides config file if provided.",
-        },
-        {
-            "name": "--headless",
-            "action": "store_true",
-            "default": False,
-            "help": "Force display off at all times",
-        },
-        {
-            "name": "--device",
-            "type": str,
-            "default": "cuda:0",
-            "help": "Device used by the RL algorithm, (cpu, gpu, cuda:0, cuda:1 etc..)",
-        },
-        {
-            "name": "--wandb",
+            "name": "--w",
             "action": "store_true",
             "default": False,
             "help": "Turn on Weights and Bias writer",
@@ -51,6 +35,8 @@ def get_args() -> argparse.Namespace:
     # name alignment
     args.sim_device_id = args.compute_device_id
     args.sim_device = args.sim_device_type
+    args.headless = False
+    args.device = "cuda:0"
     if args.sim_device == "cuda":
         args.sim_device += f":{args.sim_device_id}"
     return args
@@ -142,13 +128,15 @@ def get_load_path(root, load_run=-1, checkpoint=-1):
     return load_path
 
 
+def update_env_cfg_from_args(env_cfg, args):
+    if args.dv is not None:
+        env_cfg.viewer.enable_viewer = args.dv
+    return env_cfg
+
+
 def update_train_cfg_from_args(train_cfg, args):
-    if args.load_run is not None:
-        train_cfg.runner.load_run = args.load_run
-    if args.checkpoint is not None:
-        train_cfg.runner.checkpoint = args.checkpoint
-    if args.wandb is not None:
-        train_cfg.runner.wandb = args.wandb
+    if args.w is not None:
+        train_cfg.runner.wandb = args.w
     return train_cfg
 
 
@@ -218,7 +206,7 @@ class OnnxPolicyExporter(torch.nn.Module):
 
 def merge_config_args_into_cmd_line(args):
     # arguments that don't need a value in command line
-    store_true_keywords = ["headless", "wandb"]
+    store_true_keywords = ["dv", "w"]
     for k, v in args.items():
         if v is None:
             continue

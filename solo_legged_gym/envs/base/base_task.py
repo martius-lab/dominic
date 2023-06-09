@@ -52,7 +52,7 @@ class BaseTask:
         self.debug_viz = False
 
         # if running with a viewer, set up keyboard shortcuts and camera
-        if not self.headless:
+        if self.cfg.viewer.enable_viewer:
             self.viewer = self.gym.create_viewer(
                 self.sim, gymapi.CameraProperties())
             if self.overview:
@@ -82,11 +82,6 @@ class BaseTask:
         self.image_env = self.cfg.viewer.camera_env
         self.camera_sensors = self.gym.create_camera_sensor(self.envs[self.image_env], self.camera_props)
         self.camera_image = np.zeros((self.camera_props.height, self.camera_props.width, 4), dtype=np.uint8)
-
-    def _get_img(self):
-        self.camera_image = self.gym.get_camera_image(self.sim, self.envs[self.image_env], self.camera_sensors,
-                                                      gymapi.IMAGE_COLOR).reshape((self.camera_props.height,
-                                                                                   self.camera_props.width, 4))
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -173,7 +168,9 @@ class BaseTask:
             if self.cfg.viewer.record_camera_imgs:
                 self.gym.render_all_camera_sensors(self.sim)
                 self.gym.start_access_image_tensors(self.sim)
-                self._get_img()
+                self.camera_image = self.gym.get_camera_image(self.sim, self.envs[self.image_env], self.camera_sensors,
+                                                              gymapi.IMAGE_COLOR).reshape((self.camera_props.height,
+                                                                                           self.camera_props.width, 4))
                 self.gym.end_access_image_tensors(self.sim)
 
             if self.viewer and self.enable_viewer_sync:

@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from solo_legged_gym import ROOT_DIR
 from solo_legged_gym.runners.algorithms import *
-from .helpers import class_to_dict, set_seed, parse_sim_params, update_train_cfg_from_args
+from .helpers import class_to_dict, set_seed, parse_sim_params, update_env_cfg_from_args, update_train_cfg_from_args
 
 
 class TaskRegistry:
@@ -36,6 +36,7 @@ class TaskRegistry:
         if env_cfg is None:
             env_cfg, _ = self.get_cfgs(name)
 
+        env_cfg = update_env_cfg_from_args(env_cfg, args)
         set_seed(env_cfg.seed)
         sim_params = {"sim": class_to_dict(env_cfg.sim)}
         sim_params = parse_sim_params(args, sim_params)
@@ -63,11 +64,12 @@ class TaskRegistry:
             train_cfg_dict = class_to_dict(train_cfg)
             train_cfg_dict["runner"]["wandb_group"] = "cluster" + "_" + datetime.now().strftime('%Y%m%d_%H%M%S')
             train_cfg_dict["runner"]["wandb"] = True
+            env_cfg_dict["viewer"]["enable_viewer"] = False
             cfg = {
                 "solo_legged_gym": {
                     "args": {
-                        "headless": True,
-                        "wandb": True,
+                        "dv": True,
+                        "w": True,
                         "task": train_cfg.runner.experiment_name
                     },
                     "train_cfg": train_cfg_dict,
