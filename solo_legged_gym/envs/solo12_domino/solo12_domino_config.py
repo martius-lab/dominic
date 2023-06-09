@@ -8,11 +8,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 10 * 4  # (6 + 4) * # focus_freq
+        num_features = 6  # (6 + 4) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.02, 0.03, 0.04, 0.05]
+        contact_focus_freq = [0.04]
 
         play = False
         debug = False
@@ -189,7 +189,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'more'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
