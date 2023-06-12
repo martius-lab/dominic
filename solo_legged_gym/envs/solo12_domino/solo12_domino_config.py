@@ -100,10 +100,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             feet_slip = "[0, [0.04, 0.3, 3.0]]"
             feet_height = "[0, [0.04, 0.2]]"
 
-            lin_z = "[2, 0.1]"
-            ang_xy = "[2, 0.3]"
-            lin_vel_z = "[2, 0.3]"
-            ang_vel_xy = "[2, 1.0]"
+            # lin_z = "[2, 0.1]"
+            # ang_xy = "[2, 0.3]"
+            # lin_vel_z = "[2, 0.3]"
+            # ang_vel_xy = "[2, 1.0]"
+
             # lin_acc_z = "[0, 10]"
             # ang_acc_xy = "[0, 40]"
 
@@ -120,7 +121,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             # feet_air_time = "[0, None]"
 
         # 0 fixed / 1 loose / very_loose
-        powers = [1, 1, 1]
+        powers = [1, 1]
 
         base_height_target = 0.25
 
@@ -170,7 +171,7 @@ class Solo12DOMINOTrainCfg:
         max_grad_norm = 1.
 
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        alpha = "[0.9, 0.6]"  # optimality ratio
+        alpha = "[0.9]"  # optimality ratio
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99

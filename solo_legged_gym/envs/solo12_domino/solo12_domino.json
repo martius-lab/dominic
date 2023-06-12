@@ -7,7 +7,7 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": "[0.9, 0.6]",
+        "alpha": "[0.9]",
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
@@ -63,7 +63,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230609_194159"
+        "wandb_group": "cluster_20230612_091228"
       }
     },
     "env_cfg": {
@@ -221,23 +221,18 @@
         "max_contact_force": 100.0,
         "powers": [
           1,
-          1,
           1
         ],
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_xy": "[2, 1.0]",
           "ang_vel_z": "[1, 0.6]",
-          "ang_xy": "[2, 0.3]",
           "feet_height": "[0, [0.04, 0.2]]",
           "feet_slip": "[0, [0.04, 0.3, 3.0]]",
           "joint_targets_rate": "[0, 1.0]",
           "lin_vel_x": "[1, 0.3]",
-          "lin_vel_y": "[1, 0.3]",
-          "lin_vel_z": "[2, 0.3]",
-          "lin_z": "[2, 0.1]"
+          "lin_vel_y": "[1, 0.3]"
         }
       },
       "seed": 42,
