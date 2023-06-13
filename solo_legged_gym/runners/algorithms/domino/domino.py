@@ -464,49 +464,50 @@ class DOMINO:
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
 
-            # adaptively changing lr for Lagrange multipliers
-            if self.a_cfg.lagrange_schedule == "adaptive":
-                min_lr = 5e-4
-                a = (min_lr - self.a_cfg.lagrange_learning_rate) / 0.5
-                b = 1.5 * self.a_cfg.lagrange_learning_rate - 0.5 * min_lr
-                self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr,
-                                                      a_max=self.a_cfg.lagrange_learning_rate)
-                for param_group in self.lagrange_optimizer.param_groups:
-                    param_group["lr"] = self.lagrange_learning_rate
+            if not self.burning_expert:
+                # adaptively changing lr for Lagrange multipliers
+                if self.a_cfg.lagrange_schedule == "adaptive":
+                    min_lr = 5e-4
+                    a = (min_lr - self.a_cfg.lagrange_learning_rate) / 0.5
+                    b = 1.5 * self.a_cfg.lagrange_learning_rate - 0.5 * min_lr
+                    self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr,
+                                                          a_max=self.a_cfg.lagrange_learning_rate)
+                    for param_group in self.lagrange_optimizer.param_groups:
+                        param_group["lr"] = self.lagrange_learning_rate
 
-            # Lagrange loss
-            lagrange_loss = 0.0
-            for i in range(self.num_ext_values - 1):
-                lagrange_losses = self.lagranges[i] * (
-                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).squeeze(-1)
-                lagrange_loss += torch.sum(lagrange_losses, dim=-1)
-            lagrange_loss.backward()
-            self.lagrange_optimizer.step()
-
-            if self.a_cfg.clip_lagrange is not None:
-                if 'auto' in self.a_cfg.clip_lagrange:
-                    if len(self.a_cfg.clip_lagrange.split('_')) == 2:
-                        clip_lagrange_threshold = float(
-                            self.a_cfg.clip_lagrange.split('_')[1]) / self.a_cfg.sigmoid_scale
-                    else:
-                        clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
-                else:
-                    clip_lagrange_threshold = self.a_cfg.clip_lagrange
+                # Lagrange loss
+                lagrange_loss = 0.0
                 for i in range(self.num_ext_values - 1):
-                    self.lagranges[i].data = torch.clamp(self.lagranges[i].data,
-                                                         min=-clip_lagrange_threshold,
-                                                         max=clip_lagrange_threshold)
+                    lagrange_losses = self.lagranges[i] * (
+                            self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).squeeze(-1)
+                    lagrange_loss += torch.sum(lagrange_losses, dim=-1)
+                lagrange_loss.backward()
+                self.lagrange_optimizer.step()
 
-            for i in range(self.num_ext_values - 1):
-                mean_constraint_satisfaction[i] += (
-                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][
-                    0]).cpu().detach().numpy()
-                mean_lagranges[i] += self.lagranges[i].cpu().detach().numpy()
+                if self.a_cfg.clip_lagrange is not None:
+                    if 'auto' in self.a_cfg.clip_lagrange:
+                        if len(self.a_cfg.clip_lagrange.split('_')) == 2:
+                            clip_lagrange_threshold = float(
+                                self.a_cfg.clip_lagrange.split('_')[1]) / self.a_cfg.sigmoid_scale
+                        else:
+                            clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
+                    else:
+                        clip_lagrange_threshold = self.a_cfg.clip_lagrange
+                    for i in range(self.num_ext_values - 1):
+                        self.lagranges[i].data = torch.clamp(self.lagranges[i].data,
+                                                             min=-clip_lagrange_threshold,
+                                                             max=clip_lagrange_threshold)
 
-            # update moving average
-            self.update_moving_avg(skills.squeeze(-1),
-                                   [ext_returns[i].squeeze(-1) for i in range(self.num_ext_values)],
-                                   features)
+                for i in range(self.num_ext_values - 1):
+                    mean_constraint_satisfaction[i] += (
+                            self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][
+                        0]).cpu().detach().numpy()
+                    mean_lagranges[i] += self.lagranges[i].cpu().detach().numpy()
+
+                # update moving average
+                self.update_moving_avg(skills.squeeze(-1),
+                                       [ext_returns[i].squeeze(-1) for i in range(self.num_ext_values)],
+                                       features)
 
         num_updates = self.a_cfg.num_learning_epochs * self.a_cfg.num_mini_batches
         for i in range(self.num_ext_values):
