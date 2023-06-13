@@ -15,7 +15,6 @@
         "burning_expert_steps": 2,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
-        "debug_lagrange": false,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.4,
@@ -63,7 +62,7 @@
         "run_name": "burning_expert",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_162827"
+        "wandb_group": "cluster_20230613_165944"
       }
     },
     "env_cfg": {

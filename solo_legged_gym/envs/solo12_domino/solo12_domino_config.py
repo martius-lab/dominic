@@ -174,7 +174,6 @@ class Solo12DOMINOTrainCfg:
 
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = "[0.9]"  # optimality ratio
-        debug_lagrange = False  # set all lagrange multipliers to be one
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99

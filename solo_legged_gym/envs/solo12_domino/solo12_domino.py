@@ -111,7 +111,7 @@ class Solo12DOMINO(BaseTask):
                                                        dtype=torch.float, device=self.device,
                                                        requires_grad=False)
 
-    def reset_idx(self, env_ids, burning_expert=False):
+    def reset_idx(self, env_ids):
         """Reset selected robots"""
         if len(env_ids) == 0:
             return
@@ -119,7 +119,7 @@ class Solo12DOMINO(BaseTask):
         self._reset_dofs(env_ids)
         self._reset_root_states(env_ids)
         self._resample_commands(env_ids)
-        self._resample_skills(env_ids, burning_expert)
+        self._resample_skills(env_ids)
         self._refresh_quantities()
 
         # reset buffers
@@ -150,9 +150,9 @@ class Solo12DOMINO(BaseTask):
 
         self.extras["time_outs"] = self.time_out_buf
 
-    def reset(self, burning_expert=False):
+    def reset(self):
         """ Reset all robots"""
-        self.reset_idx(torch.arange(self.num_envs, device=self.device), burning_expert)
+        self.reset_idx(torch.arange(self.num_envs, device=self.device))
         _, _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
                                                     self.num_actions,
                                                     device=self.device,
@@ -166,7 +166,7 @@ class Solo12DOMINO(BaseTask):
         self.joint_targets = torch.clip(actions * scale_joint_target, -clip_joint_target, clip_joint_target).to(
             self.device)
 
-    def step(self, actions, pause=False, burning_expert=False):
+    def step(self, actions, pause=False):
         self.pre_physics_step(actions)
         # step physics and render each frame
         self.render()
@@ -182,11 +182,11 @@ class Solo12DOMINO(BaseTask):
             if self.device == 'cpu':
                 self.gym.fetch_results(self.sim, True)
             self.gym.refresh_dof_state_tensor(self.sim)
-        self.post_physics_step(burning_expert)
+        self.post_physics_step()
         # the skills are separated from the obs because we do not want to normalize it.
         return self.obs_buf, self.skills, self.feature_buf, self.rew_buf, self.group_rew_buf, self.reset_buf, self.extras
 
-    def post_physics_step(self, burning_expert=False):
+    def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
@@ -207,13 +207,13 @@ class Solo12DOMINO(BaseTask):
         if self.change_skills:
             env_ids_change_skills = (self.episode_length_buf % self.change_skills_interval == 0).nonzero(
                 as_tuple=False).flatten()
-            self._resample_skills(env_ids_change_skills, burning_expert)
+            self._resample_skills(env_ids_change_skills)
 
         if self.push_robots and (self.common_step_counter % self.push_interval == 0):
             self._push_robots()
 
         env_ids_reset = self.reset_buf.nonzero().flatten()
-        self.reset_idx(env_ids_reset, burning_expert)
+        self.reset_idx(env_ids_reset)
 
         self.compute_observations()
         self.compute_features()
@@ -325,11 +325,8 @@ class Solo12DOMINO(BaseTask):
         if self.cfg.env.play:
             self.commands[:] = 0.0
 
-    def _resample_skills(self, env_ids, burning_expert):
-        if burning_expert:
-            self.skills[env_ids] = 0
-        else:
-            self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
+    def _resample_skills(self, env_ids):
+        self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
 
         if self.cfg.env.play:
             self.skills[env_ids] = 0

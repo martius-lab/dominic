@@ -132,7 +132,7 @@ class DOMINO:
             self.burning_expert = True
         else:
             self.burning_expert = False
-        self.env.reset(self.burning_expert)
+        self.env.reset()
         self.avg_score = 0
 
     def learn(self):
@@ -180,7 +180,7 @@ class DOMINO:
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     exp_actions, exp_log_prob = self.exp_policy.act_and_log_prob(obs[:, :self.num_exp_obs])
                     actions[skills == 0], log_prob[skills == 0] = exp_actions[skills == 0], exp_log_prob[skills == 0]
-                    new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions, burning_expert=self.burning_expert)
+                    new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
@@ -303,7 +303,7 @@ class DOMINO:
         for i in range(self.num_ext_values - 1):
             lagrange_coeff[i][skills > 0] = self.lagranges[i][skills[skills > 0] - 1]
             lagrange_coeff[i] = torch.sigmoid(lagrange_coeff[i] * self.a_cfg.sigmoid_scale)
-            if self.a_cfg.debug_lagrange:
+            if self.burning_expert:
                 lagrange_coeff[i][:] = 1
             else:
                 lagrange_coeff[i][skills == 0] = 1  # with only extrinsic reward
@@ -348,10 +348,17 @@ class DOMINO:
              ) in generator:
 
             # using the current policy
-            _, _ = self.policy.act_and_log_prob(obs[skills.squeeze() != 0])  # update the distribution
-            _, _ = self.exp_policy.act_and_log_prob(obs[skills.squeeze() == 0, :self.num_exp_obs])  # update the distribution
-            actions_log_prob_batch = self.policy.distribution.log_prob(actions[skills.squeeze() != 0])
-            exp_actions_log_prob_batch = self.exp_policy.distribution.log_prob(actions[skills.squeeze() == 0])
+            if self.burning_expert:
+                _, _ = self.policy.act_and_log_prob(obs)  # update the distribution
+                _, _ = self.exp_policy.act_and_log_prob(obs[:, :self.num_exp_obs])  # update the distribution
+                actions_log_prob_batch = self.policy.distribution.log_prob(actions)
+                exp_actions_log_prob_batch = self.exp_policy.distribution.log_prob(actions)
+            else:
+                _, _ = self.policy.act_and_log_prob(obs[skills.squeeze() != 0])  # update the distribution
+                _, _ = self.exp_policy.act_and_log_prob(
+                    obs[skills.squeeze() == 0, :self.num_exp_obs])  # update the distribution
+                actions_log_prob_batch = self.policy.distribution.log_prob(actions[skills.squeeze() != 0])
+                exp_actions_log_prob_batch = self.exp_policy.distribution.log_prob(actions[skills.squeeze() == 0])
 
             ext_values = []
             for i in range(self.num_ext_values):
@@ -360,15 +367,26 @@ class DOMINO:
                     obs[skills.squeeze(1) == 0, :self.num_exp_obs]).squeeze(-1)
             int_value = self.int_value.evaluate(obs)
 
-            mu_batch = torch.ones_like(old_mu)
-            mu_batch[skills.squeeze() != 0] = self.policy.action_mean
-            mu_batch[skills.squeeze() == 0] = self.exp_policy.action_mean
-            sigma_batch = torch.ones_like(old_sigma)
-            sigma_batch[skills.squeeze() != 0] = self.policy.action_std
-            sigma_batch[skills.squeeze() == 0] = self.exp_policy.action_std
-            entropy_batch = torch.ones(len(skills), device=self.device)
-            entropy_batch[skills.squeeze() != 0] = self.policy.entropy
-            entropy_batch[skills.squeeze() == 0] = self.exp_policy.entropy
+            if self.burning_expert:
+                mu_batch = torch.ones_like(old_mu)
+                mu_batch[skills.squeeze() != 0] = self.policy.action_mean[skills.squeeze() != 0]
+                mu_batch[skills.squeeze() == 0] = self.exp_policy.action_mean[skills.squeeze() == 0]
+                sigma_batch = torch.ones_like(old_sigma)
+                sigma_batch[skills.squeeze() != 0] = self.policy.action_std[skills.squeeze() != 0]
+                sigma_batch[skills.squeeze() == 0] = self.exp_policy.action_std[skills.squeeze() == 0]
+                entropy_batch = torch.ones(len(skills), device=self.device)
+                entropy_batch[skills.squeeze() != 0] = self.policy.entropy[skills.squeeze() != 0]
+                entropy_batch[skills.squeeze() == 0] = self.exp_policy.entropy[skills.squeeze() == 0]
+            else:
+                mu_batch = torch.ones_like(old_mu)
+                mu_batch[skills.squeeze() != 0] = self.policy.action_mean
+                mu_batch[skills.squeeze() == 0] = self.exp_policy.action_mean
+                sigma_batch = torch.ones_like(old_sigma)
+                sigma_batch[skills.squeeze() != 0] = self.policy.action_std
+                sigma_batch[skills.squeeze() == 0] = self.exp_policy.action_std
+                entropy_batch = torch.ones(len(skills), device=self.device)
+                entropy_batch[skills.squeeze() != 0] = self.policy.entropy
+                entropy_batch[skills.squeeze() == 0] = self.exp_policy.entropy
 
             # combine advantages
             with torch.inference_mode():
@@ -383,8 +401,7 @@ class DOMINO:
                 mean_lagrange_coeffs[i] += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff[i],
                                                       dim=0) / torch.sum(func.one_hot(skills.squeeze(1)),
                                                                          dim=0)).cpu().detach().numpy()
-            if not self.burning_expert:
-                advantages += int_advantages
+            advantages += int_advantages
 
             # KL
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -407,37 +424,53 @@ class DOMINO:
                         param_group["lr"] = self.learning_rate
 
             # Surrogate loss
-            ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() != 0]))
-            exp_ratio = torch.exp(exp_actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() == 0]))
-            surrogate = -torch.squeeze(advantages[skills.squeeze() != 0]) * ratio
-            exp_surrogate = -torch.squeeze(advantages[skills.squeeze() == 0]) * exp_ratio
-            surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() != 0]) * torch.clamp(
-                ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
-            )
-            exp_surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() == 0]) * torch.clamp(
-                exp_ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
-            )
             if self.burning_expert:
-                surrogate_loss = torch.max(exp_surrogate, exp_surrogate_clipped).mean()
+                ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob))
+                exp_ratio = torch.exp(exp_actions_log_prob_batch - torch.squeeze(old_actions_log_prob))
+                surrogate = -torch.squeeze(advantages) * ratio
+                exp_surrogate = -torch.squeeze(advantages) * exp_ratio
+                surrogate_clipped = -torch.squeeze(advantages) * torch.clamp(
+                    ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
+                )
+                exp_surrogate_clipped = -torch.squeeze(advantages) * torch.clamp(
+                    exp_ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
+                )
             else:
-                surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate, exp_surrogate_clipped).mean()
+                ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() != 0]))
+                exp_ratio = torch.exp(exp_actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() == 0]))
+                surrogate = -torch.squeeze(advantages[skills.squeeze() != 0]) * ratio
+                exp_surrogate = -torch.squeeze(advantages[skills.squeeze() == 0]) * exp_ratio
+                surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() != 0]) * torch.clamp(
+                    ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
+                )
+                exp_surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() == 0]) * torch.clamp(
+                    exp_ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
+                )
+
+            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate, exp_surrogate_clipped).mean()
 
             # Value function loss
             ext_value_loss = [0 for _ in range(self.num_ext_values)]
             exp_ext_value_loss = [0 for _ in range(self.num_ext_values)]
             if self.a_cfg.use_clipped_value_loss:
                 for i in range(self.num_ext_values):
-                    ext_value_clipped = target_ext_values[i][skills.squeeze() != 0] + (ext_values[i][skills.squeeze() != 0] - target_ext_values[i][skills.squeeze() != 0]).clamp(
-                        -self.a_cfg.clip_param, self.a_cfg.clip_param
-                    )
-                    ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() != 0] - ext_returns[i][skills.squeeze() != 0]).pow(2),
-                                                  (ext_value_clipped - ext_returns[i][skills.squeeze() != 0]).pow(2)).mean()
+                    if self.burning_expert:
+                        ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(-self.a_cfg.clip_param, self.a_cfg.clip_param)
+                        ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2), (ext_value_clipped - ext_returns[i]).pow(2)).mean()
+                        exp_ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(-self.a_cfg.clip_param, self.a_cfg.clip_param)
+                        exp_ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2), (exp_ext_value_clipped - ext_returns[i]).pow(2)).mean()
+                    else:
+                        ext_value_clipped = target_ext_values[i][skills.squeeze() != 0] + (ext_values[i][skills.squeeze() != 0] - target_ext_values[i][skills.squeeze() != 0]).clamp(
+                            -self.a_cfg.clip_param, self.a_cfg.clip_param
+                        )
+                        ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() != 0] - ext_returns[i][skills.squeeze() != 0]).pow(2),
+                                                      (ext_value_clipped - ext_returns[i][skills.squeeze() != 0]).pow(2)).mean()
 
-                    exp_ext_value_clipped = target_ext_values[i][skills.squeeze() == 0] + (ext_values[i][skills.squeeze() == 0] - target_ext_values[i][skills.squeeze() == 0]).clamp(
-                        -self.a_cfg.clip_param, self.a_cfg.clip_param
-                    )
-                    exp_ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() == 0] - ext_returns[i][skills.squeeze() == 0]).pow(2),
-                                                  (exp_ext_value_clipped - ext_returns[i][skills.squeeze() == 0]).pow(2)).mean()
+                        exp_ext_value_clipped = target_ext_values[i][skills.squeeze() == 0] + (ext_values[i][skills.squeeze() == 0] - target_ext_values[i][skills.squeeze() == 0]).clamp(
+                            -self.a_cfg.clip_param, self.a_cfg.clip_param
+                        )
+                        exp_ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() == 0] - ext_returns[i][skills.squeeze() == 0]).pow(2),
+                                                      (exp_ext_value_clipped - ext_returns[i][skills.squeeze() == 0]).pow(2)).mean()
 
                 int_value_clipped = target_int_values + (int_value - target_int_values).clamp(
                     -self.a_cfg.clip_param, self.a_cfg.clip_param
@@ -447,19 +480,19 @@ class DOMINO:
                                            (int_value_clipped - int_returns).pow(2)).mean()
             else:
                 for i in range(self.num_ext_values):
-                    ext_value_loss[i] = (ext_returns[i][skills.squeeze() != 0] - ext_values[i][skills.squeeze() != 0]).pow(2).mean()
-                    exp_ext_value_loss[i] = (ext_returns[i][skills.squeeze() == 0] - ext_values[i][skills.squeeze() == 0]).pow(2).mean()
+                    if self.burning_expert:
+                        ext_value_loss[i] = (ext_returns[i] - ext_values[i]).pow(2).mean()
+                        exp_ext_value_loss[i] = (ext_returns[i] - ext_values[i]).pow(2).mean()
+                    else:
+                        ext_value_loss[i] = (ext_returns[i][skills.squeeze() != 0] - ext_values[i][skills.squeeze() != 0]).pow(2).mean()
+                        exp_ext_value_loss[i] = (ext_returns[i][skills.squeeze() == 0] - ext_values[i][skills.squeeze() == 0]).pow(2).mean()
                 int_value_loss = (int_returns - int_value).pow(2).mean()
 
             value_loss = 0
-            if self.burning_expert:
-                for i in range(self.num_ext_values):
-                    value_loss += exp_ext_value_loss[i]
-            else:
-                for i in range(self.num_ext_values):
-                    value_loss += ext_value_loss[i]
-                    value_loss += exp_ext_value_loss[i]
-                value_loss += int_value_loss
+            for i in range(self.num_ext_values):
+                value_loss += ext_value_loss[i]
+                value_loss += exp_ext_value_loss[i]
+            value_loss += int_value_loss
 
             weighted_loss = surrogate_loss + \
                             self.a_cfg.value_loss_coef * value_loss - \
@@ -481,45 +514,44 @@ class DOMINO:
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
 
-            if not self.burning_expert:
-                # adaptively changing lr for Lagrange multipliers
-                if self.a_cfg.lagrange_schedule == "adaptive":
-                    min_lr = 5e-4
-                    a = (min_lr - self.a_cfg.lagrange_learning_rate) / 0.5
-                    b = 1.5 * self.a_cfg.lagrange_learning_rate - 0.5 * min_lr
-                    self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr,
-                                                          a_max=self.a_cfg.lagrange_learning_rate)
-                    for param_group in self.lagrange_optimizer.param_groups:
-                        param_group["lr"] = self.lagrange_learning_rate
+            # adaptively changing lr for Lagrange multipliers
+            if self.a_cfg.lagrange_schedule == "adaptive":
+                min_lr = 5e-4
+                a = (min_lr - self.a_cfg.lagrange_learning_rate) / 0.5
+                b = 1.5 * self.a_cfg.lagrange_learning_rate - 0.5 * min_lr
+                self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr,
+                                                      a_max=self.a_cfg.lagrange_learning_rate)
+                for param_group in self.lagrange_optimizer.param_groups:
+                    param_group["lr"] = self.lagrange_learning_rate
 
-                # Lagrange loss
-                lagrange_loss = 0.0
-                for i in range(self.num_ext_values - 1):
-                    lagrange_losses = self.lagranges[i] * (
-                            self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).squeeze(-1)
-                    lagrange_loss += torch.sum(lagrange_losses, dim=-1)
-                lagrange_loss.backward()
-                self.lagrange_optimizer.step()
+            # Lagrange loss
+            lagrange_loss = 0.0
+            for i in range(self.num_ext_values - 1):
+                lagrange_losses = self.lagranges[i] * (
+                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).squeeze(-1)
+                lagrange_loss += torch.sum(lagrange_losses, dim=-1)
+            lagrange_loss.backward()
+            self.lagrange_optimizer.step()
 
-                if self.a_cfg.clip_lagrange is not None:
-                    if 'auto' in self.a_cfg.clip_lagrange:
-                        if len(self.a_cfg.clip_lagrange.split('_')) == 2:
-                            clip_lagrange_threshold = float(
-                                self.a_cfg.clip_lagrange.split('_')[1]) / self.a_cfg.sigmoid_scale
-                        else:
-                            clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
+            if self.a_cfg.clip_lagrange is not None:
+                if 'auto' in self.a_cfg.clip_lagrange:
+                    if len(self.a_cfg.clip_lagrange.split('_')) == 2:
+                        clip_lagrange_threshold = float(
+                            self.a_cfg.clip_lagrange.split('_')[1]) / self.a_cfg.sigmoid_scale
                     else:
-                        clip_lagrange_threshold = self.a_cfg.clip_lagrange
-                    for i in range(self.num_ext_values - 1):
-                        self.lagranges[i].data = torch.clamp(self.lagranges[i].data,
-                                                             min=-clip_lagrange_threshold,
-                                                             max=clip_lagrange_threshold)
-
+                        clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
+                else:
+                    clip_lagrange_threshold = self.a_cfg.clip_lagrange
                 for i in range(self.num_ext_values - 1):
-                    mean_constraint_satisfaction[i] += (
-                            self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][
-                        0]).cpu().detach().numpy()
-                    mean_lagranges[i] += self.lagranges[i].cpu().detach().numpy()
+                    self.lagranges[i].data = torch.clamp(self.lagranges[i].data,
+                                                         min=-clip_lagrange_threshold,
+                                                         max=clip_lagrange_threshold)
+
+            for i in range(self.num_ext_values - 1):
+                mean_constraint_satisfaction[i] += (
+                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][
+                    0]).cpu().detach().numpy()
+                mean_lagranges[i] += self.lagranges[i].cpu().detach().numpy()
 
             # update moving average
             self.update_moving_avg(skills.squeeze(-1),
