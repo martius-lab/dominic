@@ -37,19 +37,26 @@ class DOMINO:
         self.num_ext_values = len(self.env.cfg.rewards.powers)
 
         # set up the networks
+        self.num_exp_obs = self.env.num_obs - self.env.num_skills
+
         self.policy = DOMINOPolicy(num_obs=self.env.num_obs,
                                    num_actions=self.env.num_actions,
                                    hidden_dims=self.n_cfg.policy_hidden_dims,
                                    activation=self.n_cfg.policy_activation,
                                    log_std_init=self.n_cfg.log_std_init).to(self.device)
 
+        self.exp_policy = DOMINOPolicy(num_obs=self.num_exp_obs,
+                                       num_actions=self.env.num_actions,
+                                       hidden_dims=self.n_cfg.policy_hidden_dims,
+                                       activation=self.n_cfg.policy_activation,
+                                       log_std_init=self.n_cfg.log_std_init).to(self.device)
+
         self.ext_values = [Value(num_obs=self.env.num_obs,
                                  hidden_dims=self.n_cfg.value_hidden_dims,
                                  activation=self.n_cfg.value_activation).to(self.device)
                            for _ in range(self.num_ext_values)]
 
-        self.num_exp_ext_obs = self.env.num_obs - self.env.num_skills
-        self.exp_ext_values = [Value(num_obs=self.num_exp_ext_obs,
+        self.exp_ext_values = [Value(num_obs=self.num_exp_obs,
                                      hidden_dims=self.n_cfg.value_hidden_dims,
                                      activation=self.n_cfg.value_activation).to(self.device)
                                for _ in range(self.num_ext_values)]
@@ -100,7 +107,8 @@ class DOMINO:
 
         # set up optimizer
         self.learning_rate = self.a_cfg.learning_rate
-        params_list = list(self.policy.parameters()) + list(self.int_value.parameters())
+        params_list = list(self.policy.parameters()) + list(self.exp_policy.parameters()) + list(
+            self.int_value.parameters())
         for i in range(self.num_ext_values):
             params_list += list(self.exp_ext_values[i].parameters())
             params_list += list(self.ext_values[i].parameters())
@@ -161,6 +169,8 @@ class DOMINO:
                     skills = new_skills
                     # use last obs to get the actions
                     actions, log_prob = self.policy.act_and_log_prob(obs)
+                    exp_actions, exp_log_prob = self.exp_policy.act_and_log_prob(obs[:, :self.num_exp_obs])
+                    actions[skills == 0], log_prob[skills == 0] = exp_actions[skills == 0], exp_log_prob[skills == 0]
                     new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
@@ -194,7 +204,8 @@ class DOMINO:
                 last_ext_values = []
                 for i in range(self.num_ext_values):
                     last_ext_values.append(self.ext_values[i].evaluate(obs).detach())
-                    last_ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(obs[skills == 0, :self.num_exp_ext_obs]).detach()
+                    last_ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(
+                        obs[skills == 0, :self.num_exp_obs]).detach()
                 last_int_values = self.int_value.evaluate(obs).detach()
 
                 self.rollout_buffer.compute_returns(last_ext_values, last_int_values, self.a_cfg.gamma, self.a_cfg.lam)
@@ -236,12 +247,15 @@ class DOMINO:
         self.transition.actions = actions.detach()
         self.transition.actions_log_prob = log_prob.detach()
         self.transition.action_mean = self.policy.action_mean.detach()
+        self.transition.action_mean[skills == 0] = self.exp_policy.action_mean[skills == 0].detach()
         self.transition.action_sigma = self.policy.action_std.detach()
+        self.transition.action_sigma[skills == 0] = self.exp_policy.action_std[skills == 0].detach()
 
         self.transition.ext_values = []
         for i in range(self.num_ext_values):
             self.transition.ext_values.append(self.ext_values[i].evaluate(obs).detach())
-            self.transition.ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(obs[skills == 0, :self.num_exp_ext_obs]).detach()
+            self.transition.ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(
+                obs[skills == 0, :self.num_exp_obs]).detach()
         self.transition.int_values = self.int_value.evaluate(obs).detach()
 
         self.transition.ext_rews = [ext_rews[i].clone() for i in range(self.num_ext_values)]
@@ -324,18 +338,27 @@ class DOMINO:
              ) in generator:
 
             # using the current policy
-            _, _ = self.policy.act_and_log_prob(obs)  # update the distribution
-            actions_log_prob_batch = self.policy.distribution.log_prob(actions)
+            _, _ = self.policy.act_and_log_prob(obs[skills.squeeze() != 0])  # update the distribution
+            _, _ = self.exp_policy.act_and_log_prob(obs[skills.squeeze() == 0, :self.num_exp_obs])  # update the distribution
+            actions_log_prob_batch = self.policy.distribution.log_prob(actions[skills.squeeze() != 0])
+            exp_actions_log_prob_batch = self.exp_policy.distribution.log_prob(actions[skills.squeeze() == 0])
 
             ext_values = []
             for i in range(self.num_ext_values):
                 ext_values.append(self.ext_values[i].evaluate(obs))
-                ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(obs[skills.squeeze(1) == 0, :self.num_exp_ext_obs]).squeeze(-1)
+                ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(
+                    obs[skills.squeeze(1) == 0, :self.num_exp_obs]).squeeze(-1)
             int_value = self.int_value.evaluate(obs)
 
-            mu_batch = self.policy.action_mean
-            sigma_batch = self.policy.action_std
-            entropy_batch = self.policy.entropy
+            mu_batch = torch.ones_like(old_mu)
+            mu_batch[skills.squeeze() != 0] = self.policy.action_mean
+            mu_batch[skills.squeeze() == 0] = self.exp_policy.action_mean
+            sigma_batch = torch.ones_like(old_sigma)
+            sigma_batch[skills.squeeze() != 0] = self.policy.action_std
+            sigma_batch[skills.squeeze() == 0] = self.exp_policy.action_std
+            entropy_batch = torch.ones(len(skills), device=self.device)
+            entropy_batch[skills.squeeze() != 0] = self.policy.entropy
+            entropy_batch[skills.squeeze() == 0] = self.exp_policy.entropy
 
             # combine advantages
             with torch.inference_mode():
@@ -373,12 +396,17 @@ class DOMINO:
                         param_group["lr"] = self.learning_rate
 
             # Surrogate loss
-            ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob))
-            surrogate = -torch.squeeze(advantages) * ratio
-            surrogate_clipped = -torch.squeeze(advantages) * torch.clamp(
+            ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() != 0]))
+            exp_ratio = torch.exp(exp_actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() == 0]))
+            surrogate = -torch.squeeze(advantages[skills.squeeze() != 0]) * ratio
+            exp_surrogate = -torch.squeeze(advantages[skills.squeeze() == 0]) * exp_ratio
+            surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() != 0]) * torch.clamp(
                 ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
             )
-            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
+            exp_surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() == 0]) * torch.clamp(
+                exp_ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
+            )
+            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate, exp_surrogate_clipped).mean()
 
             # Value function loss
             ext_value_loss = [0 for _ in range(self.num_ext_values)]
@@ -413,7 +441,8 @@ class DOMINO:
             # Gradient step
             self.optimizer.zero_grad()
             weighted_loss.backward()
-            params_list = list(self.policy.parameters()) + list(self.int_value.parameters())
+            params_list = list(self.policy.parameters()) + list(self.exp_policy.parameters()) + list(
+                self.int_value.parameters())
             for i in range(self.num_ext_values):
                 params_list += list(self.ext_values[i].parameters())
                 params_list += list(self.exp_ext_values[i].parameters())
@@ -501,6 +530,7 @@ class DOMINO:
                 self.writer.add_scalar('Episode/' + key, value, locs['it'])
                 ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
         mean_std = self.policy.action_std.mean()
+        exp_mean_std = self.exp_policy.action_std.mean()
         fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
 
         mean_ext_value_losses = locs['mean_ext_value_loss']
@@ -521,6 +551,7 @@ class DOMINO:
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/lagrange_learning_rate', self.lagrange_learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
+        self.writer.add_scalar('Learning/exp_mean_noise_std', exp_mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
@@ -550,6 +581,7 @@ class DOMINO:
     def save(self, path, infos=None):
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
+            "exp_policy_state_dict": self.exp_policy.state_dict(),
             "intrinsic_value_state_dict": self.int_value.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "iter": self.current_learning_iteration,
@@ -567,6 +599,7 @@ class DOMINO:
     def load(self, path, load_optimizer=True):
         loaded_dict = torch.load(path)
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
+        self.exp_policy.load_state_dict(loaded_dict["exp_policy_state_dict"])
         self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
         for i in range(self.num_ext_values):
             self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
@@ -581,6 +614,7 @@ class DOMINO:
         return loaded_dict["infos"]
 
     def get_inference_policy(self, device=None):
+        # TODO: expert?
         self.eval_mode()  # switch to evaluation mode (dropout for example)
         if device is not None:
             self.policy.to(device)
@@ -593,6 +627,7 @@ class DOMINO:
 
     def train_mode(self):
         self.policy.train()
+        self.exp_policy.train()
         self.int_value.train()
         for i in range(self.num_ext_values):
             self.ext_values[i].train()
@@ -604,6 +639,7 @@ class DOMINO:
 
     def eval_mode(self):
         self.policy.eval()
+        self.exp_policy.eval()
         self.int_value.eval()
         for i in range(self.num_ext_values):
             self.ext_values[i].eval()

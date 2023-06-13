@@ -61,10 +61,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "exp_ext_values",
+        "run_name": "exp_policy",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_103153"
+        "wandb_group": "cluster_20230613_131745"
       }
     },
     "env_cfg": {
