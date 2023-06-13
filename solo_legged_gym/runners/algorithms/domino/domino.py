@@ -383,7 +383,8 @@ class DOMINO:
                 mean_lagrange_coeffs[i] += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff[i],
                                                       dim=0) / torch.sum(func.one_hot(skills.squeeze(1)),
                                                                          dim=0)).cpu().detach().numpy()
-            advantages += int_advantages
+            if not self.burning_expert:
+                advantages += int_advantages
 
             # KL
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -416,17 +417,27 @@ class DOMINO:
             exp_surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() == 0]) * torch.clamp(
                 exp_ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
             )
-            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate, exp_surrogate_clipped).mean()
+            if self.burning_expert:
+                surrogate_loss = torch.max(exp_surrogate, exp_surrogate_clipped).mean()
+            else:
+                surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate, exp_surrogate_clipped).mean()
 
             # Value function loss
             ext_value_loss = [0 for _ in range(self.num_ext_values)]
+            exp_ext_value_loss = [0 for _ in range(self.num_ext_values)]
             if self.a_cfg.use_clipped_value_loss:
                 for i in range(self.num_ext_values):
-                    ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(
+                    ext_value_clipped = target_ext_values[i][skills.squeeze() != 0] + (ext_values[i][skills.squeeze() != 0] - target_ext_values[i][skills.squeeze() != 0]).clamp(
                         -self.a_cfg.clip_param, self.a_cfg.clip_param
                     )
-                    ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2),
-                                                  (ext_value_clipped - ext_returns[i]).pow(2)).mean()
+                    ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() != 0] - ext_returns[i][skills.squeeze() != 0]).pow(2),
+                                                  (ext_value_clipped - ext_returns[i][skills.squeeze() != 0]).pow(2)).mean()
+
+                    exp_ext_value_clipped = target_ext_values[i][skills.squeeze() == 0] + (ext_values[i][skills.squeeze() == 0] - target_ext_values[i][skills.squeeze() == 0]).clamp(
+                        -self.a_cfg.clip_param, self.a_cfg.clip_param
+                    )
+                    exp_ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() == 0] - ext_returns[i][skills.squeeze() == 0]).pow(2),
+                                                  (exp_ext_value_clipped - ext_returns[i][skills.squeeze() == 0]).pow(2)).mean()
 
                 int_value_clipped = target_int_values + (int_value - target_int_values).clamp(
                     -self.a_cfg.clip_param, self.a_cfg.clip_param
@@ -436,13 +447,19 @@ class DOMINO:
                                            (int_value_clipped - int_returns).pow(2)).mean()
             else:
                 for i in range(self.num_ext_values):
-                    ext_value_loss[i] = (ext_returns[i] - ext_values[i]).pow(2).mean()
+                    ext_value_loss[i] = (ext_returns[i][skills.squeeze() != 0] - ext_values[i][skills.squeeze() != 0]).pow(2).mean()
+                    exp_ext_value_loss[i] = (ext_returns[i][skills.squeeze() == 0] - ext_values[i][skills.squeeze() == 0]).pow(2).mean()
                 int_value_loss = (int_returns - int_value).pow(2).mean()
 
             value_loss = 0
-            for i in range(self.num_ext_values):
-                value_loss += ext_value_loss[i]
-            value_loss += int_value_loss
+            if self.burning_expert:
+                for i in range(self.num_ext_values):
+                    value_loss += exp_ext_value_loss[i]
+            else:
+                for i in range(self.num_ext_values):
+                    value_loss += ext_value_loss[i]
+                    value_loss += exp_ext_value_loss[i]
+                value_loss += int_value_loss
 
             weighted_loss = surrogate_loss + \
                             self.a_cfg.value_loss_coef * value_loss - \
@@ -504,10 +521,10 @@ class DOMINO:
                         0]).cpu().detach().numpy()
                     mean_lagranges[i] += self.lagranges[i].cpu().detach().numpy()
 
-                # update moving average
-                self.update_moving_avg(skills.squeeze(-1),
-                                       [ext_returns[i].squeeze(-1) for i in range(self.num_ext_values)],
-                                       features)
+            # update moving average
+            self.update_moving_avg(skills.squeeze(-1),
+                                   [ext_returns[i].squeeze(-1) for i in range(self.num_ext_values)],
+                                   features)
 
         num_updates = self.a_cfg.num_learning_epochs * self.a_cfg.num_mini_batches
         for i in range(self.num_ext_values):

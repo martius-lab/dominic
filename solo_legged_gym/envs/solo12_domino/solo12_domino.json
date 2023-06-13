@@ -63,7 +63,7 @@
         "run_name": "burning_expert",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_151559"
+        "wandb_group": "cluster_20230613_154420"
       }
     },
     "env_cfg": {
