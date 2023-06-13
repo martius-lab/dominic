@@ -43,11 +43,16 @@ class DOMINO:
                                    activation=self.n_cfg.policy_activation,
                                    log_std_init=self.n_cfg.log_std_init).to(self.device)
 
-        self.num_ext_value_obs = self.env.num_obs - self.env.num_skills
-        self.ext_values = [Value(num_obs=self.num_ext_value_obs,
+        self.ext_values = [Value(num_obs=self.env.num_obs,
                                  hidden_dims=self.n_cfg.value_hidden_dims,
                                  activation=self.n_cfg.value_activation).to(self.device)
                            for _ in range(self.num_ext_values)]
+
+        self.num_exp_ext_obs = self.env.num_obs - self.env.num_skills
+        self.exp_ext_values = [Value(num_obs=self.num_exp_ext_obs,
+                                     hidden_dims=self.n_cfg.value_hidden_dims,
+                                     activation=self.n_cfg.value_activation).to(self.device)
+                               for _ in range(self.num_ext_values)]
 
         self.int_value = Value(num_obs=self.env.num_obs,
                                hidden_dims=self.n_cfg.value_hidden_dims,
@@ -97,6 +102,7 @@ class DOMINO:
         self.learning_rate = self.a_cfg.learning_rate
         params_list = list(self.policy.parameters()) + list(self.int_value.parameters())
         for i in range(self.num_ext_values):
+            params_list += list(self.exp_ext_values[i].parameters())
             params_list += list(self.ext_values[i].parameters())
         self.optimizer = optim.Adam(params_list, lr=self.learning_rate)
 
@@ -185,7 +191,10 @@ class DOMINO:
                         len_buffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
                         cur_episode_length[new_ids] = 0
 
-                last_ext_values = [self.ext_values[i].evaluate(obs[:, :self.num_ext_value_obs]).detach() for i in range(self.num_ext_values)]
+                last_ext_values = []
+                for i in range(self.num_ext_values):
+                    last_ext_values.append(self.ext_values[i].evaluate(obs).detach())
+                    last_ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(obs[skills == 0, :self.num_exp_ext_obs]).detach()
                 last_int_values = self.int_value.evaluate(obs).detach()
 
                 self.rollout_buffer.compute_returns(last_ext_values, last_int_values, self.a_cfg.gamma, self.a_cfg.lam)
@@ -229,7 +238,10 @@ class DOMINO:
         self.transition.action_mean = self.policy.action_mean.detach()
         self.transition.action_sigma = self.policy.action_std.detach()
 
-        self.transition.ext_values = [self.ext_values[i].evaluate(obs[:, :self.num_ext_value_obs]).detach() for i in range(self.num_ext_values)]
+        self.transition.ext_values = []
+        for i in range(self.num_ext_values):
+            self.transition.ext_values.append(self.ext_values[i].evaluate(obs).detach())
+            self.transition.ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(obs[skills == 0, :self.num_exp_ext_obs]).detach()
         self.transition.int_values = self.int_value.evaluate(obs).detach()
 
         self.transition.ext_rews = [ext_rews[i].clone() for i in range(self.num_ext_values)]
@@ -315,7 +327,10 @@ class DOMINO:
             _, _ = self.policy.act_and_log_prob(obs)  # update the distribution
             actions_log_prob_batch = self.policy.distribution.log_prob(actions)
 
-            ext_values = [self.ext_values[i].evaluate(obs[:, :self.num_ext_value_obs]) for i in range(self.num_ext_values)]
+            ext_values = []
+            for i in range(self.num_ext_values):
+                ext_values.append(self.ext_values[i].evaluate(obs))
+                ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(obs[skills.squeeze(1) == 0, :self.num_exp_ext_obs]).squeeze(-1)
             int_value = self.int_value.evaluate(obs)
 
             mu_batch = self.policy.action_mean
@@ -401,6 +416,7 @@ class DOMINO:
             params_list = list(self.policy.parameters()) + list(self.int_value.parameters())
             for i in range(self.num_ext_values):
                 params_list += list(self.ext_values[i].parameters())
+                params_list += list(self.exp_ext_values[i].parameters())
             nn.utils.clip_grad_norm_(params_list, self.a_cfg.max_grad_norm)
             self.optimizer.step()
 
@@ -414,7 +430,8 @@ class DOMINO:
                 min_lr = 5e-4
                 a = (min_lr - self.a_cfg.lagrange_learning_rate) / 0.5
                 b = 1.5 * self.a_cfg.lagrange_learning_rate - 0.5 * min_lr
-                self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr, a_max=self.a_cfg.lagrange_learning_rate)
+                self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr,
+                                                      a_max=self.a_cfg.lagrange_learning_rate)
                 for param_group in self.lagrange_optimizer.param_groups:
                     param_group["lr"] = self.lagrange_learning_rate
 
@@ -443,7 +460,8 @@ class DOMINO:
 
             for i in range(self.num_ext_values - 1):
                 mean_constraint_satisfaction[i] += (
-                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).cpu().detach().numpy()
+                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][
+                    0]).cpu().detach().numpy()
 
             # update moving average
             self.update_moving_avg(skills.squeeze(-1),
@@ -539,6 +557,7 @@ class DOMINO:
         }
         for i in range(self.num_ext_values):
             saved_dict[f"ext_value_{i}_state_dict"] = self.ext_values[i].state_dict()
+            saved_dict[f"exp_ext_value_{i}_state_dict"] = self.exp_ext_values[i].state_dict()
         if self.normalize_observation:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
         if self.normalize_features:
@@ -551,6 +570,7 @@ class DOMINO:
         self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
         for i in range(self.num_ext_values):
             self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
+            self.exp_ext_values[i].load_state_dict(loaded_dict[f"exp_ext_value_{i}_state_dict"])
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
         if self.normalize_features:
@@ -576,6 +596,7 @@ class DOMINO:
         self.int_value.train()
         for i in range(self.num_ext_values):
             self.ext_values[i].train()
+            self.exp_ext_values[i].train()
         if self.normalize_observation:
             self.obs_normalizer.train()
         if self.normalize_features:
@@ -586,6 +607,7 @@ class DOMINO:
         self.int_value.eval()
         for i in range(self.num_ext_values):
             self.ext_values[i].eval()
+            self.exp_ext_values[i].eval()
         if self.normalize_observation:
             self.obs_normalizer.eval()
         if self.normalize_features:
