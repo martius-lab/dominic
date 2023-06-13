@@ -619,16 +619,25 @@ class DOMINO:
         return loaded_dict["infos"]
 
     def get_inference_policy(self, device=None):
-        # TODO: expert?
         self.eval_mode()  # switch to evaluation mode (dropout for example)
         if device is not None:
             self.policy.to(device)
-        policy = self.policy.act_inference
+            self.exp_policy.to(device)
+        def inference_policy(x):
+            policy_out = self.policy.act_inference(x)
+            exp_policy_out = self.exp_policy.act_inference(x[:, :self.num_exp_obs])
+            mask = (x[:, -self.env.num_skills] + 1) < 1e-6
+            return exp_policy_out * mask + policy_out * ~mask
+
         if self.r_cfg.normalize_observation:
             if device is not None:
                 self.obs_normalizer.to(device)
-            policy = lambda x: self.policy.act_inference(self.obs_normalizer(x))
-        return policy
+            def inference_policy(x):
+                policy_out = self.policy.act_inference(self.obs_normalizer(x))
+                exp_policy_out = self.exp_policy.act_inference(self.obs_normalizer(x)[:, :self.num_exp_obs])
+                mask = (x[:, -self.env.num_skills] + 1) < 1e-6
+                return exp_policy_out * mask + policy_out * ~mask
+        return inference_policy
 
     def train_mode(self):
         self.policy.train()
