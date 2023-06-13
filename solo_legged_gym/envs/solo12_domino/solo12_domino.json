@@ -12,7 +12,7 @@
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
-        "burning_expert_steps": 300,
+        "burning_expert_steps": 2,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "debug_lagrange": false,
@@ -63,7 +63,7 @@
         "run_name": "burning_expert",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_154420"
+        "wandb_group": "cluster_20230613_162827"
       }
     },
     "env_cfg": {

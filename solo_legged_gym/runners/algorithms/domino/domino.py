@@ -313,12 +313,12 @@ class DOMINO:
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
         for i in range(self.num_ext_values - 1):
             encoded_ext_returns = encoded_skills * ext_returns[i + 1].unsqueeze(-1).repeat(1, self.env.num_skills)
-            mean_encoded_ext_returns = encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0)
+            mean_encoded_ext_returns = torch.nan_to_num(encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0))
             self.avg_ext_values[i] = self.a_cfg.avg_values_decay_factor * self.avg_ext_values[i] + \
                                      (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
 
         encoded_features = encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1)
-        mean_encoded_features = encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1)
+        mean_encoded_features = torch.nan_to_num(encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1), nan=(1 / self.env.num_features))
 
         self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
                             (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
