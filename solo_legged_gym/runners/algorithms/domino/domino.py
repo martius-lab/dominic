@@ -180,7 +180,7 @@ class DOMINO:
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     exp_actions, exp_log_prob = self.exp_policy.act_and_log_prob(obs[:, :self.num_exp_obs])
                     actions[skills == 0], log_prob[skills == 0] = exp_actions[skills == 0], exp_log_prob[skills == 0]
-                    new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions, self.burning_expert)
+                    new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions, burning_expert=self.burning_expert)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)

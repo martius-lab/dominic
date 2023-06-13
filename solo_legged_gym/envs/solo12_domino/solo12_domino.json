@@ -60,10 +60,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "exp_policy",
+        "run_name": "burning_expert",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_145229"
+        "wandb_group": "cluster_20230613_151051"
       }
     },
     "env_cfg": {

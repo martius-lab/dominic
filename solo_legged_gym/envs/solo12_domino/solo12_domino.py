@@ -111,7 +111,7 @@ class Solo12DOMINO(BaseTask):
                                                        dtype=torch.float, device=self.device,
                                                        requires_grad=False)
 
-    def reset_idx(self, env_ids, burning_expert):
+    def reset_idx(self, env_ids, burning_expert=False):
         """Reset selected robots"""
         if len(env_ids) == 0:
             return
