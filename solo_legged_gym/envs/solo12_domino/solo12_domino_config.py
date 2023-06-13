@@ -184,6 +184,8 @@ class Solo12DOMINOTrainCfg:
         repulsive_power = 0
         attractive_coeff = 0
 
+        burning_expert_steps = 300
+
     class runner:
         num_steps_per_env = 24  # per iteration
         max_iterations = 2000  # number of policy updates

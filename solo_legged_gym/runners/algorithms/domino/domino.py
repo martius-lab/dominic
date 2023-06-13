@@ -128,7 +128,11 @@ class DOMINO:
         self.current_learning_iteration = 0
         self.num_learning_iterations = self.r_cfg.max_iterations
 
-        self.env.reset()
+        if self.a_cfg.burning_expert_steps != 0:
+            self.burning_expert = True
+        else:
+            self.burning_expert = False
+        self.env.reset(self.burning_expert)
         self.avg_score = 0
 
     def learn(self):
@@ -163,6 +167,11 @@ class DOMINO:
             if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
                 filming = True
 
+            if it <= self.a_cfg.burning_expert_steps:
+                self.burning_expert = True
+            else:
+                self.burning_expert = False
+
             with torch.inference_mode():
                 for i in range(self.num_steps_per_env):
                     obs = new_obs
@@ -171,7 +180,7 @@ class DOMINO:
                     actions, log_prob = self.policy.act_and_log_prob(obs)
                     exp_actions, exp_log_prob = self.exp_policy.act_and_log_prob(obs[:, :self.num_exp_obs])
                     actions[skills == 0], log_prob[skills == 0] = exp_actions[skills == 0], exp_log_prob[skills == 0]
-                    new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions)
+                    new_obs, new_skills, features, _, group_rew, dones, infos = self.env.step(actions, self.burning_expert)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
@@ -572,7 +581,8 @@ class DOMINO:
         log_string = (f"""{'#' * width}\n"""
                       f"""{title.center(width, ' ')}\n\n"""
                       f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
-                          'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n""")
+                          'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
+                      f"""{'Burning expert:':>{pad}} {self.burning_expert}\n""")
 
         log_string += ep_string
         log_string += (f"""{'-' * width}\n"""
