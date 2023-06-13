@@ -8,11 +8,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 6  # (6 + 4) * # focus_freq
+        num_features = 3 * 6  # (6 + 4) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.04]
+        contact_focus_freq = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06]
 
         play = False
         debug = False
@@ -32,7 +32,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
-            lin_vel_x = [-1.0, 1.0]  # min max [m/s]
+            lin_vel_x = [-1.5, 1.5]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
 
@@ -95,13 +95,13 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             lin_vel_x = "[1, 0.3]"
             lin_vel_y = "[1, 0.3]"
             ang_vel_z = "[1, 0.6]"
+            lin_z = "[1, 0.1]"
+            # ang_xy = "[1, 0.3]"
 
             joint_targets_rate = "[0, 1.0]"
-            feet_slip = "[0, [0.04, 0.3, 3.0]]"
-            feet_height = "[0, [0.04, 0.2]]"
+            feet_slip = "[0, [0.04, 0.1, 3.0]]"  # "[0, [0.04, 0.2, 3.0]]"
+            feet_height = "[0, [0.04, 0.1]]"  # "[0, [0.04, 0.15]]"
 
-            # lin_z = "[2, 0.1]"
-            # ang_xy = "[2, 0.3]"
             # lin_vel_z = "[2, 0.3]"
             # ang_vel_xy = "[2, 1.0]"
 
@@ -157,14 +157,16 @@ class Solo12DOMINOTrainCfg:
         entropy_coef = 0.02
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
+
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # adaptive, fixed
 
         lagrange_learning_rate = 1.e-2
+        lagrange_schedule = 'fixed'  # adaptive, fixed
+
         sigmoid_scale = 0.5
         intrinsic_rew_scale = 60.0  # does not matter actually, need to scale the constraint margin accordingly
-        fixed_adv_coeff = 0.4
-        constraint_margin = 1.0
+        fixed_adv_coeff = 0.6
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -172,6 +174,7 @@ class Solo12DOMINOTrainCfg:
 
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = "[0.9]"  # optimality ratio
+        debug_lagrange = True  # set all lagrange multipliers to be one
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99
@@ -190,7 +193,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test'
+        run_name = 'debug'
 
         # load
         load_run = -1  # -1 = last run

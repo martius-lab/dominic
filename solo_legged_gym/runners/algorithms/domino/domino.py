@@ -43,7 +43,8 @@ class DOMINO:
                                    activation=self.n_cfg.policy_activation,
                                    log_std_init=self.n_cfg.log_std_init).to(self.device)
 
-        self.ext_values = [Value(num_obs=self.env.num_obs,
+        self.num_ext_value_obs = self.env.num_obs - self.env.num_skills
+        self.ext_values = [Value(num_obs=self.num_ext_value_obs,
                                  hidden_dims=self.n_cfg.value_hidden_dims,
                                  activation=self.n_cfg.value_activation).to(self.device)
                            for _ in range(self.num_ext_values)]
@@ -184,7 +185,7 @@ class DOMINO:
                         len_buffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
                         cur_episode_length[new_ids] = 0
 
-                last_ext_values = [self.ext_values[i].evaluate(obs).detach() for i in range(self.num_ext_values)]
+                last_ext_values = [self.ext_values[i].evaluate(obs[:, :self.num_ext_value_obs]).detach() for i in range(self.num_ext_values)]
                 last_int_values = self.int_value.evaluate(obs).detach()
 
                 self.rollout_buffer.compute_returns(last_ext_values, last_int_values, self.a_cfg.gamma, self.a_cfg.lam)
@@ -194,7 +195,7 @@ class DOMINO:
             # Learning update
             start = stop
             mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_coeffs, \
-                mean_constraint_satisfaction = self.update()
+                mean_constraint_satisfaction = self.update(it, tot_iter)
             stop = time.time()
             learn_time = stop - start
 
@@ -203,7 +204,7 @@ class DOMINO:
                 if filming_iter_counter == self.r_cfg.record_iters:
                     export_imgs = np.array(filming_imgs)
                     if self.r_cfg.wandb:
-                        wandb.log({'Learning/video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
+                        wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
                     del export_imgs
                     filming = False
                     filming_imgs = []
@@ -228,7 +229,7 @@ class DOMINO:
         self.transition.action_mean = self.policy.action_mean.detach()
         self.transition.action_sigma = self.policy.action_std.detach()
 
-        self.transition.ext_values = [self.ext_values[i].evaluate(obs).detach() for i in range(self.num_ext_values)]
+        self.transition.ext_values = [self.ext_values[i].evaluate(obs[:, :self.num_ext_value_obs]).detach() for i in range(self.num_ext_values)]
         self.transition.int_values = self.int_value.evaluate(obs).detach()
 
         self.transition.ext_rews = [ext_rews[i].clone() for i in range(self.num_ext_values)]
@@ -267,7 +268,10 @@ class DOMINO:
         for i in range(self.num_ext_values - 1):
             lagrange_coeff[i][skills > 0] = self.lagranges[i][skills[skills > 0] - 1]
             lagrange_coeff[i] = torch.sigmoid(lagrange_coeff[i] * self.a_cfg.sigmoid_scale)
-            lagrange_coeff[i][skills == 0] = 1  # with only extrinsic reward
+            if self.a_cfg.debug_lagrange:
+                lagrange_coeff[i][:] = 1
+            else:
+                lagrange_coeff[i][skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
     def update_moving_avg(self, skills, ext_returns, features):
@@ -284,7 +288,7 @@ class DOMINO:
         self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
                             (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
 
-    def update(self):
+    def update(self, it, tot_iter):
         mean_ext_value_loss = [0 for _ in range(self.num_ext_values)]
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
@@ -311,7 +315,7 @@ class DOMINO:
             _, _ = self.policy.act_and_log_prob(obs)  # update the distribution
             actions_log_prob_batch = self.policy.distribution.log_prob(actions)
 
-            ext_values = [self.ext_values[i].evaluate(obs) for i in range(self.num_ext_values)]
+            ext_values = [self.ext_values[i].evaluate(obs[:, :self.num_ext_value_obs]) for i in range(self.num_ext_values)]
             int_value = self.int_value.evaluate(obs)
 
             mu_batch = self.policy.action_mean
@@ -405,12 +409,20 @@ class DOMINO:
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
 
+            # adaptively changing lr for Lagrange multipliers
+            if self.a_cfg.lagrange_schedule == "adaptive":
+                min_lr = 5e-4
+                a = (min_lr - self.a_cfg.lagrange_learning_rate) / 0.5
+                b = 1.5 * self.a_cfg.lagrange_learning_rate - 0.5 * min_lr
+                self.lagrange_learning_rate = np.clip((it / tot_iter) * a + b, a_min=min_lr, a_max=self.a_cfg.lagrange_learning_rate)
+                for param_group in self.lagrange_optimizer.param_groups:
+                    param_group["lr"] = self.lagrange_learning_rate
+
             # Lagrange loss
             lagrange_loss = 0.0
             for i in range(self.num_ext_values - 1):
                 lagrange_losses = self.lagranges[i] * (
-                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0] -
-                        self.a_cfg.constraint_margin).squeeze(-1)
+                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).squeeze(-1)
                 lagrange_loss += torch.sum(lagrange_losses, dim=-1)
             lagrange_loss.backward()
             self.lagrange_optimizer.step()
@@ -487,7 +499,9 @@ class DOMINO:
                                        locs['it'])
             for j in range(self.env.num_skills):
                 self.writer.add_scalar(f'Skill/lagrange_coeff_{i}_{j}', mean_lagrange_coeffs[i][j], locs['it'])
+                self.writer.add_scalar(f'Skill/avg_ext_values_{i}_{j}', self.avg_ext_values[i][j], locs['it'])
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
+        self.writer.add_scalar('Learning/lagrange_learning_rate', self.lagrange_learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])

@@ -254,9 +254,6 @@ class Solo12DOMINO(BaseTask):
             ((self.ee_contact_focus_freq_phase[:, 1, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
              (self.ee_contact_focus_freq_phase[:, 2, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
              (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
-             (self.ee_contact_focus_freq_phase[:, 2, :] - self.ee_contact_focus_freq_phase[:, 1, :]),
-             (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 1, :]),
-             (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 2, :]),
              ), dim=-1)
 
         focus_freq_phase_offsets[focus_freq_phase_offsets >= np.pi] -= np.pi
