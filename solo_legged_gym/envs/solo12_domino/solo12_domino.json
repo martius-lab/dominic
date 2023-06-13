@@ -40,14 +40,12 @@
         "policy_activation": "elu",
         "policy_hidden_dims": [
           512,
-          256,
-          128
+          256
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
           512,
-          256,
-          128
+          256
         ]
       },
       "runner": {
@@ -64,7 +62,7 @@
         "run_name": "exp_policy",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_131745"
+        "wandb_group": "cluster_20230613_141954"
       }
     },
     "env_cfg": {

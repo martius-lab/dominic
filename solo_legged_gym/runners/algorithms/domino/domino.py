@@ -214,7 +214,7 @@ class DOMINO:
 
             # Learning update
             start = stop
-            mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_coeffs, \
+            mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagranges, mean_lagrange_coeffs, \
                 mean_constraint_satisfaction = self.update(it, tot_iter)
             stop = time.time()
             learn_time = stop - start
@@ -318,6 +318,7 @@ class DOMINO:
         mean_ext_value_loss = [0 for _ in range(self.num_ext_values)]
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
+        mean_lagranges = [np.zeros(self.env.num_skills - 1) for _ in range(self.num_ext_values - 1)]
         mean_lagrange_coeffs = [np.zeros(self.env.num_skills) for _ in range(self.num_ext_values - 1)]
         mean_constraint_satisfaction = [np.zeros(self.env.num_skills - 1) for _ in range(self.num_ext_values - 1)]
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
@@ -491,6 +492,7 @@ class DOMINO:
                 mean_constraint_satisfaction[i] += (
                         self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][
                     0]).cpu().detach().numpy()
+                mean_lagranges[i] += self.lagranges[i].cpu().detach().numpy()
 
             # update moving average
             self.update_moving_avg(skills.squeeze(-1),
@@ -503,11 +505,12 @@ class DOMINO:
         mean_int_value_loss /= num_updates
         mean_surrogate_loss /= num_updates
         for i in range(self.num_ext_values - 1):
+            mean_lagranges[i] /= num_updates
             mean_lagrange_coeffs[i] /= num_updates
             mean_constraint_satisfaction[i] /= num_updates
         self.rollout_buffer.clear()
 
-        return mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagrange_coeffs, \
+        return mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagranges, mean_lagrange_coeffs, \
             mean_constraint_satisfaction
 
     def log(self, locs, width=80, pad=35):
@@ -540,11 +543,13 @@ class DOMINO:
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
         mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
+        mean_lagranges = locs['mean_lagranges']
 
         for i in range(self.num_ext_values - 1):
             for j in range(self.env.num_skills - 1):
                 self.writer.add_scalar(f'Skill/constraint_satisfaction_{i}_{j}', mean_constraint_satisfaction[i][j],
                                        locs['it'])
+                self.writer.add_scalar(f'Skill/lagrange_{i}_{j}', mean_lagranges[i][j], locs['it'])
             for j in range(self.env.num_skills):
                 self.writer.add_scalar(f'Skill/lagrange_coeff_{i}_{j}', mean_lagrange_coeffs[i][j], locs['it'])
                 self.writer.add_scalar(f'Skill/avg_ext_values_{i}_{j}', self.avg_ext_values[i][j], locs['it'])

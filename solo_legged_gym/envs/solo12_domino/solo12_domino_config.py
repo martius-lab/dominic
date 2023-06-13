@@ -144,9 +144,9 @@ class Solo12DOMINOTrainCfg:
 
     class network:
         log_std_init = 0.0
-        policy_hidden_dims = [512, 256, 128]
+        policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [512, 256, 128]
+        value_hidden_dims = [512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
