@@ -8,11 +8,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 3 * 3  # (6 + 4) * # focus_freq
+        num_features = 2 * 3  # (6 + 4) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
-        contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.02, 0.03, 0.04]
+        contact_buffer_length = 50  # steps
+        contact_focus_freq = [0.02, 0.04]
 
         play = False
         debug = False
@@ -32,9 +32,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
-            lin_vel_x = [-1.0, 1.0]  # min max [m/s]
+            lin_vel_x = [1.0, 1.0]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
-            ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
+            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.40]  # x,y,z [m]
@@ -166,14 +166,14 @@ class Solo12DOMINOTrainCfg:
 
         sigmoid_scale = 0.5
         intrinsic_rew_scale = 60.0  # does not matter actually, need to scale the constraint margin accordingly
-        fixed_adv_coeff = 0.4
+        fixed_adv_coeff = 0.6
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        alpha = 0.9  # optimality ratio
+        alpha = "[0.9]"  # optimality ratio
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99
@@ -194,7 +194,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'grid_search'
+        run_name = 'quick_test2_norm'
 
         # load
         load_run = -1  # -1 = last run

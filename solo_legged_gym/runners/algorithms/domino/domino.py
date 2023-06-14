@@ -645,19 +645,20 @@ class DOMINO:
             plt.close('all')
             del fig, ax
 
-            fig, ax = plt.subplots()
-            for i in range(self.env.num_skills):
-                ax.plot(range(self.env.num_features),
-                        self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
-                        label=f"skill {i}")
-            ax.legend()
-            ax.grid()
-            ax.set_xlim(0, self.env.num_features - 1)
-            fig.set_size_inches(10, 8)
-            fig.set_dpi(400)
-            wandb.log({'Train/unnormalized_avg_features': wandb.Image(fig)}, step=locs['it'], commit=False)
-            plt.close('all')
-            del fig, ax
+            if self.r_cfg.normalize_features:
+                fig, ax = plt.subplots()
+                for i in range(self.env.num_skills):
+                        ax.plot(range(self.env.num_features),
+                                self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
+                                label=f"skill {i}")
+                ax.legend()
+                ax.grid()
+                ax.set_xlim(0, self.env.num_features - 1)
+                fig.set_size_inches(10, 8)
+                fig.set_dpi(400)
+                wandb.log({'Train/unnormalized_avg_features': wandb.Image(fig)}, step=locs['it'], commit=False)
+                plt.close('all')
+                del fig, ax
 
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/lagrange_learning_rate', self.lagrange_learning_rate, locs['it'])

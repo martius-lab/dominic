@@ -257,8 +257,8 @@ class Solo12DOMINO(BaseTask):
              (self.ee_contact_focus_freq_phase[:, 3, :] - self.ee_contact_focus_freq_phase[:, 0, :]),
              ), dim=-1)
 
-        focus_freq_phase_offsets[focus_freq_phase_offsets >= np.pi] -= np.pi
-        focus_freq_phase_offsets[focus_freq_phase_offsets < -np.pi] += np.pi
+        focus_freq_phase_offsets[focus_freq_phase_offsets >= 2 * np.pi] -= 2 * np.pi
+        focus_freq_phase_offsets[focus_freq_phase_offsets < 0.0] += 2 * np.pi
 
         # self.feature_buf = torch.cat((
         #     # get_euler_xyz(self.base_quat)[1].unsqueeze(-1),  # 1
@@ -309,7 +309,7 @@ class Solo12DOMINO(BaseTask):
                                             (self.ee_contact * 2 - 1).to(torch.long).unsqueeze(-1)), dim=-1)
         ee_contact_fft = torch.fft.fft(self.ee_contact_buffer, dim=2)  # num_envs * 4 * buf_len
         self.ee_contact_focus_freq_mag = ee_contact_fft[:, :, self.ee_contact_focus_freq_idx].abs()
-        self.ee_contact_focus_freq_phase = ee_contact_fft[:, :, self.ee_contact_focus_freq_idx].angle()
+        self.ee_contact_focus_freq_phase = torch.remainder(ee_contact_fft[:, :, self.ee_contact_focus_freq_idx].angle(), 2 * np.pi)
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],
@@ -325,6 +325,7 @@ class Solo12DOMINO(BaseTask):
         self.commands[env_ids, :] *= torch.any(torch.abs(self.commands[env_ids, :]) >= 0.2, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
+            self.commands[:, 0] = 1.0
 
     def _resample_skills(self, env_ids):
         self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
