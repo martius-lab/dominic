@@ -194,7 +194,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'bur300_al09'
+        run_name = 'grid_search'
 
         # load
         load_run = -1  # -1 = last run

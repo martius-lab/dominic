@@ -12,7 +12,7 @@
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
-        "burning_expert_steps": 2000000,
+        "burning_expert_steps": 300,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.01,
@@ -59,10 +59,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "baseline_again",
+        "run_name": "grid_search",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230614_073959"
+        "wandb_group": "cluster_20230614_092212"
       }
     },
     "env_cfg": {
@@ -153,19 +153,16 @@
       "env": {
         "contact_buffer_length": 100,
         "contact_focus_freq": [
-          0.01,
           0.02,
           0.03,
-          0.04,
-          0.05,
-          0.06
+          0.04
         ],
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 18,
+        "num_features": 9,
         "num_observations": 56,
         "play": false
       },
