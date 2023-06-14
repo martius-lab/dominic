@@ -173,7 +173,7 @@ class Solo12DOMINOTrainCfg:
         max_grad_norm = 1.
 
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        alpha = "[0.9]"  # optimality ratio
+        alpha = 0.9  # optimality ratio
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99
