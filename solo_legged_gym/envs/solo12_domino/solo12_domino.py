@@ -249,6 +249,7 @@ class Solo12DOMINO(BaseTask):
             self.obs_buf = torch.clip(self.obs_buf, -self.cfg.observations.clip_limit, self.cfg.observations.clip_limit)
 
     def compute_features(self):
+        # FL, FR, HL, HR
         focus_freq_mags = self.ee_contact_focus_freq_mag.view(self.num_envs, -1)
         focus_freq_phase_offsets = torch.concatenate(
             ((self.ee_contact_focus_freq_phase[:, 1, :] - self.ee_contact_focus_freq_phase[:, 0, :]),

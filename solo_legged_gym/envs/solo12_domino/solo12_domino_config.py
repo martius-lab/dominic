@@ -8,11 +8,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 3 * 6  # (6 + 4) * # focus_freq
+        num_features = 3 * 3  # (6 + 4) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 100  # steps
-        contact_focus_freq = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06]
+        contact_focus_freq = [0.02, 0.03, 0.04]
 
         play = False
         debug = False
@@ -183,7 +183,7 @@ class Solo12DOMINOTrainCfg:
         repulsive_power = 0
         attractive_coeff = 0
 
-        burning_expert_steps = 2000000
+        burning_expert_steps = 300
 
     class runner:
         num_steps_per_env = 24  # per iteration
@@ -194,7 +194,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'baseline_again'
+        run_name = 'bur300_al09'
 
         # load
         load_run = -1  # -1 = last run
