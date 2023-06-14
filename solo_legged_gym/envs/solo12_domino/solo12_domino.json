@@ -7,7 +7,7 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": "[0.9]",
+        "alpha": 0.9,
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
@@ -61,8 +61,10 @@
         "record_iters": 5,
         "run_name": "quick_test2_norm",
         "save_interval": 50,
+        "separate_policy": false,
+        "separate_value": false,
         "wandb": true,
-        "wandb_group": "cluster_20230614_165639"
+        "wandb_group": "cluster_20230614_173228"
       }
     },
     "env_cfg": {
