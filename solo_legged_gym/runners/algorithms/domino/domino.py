@@ -4,6 +4,7 @@ import os
 from collections import deque
 import statistics
 import numpy as np
+import matplotlib.pyplot as plt
 import wandb
 
 import torch
@@ -318,7 +319,8 @@ class DOMINO:
                                      (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
 
         encoded_features = encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1)
-        mean_encoded_features = torch.nan_to_num(encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1), nan=(1 / self.env.num_features))
+        mean_encoded_features = torch.nan_to_num(encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1),
+                                                 nan=(1 / self.env.num_features))
 
         self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
                             (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
@@ -437,7 +439,8 @@ class DOMINO:
                 )
             else:
                 ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() != 0]))
-                exp_ratio = torch.exp(exp_actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() == 0]))
+                exp_ratio = torch.exp(
+                    exp_actions_log_prob_batch - torch.squeeze(old_actions_log_prob[skills.squeeze() == 0]))
                 surrogate = -torch.squeeze(advantages[skills.squeeze() != 0]) * ratio
                 exp_surrogate = -torch.squeeze(advantages[skills.squeeze() == 0]) * exp_ratio
                 surrogate_clipped = -torch.squeeze(advantages[skills.squeeze() != 0]) * torch.clamp(
@@ -447,7 +450,8 @@ class DOMINO:
                     exp_ratio, 1.0 - self.a_cfg.clip_param, 1.0 + self.a_cfg.clip_param
                 )
 
-            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate, exp_surrogate_clipped).mean()
+            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean() + torch.max(exp_surrogate,
+                                                                                        exp_surrogate_clipped).mean()
 
             # Value function loss
             ext_value_loss = [0 for _ in range(self.num_ext_values)]
@@ -455,22 +459,32 @@ class DOMINO:
             if self.a_cfg.use_clipped_value_loss:
                 for i in range(self.num_ext_values):
                     if self.burning_expert:
-                        ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(-self.a_cfg.clip_param, self.a_cfg.clip_param)
-                        ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2), (ext_value_clipped - ext_returns[i]).pow(2)).mean()
-                        exp_ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(-self.a_cfg.clip_param, self.a_cfg.clip_param)
-                        exp_ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2), (exp_ext_value_clipped - ext_returns[i]).pow(2)).mean()
+                        ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(
+                            -self.a_cfg.clip_param, self.a_cfg.clip_param)
+                        ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2),
+                                                      (ext_value_clipped - ext_returns[i]).pow(2)).mean()
+                        exp_ext_value_clipped = target_ext_values[i] + (ext_values[i] - target_ext_values[i]).clamp(
+                            -self.a_cfg.clip_param, self.a_cfg.clip_param)
+                        exp_ext_value_loss[i] = torch.max((ext_values[i] - ext_returns[i]).pow(2),
+                                                          (exp_ext_value_clipped - ext_returns[i]).pow(2)).mean()
                     else:
-                        ext_value_clipped = target_ext_values[i][skills.squeeze() != 0] + (ext_values[i][skills.squeeze() != 0] - target_ext_values[i][skills.squeeze() != 0]).clamp(
+                        ext_value_clipped = target_ext_values[i][skills.squeeze() != 0] + (
+                                    ext_values[i][skills.squeeze() != 0] - target_ext_values[i][
+                                skills.squeeze() != 0]).clamp(
                             -self.a_cfg.clip_param, self.a_cfg.clip_param
                         )
-                        ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() != 0] - ext_returns[i][skills.squeeze() != 0]).pow(2),
-                                                      (ext_value_clipped - ext_returns[i][skills.squeeze() != 0]).pow(2)).mean()
+                        ext_value_loss[i] = torch.max(
+                            (ext_values[i][skills.squeeze() != 0] - ext_returns[i][skills.squeeze() != 0]).pow(2),
+                            (ext_value_clipped - ext_returns[i][skills.squeeze() != 0]).pow(2)).mean()
 
-                        exp_ext_value_clipped = target_ext_values[i][skills.squeeze() == 0] + (ext_values[i][skills.squeeze() == 0] - target_ext_values[i][skills.squeeze() == 0]).clamp(
+                        exp_ext_value_clipped = target_ext_values[i][skills.squeeze() == 0] + (
+                                    ext_values[i][skills.squeeze() == 0] - target_ext_values[i][
+                                skills.squeeze() == 0]).clamp(
                             -self.a_cfg.clip_param, self.a_cfg.clip_param
                         )
-                        exp_ext_value_loss[i] = torch.max((ext_values[i][skills.squeeze() == 0] - ext_returns[i][skills.squeeze() == 0]).pow(2),
-                                                      (exp_ext_value_clipped - ext_returns[i][skills.squeeze() == 0]).pow(2)).mean()
+                        exp_ext_value_loss[i] = torch.max(
+                            (ext_values[i][skills.squeeze() == 0] - ext_returns[i][skills.squeeze() == 0]).pow(2),
+                            (exp_ext_value_clipped - ext_returns[i][skills.squeeze() == 0]).pow(2)).mean()
 
                 int_value_clipped = target_int_values + (int_value - target_int_values).clamp(
                     -self.a_cfg.clip_param, self.a_cfg.clip_param
@@ -484,8 +498,12 @@ class DOMINO:
                         ext_value_loss[i] = (ext_returns[i] - ext_values[i]).pow(2).mean()
                         exp_ext_value_loss[i] = (ext_returns[i] - ext_values[i]).pow(2).mean()
                     else:
-                        ext_value_loss[i] = (ext_returns[i][skills.squeeze() != 0] - ext_values[i][skills.squeeze() != 0]).pow(2).mean()
-                        exp_ext_value_loss[i] = (ext_returns[i][skills.squeeze() == 0] - ext_values[i][skills.squeeze() == 0]).pow(2).mean()
+                        ext_value_loss[i] = (
+                                    ext_returns[i][skills.squeeze() != 0] - ext_values[i][skills.squeeze() != 0]).pow(
+                            2).mean()
+                        exp_ext_value_loss[i] = (
+                                    ext_returns[i][skills.squeeze() == 0] - ext_values[i][skills.squeeze() == 0]).pow(
+                            2).mean()
                 int_value_loss = (int_returns - int_value).pow(2).mean()
 
             value_loss = 0
@@ -612,6 +630,35 @@ class DOMINO:
             for j in range(self.env.num_skills):
                 self.writer.add_scalar(f'Skill/lagrange_coeff_{i}_{j}', mean_lagrange_coeffs[i][j], locs['it'])
                 self.writer.add_scalar(f'Skill/avg_ext_values_{i}_{j}', self.avg_ext_values[i][j], locs['it'])
+
+        if self.r_cfg.wandb:
+            fig, ax = plt.subplots()
+            for i in range(self.env.num_skills):
+                ax.plot(range(self.env.num_features), self.avg_features[i].detach().cpu().numpy(),
+                        label=f"skill {i}")
+            ax.legend()
+            ax.grid()
+            ax.set_xlim(0, self.env.num_features - 1)
+            fig.set_size_inches(10, 8)
+            fig.set_dpi(400)
+            wandb.log({'Train/avg_features': wandb.Image(fig)}, step=locs['it'], commit=False)
+            plt.close('all')
+            del fig, ax
+
+            fig, ax = plt.subplots()
+            for i in range(self.env.num_skills):
+                ax.plot(range(self.env.num_features),
+                        self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
+                        label=f"skill {i}")
+            ax.legend()
+            ax.grid()
+            ax.set_xlim(0, self.env.num_features - 1)
+            fig.set_size_inches(10, 8)
+            fig.set_dpi(400)
+            wandb.log({'Train/unnormalized_avg_features': wandb.Image(fig)}, step=locs['it'], commit=False)
+            plt.close('all')
+            del fig, ax
+
         self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
         self.writer.add_scalar('Learning/lagrange_learning_rate', self.lagrange_learning_rate, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
@@ -683,6 +730,7 @@ class DOMINO:
         if device is not None:
             self.policy.to(device)
             self.exp_policy.to(device)
+
         def inference_policy(x):
             policy_out = self.policy.act_inference(x)
             exp_policy_out = self.exp_policy.act_inference(x[:, :self.num_exp_obs])
@@ -692,6 +740,7 @@ class DOMINO:
         if self.r_cfg.normalize_observation:
             if device is not None:
                 self.obs_normalizer.to(device)
+
             def inference_policy(x):
                 policy_out = self.policy.act_inference(self.obs_normalizer(x))
                 exp_policy_out = self.exp_policy.act_inference(self.obs_normalizer(x)[:, :self.num_exp_obs])

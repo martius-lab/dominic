@@ -12,7 +12,7 @@
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
-        "burning_expert_steps": 2,
+        "burning_expert_steps": 2000000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.01,
@@ -59,10 +59,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "burning_expert",
+        "run_name": "baseline_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230613_165944"
+        "wandb_group": "cluster_20230614_073959"
       }
     },
     "env_cfg": {
@@ -104,8 +104,8 @@
             0.5
           ],
           "lin_vel_x": [
-            -1.5,
-            1.5
+            -1.0,
+            1.0
           ],
           "lin_vel_y": [
             0.0,

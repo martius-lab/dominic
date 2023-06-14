@@ -32,7 +32,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
-            lin_vel_x = [-1.5, 1.5]  # min max [m/s]
+            lin_vel_x = [-1.0, 1.0]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [-0.5, 0.5]  # min max [rad/s]
 
@@ -183,7 +183,7 @@ class Solo12DOMINOTrainCfg:
         repulsive_power = 0
         attractive_coeff = 0
 
-        burning_expert_steps = 300
+        burning_expert_steps = 2000000
 
     class runner:
         num_steps_per_env = 24  # per iteration
@@ -194,7 +194,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'burning_expert'
+        run_name = 'baseline_again'
 
         # load
         load_run = -1  # -1 = last run
