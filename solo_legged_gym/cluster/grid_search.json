@@ -10,7 +10,7 @@
   "cluster_requirements": {
     "request_cpus": 1,
     "request_gpus": 1,
-    "memory_in_mb": 10000,
+    "memory_in_mb": 5000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 20,
     "forbidden_hostnames": []
@@ -35,10 +35,6 @@
     {
      "param": "solo_legged_gym.train_cfg.algorithm.avg_values_decay_factor",
      "values": [0.9, 0.95, 0.99]
-    },
-    {
-     "param": "solo_legged_gym.env_cfg.seed",
-     "values": [0, 42, 66]
     }
   ]
 }
