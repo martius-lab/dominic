@@ -30,11 +30,7 @@
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.burning_expert_steps",
-     "values": [100, 300, 500, 600000]
+     "values": [300, 500, 600000]
     },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.avg_values_decay_factor",
-     "values": [0.9, 0.95, 0.99]
-    }
   ]
 }
