@@ -13,7 +13,7 @@
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
         "burning_expert_steps": 300,
-        "clip_lagrange": "auto_0.5",
+        "clip_lagrange": "auto_1.0",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
@@ -64,7 +64,7 @@
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230615_152847"
+        "wandb_group": "cluster_20230615_152958"
       }
     },
     "env_cfg": {
@@ -231,7 +231,7 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "ang_vel_z": "[1, 0.6]",
-          "ang_xy": "[1, 0.3]",
+          "ang_xy": "[1, 0.2]",
           "feet_height": "[0, [0.04, 0.1]]",
           "feet_slip": "[0, [0.04, 0.1, 3.0]]",
           "joint_targets_rate": "[0, 1.0]",

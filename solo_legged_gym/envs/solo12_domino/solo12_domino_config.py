@@ -96,7 +96,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
             lin_vel_y = "[1, 0.3]"
             ang_vel_z = "[1, 0.6]"
             lin_z = "[1, 0.1]"
-            ang_xy = "[1, 0.3]"
+            ang_xy = "[1, 0.2]"
 
             joint_targets_rate = "[0, 1.0]"
             feet_slip = "[0, [0.04, 0.1, 3.0]]"  # "[0, [0.04, 0.2, 3.0]]"
@@ -172,7 +172,7 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_0.5'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_1.0'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.9
