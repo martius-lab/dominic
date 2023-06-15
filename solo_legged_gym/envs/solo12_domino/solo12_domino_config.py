@@ -8,11 +8,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_envs = 4096
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
-        num_features = 2 * 3  # (6 + 4) * # focus_freq
+        num_features = 3 * 3  # (6 + 4) * # focus_freq
 
         episode_length_s = 20  # episode length in seconds
         contact_buffer_length = 50  # steps
-        contact_focus_freq = [0.02, 0.04]
+        contact_focus_freq = [0.02, 0.04, 0.06]
 
         play = False
         debug = False
@@ -32,9 +32,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
-            lin_vel_x = [1.0, 1.0]  # min max [m/s]
+            lin_vel_x = [-1.5, 1.5]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
-            ang_vel_yaw = [0.0, 0.0]  # min max [rad/s]
+            ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.40]  # x,y,z [m]
@@ -161,10 +161,10 @@ class Solo12DOMINOTrainCfg:
         learning_rate = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # adaptive, fixed
 
-        lagrange_learning_rate = 1.e-2
-        lagrange_schedule = 'fixed'  # adaptive, fixed
+        lagrange_learning_rate = 1.e-1
+        num_lagrange_steps = 10
 
-        sigmoid_scale = 0.5
+        sigmoid_scale = 2.0
         intrinsic_rew_scale = 60.0  # does not matter actually, need to scale the constraint margin accordingly
         fixed_adv_coeff = 0.6
         gamma = 0.99  # discount factor
@@ -172,8 +172,8 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        alpha = 0.9  # optimality ratio
+        clip_lagrange = 'auto_0.5'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.9
         avg_features_decay_factor = 0.99
@@ -192,13 +192,13 @@ class Solo12DOMINOTrainCfg:
         normalize_features = True
 
         # separation
-        separate_policy = False
-        separate_value = False
+        separate_policy = True
+        separate_value = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'quick_test2_norm'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run

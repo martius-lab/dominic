@@ -29,8 +29,8 @@
      "values": [0.5, 0.6, 0.7, 0.8, 0.9]
     },
     {
-     "param": "solo_legged_gym.train_cfg.algorithm.burning_expert_steps",
-     "values": [300, 500, 600000]
-    },
+     "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
+     "values": ["auto_0.5", "auto_1", "auto_2", "auto_5"]
+    }
   ]
 }

@@ -325,7 +325,7 @@ class Solo12DOMINO(BaseTask):
         self.commands[env_ids, :] *= torch.any(torch.abs(self.commands[env_ids, :]) >= 0.2, dim=1).unsqueeze(1)
         if self.cfg.env.play:
             self.commands[:] = 0.0
-            self.commands[:, 0] = 1.0
+            # self.commands[:, 0] = 1.0
 
     def _resample_skills(self, env_ids):
         self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)

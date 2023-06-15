@@ -7,29 +7,29 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": 0.9,
+        "alpha": 0.7,
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.99,
         "avg_values_decay_factor": 0.9,
         "burning_expert_steps": 300,
-        "clip_lagrange": "auto_2",
+        "clip_lagrange": "auto_0.5",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.6,
         "gamma": 0.99,
         "intrinsic_rew_scale": 60.0,
-        "lagrange_learning_rate": 0.01,
-        "lagrange_schedule": "fixed",
+        "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
         "max_grad_norm": 1.0,
+        "num_lagrange_steps": 10,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "repulsive_power": 0,
         "schedule": "adaptive",
-        "sigmoid_scale": 0.5,
+        "sigmoid_scale": 2.0,
         "target_d": 1.0,
         "use_clipped_value_loss": true,
         "value_loss_coef": 1.0
@@ -59,12 +59,12 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "quick_test2_norm",
+        "run_name": "test",
         "save_interval": 50,
-        "separate_policy": false,
-        "separate_value": false,
+        "separate_policy": true,
+        "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230614_173228"
+        "wandb_group": "cluster_20230615_152847"
       }
     },
     "env_cfg": {
@@ -102,12 +102,12 @@
         "num_skills": 8,
         "ranges": {
           "ang_vel_yaw": [
-            0.0,
-            0.0
+            -1.0,
+            1.0
           ],
           "lin_vel_x": [
-            1.0,
-            1.0
+            -1.5,
+            1.5
           ],
           "lin_vel_y": [
             0.0,
@@ -156,14 +156,15 @@
         "contact_buffer_length": 50,
         "contact_focus_freq": [
           0.02,
-          0.04
+          0.04,
+          0.06
         ],
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 6,
+        "num_features": 9,
         "num_observations": 56,
         "play": false
       },
