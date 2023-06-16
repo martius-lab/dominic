@@ -686,13 +686,13 @@ class DOMINO:
         if self.r_cfg.wandb:
             fig, ax = plt.subplots()
             for i in range(self.env.num_skills):
-                ax.plot(range(self.env.num_features), self.avg_features[i].detach().cpu().numpy(),
-                        label=f"skill {i}")
+                ax.scatter(range(self.env.num_features), self.avg_features[i].detach().cpu().numpy(),
+                           label=f"skill {i}")
             ax.legend()
             ax.grid()
             ax.set_xlim(0, self.env.num_features - 1)
-            fig.set_size_inches(10, 8)
-            fig.set_dpi(400)
+            fig.set_size_inches(5, 4)
+            fig.set_dpi(50)
             wandb.log({'Train/avg_features': wandb.Image(fig)}, step=locs['it'], commit=False)
             plt.close('all')
             del fig, ax
@@ -700,14 +700,14 @@ class DOMINO:
             if self.r_cfg.normalize_features:
                 fig, ax = plt.subplots()
                 for i in range(self.env.num_skills):
-                    ax.plot(range(self.env.num_features),
-                            self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
-                            label=f"skill {i}")
+                    ax.scatter(range(self.env.num_features),
+                               self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
+                               label=f"skill {i}")
                 ax.legend()
                 ax.grid()
                 ax.set_xlim(0, self.env.num_features - 1)
-                fig.set_size_inches(10, 8)
-                fig.set_dpi(400)
+                fig.set_size_inches(5, 4)
+                fig.set_dpi(50)
                 wandb.log({'Train/unnormalized_avg_features': wandb.Image(fig)}, step=locs['it'], commit=False)
                 plt.close('all')
                 del fig, ax
