@@ -57,7 +57,7 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
-        "record_gif": true,
+        "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 5,
         "run_name": "test",
@@ -65,7 +65,7 @@
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230616_204354"
+        "wandb_group": "cluster_20230616_211414"
       }
     },
     "env_cfg": {
