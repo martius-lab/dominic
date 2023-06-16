@@ -214,7 +214,7 @@ class OnnxPolicyExporter(torch.nn.Module):
 
 def merge_config_args_into_cmd_line(args):
     # arguments that don't need a value in command line
-    store_true_keywords = ["dv", "w"]
+    store_true_keywords = ["dv", "w", "dr"]
     for k, v in args.items():
         if v is None:
             continue
