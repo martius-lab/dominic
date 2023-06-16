@@ -26,11 +26,19 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.alpha",
-     "values": [0.5, 0.6, 0.7, 0.8, 0.9]
+     "values": [0.5, 0.7, 0.9]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
-     "values": ["auto_0.5", "auto_1", "auto_2", "auto_5"]
+     "values": ["auto_0.5", "auto_1", "auto_2"]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.sigmoid_scale",
+     "values": [0.5, 1.0, 2.0]
+    },
+    {
+     "param": ["solo_legged_gym.train_cfg.algorithm.avg_values_decay_factor", "solo_legged_gym.train_cfg.algorithm.avg_features_decay_factor"],
+     "values": [[0.9, 0.99], [0.99, 0.999], [0.999, 0.9999]]
     }
   ]
 }

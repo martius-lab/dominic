@@ -64,7 +64,7 @@
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230615_152958"
+        "wandb_group": "cluster_20230616_090200"
       }
     },
     "env_cfg": {
