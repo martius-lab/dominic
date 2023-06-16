@@ -683,11 +683,11 @@ class DOMINO:
                 self.writer.add_scalar(f'Skill/lagrange_coeff_{i}_{j}', mean_lagrange_coeffs[i][j], locs['it'])
                 self.writer.add_scalar(f'Skill/avg_ext_values_{i}_{j}', self.avg_ext_values[i][j], locs['it'])
 
-        if self.r_cfg.wandb:
+        if self.r_cfg.wandb and self.r_cfg.record_gif:
             fig, ax = plt.subplots()
             for i in range(self.env.num_skills):
-                ax.scatter(range(self.env.num_features), self.avg_features[i].detach().cpu().numpy(),
-                           label=f"skill {i}")
+                ax.plot(range(self.env.num_features), self.avg_features[i].detach().cpu().numpy(),
+                        label=f"skill {i}")
             ax.legend()
             ax.grid()
             ax.set_xlim(0, self.env.num_features - 1)
@@ -700,9 +700,9 @@ class DOMINO:
             if self.r_cfg.normalize_features:
                 fig, ax = plt.subplots()
                 for i in range(self.env.num_skills):
-                    ax.scatter(range(self.env.num_features),
-                               self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
-                               label=f"skill {i}")
+                    ax.plot(range(self.env.num_features),
+                            self.feat_normalizer.inverse(self.avg_features[i]).squeeze().detach().cpu().numpy(),
+                            label=f"skill {i}")
                 ax.legend()
                 ax.grid()
                 ax.set_xlim(0, self.env.num_features - 1)
