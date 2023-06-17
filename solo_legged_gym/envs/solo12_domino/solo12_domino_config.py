@@ -164,7 +164,7 @@ class Solo12DOMINOTrainCfg:
         lagrange_learning_rate = 1.e-1
         num_lagrange_steps = 10
 
-        sigmoid_scale = 2.0
+        sigmoid_scale = 1.0
         intrinsic_rew_scale = 60.0  # does not matter actually, need to scale the constraint margin accordingly
         fixed_adv_coeff = 0.6
         gamma = 0.99  # discount factor
@@ -172,7 +172,7 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_1.0'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_1'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.9
