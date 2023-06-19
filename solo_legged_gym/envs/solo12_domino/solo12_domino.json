@@ -11,8 +11,8 @@
         "alpha": 0.7,
         "attractive_coeff": 0,
         "attractive_power": 3,
-        "avg_features_decay_factor": 0.99,
-        "avg_values_decay_factor": 0.9,
+        "avg_features_decay_factor": 0.999,
+        "avg_values_decay_factor": 0.99,
         "burning_expert_steps": 300,
         "clip_lagrange": "auto_1",
         "clip_param": 0.2,
@@ -20,7 +20,7 @@
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.6,
         "gamma": 0.99,
-        "intrinsic_rew_scale": 60.0,
+        "intrinsic_rew_scale": 10.0,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -60,12 +60,12 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "test",
+        "run_name": "baseline",
         "save_interval": 50,
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230617_100821"
+        "wandb_group": "cluster_20230619_093859"
       }
     },
     "env_cfg": {

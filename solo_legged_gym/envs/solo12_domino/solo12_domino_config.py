@@ -165,7 +165,7 @@ class Solo12DOMINOTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        intrinsic_rew_scale = 60.0  # does not matter actually, need to scale the constraint margin accordingly
+        intrinsic_rew_scale = 10.0  # does not matter actually, need to scale the constraint margin accordingly
         fixed_adv_coeff = 0.6
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -175,8 +175,8 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_1'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
-        avg_values_decay_factor = 0.9
-        avg_features_decay_factor = 0.99
+        avg_values_decay_factor = 0.99
+        avg_features_decay_factor = 0.999
 
         target_d = 1.0  # l_0 in VDW force
         attractive_power = 3
@@ -198,7 +198,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'test'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
@@ -206,7 +206,7 @@ class Solo12DOMINOTrainCfg:
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
-        record_iters = 5  # should be int * num_steps_per_env
+        record_iters = 5  # should be int * num_st   eps_per_env
 
         wandb = False  # by default is false, set to true from command line
         wandb_group = 'test'
