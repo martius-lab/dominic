@@ -3,7 +3,7 @@
     "args": {
       "dv": true,
       "w": true,
-      "dr": true,
+      "dr": false,
       "task": "solo12_domino"
     },
     "train_cfg": {
@@ -65,7 +65,7 @@
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230619_171703"
+        "wandb_group": "cluster_20230619_172020"
       }
     },
     "env_cfg": {
