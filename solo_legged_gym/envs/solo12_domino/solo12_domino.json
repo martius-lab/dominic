@@ -9,7 +9,7 @@
     "train_cfg": {
       "algorithm": {
         "alpha": 0.7,
-        "attractive_coeff": 0.5,
+        "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
@@ -60,12 +60,12 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "VDW",
+        "run_name": "repulsive",
         "save_interval": 50,
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230619_132221"
+        "wandb_group": "cluster_20230619_171703"
       }
     },
     "env_cfg": {
@@ -154,18 +154,18 @@
         "randomize_friction": true
       },
       "env": {
-        "contact_buffer_length": 50,
-        "contact_focus_freq": [
-          0.02,
-          0.04,
-          0.06
-        ],
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
+        "feature_focus_freq": [
+          0.02,
+          0.04
+        ],
+        "feature_history_length": 50,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 9,
+        "num_feature_history_dim": 8,
+        "num_features": 18,
         "num_observations": 56,
         "play": false
       },

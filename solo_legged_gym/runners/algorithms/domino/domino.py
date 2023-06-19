@@ -167,6 +167,10 @@ class DOMINO:
         filming_imgs = []
         filming_iter_counter = 0
 
+        collection_time = 0
+        learn_time = 0
+        misc_time = 0
+
         for it in range(tot_iter):
             # Rollout
 
@@ -223,11 +227,11 @@ class DOMINO:
 
                 last_ext_values = []
                 for i in range(self.num_ext_values):
-                    last_ext_values.append(self.ext_values[i].evaluate(obs).detach())
+                    last_ext_values.append(self.ext_values[i](obs).detach())
                     if self.r_cfg.separate_value:
-                        last_ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(
+                        last_ext_values[i][skills == 0] = self.exp_ext_values[i](
                             obs[skills == 0, :self.num_exp_obs]).detach()
-                last_int_values = self.int_value.evaluate(obs).detach()
+                last_int_values = self.int_value(obs).detach()
 
                 self.rollout_buffer.compute_returns(last_ext_values, last_int_values, self.a_cfg.gamma, self.a_cfg.lam)
             stop = time.time()
@@ -236,7 +240,7 @@ class DOMINO:
             # Learning update
             start = stop
             mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagranges, mean_lagrange_coeffs, \
-                mean_constraint_satisfaction = self.update(it, tot_iter)
+                mean_constraint_satisfaction, min_features_distance = self.update(it, tot_iter)
             stop = time.time()
             learn_time = stop - start
 
@@ -274,11 +278,11 @@ class DOMINO:
 
         self.transition.ext_values = []
         for i in range(self.num_ext_values):
-            self.transition.ext_values.append(self.ext_values[i].evaluate(obs).detach())
+            self.transition.ext_values.append(self.ext_values[i](obs).detach())
             if self.r_cfg.separate_value:
-                self.transition.ext_values[i][skills == 0] = self.exp_ext_values[i].evaluate(
+                self.transition.ext_values[i][skills == 0] = self.exp_ext_values[i](
                     obs[skills == 0, :self.num_exp_obs]).detach()
-        self.transition.int_values = self.int_value.evaluate(obs).detach()
+        self.transition.int_values = self.int_value(obs).detach()
 
         self.transition.ext_rews = [ext_rews[i].clone() for i in range(self.num_ext_values)]
         for i in range(self.num_ext_values):
@@ -389,11 +393,11 @@ class DOMINO:
 
             ext_values = []
             for i in range(self.num_ext_values):
-                ext_values.append(self.ext_values[i].evaluate(obs))
+                ext_values.append(self.ext_values[i](obs))
                 if self.r_cfg.separate_value:
                     ext_values[i][exp_skill_mask.unsqueeze(-1)] = \
-                        self.exp_ext_values[i].evaluate(obs[exp_skill_mask, :self.num_exp_obs]).squeeze(-1)
-            int_value = self.int_value.evaluate(obs)
+                        self.exp_ext_values[i](obs[exp_skill_mask, :self.num_exp_obs]).squeeze(-1)
+            int_value = self.int_value(obs)
 
             # update moving average
             if self.r_cfg.separate_policy:
@@ -635,10 +639,20 @@ class DOMINO:
         mean_lagranges = [i / num_updates for i in mean_lagranges]
         mean_lagrange_coeffs = [i / num_updates for i in mean_lagrange_coeffs]
         mean_constraint_satisfaction = [i / num_updates for i in mean_constraint_satisfaction]
+
+        # compute min distance between average features
+        avg_feature_distance = torch.norm((self.avg_features.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
+                                           self.avg_features.unsqueeze(0).repeat(self.env.num_skills, 1, 1)),
+                                          dim=2, p=0.5)
+        _, nearest_idx = torch.kthvalue(avg_feature_distance, k=2, dim=-1)  # num_samples
+        nearst_features = self.avg_features[nearest_idx]  # num_samples * num_features
+        min_features_distance = torch.norm(self.avg_features - nearst_features, p=0.5, dim=-1)
+
+        # clear buffer
         self.rollout_buffer.clear()
 
         return mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_lagranges, mean_lagrange_coeffs, \
-            mean_constraint_satisfaction
+            mean_constraint_satisfaction, min_features_distance
 
     def log(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
@@ -682,6 +696,9 @@ class DOMINO:
             for j in range(self.env.num_skills):
                 self.writer.add_scalar(f'Skill/lagrange_coeff_{i}_{j}', mean_lagrange_coeffs[i][j], locs['it'])
                 self.writer.add_scalar(f'Skill/avg_ext_values_{i}_{j}', self.avg_ext_values[i][j], locs['it'])
+
+        for i in range(self.env.num_skills):
+            self.writer.add_scalar(f'Skill/min_features_distance_{i}', locs['min_features_distance'][i], locs['it'])
 
         if self.r_cfg.wandb and self.r_cfg.record_gif:
             fig, ax = plt.subplots()

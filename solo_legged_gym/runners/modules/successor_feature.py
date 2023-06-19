@@ -2,22 +2,21 @@ import torch
 import torch.nn as nn
 
 
-class Value(nn.Module):
+class SuccessorFeature(nn.Module):
     def __init__(self,
                  num_obs,
                  hidden_dims=[256, 256, 256],
                  activation='elu',
                  **kwargs):
         if kwargs:
-            print("Value.__init__ got unexpected arguments, which will be ignored: " + str(
+            print("SuccessorFeature.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
-        super(Value, self).__init__()
+        super(SuccessorFeature, self).__init__()
 
         activation = get_activation(activation)
 
         mlp_input_dim = num_obs
 
-        # Value function
         layers = []
         layers.append(nn.Linear(mlp_input_dim, hidden_dims[0]))
         layers.append(activation)
@@ -27,9 +26,9 @@ class Value(nn.Module):
             else:
                 layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
                 layers.append(activation)
-        self.value = nn.Sequential(*layers)
+        self.succ_feat = nn.Sequential(*layers)
 
-        print(f"Value MLP: {self.value}")
+        print(f"Successor Feature MLP: {self.succ_feat}")
 
     @staticmethod
     def init_weights(sequential, scales):
@@ -42,7 +41,7 @@ class Value(nn.Module):
         pass
 
     def forward(self, x):
-        return self.value(x)
+        return self.succ_feat(x)
 
 
 def get_activation(act_name):
