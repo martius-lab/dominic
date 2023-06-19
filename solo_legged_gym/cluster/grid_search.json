@@ -29,12 +29,12 @@
      "values": [0.5, 0.7, 0.9]
     },
     {
-     "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
-     "values": [1.0, 5.0, 10.0, 50.0, 60.0, 100.0]
+     "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
+     "values": ["auto_0.5", "auto_1", "auto_2"]
     },
     {
-     "param": ["solo_legged_gym.train_cfg.algorithm.avg_values_decay_factor", "solo_legged_gym.train_cfg.algorithm.avg_features_decay_factor"],
-     "values": [[0.9, 0.99], [0.99, 0.999], [0.999, 0.9999]]
+     "param": "solo_legged_gym.train_cfg.algorithm.target_d",
+     "values": [0.5, 1.0, 1.5]
     }
   ]
 }

@@ -181,7 +181,7 @@ class Solo12DOMINOTrainCfg:
         target_d = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0
+        attractive_coeff = 1
 
         burning_expert_steps = 300
 
@@ -198,7 +198,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'baseline'
+        run_name = 'VDW'
 
         # load
         load_run = -1  # -1 = last run

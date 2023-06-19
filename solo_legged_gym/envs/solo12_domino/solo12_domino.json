@@ -9,7 +9,7 @@
     "train_cfg": {
       "algorithm": {
         "alpha": 0.7,
-        "attractive_coeff": 0,
+        "attractive_coeff": 1,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
@@ -60,12 +60,12 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "baseline",
+        "run_name": "VDW",
         "save_interval": 50,
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230619_093859"
+        "wandb_group": "cluster_20230619_094554"
       }
     },
     "env_cfg": {
