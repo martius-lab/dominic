@@ -181,7 +181,7 @@ class Solo12DOMINOTrainCfg:
         target_d = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 1
+        attractive_coeff = 0.5
 
         burning_expert_steps = 300
 
