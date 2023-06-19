@@ -29,8 +29,8 @@
      "values": [0.5, 0.7, 0.9]
     },
     {
-     "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
-     "values": ["auto_0.5", "auto_1", "auto_2"]
+     "param": "solo_legged_gym.train_cfg.algorithm.target_d",
+     "values": [1.0, 5.0, 10.0, 20.0]
     }
   ]
 }
