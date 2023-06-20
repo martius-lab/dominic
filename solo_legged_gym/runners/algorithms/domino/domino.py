@@ -700,7 +700,7 @@ class DOMINO:
         for i in range(self.env.num_skills):
             self.writer.add_scalar(f'Skill/min_features_distance_{i}', locs['min_features_distance'][i], locs['it'])
 
-        if self.r_cfg.wandb and self.r_cfg.record_gif:
+        if self.r_cfg.wandb and self.r_cfg.record_features and (locs['it'] % self.r_cfg.record_features_interval == 0):
             fig, ax = plt.subplots()
             for i in range(self.env.num_skills):
                 ax.plot(range(self.env.num_features), self.avg_features[i].detach().cpu().numpy(),

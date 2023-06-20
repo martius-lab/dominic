@@ -206,8 +206,11 @@ class Solo12DOMINOTrainCfg:
         checkpoint = -1  # -1 = last saved model
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
-        record_gif_interval = 50
-        record_iters = 5  # should be int * num_st   eps_per_env
+        record_gif_interval = 100
+        record_iters = 10  # should be int * num_st   eps_per_env
+
+        record_features = True
+        record_features_interval = 100
 
         wandb = False  # by default is false, set to true from command line
         wandb_group = 'test'

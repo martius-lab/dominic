@@ -57,15 +57,17 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
+        "record_features": true,
+        "record_features_interval": 100,
         "record_gif": true,
-        "record_gif_interval": 50,
-        "record_iters": 5,
+        "record_gif_interval": 100,
+        "record_iters": 10,
         "run_name": "VDW",
         "save_interval": 50,
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230620_095627"
+        "wandb_group": "cluster_20230620_100849"
       }
     },
     "env_cfg": {
