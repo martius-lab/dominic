@@ -5,6 +5,7 @@ import torch.nn as nn
 class SuccessorFeature(nn.Module):
     def __init__(self,
                  num_obs,
+                 num_features,
                  hidden_dims=[256, 256, 256],
                  activation='elu',
                  **kwargs):
@@ -16,13 +17,14 @@ class SuccessorFeature(nn.Module):
         activation = get_activation(activation)
 
         mlp_input_dim = num_obs
+        mlp_output_dim = num_features
 
         layers = []
         layers.append(nn.Linear(mlp_input_dim, hidden_dims[0]))
         layers.append(activation)
         for l in range(len(hidden_dims)):
             if l == len(hidden_dims) - 1:
-                layers.append(nn.Linear(hidden_dims[l], 1))
+                layers.append(nn.Linear(hidden_dims[l], mlp_output_dim))
             else:
                 layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
                 layers.append(activation)

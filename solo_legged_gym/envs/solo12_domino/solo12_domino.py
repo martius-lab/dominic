@@ -14,7 +14,7 @@ class Solo12DOMINO(BaseTask):
         self.num_commands = self.cfg.commands.num_commands
         self.command_ranges = class_to_dict(self.cfg.commands.ranges)
 
-        self.num_skills = self.cfg.commands.num_skills
+        self.num_skills = self.cfg.env.num_skills
         self.skills = torch.zeros(self.num_envs, dtype=torch.long, device=self.device, requires_grad=False)
 
         self.add_noise = self.cfg.observations.add_noise
@@ -26,9 +26,6 @@ class Solo12DOMINO(BaseTask):
         self.change_commands = self.cfg.commands.change_commands
         if self.change_commands:
             self.change_commands_interval = np.ceil(self.cfg.commands.change_commands_interval_s / self.dt)
-        self.change_skills = self.cfg.commands.change_skills
-        if self.change_skills:
-            self.change_skills_interval = np.ceil(self.cfg.commands.change_skills_intervals_s / self.dt)
 
         self._set_default_dof_pos()
         self._prepare_reward()
@@ -151,10 +148,10 @@ class Solo12DOMINO(BaseTask):
     def reset(self):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
-        _, _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
-                                                    self.num_actions,
-                                                    device=self.device,
-                                                    requires_grad=False))
+        _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
+                                                 self.num_actions,
+                                                 device=self.device,
+                                                 requires_grad=False))
 
     def pre_physics_step(self, actions):
         self.actions = actions
@@ -182,7 +179,7 @@ class Solo12DOMINO(BaseTask):
             self.gym.refresh_dof_state_tensor(self.sim)
         self.post_physics_step()
         # the skills are separated from the obs because we do not want to normalize it.
-        return self.obs_buf, self.skills, self.feature_buf, self.rew_buf, self.group_rew_buf, self.reset_buf, self.extras
+        return self.obs_buf, self.skills, self.feature_buf, self.group_rew_buf, self.reset_buf, self.extras
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -201,11 +198,6 @@ class Solo12DOMINO(BaseTask):
             env_ids_change_commands = (self.episode_length_buf % self.change_commands_interval == 0).nonzero(
                 as_tuple=False).flatten()
             self._resample_commands(env_ids_change_commands)
-
-        if self.change_skills:
-            env_ids_change_skills = (self.episode_length_buf % self.change_skills_interval == 0).nonzero(
-                as_tuple=False).flatten()
-            self._resample_skills(env_ids_change_skills)
 
         if self.push_robots and (self.common_step_counter % self.push_interval == 0):
             self._push_robots()
@@ -228,7 +220,6 @@ class Solo12DOMINO(BaseTask):
         self.reset_buf |= self.time_out_buf
 
     def compute_observations(self):
-        encoded_skills = 2 * (0.5 - func.one_hot(self.skills, num_classes=self.num_skills))
         self.obs_buf = torch.cat((self.base_lin_vel,  # 3
                                   self.base_ang_vel,  # 3
                                   (self.dof_pos - self.default_dof_pos),  # 12
@@ -236,7 +227,6 @@ class Solo12DOMINO(BaseTask):
                                   self.projected_gravity,  # 3
                                   self.actions,
                                   self.commands,
-                                  encoded_skills,
                                   ), dim=-1)
         # add noise if needed
         if self.add_noise:

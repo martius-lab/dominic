@@ -6,7 +6,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
+        num_observations = 33 + 12 + 3  # #states + #actions + #commands
+        num_skills = 8  # latent space
         num_actions = 12
         num_feature_history_dim = 8
         num_features = 4 + 4 * 4
@@ -27,10 +28,6 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_commands = 3  # default: lin_vel_x, lin_vel_y, ang_vel_yaw
         change_commands = True
         change_commands_interval_s = 10.  # time before command are changed[s]
-
-        num_skills = 8  # latent space
-        change_skills = False
-        change_skills_intervals_s = 10.  # time before skills are changed[s]
 
         class ranges:
             lin_vel_x = [-1.5, 1.5]  # min max [m/s]
@@ -149,6 +146,8 @@ class Solo12DOMINOTrainCfg:
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        succ_feat_hidden_dims = [512, 256]
+        succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
         # algorithm params
@@ -166,7 +165,6 @@ class Solo12DOMINOTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        intrinsic_rew_scale = 10.0  # does not matter actually, need to scale the constraint margin accordingly
         fixed_adv_coeff = 0.6
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -179,10 +177,13 @@ class Solo12DOMINOTrainCfg:
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
 
-        target_d = 1.0  # l_0 in VDW force
+        target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0
+
+        succ_feat_gamma = 0.95
+        succ_feat_learning_rate = 1.e-3
 
         burning_expert_steps = 300
 
@@ -199,7 +200,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'VDW'
+        run_name = 'new_version'
 
         # load
         load_run = -1  # -1 = last run

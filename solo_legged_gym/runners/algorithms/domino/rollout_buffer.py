@@ -15,6 +15,7 @@ class RolloutBuffer:
             self.int_values = None
             self.skills = None
             self.features = None
+            self.succ_feat = None
             self.dones = None
 
         def clear(self):
@@ -59,6 +60,8 @@ class RolloutBuffer:
 
         self.skills = torch.zeros(num_transitions_per_env, num_envs, 1, dtype=torch.long, device=self.device)
         self.features = torch.zeros(num_transitions_per_env, num_envs, *features_shape, device=self.device)
+        self.succ_feat = torch.zeros(num_transitions_per_env, num_envs, *features_shape, device=self.device)
+        self.succ_feat_target = torch.zeros(num_transitions_per_env, num_envs, *features_shape, device=self.device)
 
         self.num_transitions_per_env = num_transitions_per_env
         self.num_envs = num_envs
@@ -84,6 +87,7 @@ class RolloutBuffer:
         self.dones[self.step].copy_(transition.dones.view(-1, 1))
         self.skills[self.step].copy_(transition.skills.view(-1, 1))
         self.features[self.step].copy_(transition.features)
+        self.succ_feat[self.step].copy_(transition.succ_feat)
         self.step += 1
 
     def clear(self):
@@ -121,6 +125,15 @@ class RolloutBuffer:
         self.int_advantages = self.int_returns - self.int_values
         self.int_advantages = (self.int_advantages - self.int_advantages.mean()) / (self.int_advantages.std() + 1e-8)
 
+    def compute_succ_feat_target(self, last_succ_feat, gamma):
+        for step in reversed(range(self.num_transitions_per_env)):
+            if step == self.num_transitions_per_env - 1:
+                next_succ_feat = last_succ_feat
+            else:
+                next_succ_feat = self.succ_feat[step + 1]
+            next_is_not_terminal = 1.0 - self.dones[step].float()
+            self.succ_feat_target[step] = self.features[step] + next_is_not_terminal * gamma * next_succ_feat
+
     def mini_batch_generator(self, num_mini_batches, num_epochs=8):
         batch_size = self.num_envs * self.num_transitions_per_env
         mini_batch_size = batch_size // num_mini_batches
@@ -141,7 +154,7 @@ class RolloutBuffer:
         old_mu = self.mu.flatten(0, 1)
         old_sigma = self.sigma.flatten(0, 1)
         skills = self.skills.flatten(0, 1)
-        features = self.features.flatten(0, 1)
+        succ_feat_target = self.succ_feat_target.flatten(0, 1)
 
         for epoch in range(num_epochs):
             for i in range(num_mini_batches):
@@ -164,8 +177,8 @@ class RolloutBuffer:
                 int_advantages_batch = int_advantages[batch_idx]
 
                 skills_batch = skills[batch_idx]
-                features_batch = features[batch_idx]
+                succ_feat_target_batch = succ_feat_target[batch_idx]
                 yield obs_batch, actions_batch, target_ext_values_batch, target_int_values_batch, \
                     ext_advantages_batch, int_advantages_batch, \
                     ext_returns_batch, int_returns_batch, \
-                    old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, skills_batch, features_batch
+                    old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, skills_batch, succ_feat_target_batch
