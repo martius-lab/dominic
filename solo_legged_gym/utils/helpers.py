@@ -148,18 +148,18 @@ def update_train_cfg_from_args(train_cfg, args):
     return train_cfg
 
 
-def export_policy_as_jit(policy_latent, action, normalizer, path, filename="policy.pt"):
-    policy_exporter = TorchPolicyExporter(policy_latent, action, normalizer)
+def export_policy_as_jit(num_skills, policy_latent, action, normalizer, path, filename="policy.pt"):
+    policy_exporter = TorchPolicyExporter(num_skills, policy_latent, action, normalizer)
     policy_exporter.export(path, filename)
 
 
-def export_policy_as_onnx(policy_latent, action, normalizer, path, filename="policy.onnx"):
-    policy_exporter = OnnxPolicyExporter(policy_latent, action, normalizer)
+def export_policy_as_onnx(num_skills, policy_latent, action, normalizer, path, filename="policy.onnx"):
+    policy_exporter = OnnxPolicyExporter(num_skills, policy_latent, action, normalizer)
     policy_exporter.export(path, filename)
 
 
 class TorchPolicyExporter(torch.nn.Module):
-    def __init__(self, policy_latent, action, normalizer=None):
+    def __init__(self, num_skills, policy_latent, action, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
@@ -167,9 +167,12 @@ class TorchPolicyExporter(torch.nn.Module):
             self.normalizer = torch.nn.Identity()
         self.policy_latent = copy.deepcopy(policy_latent)
         self.action = copy.deepcopy(action)
+        self.num_skills = num_skills
 
     def forward(self, x):
-        return self.action(self.policy_latent(self.normalizer(x)))
+        obs_skills = torch.concat((self.normalizer(x[:, :-self.num_skills]),
+                                   x[:, -self.num_skills:]), dim=-1)
+        return self.action(self.policy_latent(obs_skills))
 
     @torch.jit.export
     def reset(self):
@@ -184,7 +187,7 @@ class TorchPolicyExporter(torch.nn.Module):
 
 
 class OnnxPolicyExporter(torch.nn.Module):
-    def __init__(self, policy_latent, action, normalizer=None):
+    def __init__(self, num_skills, policy_latent, action, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
@@ -192,9 +195,12 @@ class OnnxPolicyExporter(torch.nn.Module):
             self.normalizer = torch.nn.Identity()
         self.policy_latent = copy.deepcopy(policy_latent)
         self.action = copy.deepcopy(action)
+        self.num_skills = num_skills
 
     def forward(self, x):
-        return self.action(self.policy_latent(self.normalizer(x)))
+        obs_skills = torch.concat((self.normalizer(x[:, :-self.num_skills]),
+                                   x[:, -self.num_skills:]), dim=-1)
+        return self.action(self.policy_latent(obs_skills))
 
     def export(self, path, filename):
         self.to("cpu")

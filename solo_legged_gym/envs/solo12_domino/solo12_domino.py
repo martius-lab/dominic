@@ -1,5 +1,4 @@
 import torch
-import torch.nn.functional as func
 import numpy as np
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz

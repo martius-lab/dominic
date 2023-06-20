@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "burning_expert_steps": 300,
-        "clip_lagrange": "auto_2",
+        "clip_lagrange": "auto_1.5",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
@@ -73,7 +73,7 @@
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230620_145559"
+        "wandb_group": "cluster_20230620_152839"
       }
     },
     "env_cfg": {
@@ -112,7 +112,7 @@
             1.0
           ],
           "lin_vel_x": [
-            -1.5,
+            0.0,
             1.5
           ],
           "lin_vel_y": [

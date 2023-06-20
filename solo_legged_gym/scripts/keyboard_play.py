@@ -1,5 +1,6 @@
 from isaacgym import gymapi
 from isaacgym.torch_utils import get_euler_xyz
+import torch.nn.functional as func
 
 from solo_legged_gym import ROOT_DIR
 from solo_legged_gym.envs import task_registry
@@ -54,8 +55,8 @@ class keyboard_play:
                 "policies",
             )
             name = "policy"
-            export_policy_as_jit(self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.pt")
-            export_policy_as_onnx(self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
+            export_policy_as_jit(self.env.num_skills, self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.pt")
+            export_policy_as_onnx(self.env.num_skills, self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
             print("--------------------------")
             print("Exported policy to: ", path)
             policy_jit_path = os.path.join(
@@ -65,11 +66,15 @@ class keyboard_play:
                 "policy.pt"
             )
             policy_jit = torch.jit.load(policy_jit_path)
-            test_input = torch.rand(1, env_cfg.env.num_observations)
+            test_obs = torch.rand(1, env_cfg.env.num_observations)
+            test_skill = torch.zeros(1, 1).type(torch.long)
+            test_encoded_skill = self.encode_skills(test_skill)
+            test_obs_skill = torch.concat((test_obs, test_encoded_skill), dim=-1)
+
             print("loaded policy test output: ")
-            print(self.policy(test_input.to("cuda:0")))
+            print(self.policy(test_obs_skill.to("cuda:0")))
             print("loaded jit policy test output: ")
-            print(policy_jit(test_input))
+            print(policy_jit(test_obs_skill))
             print("--------------------------")
 
         if LOG_DATA:
@@ -112,7 +117,10 @@ class keyboard_play:
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
-        self.obs, _, _, _, _, _, _ = self.env.step(self.policy(self.obs.detach()).detach())
+
+        obs_skills = torch.concat((self.obs.detach(), self.encode_skills(self.env.skills)), dim=-1)
+
+        self.obs, _, _, _, _, _ = self.env.step(self.policy(obs_skills.detach()).detach())
         self.update_keyboard_command()
         if LOG_DATA:
             self.log_data()
@@ -187,6 +195,9 @@ class keyboard_play:
                       np.array2string(self.env.commands[0, :].cpu().detach().numpy().astype(float)))
             if event.value > 0 and event.action in list(self.skill_control.values()):
                 print(list(self.skill_control.keys())[list(self.skill_control.values()).index(event.action)])
+
+    def encode_skills(self, skills):
+        return 2 * (0.5 - func.one_hot(skills, num_classes=self.env.num_skills)).squeeze(1)
 
 
 if __name__ == "__main__":

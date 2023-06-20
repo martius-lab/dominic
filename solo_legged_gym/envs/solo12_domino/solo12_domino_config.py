@@ -30,7 +30,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         change_commands_interval_s = 10.  # time before command are changed[s]
 
         class ranges:
-            lin_vel_x = [-1.5, 1.5]  # min max [m/s]
+            lin_vel_x = [0.0, 1.5]  # min max [m/s]
             lin_vel_y = [0.0, 0.0]  # min max [m/s]
             ang_vel_yaw = [-1.0, 1.0]  # min max [rad/s]
 
@@ -171,7 +171,7 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_1'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.99
@@ -200,7 +200,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'new_version'
+        run_name = 'new_version2'
 
         # load
         load_run = -1  # -1 = last run
