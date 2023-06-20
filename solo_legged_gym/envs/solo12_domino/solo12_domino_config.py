@@ -9,11 +9,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_observations = 33 + 12 + 3 + 8  # #states + #actions + #commands + #skills
         num_actions = 12
         num_feature_history_dim = 8
-        num_features = 4 + (4 + 3) * 2
-        feature_history_length = 50  # steps
+        num_features = 4 + 4 * 4
+        feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
-        feature_focus_freq = [0.02, 0.04]
+        feature_focus_freq = [0.01, 0.02, 0.03, 0.04]
 
         play = False
         debug = False
@@ -93,9 +93,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[1, 0.3]"
-            lin_vel_y = "[1, 0.3]"
-            ang_vel_z = "[1, 0.6]"
+            lin_vel_x = "[1, 0.2]"
+            lin_vel_y = "[1, 0.2]"
+            ang_vel_z = "[1, 0.4]"
             lin_z = "[1, 0.1]"
             ang_xy = "[1, 0.2]"
 
@@ -173,7 +173,7 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_1'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.99
@@ -182,7 +182,7 @@ class Solo12DOMINOTrainCfg:
         target_d = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0
 
         burning_expert_steps = 300
 
@@ -199,7 +199,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'VDW'
+        run_name = 'repulsive'
 
         # load
         load_run = -1  # -1 = last run

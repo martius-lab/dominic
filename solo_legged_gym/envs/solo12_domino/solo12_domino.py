@@ -265,7 +265,7 @@ class Solo12DOMINO(BaseTask):
             self.base_lin_vel[:, 2:3],  # 1
             self.base_ang_vel[:, :2],  # 2
             focus_freq_mags,  # num_focus_freq * 4
-            feet_contact_phase_offsets  # num_focus_freq * 6
+            # feet_contact_phase_offsets  # num_focus_freq * 6
         ), dim=-1)
 
         # no noise added, no clipping
@@ -489,7 +489,7 @@ class Solo12DOMINO(BaseTask):
     def _reward_ang_xy(self, sigma):
         ang_xy = torch.stack(list(get_euler_xyz(self.base_quat)[:2]), dim=1)
         ang_xy = torch.norm(ang_xy, p=2, dim=1)
-        return torch.exp(-torch.square(ang_xy / sigma))
+        return torch.clip(torch.exp(-torch.square(ang_xy / sigma)), min=None, max=0.9) / 0.9
 
     def _reward_ang_vel_xy(self, sigma):
         ang_vel_xy = torch.norm(self.base_ang_vel[:, :2], p=2, dim=1)
