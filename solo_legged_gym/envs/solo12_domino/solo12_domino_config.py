@@ -10,7 +10,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_feature_history_dim = 8
-        num_features = 4 + 4 * 4
+        num_features = 4 + (4 + 3) * 4
         feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
@@ -90,9 +90,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_vel_x = "[1, 0.2]"
-            lin_vel_y = "[1, 0.2]"
-            ang_vel_z = "[1, 0.4]"
+            lin_vel_x = "[1, 0.3]"
+            lin_vel_y = "[1, 0.3]"
+            ang_vel_z = "[1, 0.6]"
             lin_z = "[1, 0.1]"
             ang_xy = "[1, 0.2]"
 

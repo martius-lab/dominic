@@ -73,7 +73,7 @@
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230620_145029"
+        "wandb_group": "cluster_20230620_145559"
       }
     },
     "env_cfg": {
@@ -172,7 +172,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_feature_history_dim": 8,
-        "num_features": 20,
+        "num_features": 32,
         "num_observations": 48,
         "num_skills": 8,
         "play": false
@@ -239,13 +239,13 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "ang_vel_z": "[1, 0.4]",
+          "ang_vel_z": "[1, 0.6]",
           "ang_xy": "[1, 0.2]",
           "feet_height": "[0, [0.04, 0.1]]",
           "feet_slip": "[0, [0.04, 0.1, 3.0]]",
           "joint_targets_rate": "[0, 1.0]",
-          "lin_vel_x": "[1, 0.2]",
-          "lin_vel_y": "[1, 0.2]",
+          "lin_vel_x": "[1, 0.3]",
+          "lin_vel_y": "[1, 0.3]",
           "lin_z": "[1, 0.1]"
         }
       },
