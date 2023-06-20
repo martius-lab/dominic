@@ -148,31 +148,34 @@ def update_train_cfg_from_args(train_cfg, args):
     return train_cfg
 
 
-def export_policy_as_jit(num_skills, policy_latent, action, normalizer, path, filename="policy.pt"):
-    policy_exporter = TorchPolicyExporter(num_skills, policy_latent, action, normalizer)
+def export_policy_as_jit(num_skills, num_hidden_dim, policy_latent_layers, masks, action, normalizer, path, filename="policy.pt"):
+    policy_exporter = TorchPolicyExporter(num_skills, num_hidden_dim, policy_latent_layers, masks, action, normalizer)
     policy_exporter.export(path, filename)
 
 
-def export_policy_as_onnx(num_skills, policy_latent, action, normalizer, path, filename="policy.onnx"):
-    policy_exporter = OnnxPolicyExporter(num_skills, policy_latent, action, normalizer)
+def export_policy_as_onnx(num_skills, num_hidden_dim, policy_latent_layers, masks, action, normalizer, path, filename="policy.onnx"):
+    policy_exporter = OnnxPolicyExporter(num_skills, num_hidden_dim, policy_latent_layers, masks, action, normalizer)
     policy_exporter.export(path, filename)
 
 
 class TorchPolicyExporter(torch.nn.Module):
-    def __init__(self, num_skills, policy_latent, action, normalizer=None):
+    def __init__(self, num_skills, num_hidden_dim, policy_latent_layers, masks, action, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
         else:
             self.normalizer = torch.nn.Identity()
-        self.policy_latent = copy.deepcopy(policy_latent)
+        self.policy_latent_layers = copy.deepcopy(policy_latent_layers)
+        self.masks = copy.deepcopy(masks)
         self.action = copy.deepcopy(action)
         self.num_skills = num_skills
 
-    def forward(self, x):
-        obs_skills = torch.concat((self.normalizer(x[:, :-self.num_skills]),
-                                   x[:, -self.num_skills:]), dim=-1)
-        return self.action(self.policy_latent(obs_skills))
+    def forward(self, input_x):
+        x, z = input_x[:, :-self.num_skills], input_x[:, -self.num_skills:]
+        skill_idxs = z.argmax(dim=1).flatten()
+        x = self.policy_latent_layers[1](self.policy_latent_layers[0](x)) * self.masks[0][skill_idxs]
+        x = self.policy_latent_layers[3](self.policy_latent_layers[2](x)) * self.masks[1][skill_idxs]
+        return self.action(x)
 
     @torch.jit.export
     def reset(self):
@@ -187,24 +190,27 @@ class TorchPolicyExporter(torch.nn.Module):
 
 
 class OnnxPolicyExporter(torch.nn.Module):
-    def __init__(self, num_skills, policy_latent, action, normalizer=None):
+    def __init__(self, num_skills, num_hidden_dim, policy_latent_layers, masks, action, normalizer=None):
         super().__init__()
         if normalizer:
             self.normalizer = copy.deepcopy(normalizer)
         else:
             self.normalizer = torch.nn.Identity()
-        self.policy_latent = copy.deepcopy(policy_latent)
+        self.policy_latent_layers = copy.deepcopy(policy_latent_layers)
         self.action = copy.deepcopy(action)
+        self.masks = copy.deepcopy(masks)
         self.num_skills = num_skills
 
-    def forward(self, x):
-        obs_skills = torch.concat((self.normalizer(x[:, :-self.num_skills]),
-                                   x[:, -self.num_skills:]), dim=-1)
-        return self.action(self.policy_latent(obs_skills))
+    def forward(self, input_x):
+        x, z = input_x[:, :-self.num_skills], input_x[:, -self.num_skills:]
+        skill_idxs = z.argmax(dim=1).flatten()
+        x = self.policy_latent_layers[1](self.policy_latent_layers[0](x)) * self.masks[0][skill_idxs]
+        x = self.policy_latent_layers[3](self.policy_latent_layers[2](x)) * self.masks[1][skill_idxs]
+        return self.action(x)
 
     def export(self, path, filename):
         self.to("cpu")
-        obs = torch.zeros(1, self.policy_latent[0].in_features)
+        obs = torch.zeros(1, self.policy_latent_layers[0].in_features + self.num_skills)
         torch.onnx.export(
             self,
             obs,

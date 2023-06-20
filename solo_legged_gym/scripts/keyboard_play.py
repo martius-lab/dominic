@@ -49,14 +49,27 @@ class keyboard_play:
 
         # export policy as a jit module and as onnx model (used to run it from C++)
         if EXPORT_POLICY:
+            # TODO: how to jit this thing properly?
             path = os.path.join(
                 os.path.dirname(load_path),
                 "exported",
                 "policies",
             )
             name = "policy"
-            export_policy_as_jit(self.env.num_skills, self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.pt")
-            export_policy_as_onnx(self.env.num_skills, self.runner.policy.policy_latent_net, self.runner.policy.action_mean_net, self.runner.obs_normalizer, path, filename=f"{name}.onnx")
+            export_policy_as_jit(self.env.num_skills,
+                                 self.runner.policy.num_hidden_dim,
+                                 self.runner.policy.policy_latent_layers,
+                                 self.runner.policy.masks,
+                                 self.runner.policy.action_mean_net,
+                                 self.runner.obs_normalizer,
+                                 path, filename=f"{name}.pt")
+            export_policy_as_onnx(self.env.num_skills,
+                                  self.runner.policy.num_hidden_dim,
+                                  self.runner.policy.policy_latent_layers,
+                                  self.runner.policy.masks,
+                                  self.runner.policy.action_mean_net,
+                                  self.runner.obs_normalizer,
+                                  path, filename=f"{name}.onnx")
             print("--------------------------")
             print("Exported policy to: ", path)
             policy_jit_path = os.path.join(
@@ -69,12 +82,11 @@ class keyboard_play:
             test_obs = torch.rand(1, env_cfg.env.num_observations)
             test_skill = torch.zeros(1, 1).type(torch.long)
             test_encoded_skill = self.encode_skills(test_skill)
-            test_obs_skill = torch.concat((test_obs, test_encoded_skill), dim=-1)
 
             print("loaded policy test output: ")
-            print(self.policy(test_obs_skill.to("cuda:0")))
+            print(self.policy((test_obs.to("cuda:0"), test_encoded_skill.to("cuda:0"))))
             print("loaded jit policy test output: ")
-            print(policy_jit(test_obs_skill))
+            print(policy_jit(torch.concat((test_obs, test_encoded_skill), dim=-1)))
             print("--------------------------")
 
         if LOG_DATA:
@@ -118,9 +130,9 @@ class keyboard_play:
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
 
-        obs_skills = torch.concat((self.obs.detach(), self.encode_skills(self.env.skills)), dim=-1)
+        obs_skills = (self.obs.detach(), self.encode_skills(self.env.skills))
 
-        self.obs, _, _, _, _, _ = self.env.step(self.policy(obs_skills.detach()).detach())
+        self.obs, _, _, _, _, _ = self.env.step(self.policy(obs_skills).detach())
         self.update_keyboard_command()
         if LOG_DATA:
             self.log_data()
@@ -197,7 +209,7 @@ class keyboard_play:
                 print(list(self.skill_control.keys())[list(self.skill_control.values()).index(event.action)])
 
     def encode_skills(self, skills):
-        return 2 * (0.5 - func.one_hot(skills, num_classes=self.env.num_skills)).squeeze(1)
+        return func.one_hot(skills, num_classes=self.env.num_skills).squeeze(1)
 
 
 if __name__ == "__main__":

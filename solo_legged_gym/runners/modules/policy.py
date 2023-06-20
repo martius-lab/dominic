@@ -3,7 +3,7 @@ import torch.nn as nn
 from solo_legged_gym.runners.utils.distributions import DiagGaussianDistribution
 
 
-class DOMINOPolicy(nn.Module):
+class Policy(nn.Module):
     def __init__(self,
                  num_obs,
                  num_actions,
@@ -12,9 +12,9 @@ class DOMINOPolicy(nn.Module):
                  log_std_init=0.0,
                  **kwargs):
         if kwargs:
-            print("PPOPolicy.__init__ got unexpected arguments, which will be ignored: " + str(
+            print("Policy.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
-        super(DOMINOPolicy, self).__init__()
+        super(Policy, self).__init__()
 
         activation = get_activation(activation)
 

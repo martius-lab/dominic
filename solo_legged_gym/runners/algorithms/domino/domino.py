@@ -4,7 +4,6 @@ import os
 from collections import deque
 import statistics
 import numpy as np
-import matplotlib.pyplot as plt
 import wandb
 
 import torch
@@ -15,10 +14,13 @@ from torch.utils.tensorboard import SummaryWriter
 
 from solo_legged_gym.utils import class_to_dict
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
-from solo_legged_gym.runners.algorithms.domino.domino_policy import DOMINOPolicy
-from solo_legged_gym.runners.modules.value import Value
+# from solo_legged_gym.runners.modules.policy import Policy
+from solo_legged_gym.runners.modules.masked_policy import MaskedPolicy
+# from solo_legged_gym.runners.modules.value import Value
+from solo_legged_gym.runners.modules.masked_value import MaskedValue
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
-from solo_legged_gym.runners.modules.successor_feature import SuccessorFeature
+# from solo_legged_gym.runners.modules.successor_feature import SuccessorFeature
+from solo_legged_gym.runners.modules.masked_successor_feature import MaskedSuccessorFeature
 from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuffer
 
 torch.autograd.set_detect_anomaly(True)
@@ -39,25 +41,37 @@ class DOMINO:
         self.num_ext_values = len(self.env.cfg.rewards.powers)
 
         # set up the networks
-        self.policy = DOMINOPolicy(num_obs=self.env.num_obs + self.env.num_skills,
+        self.policy = MaskedPolicy(num_obs=self.env.num_obs,
+                                   num_skills=self.env.num_skills,
                                    num_actions=self.env.num_actions,
+                                   share_ratio=self.n_cfg.policy_share_ratio,
                                    hidden_dims=self.n_cfg.policy_hidden_dims,
                                    activation=self.n_cfg.policy_activation,
-                                   log_std_init=self.n_cfg.log_std_init).to(self.device)
+                                   log_std_init=self.n_cfg.log_std_init,
+                                   device=self.device).to(self.device)
 
-        self.ext_values = [Value(num_obs=self.env.num_obs + self.env.num_skills,
-                                 hidden_dims=self.n_cfg.value_hidden_dims,
-                                 activation=self.n_cfg.value_activation).to(self.device)
+        self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
+                                       num_skills=self.env.num_skills,
+                                       share_ratio=self.n_cfg.value_share_ratio,
+                                       hidden_dims=self.n_cfg.value_hidden_dims,
+                                       activation=self.n_cfg.value_activation,
+                                       device=self.device)
                            for _ in range(self.num_ext_values)]
 
-        self.int_value = Value(num_obs=self.env.num_obs + self.env.num_skills,
-                               hidden_dims=self.n_cfg.value_hidden_dims,
-                               activation=self.n_cfg.value_activation).to(self.device)
+        self.int_value = MaskedValue(num_obs=self.env.num_obs,
+                                     num_skills=self.env.num_skills,
+                                     share_ratio=self.n_cfg.value_share_ratio,
+                                     hidden_dims=self.n_cfg.value_hidden_dims,
+                                     activation=self.n_cfg.value_activation,
+                                     device=self.device)
 
-        self.succ_feat = SuccessorFeature(num_obs=self.env.num_obs + self.env.num_skills,
-                                          num_features=self.env.num_features,
-                                          hidden_dims=self.n_cfg.succ_feat_hidden_dims,
-                                          activation=self.n_cfg.succ_feat_activation).to(self.device)
+        self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
+                                                num_skills=self.env.num_skills,
+                                                num_features=self.env.num_features,
+                                                share_ratio=self.n_cfg.succ_feat_share_ratio,
+                                                hidden_dims=self.n_cfg.succ_feat_hidden_dims,
+                                                activation=self.n_cfg.succ_feat_activation,
+                                                device=self.device)
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
@@ -178,7 +192,7 @@ class DOMINO:
 
                     # use last obs to get the actions
                     actions, log_prob = \
-                        self.policy.act_and_log_prob(torch.concat((obs, self.encode_skills(skills)), dim=-1))
+                        self.policy.act_and_log_prob((obs, self.encode_skills(skills)))
 
                     new_obs, new_skills, features, group_rew, dones, infos = self.env.step(actions)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
@@ -214,7 +228,7 @@ class DOMINO:
                         len_buffer.extend(cur_episode_length[new_ids][:, 0].cpu().numpy().tolist())
                         cur_episode_length[new_ids] = 0
 
-                obs_skills = torch.concat((obs, self.encode_skills(skills)), dim=-1)
+                obs_skills = (obs, self.encode_skills(skills))
                 last_ext_values = []
                 for i in range(self.num_ext_values):
                     last_ext_values.append(self.ext_values[i](obs_skills).detach())
@@ -256,7 +270,7 @@ class DOMINO:
         return 0
 
     def process_env_step(self, obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos):
-        obs_skills = torch.concat((obs, self.encode_skills(skills)), dim=-1)
+        obs_skills = (obs, self.encode_skills(skills))
 
         self.transition.observations = obs
 
@@ -292,9 +306,8 @@ class DOMINO:
         n_samples = obs.size(0)
         n_obs = obs.size(1)
         all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
-        all_sfs = self.succ_feat(torch.concat((obs.unsqueeze(1).repeat(1, n_skills, 1),
-                                               all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1)),
-                                              dim=-1).view(-1, n_obs + n_skills)).view(n_samples, n_skills, -1)
+        all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
+                                  all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(n_samples, n_skills, -1)
         sfs = all_sfs[torch.arange(all_sfs.size(0)), skills, :]
         sfs_dist = torch.norm((sfs.unsqueeze(1).repeat(1, self.env.num_skills, 1) - all_sfs), dim=2, p=2)
 
@@ -328,7 +341,7 @@ class DOMINO:
                                      (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
 
     def encode_skills(self, skills):
-        return (2 * (0.5 - func.one_hot(skills, num_classes=self.env.num_skills))).squeeze()
+        return (func.one_hot(skills, num_classes=self.env.num_skills)).squeeze(1)
 
     def update(self, it, tot_iter):
         # for logging
@@ -358,7 +371,7 @@ class DOMINO:
              ) in generator:
 
             # using the current policy to get action log prob
-            obs_skills = torch.concat((obs, self.encode_skills(skills)), dim=-1)
+            obs_skills = (obs, self.encode_skills(skills))
             _, _ = self.policy.act_and_log_prob(obs_skills)
             actions_log_prob_batch = self.policy.distribution.log_prob(actions)
 
@@ -642,9 +655,9 @@ class DOMINO:
             self.policy.to(device)
             self.obs_normalizer.to(device)
 
-        def inference_policy(x):
-            obs_skills = torch.concat((self.obs_normalizer(x[:, :-self.env.num_skills]),
-                                       x[:, -self.env.num_skills:]), dim=-1)
+        def inference_policy(input_x):
+            x, z = input_x
+            obs_skills = (self.obs_normalizer(x), z)
             return self.policy.act_inference(obs_skills)
 
         return inference_policy

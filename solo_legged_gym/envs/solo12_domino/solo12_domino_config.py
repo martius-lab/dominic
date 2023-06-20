@@ -10,11 +10,11 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_feature_history_dim = 8
-        num_features = 4 + (4 + 3) * 4
+        num_features = 4 + (4 + 3) * 2
         feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
-        feature_focus_freq = [0.01, 0.02, 0.03, 0.04]
+        feature_focus_freq = [0.02, 0.03]
 
         play = False
         debug = False
@@ -144,10 +144,13 @@ class Solo12DOMINOTrainCfg:
         log_std_init = 0.0
         policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        policy_share_ratio = 1 / 8.0
         value_hidden_dims = [512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        value_share_ratio = 1 / 8.0
         succ_feat_hidden_dims = [512, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+        succ_feat_share_ratio = 1 / 8.0
 
     class algorithm:
         # algorithm params
@@ -200,7 +203,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'new_version2'
+        run_name = 'masked'
 
         # load
         load_run = -1  # -1 = last run

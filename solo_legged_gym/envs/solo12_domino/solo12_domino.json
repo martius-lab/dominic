@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "burning_expert_steps": 300,
-        "clip_lagrange": "auto_1.5",
+        "clip_lagrange": "auto_1",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
@@ -44,16 +44,19 @@
           512,
           256
         ],
+        "policy_share_ratio": 0.125,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
           512,
           256
         ],
+        "succ_feat_share_ratio": 0.125,
         "value_activation": "elu",
         "value_hidden_dims": [
           512,
           256
-        ]
+        ],
+        "value_share_ratio": 0.125
       },
       "runner": {
         "checkpoint": -1,
@@ -68,12 +71,12 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "new_version",
+        "run_name": "masked",
         "save_interval": 50,
         "separate_policy": true,
         "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230620_152839"
+        "wandb_group": "cluster_20230620_223042"
       }
     },
     "env_cfg": {
@@ -163,16 +166,14 @@
         "env_spacing": 2.0,
         "episode_length_s": 20,
         "feature_focus_freq": [
-          0.01,
           0.02,
-          0.03,
-          0.04
+          0.03
         ],
         "feature_history_length": 100,
         "num_actions": 12,
         "num_envs": 4096,
         "num_feature_history_dim": 8,
-        "num_features": 32,
+        "num_features": 18,
         "num_observations": 48,
         "num_skills": 8,
         "play": false
