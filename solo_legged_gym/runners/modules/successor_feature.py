@@ -5,10 +5,14 @@ import torch.nn as nn
 class SuccessorFeature(nn.Module):
     def __init__(self,
                  num_obs,
+                 num_skills,
                  num_features,
-                 hidden_dims=[256, 256, 256],
+                 hidden_dims=None,
                  activation='elu',
+                 device='cpu',
                  **kwargs):
+        if hidden_dims is None:
+            hidden_dims = [256, 256]
         if kwargs:
             print("SuccessorFeature.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
@@ -16,21 +20,17 @@ class SuccessorFeature(nn.Module):
 
         activation = get_activation(activation)
 
-        mlp_input_dim = num_obs
+        mlp_input_dim = num_obs + num_skills
         mlp_output_dim = num_features
 
-        layers = []
-        layers.append(nn.Linear(mlp_input_dim, hidden_dims[0]))
-        layers.append(activation)
-        for l in range(len(hidden_dims)):
-            if l == len(hidden_dims) - 1:
-                layers.append(nn.Linear(hidden_dims[l], mlp_output_dim))
+        layers = [nn.Linear(mlp_input_dim, hidden_dims[0]).to(device), activation]
+        for la in range(len(hidden_dims)):
+            if la == len(hidden_dims) - 1:
+                layers.append(nn.Linear(hidden_dims[la], mlp_output_dim).to(device))
             else:
-                layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
+                layers.append(nn.Linear(hidden_dims[la], hidden_dims[la + 1]).to(device))
                 layers.append(activation)
         self.succ_feat = nn.Sequential(*layers)
-
-        print(f"Successor Feature MLP: {self.succ_feat}")
 
     @staticmethod
     def init_weights(sequential, scales):
@@ -42,8 +42,9 @@ class SuccessorFeature(nn.Module):
         # not used at the moment
         pass
 
-    def forward(self, x):
-        return self.succ_feat(x)
+    def forward(self, input_x):
+        x, z = input_x
+        return self.succ_feat(torch.concat((x, z), dim=-1))
 
 
 def get_activation(act_name):

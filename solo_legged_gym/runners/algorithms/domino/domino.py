@@ -14,12 +14,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 from solo_legged_gym.utils import class_to_dict
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
-# from solo_legged_gym.runners.modules.policy import Policy
+from solo_legged_gym.runners.modules.policy import Policy
 from solo_legged_gym.runners.modules.masked_policy import MaskedPolicy
-# from solo_legged_gym.runners.modules.value import Value
+from solo_legged_gym.runners.modules.value import Value
 from solo_legged_gym.runners.modules.masked_value import MaskedValue
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
-# from solo_legged_gym.runners.modules.successor_feature import SuccessorFeature
+from solo_legged_gym.runners.modules.successor_feature import SuccessorFeature
 from solo_legged_gym.runners.modules.masked_successor_feature import MaskedSuccessorFeature
 from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuffer
 
@@ -41,43 +41,83 @@ class DOMINO:
         self.num_ext_values = len(self.env.cfg.rewards.powers)
 
         # set up the networks
-        self.policy = MaskedPolicy(num_obs=self.env.num_obs,
-                                   num_skills=self.env.num_skills,
-                                   num_actions=self.env.num_actions,
-                                   share_ratio=self.n_cfg.policy_share_ratio,
-                                   hidden_dims=self.n_cfg.policy_hidden_dims,
-                                   activation=self.n_cfg.policy_activation,
-                                   log_std_init=self.n_cfg.log_std_init,
-                                   device=self.device).to(self.device)
-
-        self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
+        if self.n_cfg.masked_net:
+            self.policy = MaskedPolicy(num_obs=self.env.num_obs,
                                        num_skills=self.env.num_skills,
-                                       share_ratio=self.n_cfg.value_share_ratio,
-                                       hidden_dims=self.n_cfg.value_hidden_dims,
-                                       activation=self.n_cfg.value_activation,
-                                       device=self.device)
-                           for _ in range(self.num_ext_values)]
+                                       num_actions=self.env.num_actions,
+                                       share_ratio=self.n_cfg.share_ratio,
+                                       hidden_dims=self.n_cfg.policy_hidden_dims,
+                                       activation=self.n_cfg.policy_activation,
+                                       log_std_init=self.n_cfg.log_std_init,
+                                       device=self.device).to(self.device)
+        else:
+            self.policy = Policy(num_obs=self.env.num_obs,
+                                 num_skills=self.env.num_skills,
+                                 num_actions=self.env.num_actions,
+                                 hidden_dims=self.n_cfg.policy_hidden_dims,
+                                 activation=self.n_cfg.policy_activation,
+                                 log_std_init=self.n_cfg.log_std_init,
+                                 device=self.device).to(self.device)
 
-        self.int_value = MaskedValue(num_obs=self.env.num_obs,
+        if self.n_cfg.masked_net:
+            self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
+                                           num_skills=self.env.num_skills,
+                                           share_ratio=self.n_cfg.share_ratio,
+                                           hidden_dims=self.n_cfg.value_hidden_dims,
+                                           activation=self.n_cfg.value_activation,
+                                           device=self.device)
+                               for _ in range(self.num_ext_values)]
+
+            self.int_value = MaskedValue(num_obs=self.env.num_obs,
+                                         num_skills=self.env.num_skills,
+                                         share_ratio=self.n_cfg.share_ratio,
+                                         hidden_dims=self.n_cfg.value_hidden_dims,
+                                         activation=self.n_cfg.value_activation,
+                                         device=self.device)
+
+        else:
+            self.ext_values = [Value(num_obs=self.env.num_obs,
                                      num_skills=self.env.num_skills,
-                                     share_ratio=self.n_cfg.value_share_ratio,
                                      hidden_dims=self.n_cfg.value_hidden_dims,
                                      activation=self.n_cfg.value_activation,
                                      device=self.device)
+                               for _ in range(self.num_ext_values)]
 
-        self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
-                                                num_skills=self.env.num_skills,
-                                                num_features=self.env.num_features,
-                                                share_ratio=self.n_cfg.succ_feat_share_ratio,
-                                                hidden_dims=self.n_cfg.succ_feat_hidden_dims,
-                                                activation=self.n_cfg.succ_feat_activation,
-                                                device=self.device)
+            self.int_value = Value(num_obs=self.env.num_obs,
+                                   num_skills=self.env.num_skills,
+                                   hidden_dims=self.n_cfg.value_hidden_dims,
+                                   activation=self.n_cfg.value_activation,
+                                   device=self.device)
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
         self.lagranges = [nn.Parameter(torch.ones(self.env.num_skills - 1,
                                                   device=self.device) * 0.0, requires_grad=True)
                           for _ in range(self.num_ext_values - 1)]
+
+        if self.a_cfg.use_succ_feat:
+            if self.n_cfg.masked_net:
+                self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
+                                                        num_skills=self.env.num_skills,
+                                                        num_features=self.env.num_features,
+                                                        share_ratio=self.n_cfg.share_ratio,
+                                                        hidden_dims=self.n_cfg.succ_feat_hidden_dims,
+                                                        activation=self.n_cfg.succ_feat_activation,
+                                                        device=self.device)
+            else:
+                self.succ_feat = SuccessorFeature(num_obs=self.env.num_obs,
+                                                  num_skills=self.env.num_skills,
+                                                  num_features=self.env.num_features,
+                                                  hidden_dims=self.n_cfg.succ_feat_hidden_dims,
+                                                  activation=self.n_cfg.succ_feat_activation,
+                                                  device=self.device)
+
+            self.succ_feat_learning_rate = self.a_cfg.succ_feat_learning_rate
+            self.succ_feat_optimizer = optim.Adam(list(self.succ_feat.parameters()), lr=self.succ_feat_learning_rate)
+
+        else:
+            self.avg_features = torch.ones(self.env.num_skills, self.env.num_features, device=self.device,
+                                           requires_grad=False) * (1 / self.env.num_features)
 
         # set up moving averages
         self.avg_ext_values = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False)
@@ -107,6 +147,7 @@ class DOMINO:
                                             actions_shape=[self.env.num_actions],
                                             features_shape=[self.env.num_features],
                                             num_ext_values=self.num_ext_values,
+                                            use_succ_feat=self.a_cfg.use_succ_feat,
                                             device=self.device)
         self.transition = RolloutBuffer.Transition()
 
@@ -119,9 +160,6 @@ class DOMINO:
 
         self.lagrange_learning_rate = self.a_cfg.lagrange_learning_rate
         self.lagrange_optimizer = optim.Adam(self.lagranges, lr=self.lagrange_learning_rate)
-
-        self.succ_feat_learning_rate = self.a_cfg.succ_feat_learning_rate
-        self.succ_feat_optimizer = optim.Adam(list(self.succ_feat.parameters()), lr=self.succ_feat_learning_rate)
 
         # Log
         self.log_dir = log_dir
@@ -235,8 +273,9 @@ class DOMINO:
                 last_int_values = self.int_value(obs_skills).detach()
                 self.rollout_buffer.compute_returns(last_ext_values, last_int_values, self.a_cfg.gamma, self.a_cfg.lam)
 
-                last_succ_feat = self.succ_feat(obs_skills).detach()
-                self.rollout_buffer.compute_succ_feat_target(last_succ_feat, self.a_cfg.succ_feat_gamma)
+                if self.a_cfg.use_succ_feat:
+                    last_succ_feat = self.succ_feat(obs_skills).detach()
+                    self.rollout_buffer.compute_succ_feat_target(last_succ_feat, self.a_cfg.succ_feat_gamma)
 
             stop = time.time()
             collection_time = stop - start
@@ -296,24 +335,37 @@ class DOMINO:
         self.transition.dones = dones
         self.transition.skills = skills
         self.transition.features = features
-        self.transition.succ_feat = self.succ_feat(obs_skills).detach()
+        if self.a_cfg.use_succ_feat:
+            self.transition.succ_feat = self.succ_feat(obs_skills).detach()
 
         self.rollout_buffer.add_transitions(self.transition)
         self.transition.clear()
 
     def get_intrinsic_reward(self, skills, obs, features):
-        n_skills = self.env.num_skills
-        n_samples = obs.size(0)
-        n_obs = obs.size(1)
-        all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
-        all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
-                                  all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(n_samples, n_skills, -1)
-        sfs = all_sfs[torch.arange(all_sfs.size(0)), skills, :]
-        sfs_dist = torch.norm((sfs.unsqueeze(1).repeat(1, self.env.num_skills, 1) - all_sfs), dim=2, p=2)
+        if self.a_cfg.use_succ_feat:
+            n_skills = self.env.num_skills
+            n_samples = obs.size(0)
+            n_obs = obs.size(1)
+            all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
+            all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
+                                      all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(
+                n_samples, n_skills, -1)
+            sfs = all_sfs[torch.arange(all_sfs.size(0)), skills, :]
+            sfs_dist = torch.norm((sfs.unsqueeze(1).repeat(1, self.env.num_skills, 1) - all_sfs), dim=2, p=2)
 
-        _, nearest_sfs_idx = torch.kthvalue(sfs_dist, k=2, dim=-1)  # num_samples
-        nearst_sfs = all_sfs[torch.arange(all_sfs.size(0)), nearest_sfs_idx, :]
-        psi_diff = sfs - nearst_sfs
+            _, nearest_sfs_idx = torch.kthvalue(sfs_dist, k=2, dim=-1)  # num_samples
+            nearst_sfs = all_sfs[torch.arange(all_sfs.size(0)), nearest_sfs_idx, :]
+            psi_diff = sfs - nearst_sfs
+        else:
+            afs = self.avg_features[skills]  # num_samples * num_features
+            afs_dist = torch.norm((afs.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
+                                   self.avg_features.unsqueeze(0).repeat(self.env.num_envs, 1, 1)),
+                                  dim=2, p=2)
+
+            _, nearest_afs_idx = torch.kthvalue(afs_dist, k=2, dim=-1)  # num_samples
+            nearst_afs = self.avg_features[nearest_afs_idx]  # num_samples * num_features
+            psi_diff = afs - nearst_afs
+
         dist = torch.norm(psi_diff, p=2, dim=-1)
         norm_diff = dist / self.a_cfg.target_dist
         c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
@@ -332,13 +384,22 @@ class DOMINO:
                 lagrange_coeff[i][skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
-    def update_moving_avg(self, skills, ext_returns):
+    def update_value_moving_avg(self, skills, ext_returns):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
         for i in range(self.num_ext_values - 1):
             encoded_ext_returns = encoded_skills * ext_returns[i + 1].unsqueeze(-1).repeat(1, self.env.num_skills)
             mean_encoded_ext_returns = torch.nan_to_num(encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0))
             self.avg_ext_values[i] = self.a_cfg.avg_values_decay_factor * self.avg_ext_values[i] + \
                                      (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
+
+    def update_feature_moving_avg(self, skills, features):
+        encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
+        encoded_features = encoded_skills.unsqueeze(-1) * features.unsqueeze(1).repeat(1, self.env.num_skills, 1)
+        mean_encoded_features = torch.nan_to_num(encoded_features.sum(dim=0) / encoded_skills.sum(dim=0).unsqueeze(-1),
+                                                 nan=(1 / self.env.num_features))
+
+        self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
+                            (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
 
     def encode_skills(self, skills):
         return (func.one_hot(skills, num_classes=self.env.num_skills)).squeeze(1)
@@ -367,9 +428,12 @@ class DOMINO:
              old_mu,
              old_sigma,
              skills,
+             features,
              succ_feat_target,
              ) in generator:
 
+            ############################################################################################################
+            # PPO step
             # using the current policy to get action log prob
             obs_skills = (obs, self.encode_skills(skills))
             _, _ = self.policy.act_and_log_prob(obs_skills)
@@ -380,9 +444,6 @@ class DOMINO:
             for i in range(self.num_ext_values):
                 ext_values.append(self.ext_values[i](obs_skills))
             int_value = self.int_value(obs_skills)
-
-            # get successor features
-            succ_feat = self.succ_feat(obs_skills)
 
             # update moving average
             mu_batch = self.policy.action_mean
@@ -402,8 +463,6 @@ class DOMINO:
                 int_advantages *= (1 - lagrange_coeff[i])
             advantages += int_advantages
 
-            ############################################################################################################
-            # PPO step
             # Using KL to adaptively changing the learning rate
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
                 with torch.inference_mode():
@@ -479,13 +538,6 @@ class DOMINO:
             self.optimizer.step()
 
             ############################################################################################################
-            # learn successor features
-            succ_feat_loss = (succ_feat - succ_feat_target).pow(2).mean()
-            self.succ_feat_optimizer.zero_grad()
-            succ_feat_loss.backward()
-            self.succ_feat_optimizer.step()
-
-            ############################################################################################################
             # learn lagrange multipliers
             if not self.burning_expert:
                 for _ in range(self.a_cfg.num_lagrange_steps):
@@ -514,8 +566,21 @@ class DOMINO:
                                                              max=clip_lagrange_threshold)
 
             ############################################################################################################
-            # update moving average
-            self.update_moving_avg(skills.squeeze(-1), [ext_returns[i].squeeze(-1) for i in range(self.num_ext_values)])
+            # update features sfs/afs
+            if self.a_cfg.use_succ_feat:
+                succ_feat = self.succ_feat(obs_skills)
+                succ_feat_loss = (succ_feat - succ_feat_target).pow(2).mean()
+                self.succ_feat_optimizer.zero_grad()
+                succ_feat_loss.backward()
+                self.succ_feat_optimizer.step()
+            else:
+                self.update_feature_moving_avg(skills.squeeze(-1),
+                                               features)
+
+            ############################################################################################################
+            # update value moving average
+            self.update_value_moving_avg(skills.squeeze(-1),
+                                         [ext_returns[i].squeeze(-1) for i in range(self.num_ext_values)])
 
             ############################################################################################################
             # logging
@@ -531,13 +596,15 @@ class DOMINO:
                                                             0]).detach().cpu().numpy()
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
-            mean_succ_feat_loss += succ_feat_loss.item()
+            if self.a_cfg.use_succ_feat:
+                mean_succ_feat_loss += succ_feat_loss.item()
 
         num_updates = self.a_cfg.num_learning_epochs * self.a_cfg.num_mini_batches
         mean_ext_value_loss = [i / num_updates for i in mean_ext_value_loss]
         mean_int_value_loss /= num_updates
         mean_surrogate_loss /= num_updates
-        mean_succ_feat_loss /= num_updates
+        if self.a_cfg.use_succ_feat:
+            mean_succ_feat_loss /= num_updates
         mean_lagranges = [i / num_updates for i in mean_lagranges]
         mean_lagrange_coeffs = [i / num_updates for i in mean_lagrange_coeffs]
         mean_constraint_satisfaction = [i / num_updates for i in mean_constraint_satisfaction]
@@ -575,7 +642,8 @@ class DOMINO:
             self.writer.add_scalar(f'Learning/ext_value_function_loss_{i}', mean_ext_value_losses[i], locs['it'])
         self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
-        self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'], locs['it'])
+        if self.a_cfg.use_succ_feat:
+            self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'], locs['it'])
 
         mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
@@ -633,15 +701,19 @@ class DOMINO:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
         if self.normalize_features:
             saved_dict["feat_norm_state_dict"] = self.feat_normalizer.state_dict()
+        if self.a_cfg.use_succ_feat:
+            saved_dict["succ_feat_state_dict"] = self.succ_feat.state_dict()
         torch.save(saved_dict, path)
 
-    def load(self, path, load_values=False, load_optimizer=False, load_feat_normalizer=False):
+    def load(self, path, load_values=False, load_succ_feat=False, load_optimizer=False, load_feat_normalizer=False):
         loaded_dict = torch.load(path)
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
         if load_values:
             self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
             for i in range(self.num_ext_values):
                 self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
+        if load_succ_feat:
+            self.succ_feat.load_state_dict(loaded_dict["succ_feat_state_dict"])
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
         if self.normalize_features and load_feat_normalizer:

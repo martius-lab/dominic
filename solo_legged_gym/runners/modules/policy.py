@@ -6,11 +6,15 @@ from solo_legged_gym.runners.utils.distributions import DiagGaussianDistribution
 class Policy(nn.Module):
     def __init__(self,
                  num_obs,
+                 num_skills,
                  num_actions,
-                 hidden_dims=[256, 256, 256],
+                 hidden_dims=None,
                  activation='elu',
                  log_std_init=0.0,
+                 device='cpu',
                  **kwargs):
+        if hidden_dims is None:
+            hidden_dims = [256, 256]
         if kwargs:
             print("Policy.__init__ got unexpected arguments, which will be ignored: " + str(
                 [key for key in kwargs.keys()]))
@@ -18,23 +22,18 @@ class Policy(nn.Module):
 
         activation = get_activation(activation)
 
-        mlp_input_dim = num_obs
+        mlp_input_dim = num_obs + num_skills
 
         # Policy
-        layers = []
-        layers.append(nn.Linear(mlp_input_dim, hidden_dims[0]))
-        layers.append(activation)
-        for l in range(len(hidden_dims)-1):
-            layers.append(nn.Linear(hidden_dims[l], hidden_dims[l + 1]))
+        layers = [nn.Linear(mlp_input_dim, hidden_dims[0]).to(device), activation]
+        for la in range(len(hidden_dims)-1):
+            layers.append(nn.Linear(hidden_dims[la], hidden_dims[la + 1]).to(device))
             layers.append(activation)
         self.policy_latent_net = nn.Sequential(*layers)
 
         self.distribution = DiagGaussianDistribution(action_dim=num_actions)
-        self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1], log_std_init=log_std_init)
-
-        print(f"Policy Latent MLP: {self.policy_latent_net}\n")
-        print(f"Policy Action Mean: {self.action_mean_net}\n")
-        print(f"Policy Action log std: {self.log_std}\n")
+        self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1],
+                                                                                      log_std_init=log_std_init)
 
     def reset(self, dones=None):
         pass
@@ -54,12 +53,16 @@ class Policy(nn.Module):
     def entropy(self):
         return self.distribution.entropy()
 
-    def act_and_log_prob(self, observations):
+    def act_and_log_prob(self, input_x):
         # return actions and log_prob
+        x, z = input_x
+        observations = torch.concat((x, z), dim=-1)
         mean = self.action_mean_net(self.policy_latent_net(observations))
         return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
 
-    def act_inference(self, observations):
+    def act_inference(self, input_x):
+        x, z = input_x
+        observations = torch.concat((x, z), dim=-1)
         mean = self.action_mean_net(self.policy_latent_net(observations))
         return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
 

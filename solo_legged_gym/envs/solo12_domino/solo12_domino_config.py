@@ -10,7 +10,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_feature_history_dim = 8
-        num_features = 4 + (4 + 3) * 2
+        num_features = 4
         feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
@@ -142,15 +142,16 @@ class Solo12DOMINOTrainCfg:
 
     class network:
         log_std_init = 0.0
+
+        masked_net = True
+        share_ratio = 1 / 8.0
+
         policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        policy_share_ratio = 1 / 8.0
         value_hidden_dims = [512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_share_ratio = 1 / 8.0
         succ_feat_hidden_dims = [512, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_share_ratio = 1 / 8.0
 
     class algorithm:
         # algorithm params
@@ -185,6 +186,7 @@ class Solo12DOMINOTrainCfg:
         repulsive_power = 0
         attractive_coeff = 0
 
+        use_succ_feat = True
         succ_feat_gamma = 0.95
         succ_feat_learning_rate = 1.e-3
 
@@ -196,14 +198,10 @@ class Solo12DOMINOTrainCfg:
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
-        # separation
-        separate_policy = True
-        separate_value = True
-
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'masked'
+        run_name = 'NONFREQ_FEAT'
 
         # load
         load_run = -1  # -1 = last run

@@ -34,29 +34,29 @@
         "succ_feat_learning_rate": 0.001,
         "target_dist": 1.0,
         "use_clipped_value_loss": true,
+        "use_succ_feat": true,
         "value_loss_coef": 1.0
       },
       "algorithm_name": "DOMINO",
       "network": {
         "log_std_init": 0.0,
+        "masked_net": true,
         "policy_activation": "elu",
         "policy_hidden_dims": [
           512,
           256
         ],
-        "policy_share_ratio": 0.125,
+        "share_ratio": 0.125,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
           512,
           256
         ],
-        "succ_feat_share_ratio": 0.125,
         "value_activation": "elu",
         "value_hidden_dims": [
           512,
           256
-        ],
-        "value_share_ratio": 0.125
+        ]
       },
       "runner": {
         "checkpoint": -1,
@@ -71,12 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "masked",
+        "run_name": "NONFREQ_FEAT",
         "save_interval": 50,
-        "separate_policy": true,
-        "separate_value": true,
         "wandb": true,
-        "wandb_group": "cluster_20230620_223042"
+        "wandb_group": "cluster_20230621_171009"
       }
     },
     "env_cfg": {
@@ -173,7 +171,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_feature_history_dim": 8,
-        "num_features": 18,
+        "num_features": 4,
         "num_observations": 48,
         "num_skills": 8,
         "play": false

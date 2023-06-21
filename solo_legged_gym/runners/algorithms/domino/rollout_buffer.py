@@ -27,6 +27,7 @@ class RolloutBuffer:
                  actions_shape,
                  features_shape,
                  num_ext_values=1,
+                 use_succ_feat=False,
                  device='cpu'):
 
         self.device = device
@@ -34,6 +35,7 @@ class RolloutBuffer:
         self.obs_shape = obs_shape
         self.actions_shape = actions_shape
         self.num_ext_values = num_ext_values
+        self.use_succ_feat = use_succ_feat
 
         self.observations = torch.zeros(num_transitions_per_env, num_envs, *obs_shape, device=self.device)
 
@@ -87,7 +89,8 @@ class RolloutBuffer:
         self.dones[self.step].copy_(transition.dones.view(-1, 1))
         self.skills[self.step].copy_(transition.skills.view(-1, 1))
         self.features[self.step].copy_(transition.features)
-        self.succ_feat[self.step].copy_(transition.succ_feat)
+        if self.use_succ_feat:
+            self.succ_feat[self.step].copy_(transition.succ_feat)
         self.step += 1
 
     def clear(self):
@@ -154,6 +157,7 @@ class RolloutBuffer:
         old_mu = self.mu.flatten(0, 1)
         old_sigma = self.sigma.flatten(0, 1)
         skills = self.skills.flatten(0, 1)
+        features = self.features.flatten(0, 1)
         succ_feat_target = self.succ_feat_target.flatten(0, 1)
 
         for epoch in range(num_epochs):
@@ -177,8 +181,10 @@ class RolloutBuffer:
                 int_advantages_batch = int_advantages[batch_idx]
 
                 skills_batch = skills[batch_idx]
+                features_batch = features[batch_idx]
                 succ_feat_target_batch = succ_feat_target[batch_idx]
                 yield obs_batch, actions_batch, target_ext_values_batch, target_int_values_batch, \
                     ext_advantages_batch, int_advantages_batch, \
                     ext_returns_batch, int_returns_batch, \
-                    old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, skills_batch, succ_feat_target_batch
+                    old_actions_log_prob_batch, old_mu_batch, old_sigma_batch, \
+                    skills_batch, features_batch, succ_feat_target_batch
