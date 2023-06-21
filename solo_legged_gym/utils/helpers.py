@@ -173,6 +173,7 @@ class TorchPolicyExporter(torch.nn.Module):
     def forward(self, input_x):
         x, z = input_x[:, :-self.num_skills], input_x[:, -self.num_skills:]
         skill_idxs = z.argmax(dim=1).flatten()
+        x = self.normalizer(x)
         x = self.policy_latent_layers[1](self.policy_latent_layers[0](x)) * self.masks[0][skill_idxs]
         x = self.policy_latent_layers[3](self.policy_latent_layers[2](x)) * self.masks[1][skill_idxs]
         return self.action(x)
@@ -204,6 +205,7 @@ class OnnxPolicyExporter(torch.nn.Module):
     def forward(self, input_x):
         x, z = input_x[:, :-self.num_skills], input_x[:, -self.num_skills:]
         skill_idxs = z.argmax(dim=1).flatten()
+        x = self.normalizer(x)
         x = self.policy_latent_layers[1](self.policy_latent_layers[0](x)) * self.masks[0][skill_idxs]
         x = self.policy_latent_layers[3](self.policy_latent_layers[2](x)) * self.masks[1][skill_idxs]
         return self.action(x)

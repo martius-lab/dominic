@@ -635,15 +635,16 @@ class DOMINO:
             saved_dict["feat_norm_state_dict"] = self.feat_normalizer.state_dict()
         torch.save(saved_dict, path)
 
-    def load(self, path, load_optimizer=True):
+    def load(self, path, load_values=False, load_optimizer=False, load_feat_normalizer=False):
         loaded_dict = torch.load(path)
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
-        self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
-        for i in range(self.num_ext_values):
-            self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
+        if load_values:
+            self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
+            for i in range(self.num_ext_values):
+                self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
-        if self.normalize_features:
+        if self.normalize_features and load_feat_normalizer:
             self.feat_normalizer.load_state_dict(loaded_dict["feat_norm_state_dict"])
         if load_optimizer:
             self.optimizer.load_state_dict(loaded_dict["optimizer_state_dict"])
