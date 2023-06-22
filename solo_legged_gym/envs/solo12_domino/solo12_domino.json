@@ -73,7 +73,7 @@
         "run_name": "BASE_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230622_153309"
+        "wandb_group": "cluster_20230622_154337"
       }
     },
     "env_cfg": {
@@ -170,7 +170,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_feature_history_dim": 8,
-        "num_features": 12,
+        "num_features": 7,
         "num_observations": 48,
         "num_skills": 8,
         "play": false
