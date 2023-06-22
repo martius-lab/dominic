@@ -40,7 +40,7 @@ class MaskedSuccessorFeature(nn.Module):
         # Mask
         self.masks = nn.ParameterList()
         for la in range(self.num_hidden_dim):
-            self.masks.append(torch.nn.Parameter((torch.rand((num_skills, hidden_dims[la])) < share_ratio).float(),
+            self.masks.append(torch.nn.Parameter((torch.rand((num_skills, hidden_dims[la])) <= share_ratio).float(),
                                                  requires_grad=False).to(self.device))
 
     @staticmethod

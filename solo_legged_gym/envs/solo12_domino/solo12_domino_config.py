@@ -143,14 +143,12 @@ class Solo12DOMINOTrainCfg:
     class network:
         log_std_init = 0.0
 
-        masked_net = True
-        share_ratio = 1 / 8.0
-
-        policy_hidden_dims = [512, 256]
+        share_ratio = 0.125
+        policy_hidden_dims = [1024, 512]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [512, 256]
+        value_hidden_dims = [1024, 512]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [512, 256]
+        succ_feat_hidden_dims = [1024, 512]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -175,7 +173,7 @@ class Solo12DOMINOTrainCfg:
         desired_kl = 0.01  # adjust the learning rate automatically
         max_grad_norm = 1.
 
-        clip_lagrange = 'auto_1'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.99
@@ -201,7 +199,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'ALL_FEAT'
+        run_name = 'ALL_FEAT2'
 
         # load
         load_run = -1  # -1 = last run

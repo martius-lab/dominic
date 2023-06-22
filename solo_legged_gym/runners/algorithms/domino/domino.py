@@ -41,53 +41,29 @@ class DOMINO:
         self.num_ext_values = len(self.env.cfg.rewards.powers)
 
         # set up the networks
-        if self.n_cfg.masked_net:
-            self.policy = MaskedPolicy(num_obs=self.env.num_obs,
+        self.policy = MaskedPolicy(num_obs=self.env.num_obs,
+                                   num_skills=self.env.num_skills,
+                                   num_actions=self.env.num_actions,
+                                   share_ratio=self.n_cfg.share_ratio,
+                                   hidden_dims=self.n_cfg.policy_hidden_dims,
+                                   activation=self.n_cfg.policy_activation,
+                                   log_std_init=self.n_cfg.log_std_init,
+                                   device=self.device).to(self.device)
+
+        self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
                                        num_skills=self.env.num_skills,
-                                       num_actions=self.env.num_actions,
                                        share_ratio=self.n_cfg.share_ratio,
-                                       hidden_dims=self.n_cfg.policy_hidden_dims,
-                                       activation=self.n_cfg.policy_activation,
-                                       log_std_init=self.n_cfg.log_std_init,
-                                       device=self.device).to(self.device)
-        else:
-            self.policy = Policy(num_obs=self.env.num_obs,
-                                 num_skills=self.env.num_skills,
-                                 num_actions=self.env.num_actions,
-                                 hidden_dims=self.n_cfg.policy_hidden_dims,
-                                 activation=self.n_cfg.policy_activation,
-                                 log_std_init=self.n_cfg.log_std_init,
-                                 device=self.device).to(self.device)
+                                       hidden_dims=self.n_cfg.value_hidden_dims,
+                                       activation=self.n_cfg.value_activation,
+                                       device=self.device)
+                           for _ in range(self.num_ext_values)]
 
-        if self.n_cfg.masked_net:
-            self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
-                                           num_skills=self.env.num_skills,
-                                           share_ratio=self.n_cfg.share_ratio,
-                                           hidden_dims=self.n_cfg.value_hidden_dims,
-                                           activation=self.n_cfg.value_activation,
-                                           device=self.device)
-                               for _ in range(self.num_ext_values)]
-
-            self.int_value = MaskedValue(num_obs=self.env.num_obs,
-                                         num_skills=self.env.num_skills,
-                                         share_ratio=self.n_cfg.share_ratio,
-                                         hidden_dims=self.n_cfg.value_hidden_dims,
-                                         activation=self.n_cfg.value_activation,
-                                         device=self.device)
-
-        else:
-            self.ext_values = [Value(num_obs=self.env.num_obs,
+        self.int_value = MaskedValue(num_obs=self.env.num_obs,
                                      num_skills=self.env.num_skills,
+                                     share_ratio=self.n_cfg.share_ratio,
                                      hidden_dims=self.n_cfg.value_hidden_dims,
                                      activation=self.n_cfg.value_activation,
                                      device=self.device)
-                               for _ in range(self.num_ext_values)]
-
-            self.int_value = Value(num_obs=self.env.num_obs,
-                                   num_skills=self.env.num_skills,
-                                   hidden_dims=self.n_cfg.value_hidden_dims,
-                                   activation=self.n_cfg.value_activation,
-                                   device=self.device)
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
@@ -96,21 +72,13 @@ class DOMINO:
                           for _ in range(self.num_ext_values - 1)]
 
         if self.a_cfg.use_succ_feat:
-            if self.n_cfg.masked_net:
-                self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
-                                                        num_skills=self.env.num_skills,
-                                                        num_features=self.env.num_features,
-                                                        share_ratio=self.n_cfg.share_ratio,
-                                                        hidden_dims=self.n_cfg.succ_feat_hidden_dims,
-                                                        activation=self.n_cfg.succ_feat_activation,
-                                                        device=self.device)
-            else:
-                self.succ_feat = SuccessorFeature(num_obs=self.env.num_obs,
-                                                  num_skills=self.env.num_skills,
-                                                  num_features=self.env.num_features,
-                                                  hidden_dims=self.n_cfg.succ_feat_hidden_dims,
-                                                  activation=self.n_cfg.succ_feat_activation,
-                                                  device=self.device)
+            self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
+                                                    num_skills=self.env.num_skills,
+                                                    num_features=self.env.num_features,
+                                                    share_ratio=self.n_cfg.share_ratio,
+                                                    hidden_dims=self.n_cfg.succ_feat_hidden_dims,
+                                                    activation=self.n_cfg.succ_feat_activation,
+                                                    device=self.device)
 
             self.succ_feat_learning_rate = self.a_cfg.succ_feat_learning_rate
             self.succ_feat_optimizer = optim.Adam(list(self.succ_feat.parameters()), lr=self.succ_feat_learning_rate)

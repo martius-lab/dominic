@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "burning_expert_steps": 300,
-        "clip_lagrange": "auto_1",
+        "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
@@ -40,22 +40,21 @@
       "algorithm_name": "DOMINO",
       "network": {
         "log_std_init": 0.0,
-        "masked_net": true,
         "policy_activation": "elu",
         "policy_hidden_dims": [
-          512,
-          256
+          1024,
+          512
         ],
         "share_ratio": 0.125,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
-          512,
-          256
+          1024,
+          512
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
-          512,
-          256
+          1024,
+          512
         ]
       },
       "runner": {
@@ -74,7 +73,7 @@
         "run_name": "ALL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230621_171332"
+        "wandb_group": "cluster_20230622_112346"
       }
     },
     "env_cfg": {
