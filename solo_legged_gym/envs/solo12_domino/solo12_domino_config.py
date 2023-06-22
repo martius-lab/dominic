@@ -10,7 +10,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_feature_history_dim = 8
-        num_features = 4 + (4 + 3) * 2
+        num_features = 4 + 4 * 2
         feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
@@ -199,7 +199,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'ALL_FEAT2'
+        run_name = 'BASE_FEAT'
 
         # load
         load_run = -1  # -1 = last run
