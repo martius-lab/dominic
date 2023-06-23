@@ -13,6 +13,7 @@
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
+        "bootstrap_value": true,
         "burning_expert_steps": 300,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
@@ -74,7 +75,7 @@
         "run_name": "ALL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230623_164425"
+        "wandb_group": "cluster_20230623_172908"
       }
     },
     "env_cfg": {

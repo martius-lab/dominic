@@ -154,6 +154,7 @@ class Solo12DOMINOTrainCfg:
 
     class algorithm:
         # algorithm params
+        bootstrap_value = True
         value_loss_coef = 1.0
         use_clipped_value_loss = True
         clip_param = 0.2
