@@ -74,7 +74,7 @@
         "run_name": "ALL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230623_110728"
+        "wandb_group": "cluster_20230623_150453"
       }
     },
     "env_cfg": {
