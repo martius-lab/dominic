@@ -205,7 +205,8 @@ class DOMINO:
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
                     int_rew, dist = self.get_intrinsic_reward(skills, obs, features, self.a_cfg.intrinsic_rew_scale)
-                    self.process_env_step(obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos)
+                    self.process_env_step(obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos,
+                                          self.a_cfg.bootstrap_value)
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
 
@@ -276,7 +277,8 @@ class DOMINO:
         # score not implemented yet
         return 0
 
-    def process_env_step(self, obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos):
+    def process_env_step(self, obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos,
+                         bootstrap=True):
         obs_skills = (obs, self.encode_skills(skills))
 
         self.transition.observations = obs
@@ -292,13 +294,14 @@ class DOMINO:
         self.transition.int_values = self.int_value(obs_skills).detach()
 
         self.transition.ext_rews = [ext_rews[i].clone() for i in range(self.num_ext_values)]
-        for i in range(self.num_ext_values):
-            self.transition.ext_rews[i] += self.a_cfg.gamma * torch.squeeze(
-                self.transition.ext_values[i] * infos['time_outs'].unsqueeze(1).to(self.device), 1)
-
         self.transition.int_rew = int_rew.clone()
-        self.transition.int_rew += self.a_cfg.gamma * torch.squeeze(
-            self.transition.int_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)  # bootstrap for timeouts
+
+        if bootstrap:
+            for i in range(self.num_ext_values):
+                self.transition.ext_rews[i] += self.a_cfg.gamma * torch.squeeze(
+                    self.transition.ext_values[i] * infos['time_outs'].unsqueeze(1).to(self.device), 1)
+            self.transition.int_rew += self.a_cfg.gamma * torch.squeeze(
+                self.transition.int_values * infos['time_outs'].unsqueeze(1).to(self.device), 1)
 
         self.transition.dones = dones
         self.transition.skills = skills
