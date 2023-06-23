@@ -10,7 +10,7 @@
   "cluster_requirements": {
     "request_cpus": 1,
     "request_gpus": 1,
-    "memory_in_mb": 20000,
+    "memory_in_mb": 10000,
     "gpu_memory_mb": 12000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 15,
@@ -36,10 +36,6 @@
     {
      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
      "values": [0.1, 0.5, 1.0]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.use_succ_feat",
-     "values": [true, false]
     }
   ]
 }
