@@ -36,6 +36,10 @@
     {
      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
      "values": [0.1, 0.5, 1.0]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.use_succ_feat",
+     "values": [true, false]
     }
   ]
 }

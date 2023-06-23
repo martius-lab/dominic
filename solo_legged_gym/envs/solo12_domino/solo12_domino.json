@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "BASE_FEAT",
+        "run_name": "ALL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230623_151253"
+        "wandb_group": "cluster_20230623_152701"
       }
     },
     "env_cfg": {
@@ -104,19 +104,21 @@
         "thickness": 0.01
       },
       "commands": {
+        "change_commands": true,
+        "change_commands_interval_s": 10.0,
         "num_commands": 3,
         "ranges": {
-          "direction": [
-            -3.141592653589793,
-            3.141592653589793
+          "ang_vel_yaw": [
+            -1.0,
+            1.0
           ],
-          "radius": [
-            1.0,
-            5.0
+          "lin_vel_x": [
+            0.0,
+            1.5
           ],
-          "yaw": [
-            -3.141592653589793,
-            3.141592653589793
+          "lin_vel_y": [
+            0.0,
+            0.0
           ]
         }
       },
