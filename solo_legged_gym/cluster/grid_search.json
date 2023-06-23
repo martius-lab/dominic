@@ -14,7 +14,7 @@
     "gpu_memory_mb": 12000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 15,
-    "forbidden_hostnames": ["g095"]
+    "forbidden_hostnames": ["g095", "g023", "g020", "g097"]
   },
   "fixed_params": {
     "__import_promise__": "solo_legged_gym/envs/solo12_domino/solo12_domino.json"
