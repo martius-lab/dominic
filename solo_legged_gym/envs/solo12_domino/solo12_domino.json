@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "ALL_FEAT",
+        "run_name": "NO_FOURIER_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230623_172908"
+        "wandb_group": "cluster_20230623_173605"
       }
     },
     "env_cfg": {
@@ -172,7 +172,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_feature_history_dim": 11,
-        "num_features": 27,
+        "num_features": 15,
         "num_observations": 48,
         "num_skills": 8,
         "play": false
