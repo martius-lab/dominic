@@ -518,6 +518,8 @@ class Solo12DOMINOPosition(BaseTask):
         base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / torch.norm(self.base_lin_vel[:, 0:2], dim=-1, keepdim=True)
 
         towards_error = torch.abs(torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1))
+
+        # TODO: clip this
         return torch.exp(-torch.square(towards_error / sigma))
 
     def _reward_stall_in_place(self, sigma):
