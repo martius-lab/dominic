@@ -10,7 +10,8 @@
   "cluster_requirements": {
     "request_cpus": 1,
     "request_gpus": 1,
-    "memory_in_mb": 10000,
+    "memory_in_mb": 5000,
+    "gpu_memory_mb": 12000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 15,
     "forbidden_hostnames": []
@@ -26,15 +27,19 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.alpha",
-     "values": [0.6, 0.7, 0.8, 0.9]
+     "values": [0.7, 0.8, 0.9]
     },
     {
      "param": "solo_legged_gym.train_cfg.network.share_ratio",
-     "values": [0.125, 0.25, 0.5, 1.0]
+     "values": [0.125, 0.25, 0.5, 0.8]
     },
     {
-     "param": "solo_legged_gym.env_cfg.seed",
-     "values": [0, 22, 42, 88]
+     "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
+     "values": [0.1, 0.5, 1.0]
+    },
+    {
+     "param": "solo_legged_gym.train_cfg.algorithm.use_succ_feat",
+     "values": [true, false]
     }
   ]
 }

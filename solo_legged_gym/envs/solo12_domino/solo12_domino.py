@@ -254,8 +254,8 @@ class Solo12DOMINO(BaseTask):
             self.base_lin_vel[:, 2:3],  # 1
             self.projected_gravity,  # 3
             self.base_ang_vel[:, :2],  # 2
-            # focus_freq_mags,  # num_focus_freq * 4
-            # feet_contact_phase_offsets  # num_focus_freq * 3
+            focus_freq_mags,  # num_focus_freq * 7
+            feet_contact_phase_offsets  # num_focus_freq * 3
         ), dim=-1)
 
         # no noise added, no clipping
@@ -276,6 +276,7 @@ class Solo12DOMINO(BaseTask):
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+
         self.feet_contact_force = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1)
         self.ee_contact = self.feet_contact_force > 0.1
         self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
@@ -291,6 +292,7 @@ class Solo12DOMINO(BaseTask):
         selected_features = torch.concatenate(((self.ee_contact * 2 - 1).to(torch.float),
                                                self.root_states[:, 2:3],
                                                self.base_lin_vel[:, 2:3],
+                                               self.projected_gravity[:, :],
                                                self.base_ang_vel[:, :2],
                                                ), dim=-1)
 

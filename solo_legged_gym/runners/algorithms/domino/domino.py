@@ -204,7 +204,7 @@ class DOMINO:
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
                     features = self.feat_normalizer(features)
-                    int_rew, dist = self.get_intrinsic_reward(skills, obs, features)
+                    int_rew, dist = self.get_intrinsic_reward(skills, obs, features, self.a_cfg.intrinsic_rew_scale)
                     self.process_env_step(obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos)
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
@@ -309,7 +309,7 @@ class DOMINO:
         self.rollout_buffer.add_transitions(self.transition)
         self.transition.clear()
 
-    def get_intrinsic_reward(self, skills, obs, features):
+    def get_intrinsic_reward(self, skills, obs, features, intrisic_rew_scale):
         if self.a_cfg.use_succ_feat:
             n_skills = self.env.num_skills
             n_samples = obs.size(0)
@@ -338,7 +338,7 @@ class DOMINO:
         norm_diff = dist / self.a_cfg.target_dist
         c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
             self.a_cfg.attractive_coeff * torch.pow(norm_diff, self.a_cfg.attractive_power)
-        int_rew = c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
+        int_rew = intrisic_rew_scale * c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
         return int_rew, dist
 
     def get_lagrange_coeff(self, skills, burning_expert):

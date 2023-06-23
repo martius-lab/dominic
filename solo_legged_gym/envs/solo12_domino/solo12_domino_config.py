@@ -9,8 +9,9 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_observations = 33 + 12 + 3  # #states + #actions + #commands
         num_skills = 8  # latent space
         num_actions = 12
-        num_feature_history_dim = 8
-        num_features = 7
+
+        num_feature_history_dim = 4 + 7
+        num_features = 7 + (7 + 3) * 2
         feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
@@ -144,11 +145,11 @@ class Solo12DOMINOTrainCfg:
         log_std_init = 0.0
 
         share_ratio = 0.125
-        policy_hidden_dims = [1024, 512]
+        policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [1024, 512]
+        value_hidden_dims = [512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [1024, 512]
+        succ_feat_hidden_dims = [512, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -176,6 +177,8 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
+        intrinsic_rew_scale = 1.0
+
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
 
@@ -199,7 +202,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'BASE_FEAT'
+        run_name = 'ALL_FEAT'
 
         # load
         load_run = -1  # -1 = last run

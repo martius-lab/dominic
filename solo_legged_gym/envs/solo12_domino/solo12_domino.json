@@ -20,6 +20,7 @@
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.6,
         "gamma": 0.99,
+        "intrinsic_rew_scale": 1.0,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -42,19 +43,19 @@
         "log_std_init": 0.0,
         "policy_activation": "elu",
         "policy_hidden_dims": [
-          1024,
-          512
+          512,
+          256
         ],
         "share_ratio": 0.125,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
-          1024,
-          512
+          512,
+          256
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
-          1024,
-          512
+          512,
+          256
         ]
       },
       "runner": {
@@ -70,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "BASE_FEAT",
+        "run_name": "ALL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230622_154337"
+        "wandb_group": "cluster_20230623_110728"
       }
     },
     "env_cfg": {
@@ -169,8 +170,8 @@
         "feature_history_length": 100,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_feature_history_dim": 8,
-        "num_features": 7,
+        "num_feature_history_dim": 11,
+        "num_features": 27,
         "num_observations": 48,
         "num_skills": 8,
         "play": false
