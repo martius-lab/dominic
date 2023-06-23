@@ -13,7 +13,7 @@
     "memory_in_mb": 5000,
     "gpu_memory_mb": 12000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
-    "bid": 20,
+    "bid": 100,
     "forbidden_hostnames": []
   },
   "fixed_params": {
