@@ -14,12 +14,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 from solo_legged_gym.utils import class_to_dict
 from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
-from solo_legged_gym.runners.modules.policy import Policy
 from solo_legged_gym.runners.modules.masked_policy import MaskedPolicy
-from solo_legged_gym.runners.modules.value import Value
 from solo_legged_gym.runners.modules.masked_value import MaskedValue
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
-from solo_legged_gym.runners.modules.successor_feature import SuccessorFeature
 from solo_legged_gym.runners.modules.masked_successor_feature import MaskedSuccessorFeature
 from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuffer
 
