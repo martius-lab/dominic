@@ -1,7 +1,9 @@
 import torch
 import numpy as np
+import sys
 from isaacgym import gymtorch, gymapi, gymutil
-from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, torch_rand_float_ring
+from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, torch_rand_float_ring, \
+    quat_rotate
 
 from solo_legged_gym.envs import BaseTask
 from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi
@@ -149,6 +151,9 @@ class Solo12DOMINOPosition(BaseTask):
     def reset(self):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
+        self._update_remaining_time()
+        self._update_commands_in_base()
+
         _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
                                                  self.num_actions,
                                                  device=self.device,
@@ -165,7 +170,6 @@ class Solo12DOMINOPosition(BaseTask):
     def step(self, actions, pause=False):
         self.pre_physics_step(actions)
         # step physics and render each frame
-        self._draw_target()
         self.render()
         for _ in range(self.cfg.control.decimation):
             self.torques = self._compute_torques(self.joint_targets).view(self.torques.shape)
@@ -182,6 +186,77 @@ class Solo12DOMINOPosition(BaseTask):
         self.post_physics_step()
         # the skills are separated from the obs because we do not want to normalize it.
         return self.obs_buf, self.skills, self.feature_buf, self.group_rew_buf, self.reset_buf, self.extras
+
+    def render(self, sync_frame_time=True):
+        # Overwrite with lines
+        # fetch results
+        if self.device != 'cpu':
+            self.gym.fetch_results(self.sim, True)
+
+        if self.cfg.viewer.record_camera_imgs:
+            ref_pos = [self.root_states[self.image_env, 0].item() + self.cfg.viewer.camera_pos_b[0],
+                       self.root_states[self.image_env, 1].item() + self.cfg.viewer.camera_pos_b[1],
+                       self.cfg.viewer.camera_pos_b[2]]
+            ref_lookat = [self.root_states[self.image_env, 0].item(),
+                          self.root_states[self.image_env, 1].item(),
+                          0.2]
+            cam_pos = gymapi.Vec3(ref_pos[0], ref_pos[1], ref_pos[2])
+            cam_target = gymapi.Vec3(ref_lookat[0], ref_lookat[1], ref_lookat[2])
+
+            self.gym.set_camera_location(self.camera_sensors, self.envs[self.image_env], cam_pos, cam_target)
+
+        if self.viewer:
+            # check for window closed
+            if self.gym.query_viewer_has_closed(self.viewer):
+                sys.exit()
+
+            # check for keyboard events
+            for evt in self.gym.query_viewer_action_events(self.viewer):
+                if evt.action == "QUIT" and evt.value > 0:
+                    sys.exit()
+                elif evt.action == "toggle_viewer_sync" and evt.value > 0:
+                    self.enable_viewer_sync = not self.enable_viewer_sync
+                elif evt.action == "toggle_overview" and evt.value > 0:
+                    self.overview = not self.overview
+                    self.viewer_set = False
+
+            # step graphics
+            if self.enable_viewer_sync:
+                if not self.viewer_set:
+                    if self.overview:
+                        self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
+                    else:
+                        ref_pos = [
+                            self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                            self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                            self.cfg.viewer.ref_pos_b[2]]
+                        ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
+                                      self.root_states[self.cfg.viewer.ref_env, 1].item(),
+                                      0.2]
+                        self._set_camera(ref_pos, ref_lookat)
+                    self.viewer_set = True
+            else:
+                self.gym.poll_viewer_events(self.viewer)
+
+        if self.cfg.viewer.record_camera_imgs or (self.viewer and self.enable_viewer_sync):
+            self.gym.step_graphics(self.sim)
+
+            if self.cfg.viewer.record_camera_imgs:
+                self.gym.render_all_camera_sensors(self.sim)
+                self.gym.start_access_image_tensors(self.sim)
+                self.camera_image = self.gym.get_camera_image(self.sim, self.envs[self.image_env],
+                                                              self.camera_sensors,
+                                                              gymapi.IMAGE_COLOR).reshape((self.camera_props.height,
+                                                                                           self.camera_props.width,
+                                                                                           4))
+                self.gym.end_access_image_tensors(self.sim)
+
+            if self.viewer and self.enable_viewer_sync:
+                self._draw_target()
+                self.gym.draw_viewer(self.viewer, self.sim, True)
+                if sync_frame_time:
+                    self.gym.sync_frame_time(self.sim)
+                self.gym.clear_lines(self.viewer)
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -252,11 +327,11 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.feature_buf = torch.cat((
             self.root_states[:, 2:3],  # 1
-            self.base_lin_vel[:, 2:3],  # 1
             self.projected_gravity,  # 3
+            self.base_lin_vel[:, 2:3],  # 1
             self.base_ang_vel[:, :2],  # 2
-            focus_freq_mags,  # num_focus_freq * 7
-            feet_contact_phase_offsets  # num_focus_freq * 3
+            self.ee_global[:, :, 2],  # 4
+            self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
 
         # no noise added, no clipping
@@ -321,10 +396,6 @@ class Solo12DOMINOPosition(BaseTask):
         self.commands[env_ids, 1] = base_pos[:, 1] + sampled_radius * torch.sin(sampled_direction)
         self.commands[env_ids, 2] = sampled_yaw
 
-        if self.cfg.env.play:
-            self.commands[:] = 0.0
-            # self.commands[:, 0] = 1.0
-
     def _update_commands_in_base(self):
         base_pos = self.root_states[:, 0:2]  # x and y in global frame
         base_yaw = 2 * torch.acos(get_quat_yaw(self.root_states[:, 3:7])[:, 3])
@@ -341,14 +412,34 @@ class Solo12DOMINOPosition(BaseTask):
         self.remaining_time = (self.max_episode_length - self.episode_length_buf) / self.max_episode_length
 
     def _prepare_draw(self):
-        self.box_geom = gymutil.WireframeBoxGeometry(0.3, 0.25, 0.1, color=(1, 1, 0))
-        self.box_poses = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.5), gymapi.Quat(0, 0, 0, 1)) for _ in range(self.num_envs)]
+        self.box_geoms = [gymutil.WireframeBoxGeometry(0.3, 0.25, 0.1, color=(1, 1, 0)) for _ in range(self.num_envs)]
+        self.box_poses = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.5), gymapi.Quat(0, 0, 0, 1)) for _ in
+                          range(self.num_envs)]
+        self.box_geom_in_base = gymutil.WireframeBoxGeometry(0.1, 0.1, 0.1, color=(1, 0, 1))
+        self.box_poses_in_base = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.5), gymapi.Quat(0, 0, 0, 1)) for _ in
+                                  range(self.num_envs)]
 
     def _draw_target(self):
         for i in range(self.num_envs):
-            self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.5)
-            self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, self.commands[i, 2])
-            gymutil.draw_lines(self.box_geom, self.gym, self.viewer, self.envs[i], self.box_poses[i])
+            if self.cfg.env.plot_target:
+                self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.5)
+                self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, self.commands[i, 2])
+                if self.remaining_time[i] < self.remaining_check_time:
+                    color_ = (1, 0, 0)
+                else:
+                    color_ = (1, 1, 0)
+                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.25, self.remaining_time[i] * 0.5, color=color_)
+                gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
+
+            if self.cfg.env.plot_target_in_base:
+                target_pos_in_base = torch.cat((self.commands_in_base[:, 0:2],
+                                                  torch.zeros_like(self.commands[:, 2:3])), dim=-1)  # fake z component
+                target_pos_in_global = quat_rotate(get_quat_yaw(self.base_quat), target_pos_in_base)[:, 0:2]
+                self.box_poses_in_base[i].p = gymapi.Vec3(target_pos_in_global[i, 0] + self.root_states[i, 0],
+                                                          target_pos_in_global[i, 1] + self.root_states[i, 1], 0.5)
+                self.box_poses_in_base[i].r = gymapi.Quat.from_euler_zyx(0, 0, self.commands_in_base[i, 2] +
+                                                                         2 * torch.acos(get_quat_yaw(self.root_states[i, 3:7])[:, 3]))
+                gymutil.draw_lines(self.box_geom_in_base, self.gym, self.viewer, self.envs[i], self.box_poses_in_base[i])
 
     def _resample_skills(self, env_ids):
         self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
@@ -475,9 +566,11 @@ class Solo12DOMINOPosition(BaseTask):
                 reward_function = getattr(self, '_reward_' + reward_name)
                 reward_sigma = eval(self.reward_terms[reward_name])[1]
                 term_reward = reward_function(reward_sigma)
+                assert torch.isnan(term_reward).sum() == 0
                 self.episode_term_sums[reward_name] += term_reward
                 self.group_rew_buf[:, group_idx] *= term_reward
             self.group_rew_buf[:, group_idx] = torch.pow(self.group_rew_buf[:, group_idx], group_power)
+            assert torch.isnan(self.group_rew_buf[:, group_idx]).sum() == 0
             self.episode_group_sums[group_name] += self.group_rew_buf[:, group_idx]
             self.rew_buf *= self.group_rew_buf[:, group_idx]
 
@@ -497,30 +590,31 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _reward_pos(self, sigma):
         pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
-        remaining_time = (self.max_episode_length - self.episode_length_buf) / self.max_episode_length
-        pos_error *= remaining_time < self.remaining_check_time
-        return torch.exp(-torch.square(pos_error / sigma))
+        rew = torch.exp(-torch.square(pos_error / sigma[1]))
+        rew_threshold = np.exp(-np.square(sigma[0] / sigma[1]))
+        return rew * (self.remaining_time < self.remaining_check_time) + \
+            torch.ones_like(rew) * rew_threshold * (self.remaining_time >= self.remaining_check_time)
 
     def _reward_yaw(self, sigma):
         base_yaw = 2 * torch.acos(get_quat_yaw(self.root_states[:, 3:7])[:, 3])
         pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
-        yaw_error = torch.abs(wrap_to_pi(self.commands[:, 2] - base_yaw) * (pos_error < sigma[0]))
-        remaining_time = (self.max_episode_length - self.episode_length_buf) / self.max_episode_length
-        yaw_error *= remaining_time < self.remaining_check_time
-        return torch.exp(-torch.square(yaw_error / sigma[1]))
+        yaw_error = torch.abs(wrap_to_pi(self.commands[:, 2] - base_yaw))
+        rew = torch.exp(-torch.square(yaw_error / sigma[2]))
+        rew_threshold = np.exp(-np.square(sigma[1] / sigma[2]))
+        return rew * (self.remaining_time < self.remaining_check_time) * (pos_error < sigma[0]) + \
+            torch.ones_like(rew) * rew_threshold * (self.remaining_time < self.remaining_check_time) * (pos_error >= sigma[0]) + \
+            torch.ones_like(rew) * rew_threshold * (self.remaining_time >= self.remaining_check_time)
 
     def _reward_move_towards(self, sigma):
-        target_pos_in_global = torch.cat((self.commands[:, 0:2] - self.root_states[:, 0:2],
-                                          torch.zeros_like(self.commands[:, 2:3])), dim=-1)  # with fake z component
-        target_pos_in_base = quat_rotate_inverse(get_quat_yaw(self.base_quat), target_pos_in_global)[:, 0:2]  # get rid of fake z
-        target_pos_in_base_normalized = target_pos_in_base / torch.norm(target_pos_in_base, dim=-1, keepdim=True)
+        target_pos_in_base = self.commands_in_base[:, 0:2]
+        target_pos_in_base_normalized = target_pos_in_base / (torch.norm(target_pos_in_base, dim=-1,
+                                                                         keepdim=True) + 1e-8)
 
-        base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / torch.norm(self.base_lin_vel[:, 0:2], dim=-1, keepdim=True)
+        base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / (torch.norm(self.base_lin_vel[:, 0:2], dim=-1,
+                                                                          keepdim=True) + 1e-8)
 
-        towards_error = torch.abs(torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1))
-
-        # TODO: clip this
-        return torch.exp(-torch.square(towards_error / sigma))
+        towards_error = 1 - torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1)
+        return torch.clip(torch.exp(-torch.square(towards_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
     def _reward_stall_in_place(self, sigma):
         distance = torch.norm(self.commands[:, 0:2] - self.root_states[:, 0:2], dim=-1, p=2)
@@ -567,6 +661,8 @@ class Solo12DOMINOPosition(BaseTask):
     def _reward_feet_height(self, sigma):
         feet_height_error = torch.norm(self.ee_global[:, :, 2] - sigma[0], p=2, dim=1) * (
                 torch.norm(self.commands, dim=1) < 0.1)
+        pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
+        feet_height_error *= (pos_error >= sigma[2])
         return torch.exp(-torch.square(feet_height_error / sigma[1]))
 
     def _reward_feet_slip(self, sigma):
@@ -574,6 +670,8 @@ class Solo12DOMINOPosition(BaseTask):
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         sigma_ = sigma[1] + self.ee_global[:, :, 2] * sigma[2]
         feet_slip = torch.sum(feet_move * feet_low / sigma_, dim=1)
+        pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
+        feet_slip *= (pos_error >= sigma[3])
         return torch.exp(-torch.square(feet_slip))
 
     def _reward_feet_slip_h(self, sigma):

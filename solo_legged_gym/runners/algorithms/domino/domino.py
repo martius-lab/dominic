@@ -428,10 +428,13 @@ class DOMINO:
             # The most important part of the algorithm
             # adv =
             # c * ext_adv[0] + lag_1 * ext_adv[1] + lag_2 * ext_adv[2] + ... + (1 - lag_1)(1 - lag_2) * ... * int_adv
-            advantages = self.a_cfg.fixed_adv_coeff * ext_advantages[0]
-            for i in range(self.num_ext_values - 1):
-                advantages += lagrange_coeff[i] * ext_advantages[i + 1]
-                int_advantages *= (1 - lagrange_coeff[i])
+            advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0]
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2]
+            # change this self.num_ext_values - 1
+            # for i in range(self.num_ext_values - 1):
+            #     advantages += lagrange_coeff[i] * ext_advantages[i + 1]
+            #     int_advantages *= (1 - lagrange_coeff[i])
             advantages += int_advantages
 
             # Using KL to adaptively changing the learning rate

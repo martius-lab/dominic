@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
-    seed = 42
+    seed = 27
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
@@ -12,20 +12,25 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_actions = 12
 
         num_feature_history_dim = 4 + 7
-        num_features = 7 + (7 + 3) * 2
+
+        num_features = 15
         feature_history_length = 100  # steps
 
         episode_length_s = 20  # episode length in seconds
-        remaining_check_time = 0.1  # end of episode, check if reach to position
+        remaining_check_time = 0.2  # percentage
         feature_focus_freq = [0.02, 0.03]
 
         play = False
         debug = False
+        plot_target = True
+        plot_target_in_base = False
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
         ref_pos_b = [1, 1, 0.5]
         record_camera_imgs = True
+        overview_pos = [-2, -2, 2]  # [m]
+        overview_lookat = [2, 2, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: sampled radius, direction, yaw
@@ -91,16 +96,17 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            move_towards = "[1, 0.1]"
-            stall_in_place = "[1, [0.3, 0.5, 0.1]]"
-            lin_z = "[1, 0.1]"
-            ang_xy = "[1, 0.2]"
+            move_towards = "[2, [1.0, 0.9]]"  # sigma, clip/scale
+            stall_in_place = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, dist, sigma
+            lin_z = "[2, 0.1]"
+            ang_xy = "[2, 0.2]"
 
-            pos = "[0, 0.3]"
-            yaw = "[0, [0.5, 0.3]]"
+            pos = "[1, [0.125, 0.25]]"  # threshold, sigma
+            yaw = "[1, [0.25, 3.14, 6.0]]"  # pos threshold, yaw threshold, sigma
+
             joint_targets_rate = "[0, 1.0]"
-            feet_slip = "[0, [0.04, 0.1, 3.0]]"  # "[0, [0.04, 0.2, 3.0]]"
-            feet_height = "[0, [0.04, 0.1]]"  # "[0, [0.04, 0.15]]"
+            feet_slip = "[0, [0.04, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
+            feet_height = "[0, [0.04, 0.10, 0.25]]"  # target height, sigma, pos threshold
 
             # lin_vel_z = "[2, 0.3]"
             # ang_vel_xy = "[2, 1.0]"
@@ -121,7 +127,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # feet_air_time = "[0, None]"
 
         # 0 fixed / 1 loose / very_loose
-        powers = [1, 1]
+        powers = [1, 1, 1]
 
         base_height_target = 0.25
 
@@ -145,7 +151,7 @@ class Solo12DOMINOPositionTrainCfg:
     class network:
         log_std_init = 0.0
 
-        share_ratio = 0.125
+        share_ratio = 1.0
         policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [512, 256]
@@ -170,7 +176,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = 0.6
+        fixed_adv_coeff = '[1.0, 1.0, 1.5]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
