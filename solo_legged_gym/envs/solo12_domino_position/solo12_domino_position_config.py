@@ -185,7 +185,7 @@ class Solo12DOMINOPositionTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
-        intrinsic_rew_scale = 1.0
+        intrinsic_rew_scale = 0.5
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
