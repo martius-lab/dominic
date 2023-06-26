@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from isaacgym import gymtorch, gymapi
+from isaacgym import gymtorch
 from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz
 
 from solo_legged_gym.envs import BaseTask
@@ -32,7 +32,6 @@ class Solo12DOMINO(BaseTask):
     def _init_buffers(self):
         super()._init_buffers()
         self.num_features = self.cfg.env.num_features
-        self.num_feature_history_dim = self.cfg.env.num_feature_history_dim
         self.feature_buf = torch.zeros(self.num_envs, self.num_features, device=self.device, dtype=torch.float)
 
         self.HAA_indices = torch.tensor(
@@ -85,26 +84,6 @@ class Solo12DOMINO(BaseTask):
         self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device,
                                          requires_grad=False)
 
-        feature_history_length = self.cfg.env.feature_history_length
-        self.feature_history = torch.zeros(self.num_envs, self.num_feature_history_dim, feature_history_length,
-                                           dtype=torch.float,
-                                           device=self.device, requires_grad=False)
-        feature_freq = torch.fft.fftfreq(feature_history_length).to(self.device)
-        feature_focus_freq = self.cfg.env.feature_focus_freq
-        feature_focus_freq_len = len(feature_focus_freq)
-        self.feature_focus_freq_idx = torch.zeros(feature_focus_freq_len, dtype=torch.long,
-                                                  device=self.device, requires_grad=False)
-        for i in range(feature_focus_freq_len):
-            self.feature_focus_freq_idx[i] = \
-                (abs(feature_freq - feature_focus_freq[i]) < 1e-4).nonzero(as_tuple=True)[0]
-
-        self.feature_focus_freq_mag = torch.zeros(self.num_envs, self.num_feature_history_dim, feature_focus_freq_len,
-                                                  dtype=torch.float, device=self.device,
-                                                  requires_grad=False)
-        self.feature_focus_freq_phase = torch.zeros(self.num_envs, self.num_feature_history_dim, feature_focus_freq_len,
-                                                    dtype=torch.float, device=self.device,
-                                                    requires_grad=False)
-
     def reset_idx(self, env_ids):
         """Reset selected robots"""
         if len(env_ids) == 0:
@@ -124,7 +103,6 @@ class Solo12DOMINO(BaseTask):
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
-        self.feature_history[env_ids] = 0
 
         self.episode_length_buf[env_ids] = 0
 
@@ -237,18 +215,6 @@ class Solo12DOMINO(BaseTask):
 
     def compute_features(self):
         # FL, FR, HL, HR
-        feet_contact_phase_offsets = torch.concatenate(
-            ((self.feature_focus_freq_phase[:, 1, :] - self.feature_focus_freq_phase[:, 0, :]),
-             (self.feature_focus_freq_phase[:, 2, :] - self.feature_focus_freq_phase[:, 0, :]),
-             (self.feature_focus_freq_phase[:, 3, :] - self.feature_focus_freq_phase[:, 0, :]),
-             ), dim=-1)
-
-        feet_contact_phase_offsets[feet_contact_phase_offsets >= 2 * np.pi] -= 2 * np.pi
-        feet_contact_phase_offsets[feet_contact_phase_offsets < 0.0] += 2 * np.pi
-
-        # we care about the magnitude of the rest
-        focus_freq_mags = self.feature_focus_freq_mag[:, 4:, :].view(self.num_envs, -1)
-
         self.feature_buf = torch.cat((
             self.root_states[:, 2:3],  # 1
             self.projected_gravity,  # 3
@@ -286,21 +252,6 @@ class Solo12DOMINO(BaseTask):
             self.ee_local[:, i, :] = quat_rotate_inverse(get_quat_yaw(self.base_quat), ee_local_[:, i, :])
         self.joint_targets_rate = torch.norm(self.last_joint_targets - self.joint_targets, p=2, dim=1)
         self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
-
-        # contact history: 1 in contact, -1 in swing, 0 placeholder
-        selected_features = torch.concatenate(((self.ee_contact * 2 - 1).to(torch.float),
-                                               self.root_states[:, 2:3],
-                                               self.base_lin_vel[:, 2:3],
-                                               self.projected_gravity[:, :],
-                                               self.base_ang_vel[:, :2],
-                                               ), dim=-1)
-
-        self.feature_history = torch.cat((self.feature_history[:, :, 1:], selected_features.unsqueeze(-1)), dim=-1)
-
-        feature_fft = torch.fft.fft(self.feature_history, dim=2)  # num_envs * dim_selected_features * buf_len
-        self.feature_focus_freq_mag = feature_fft[:, :, self.feature_focus_freq_idx].abs()
-        self.feature_focus_freq_phase = torch.remainder(feature_fft[:, :, self.feature_focus_freq_idx].angle(),
-                                                        2 * np.pi)
 
     def _resample_commands(self, env_ids):
         self.commands[env_ids, 0] = torch_rand_float(self.command_ranges["lin_vel_x"][0],

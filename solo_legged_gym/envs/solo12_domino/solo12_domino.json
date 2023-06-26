@@ -75,7 +75,7 @@
         "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230626_110139"
+        "wandb_group": "cluster_20230626_111530"
       }
     },
     "env_cfg": {
@@ -164,14 +164,8 @@
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
-        "feature_focus_freq": [
-          0.02,
-          0.03
-        ],
-        "feature_history_length": 100,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_feature_history_dim": 11,
         "num_features": 15,
         "num_observations": 48,
         "num_skills": 8,

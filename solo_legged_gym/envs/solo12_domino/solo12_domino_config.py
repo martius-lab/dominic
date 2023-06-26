@@ -9,15 +9,8 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_observations = 33 + 12 + 3  # #states + #actions + #commands
         num_skills = 8  # latent space
         num_actions = 12
-
-        num_feature_history_dim = 4 + 7
-
         num_features = 15
-        feature_history_length = 100  # steps
-
         episode_length_s = 20  # episode length in seconds
-        feature_focus_freq = [0.02, 0.03]
-
         play = False
         debug = False
 
