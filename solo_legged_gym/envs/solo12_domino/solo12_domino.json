@@ -21,7 +21,7 @@
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.6,
         "gamma": 0.99,
-        "intrinsic_rew_scale": 1.0,
+        "intrinsic_rew_scale": 0.5,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "baseline",
+        "run_name": "VEL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230626_134248"
+        "wandb_group": "cluster_20230626_171851"
       }
     },
     "env_cfg": {
@@ -166,7 +166,7 @@
         "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 15,
+        "num_features": 7,
         "num_observations": 48,
         "num_skills": 8,
         "play": false

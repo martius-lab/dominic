@@ -309,7 +309,7 @@ class DOMINO:
         self.rollout_buffer.add_transitions(self.transition)
         self.transition.clear()
 
-    def get_intrinsic_reward(self, skills, obs, features, intrisic_rew_scale):
+    def get_intrinsic_reward(self, skills, obs, features, intrinsic_rew_scale):
         if self.a_cfg.use_succ_feat:
             n_skills = self.env.num_skills
             n_samples = obs.size(0)
@@ -338,7 +338,7 @@ class DOMINO:
         norm_diff = dist / self.a_cfg.target_dist
         c = (1 - self.a_cfg.attractive_coeff) * torch.pow(norm_diff, self.a_cfg.repulsive_power) - \
             self.a_cfg.attractive_coeff * torch.pow(norm_diff, self.a_cfg.attractive_power)
-        int_rew = intrisic_rew_scale * c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
+        int_rew = intrinsic_rew_scale * c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
         return int_rew, dist
 
     def get_lagrange_coeff(self, skills, burning_expert):

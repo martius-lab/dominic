@@ -216,11 +216,11 @@ class Solo12DOMINO(BaseTask):
     def compute_features(self):
         # FL, FR, HL, HR
         self.feature_buf = torch.cat((
-            self.root_states[:, 2:3],  # 1
-            self.projected_gravity,  # 3
+            # self.root_states[:, 2:3],  # 1
+            # self.projected_gravity,  # 3
             self.base_lin_vel[:, 2:3],  # 1
             self.base_ang_vel[:, :2],  # 2
-            self.ee_global[:, :, 2],  # 4
+            # self.ee_global[:, :, 2],  # 4
             self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
         # no noise added, no clipping
