@@ -21,7 +21,7 @@
         "entropy_coef": 0.02,
         "fixed_adv_coeff": "[1.0, 1.0, 1.5]",
         "gamma": 0.99,
-        "intrinsic_rew_scale": 1.0,
+        "intrinsic_rew_scale": 0.5,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -75,7 +75,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230625_135003"
+        "wandb_group": "cluster_20230626_111946"
       }
     },
     "env_cfg": {
@@ -162,14 +162,8 @@
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 20,
-        "feature_focus_freq": [
-          0.02,
-          0.03
-        ],
-        "feature_history_length": 100,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_feature_history_dim": 11,
         "num_features": 15,
         "num_observations": 49,
         "num_skills": 8,
