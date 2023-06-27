@@ -27,11 +27,15 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.env_cfg.rewards.terms.yaw",
-     "values": ["[1, 0.5]", "[1, 1.0]", "[1, 2.0]", "[1, 3.0]"]
+     "values": ["[1, 0.5]", "[1, 1.0]", "[1, 2.0]"]
     },
     {
      "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
      "values": ["[1.0, 1.5, 1.0]", "[1.0, 2.0, 1.0]", "[1.0, 3.0, 1.0]"]
+    },
+    {
+     "param": "solo_legged_gym.env_cfg.env.episode_length_s",
+     "values": [10, 15, 20]
     }
   ]
 }
