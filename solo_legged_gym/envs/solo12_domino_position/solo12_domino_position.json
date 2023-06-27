@@ -21,7 +21,7 @@
         "entropy_coef": 0.02,
         "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
         "gamma": 0.99,
-        "intrinsic_rew_scale": 0.5,
+        "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -75,7 +75,7 @@
         "run_name": "sparse_reward",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230627_062136"
+        "wandb_group": "cluster_20230627_112543"
       }
     },
     "env_cfg": {
@@ -161,7 +161,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 15,
+        "episode_length_s": 20,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 15,
