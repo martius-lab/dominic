@@ -9,7 +9,7 @@ class Solo12DOMINOEnvCfg(BaseEnvCfg):
         num_observations = 33 + 12 + 3  # #states + #actions + #commands
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 15
+        num_features = 7
         episode_length_s = 20  # episode length in seconds
         play = False
         debug = False
@@ -172,7 +172,7 @@ class Solo12DOMINOTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
         alpha = 0.7  # optimality ratio
 
-        intrinsic_rew_scale = 0.5
+        intrinsic_rew_scale = 5.0
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -197,7 +197,7 @@ class Solo12DOMINOTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino'
-        run_name = 'baseline'
+        run_name = 'VEL_FEAT'
 
         # load
         load_run = -1  # -1 = last run
