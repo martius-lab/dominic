@@ -95,8 +95,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             lin_z = "[2, 0.1]"
             ang_xy = "[2, 0.2]"
 
-            pos = "[1, [0.125, 0.25]]"  # threshold, sigma
-            yaw = "[1, [0.25, 3.14, 6.0]]"  # pos threshold, yaw threshold, sigma
+            pos = "[1, 0.5]"  # sigma
+            yaw = "[1, 1.0]"  # sigma
 
             joint_targets_rate = "[0, 1.0]"
             feet_slip = "[0, [0.04, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
@@ -170,7 +170,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 1.0, 1.5]'
+        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -204,7 +204,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test'
+        run_name = 'sparse_reward'
 
         # load
         load_run = -1  # -1 = last run

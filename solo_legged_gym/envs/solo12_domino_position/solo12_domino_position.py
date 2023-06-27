@@ -363,8 +363,8 @@ class Solo12DOMINOPosition(BaseTask):
         self.remaining_time = (self.max_episode_length - self.episode_length_buf) / self.max_episode_length
 
     def _prepare_draw(self):
-        self.box_geoms = [gymutil.WireframeBoxGeometry(0.3, 0.25, 0.1, color=(1, 1, 0)) for _ in range(self.num_envs)]
-        self.box_poses = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.5), gymapi.Quat(0, 0, 0, 1)) for _ in
+        self.box_geoms = [gymutil.WireframeBoxGeometry(0.3, 0.15, 0.4, color=(1, 1, 0)) for _ in range(self.num_envs)]
+        self.box_poses = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.25), gymapi.Quat(0, 0, 0, 1)) for _ in
                           range(self.num_envs)]
         self.box_geom_in_base = gymutil.WireframeBoxGeometry(0.1, 0.1, 0.1, color=(1, 0, 1))
         self.box_poses_in_base = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.5), gymapi.Quat(0, 0, 0, 1)) for _ in
@@ -373,13 +373,13 @@ class Solo12DOMINOPosition(BaseTask):
     def _draw_target(self):
         for i in range(self.num_envs):
             if self.cfg.env.plot_target:
-                self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.5)
+                self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.25)
                 self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, self.commands[i, 2])
                 if self.remaining_time[i] < self.remaining_check_time:
                     color_ = (1, 0, 0)
                 else:
                     color_ = (1, 1, 0)
-                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.25, self.remaining_time[i] * 0.5, color=color_)
+                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.15, self.remaining_time[i] * 0.4, color=color_)
                 gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
 
             if self.cfg.env.plot_target_in_base:
@@ -540,35 +540,24 @@ class Solo12DOMINOPosition(BaseTask):
         return torch.exp(-torch.square(ang_vel_error / sigma))
 
     def _reward_pos(self, sigma):
-        pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
-        rew = torch.exp(-torch.square(pos_error / sigma[1]))
-        rew_threshold = np.exp(-np.square(sigma[0] / sigma[1]))
-        return rew * (self.remaining_time < self.remaining_check_time) + \
-            torch.ones_like(rew) * rew_threshold * (self.remaining_time >= self.remaining_check_time)
+        pos_error = torch.norm(self.commands_in_base[:, 0:2], dim=1, p=2)
+        rew = torch.exp(-torch.square(pos_error / sigma))
+        return rew * (self.remaining_time < self.remaining_check_time)
 
     def _reward_yaw(self, sigma):
-        base_yaw = 2 * torch.acos(get_quat_yaw(self.root_states[:, 3:7])[:, 3])
-        pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
-        yaw_error = torch.abs(wrap_to_pi(self.commands[:, 2] - base_yaw))
-        rew = torch.exp(-torch.square(yaw_error / sigma[2]))
-        rew_threshold = np.exp(-np.square(sigma[1] / sigma[2]))
-        return rew * (self.remaining_time < self.remaining_check_time) * (pos_error < sigma[0]) + \
-            torch.ones_like(rew) * rew_threshold * (self.remaining_time < self.remaining_check_time) * (pos_error >= sigma[0]) + \
-            torch.ones_like(rew) * rew_threshold * (self.remaining_time >= self.remaining_check_time)
+        yaw_error = torch.abs(self.commands_in_base[:, 2])
+        rew = torch.exp(-torch.square(yaw_error / sigma))
+        return rew * (self.remaining_time < self.remaining_check_time)
 
     def _reward_move_towards(self, sigma):
         target_pos_in_base = self.commands_in_base[:, 0:2]
-        target_pos_in_base_normalized = target_pos_in_base / (torch.norm(target_pos_in_base, dim=-1,
-                                                                         keepdim=True) + 1e-8)
-
-        base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / (torch.norm(self.base_lin_vel[:, 0:2], dim=-1,
-                                                                          keepdim=True) + 1e-8)
-
+        target_pos_in_base_normalized = target_pos_in_base / (torch.norm(target_pos_in_base, dim=-1, keepdim=True) + 1e-8)
+        base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / (torch.norm(self.base_lin_vel[:, 0:2], dim=-1, keepdim=True) + 1e-8)
         towards_error = 1 - torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1)
         return torch.clip(torch.exp(-torch.square(towards_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
     def _reward_stall_in_place(self, sigma):
-        distance = torch.norm(self.commands[:, 0:2] - self.root_states[:, 0:2], dim=-1, p=2)
+        distance = torch.norm(self.commands_in_base[:, 0:2], dim=1, p=2)
         base_vel = torch.norm(self.base_lin_vel[:, 0:2], dim=-1, p=2)
         base_vel_low = torch.clip(sigma[0] - base_vel, min=0.0, max=None) * (distance > sigma[1])
         return torch.exp(-torch.square(base_vel_low / sigma[2]))
