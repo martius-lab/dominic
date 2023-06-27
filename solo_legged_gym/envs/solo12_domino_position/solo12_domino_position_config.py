@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 15
-        episode_length_s = 20  # episode length in seconds
+        episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
@@ -96,7 +96,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             ang_xy = "[2, 0.2]"
 
             pos = "[1, 0.5]"  # sigma
-            yaw = "[1, 1.0]"  # sigma
+            yaw = "[1, 2.0]"  # sigma
 
             joint_targets_rate = "[0, 1.0]"
             feet_slip = "[0, [0.04, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
@@ -170,7 +170,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 2.0, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
