@@ -2,11 +2,10 @@ import torch
 import numpy as np
 import sys
 from isaacgym import gymtorch, gymapi, gymutil
-from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, torch_rand_float_ring, \
-    quat_rotate
+from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, quat_rotate
 
 from solo_legged_gym.envs import BaseTask
-from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi
+from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi, torch_rand_float_ring
 
 
 class Solo12DOMINOPosition(BaseTask):

@@ -8,4 +8,4 @@ from .helpers import class_to_dict, \
     merge_config_args_into_cmd_line, \
     update_cfgs_from_dict
 from .task_registry import task_registry
-from .math import quat_apply_yaw, get_quat_yaw, wrap_to_pi, torch_rand_sqrt_float
+from .math import quat_apply_yaw, get_quat_yaw, wrap_to_pi, torch_rand_sqrt_float, torch_rand_float_ring
