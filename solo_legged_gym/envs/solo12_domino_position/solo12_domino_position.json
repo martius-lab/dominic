@@ -75,7 +75,7 @@
         "run_name": "sparse_reward",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230627_113225"
+        "wandb_group": "cluster_20230627_143538"
       }
     },
     "env_cfg": {

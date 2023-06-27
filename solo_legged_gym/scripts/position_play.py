@@ -20,7 +20,7 @@ class keyboard_play:
 
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
-        env_cfg.env.num_envs = 20
+        env_cfg.env.num_envs = 5
         env_cfg.env.play = True
         env_cfg.env.debug = False
         env_cfg.observations.add_noise = False
