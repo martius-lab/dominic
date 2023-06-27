@@ -21,7 +21,7 @@
         "entropy_coef": 0.02,
         "fixed_adv_coeff": 0.6,
         "gamma": 0.99,
-        "intrinsic_rew_scale": 0.5,
+        "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
         "learning_rate": 0.001,
@@ -75,7 +75,7 @@
         "run_name": "VEL_FEAT",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230626_171851"
+        "wandb_group": "cluster_20230627_105239"
       }
     },
     "env_cfg": {
