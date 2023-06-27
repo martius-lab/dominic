@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 33 + 12 + 3 + 1  # #states + #actions + #commands + #remaining_time
+        num_observations = 33 + 12 + 2 + 1  # #states + #actions + #commands + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 15
@@ -17,7 +17,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         play = False
         debug = False
         plot_target = True
-        plot_target_in_base = False
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
@@ -27,12 +26,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [2, 2, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 3  # default: sampled radius, direction, yaw
+        num_commands = 2  # default: sampled radius, direction
 
         class ranges:
             radius = [1.0, 5.0]  # [m]
             direction = [-np.pi, np.pi]  # [rad]
-            yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.40]  # x,y,z [m]
@@ -96,7 +94,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             ang_xy = "[2, 0.2]"
 
             pos = "[1, 0.5]"  # sigma
-            yaw = "[1, 2.0]"  # sigma
 
             joint_targets_rate = "[0, 1.0]"
             feet_slip = "[0, [0.04, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
@@ -170,7 +167,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 2.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -204,7 +201,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'sparse_reward'
+        run_name = 'no_yaw'
 
         # load
         load_run = -1  # -1 = last run

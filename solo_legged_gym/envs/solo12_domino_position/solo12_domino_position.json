@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
+        "fixed_adv_coeff": "[1.0, 2.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
@@ -75,7 +75,7 @@
         "run_name": "sparse_reward",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230627_143538"
+        "wandb_group": "cluster_20230627_161612"
       }
     },
     "env_cfg": {
@@ -105,7 +105,7 @@
         "thickness": 0.01
       },
       "commands": {
-        "num_commands": 3,
+        "num_commands": 2,
         "ranges": {
           "direction": [
             -3.141592653589793,
@@ -114,10 +114,6 @@
           "radius": [
             1.0,
             5.0
-          ],
-          "yaw": [
-            -3.141592653589793,
-            3.141592653589793
           ]
         }
       },
@@ -161,11 +157,11 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 20,
+        "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 15,
-        "num_observations": 49,
+        "num_observations": 48,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -242,8 +238,7 @@
           "lin_z": "[2, 0.1]",
           "move_towards": "[2, [1.0, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_in_place": "[2, [0.5, 0.25, 0.1]]",
-          "yaw": "[1, 1.0]"
+          "stall_in_place": "[2, [0.5, 0.25, 0.1]]"
         }
       },
       "seed": 27,
