@@ -14,12 +14,12 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 5000,
+        "burning_expert_steps": 300,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 2.0, 1.0]",
+        "fixed_adv_coeff": "[1.0, 0.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
@@ -44,19 +44,19 @@
         "log_std_init": 0.0,
         "policy_activation": "elu",
         "policy_hidden_dims": [
-          512,
-          256
+          1024,
+          512
         ],
-        "share_ratio": 1.0,
+        "share_ratio": 0.125,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
-          512,
-          256
+          1024,
+          512
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
-          512,
-          256
+          1024,
+          512
         ]
       },
       "runner": {
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "sparse_reward",
+        "run_name": "diversity_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230627_161612"
+        "wandb_group": "cluster_20230627_195657"
       }
     },
     "env_cfg": {
@@ -165,7 +165,6 @@
         "num_skills": 8,
         "play": false,
         "plot_target": true,
-        "plot_target_in_base": false,
         "remaining_check_time": 0.2
       },
       "init_member_classes": {},
@@ -236,9 +235,9 @@
           "feet_slip": "[0, [0.04, 0.10, 3.0, 0.25]]",
           "joint_targets_rate": "[0, 1.0]",
           "lin_z": "[2, 0.1]",
-          "move_towards": "[2, [1.0, 0.9]]",
+          "move_towards": "[0, [1.0, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_in_place": "[2, [0.5, 0.25, 0.1]]"
+          "stall_in_place": "[0, [0.5, 0.25, 0.1]]"
         }
       },
       "seed": 27,

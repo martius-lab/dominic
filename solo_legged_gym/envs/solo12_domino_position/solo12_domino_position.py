@@ -371,7 +371,7 @@ class Solo12DOMINOPosition(BaseTask):
                     color_ = (1, 0, 0)
                 else:
                     color_ = (1, 1, 0)
-                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.15, self.remaining_time[i] * 0.4, color=color_)
+                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.1, 0.1, self.remaining_time[i] * 0.4, color=color_)
                 gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
 
     def _resample_skills(self, env_ids):

@@ -88,13 +88,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            move_towards = "[2, [1.0, 0.9]]"  # sigma, clip/scale
-            stall_in_place = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, dist, sigma
             lin_z = "[2, 0.1]"
             ang_xy = "[2, 0.2]"
 
             pos = "[1, 0.5]"  # sigma
 
+            move_towards = "[0, [1.0, 0.9]]"  # sigma, clip/scale
+            stall_in_place = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, dist, sigma
             joint_targets_rate = "[0, 1.0]"
             feet_slip = "[0, [0.04, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
             feet_height = "[0, [0.04, 0.10, 0.25]]"  # target height, sigma, pos threshold
@@ -142,12 +142,12 @@ class Solo12DOMINOPositionTrainCfg:
     class network:
         log_std_init = 0.0
 
-        share_ratio = 1.0
-        policy_hidden_dims = [512, 256]
+        share_ratio = 0.125
+        policy_hidden_dims = [1024, 512]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [512, 256]
+        value_hidden_dims = [1024, 512]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [512, 256]
+        succ_feat_hidden_dims = [1024, 512]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -167,7 +167,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 0.5, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -190,7 +190,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_learning_rate = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 300
 
     class runner:
         num_steps_per_env = 24  # per iteration
@@ -201,7 +201,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'no_yaw'
+        run_name = 'diversity_test'
 
         # load
         load_run = -1  # -1 = last run
