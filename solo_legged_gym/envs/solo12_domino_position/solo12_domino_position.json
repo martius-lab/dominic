@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 1.0, 1.5]",
+        "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 0.5,
         "lagrange_learning_rate": 0.1,
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "test",
+        "run_name": "sparse_reward",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230626_111946"
+        "wandb_group": "cluster_20230627_062136"
       }
     },
     "env_cfg": {
@@ -161,7 +161,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 20,
+        "episode_length_s": 15,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 15,
@@ -241,9 +241,9 @@
           "joint_targets_rate": "[0, 1.0]",
           "lin_z": "[2, 0.1]",
           "move_towards": "[2, [1.0, 0.9]]",
-          "pos": "[1, [0.125, 0.25]]",
+          "pos": "[1, 0.5]",
           "stall_in_place": "[2, [0.5, 0.25, 0.1]]",
-          "yaw": "[1, [0.25, 3.14, 6.0]]"
+          "yaw": "[1, 1.0]"
         }
       },
       "seed": 27,

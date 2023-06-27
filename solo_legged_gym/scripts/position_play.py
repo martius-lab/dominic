@@ -13,7 +13,6 @@ import csv
 
 EXPORT_POLICY = True
 LOG_DATA = True
-REAL_TIME = False
 np.set_printoptions(precision=2)
 
 
@@ -21,7 +20,7 @@ class keyboard_play:
 
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
-        env_cfg.env.num_envs = 1
+        env_cfg.env.num_envs = 20
         env_cfg.env.play = True
         env_cfg.env.debug = False
         env_cfg.observations.add_noise = False
@@ -111,12 +110,8 @@ class keyboard_play:
             self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
 
     def play(self):
-        if REAL_TIME:
-            threading.Timer(1 / 50, self.play).start()
+        while True:
             self.step()
-        else:
-            while True:
-                self.step()
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
