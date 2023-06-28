@@ -78,6 +78,10 @@ class Solo12DOMINOPosition(BaseTask):
         self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
         self.ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                          requires_grad=False)
+        self.last_ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+                                              requires_grad=False)
+        self.ee_acc_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+                                         requires_grad=False)
         self.actuator_lag_buffer = torch.zeros(self.num_envs, self.cfg.domain_rand.actuator_lag_steps + 1, 12,
                                                dtype=torch.float, device=self.device, requires_grad=False)
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
@@ -103,6 +107,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_dof_vel[env_ids] = 0.
         self.last_root_vel[env_ids] = 0.
         self.last_ee_global[env_ids] = 0.
+        self.last_ee_vel_global[env_ids] = 0.
         self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
@@ -263,6 +268,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_root_vel[:] = self.root_states[:, 7:13]
         self.last_joint_targets[:] = self.joint_targets[:]
         self.last_ee_global[:] = self.ee_global[:]
+        self.last_ee_vel_global[:] = self.ee_vel_global[:]
 
     def _check_termination(self):
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1.,
@@ -291,11 +297,8 @@ class Solo12DOMINOPosition(BaseTask):
     def compute_features(self):
         # FL, FR, HL, HR
         self.feature_buf = torch.cat((
-            self.root_states[:, 2:3],  # 1
-            self.projected_gravity,  # 3
             self.base_lin_vel[:, 2:3],  # 1
             self.base_ang_vel[:, :2],  # 2
-            self.ee_global[:, :, 2],  # 4
             self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
 
@@ -326,8 +329,10 @@ class Solo12DOMINOPosition(BaseTask):
         ee_local_[:, :, 0:2] -= self.root_states[:, 0:2].unsqueeze(1)
         for i in range(len(self.feet_indices)):
             self.ee_local[:, i, :] = quat_rotate_inverse(get_quat_yaw(self.base_quat), ee_local_[:, i, :])
+
         self.joint_targets_rate = torch.norm(self.last_joint_targets - self.joint_targets, p=2, dim=1)
         self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
+        self.ee_acc_global = (self.last_ee_vel_global - self.ee_vel_global) / self.dt
 
     def _resample_commands(self, env_ids):
         # get current position
@@ -591,6 +596,10 @@ class Solo12DOMINOPosition(BaseTask):
         pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
         feet_slip *= (pos_error >= sigma[3])
         return torch.exp(-torch.square(feet_slip))
+
+    def _reward_feet_acc(self, sigma):
+        feet_acc_error = torch.sum(torch.norm(self.ee_acc_global, p=2, dim=-1), dim=-1)
+        return torch.exp(-torch.square(feet_acc_error / sigma))
 
     # def _reward_feet_slip_h(self, sigma):
     #     feet_too_low = self.ee_global[:, :, 2] < sigma[0]

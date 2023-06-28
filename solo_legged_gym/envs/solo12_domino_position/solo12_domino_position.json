@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[2.0, 2.0, 0.5]",
+        "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
@@ -75,7 +75,7 @@
         "run_name": "new_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230628_140014"
+        "wandb_group": "cluster_20230628_151855"
       }
     },
     "env_cfg": {
@@ -160,7 +160,7 @@
         "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 15,
+        "num_features": 7,
         "num_observations": 48,
         "num_skills": 8,
         "play": false,
@@ -227,12 +227,12 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "ang_xy": "[2, 0.2]",
-          "feet_height": "[0, [0.06, 0.10, 0.25]]",
+          "feet_acc": "[0, 200]",
           "joint_targets_rate": "[0, 1.0]",
           "lin_z": "[2, 0.1]",
           "move_towards": "[0, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_in_place": "[0, [0.2, 0.25, 0.1]]"
+          "stall_in_place": "[0, [0.4, 0.25, 0.1]]"
         }
       },
       "seed": 27,
