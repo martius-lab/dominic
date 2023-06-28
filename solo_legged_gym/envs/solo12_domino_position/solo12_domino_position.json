@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.01,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
+        "fixed_adv_coeff": "[1.5, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "new_test",
+        "run_name": "new_test2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230628_151855"
+        "wandb_group": "cluster_20230628_174224"
       }
     },
     "env_cfg": {

@@ -166,7 +166,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.5, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
@@ -200,7 +200,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'new_test'
+        run_name = 'new_test2'
 
         # load
         load_run = -1  # -1 = last run

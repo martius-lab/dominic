@@ -27,8 +27,15 @@
   "hyperparam_list": [
     {
      "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
-     "values": ["[1.0, 1.0, 1.0]", "[1.5, 1.0, 1.0]", "[1.0, 1.5, 1.0]", "[1.0, 1.0, 1.5]",
-                "[1.5, 1.5, 1.0]", "[1.0, 1.5, 1.5]", "[1.5, 1.0, 1.5]"]
+     "values": ["[1.2, 1.2, 1.0]", "[1.4, 1.4, 1.0]", "[1.5, 1.5, 1.0]", "[2.0, 2.0, 1.0]"]
+    },
+    {
+     "param": "solo_legged_gym.env_cfg.rewards.terms.stall_in_place",
+     "values": ["[0, [0.2, 0.25, 0.1]]", "[0, [0.4, 0.25, 0.1]]", "[0, [0.6, 0.25, 0.1]]","[0, [1.0, 0.25, 0.1]]"]
+    },
+    {
+     "param": "solo_legged_gym.env_cfg.rewards.terms.lin_z",
+     "values": ["[2, 0.1]", "[2, 0.05]", "[2, 0.2]"]
     }
   ]
 }
