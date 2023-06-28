@@ -96,8 +96,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 1.0]"
             move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
             stall_in_place = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, dist, sigma
-            feet_slip = "[0, [0.05, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
-            feet_height = "[0, [0.05, 0.10, 0.25]]"  # target height, sigma, pos threshold
+            # feet_slip = "[0, [0.05, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
+            feet_height = "[0, [0.06, 0.10, 0.25]]"  # target height, sigma, pos threshold
 
             # lin_vel_z = "[2, 0.3]"
             # ang_vel_xy = "[2, 1.0]"
