@@ -166,7 +166,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.5, 1.5, 1.0]'
+        fixed_adv_coeff = '[1.4, 1.4, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.01  # adjust the learning rate automatically
