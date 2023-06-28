@@ -469,9 +469,9 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _prepare_reward(self):
         self.reward_terms = class_to_dict(self.cfg.rewards.terms)
-        self.reward_powers = self.cfg.rewards.powers
+        self.reward_num_groups = self.cfg.rewards.num_groups
         self.reward_groups = {}
-        for i in range(len(self.reward_powers)):
+        for i in range(self.reward_num_groups):
             self.reward_groups[str(int(i))] = []
         for name, info in self.reward_terms.items():
             group = str(int(eval(info)[0]))
@@ -485,14 +485,13 @@ class Solo12DOMINOPosition(BaseTask):
             for name in self.reward_groups.keys()}
 
         # allocate
-        self.group_rew_buf = torch.ones(self.num_envs, len(self.reward_powers), dtype=torch.float, device=self.device,
+        self.group_rew_buf = torch.ones(self.num_envs, self.reward_num_groups, dtype=torch.float, device=self.device,
                                         requires_grad=False)
 
     def compute_reward(self):
         self.rew_buf[:] = 1.0
         for group_name, terms in self.reward_groups.items():
             group_idx = int(group_name)
-            group_power = self.reward_powers[group_idx]
             self.group_rew_buf[:, group_idx] = 1.0
             for i in range(len(terms)):
                 reward_name = terms[i]
@@ -502,10 +501,8 @@ class Solo12DOMINOPosition(BaseTask):
                 assert torch.isnan(term_reward).sum() == 0
                 self.episode_term_sums[reward_name] += term_reward
                 self.group_rew_buf[:, group_idx] *= term_reward
-            self.group_rew_buf[:, group_idx] = torch.pow(self.group_rew_buf[:, group_idx], group_power)
             assert torch.isnan(self.group_rew_buf[:, group_idx]).sum() == 0
             self.episode_group_sums[group_name] += self.group_rew_buf[:, group_idx]
-            self.rew_buf *= self.group_rew_buf[:, group_idx]
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -609,8 +606,8 @@ class Solo12DOMINOPosition(BaseTask):
     # def _reward_dof_vel(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
     #
-    # def _reward_dof_acc(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
+    def _reward_dof_acc(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
     #
     # def _reward_stand_still(self, sigma):
     #     not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (
@@ -622,8 +619,8 @@ class Solo12DOMINOPosition(BaseTask):
     #     feet_off_ground_when_stand = torch.sum(feet_height, dim=-1) * (torch.norm(self.commands, dim=1) < 0.1)
     #     return torch.exp(-torch.square(feet_off_ground_when_stand / sigma))
     #
-    # def _reward_torques(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+    def _reward_torques(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
     #
     # def _reward_feet_contact_force(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.feet_contact_force, p=2, dim=1) / sigma))

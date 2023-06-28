@@ -14,12 +14,12 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 300,
+        "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.01,
-        "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 0.5, 1.0]",
+        "entropy_coef": 0.01,
+        "fixed_adv_coeff": "[2.0, 2.0, 0.5]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
@@ -55,15 +55,15 @@
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
-          1024,
-          512
+          256,
+          128
         ]
       },
       "runner": {
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 500,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "diversity_test",
+        "run_name": "new_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230627_195657"
+        "wandb_group": "cluster_20230628_120339"
       }
     },
     "env_cfg": {
@@ -221,23 +221,19 @@
       "rewards": {
         "base_height_target": 0.25,
         "max_contact_force": 100.0,
-        "powers": [
-          1,
-          1,
-          1
-        ],
+        "num_groups": 3,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
           "ang_xy": "[2, 0.2]",
-          "feet_height": "[0, [0.04, 0.10, 0.25]]",
-          "feet_slip": "[0, [0.04, 0.10, 3.0, 0.25]]",
+          "feet_height": "[0, [0.05, 0.10, 0.25]]",
+          "feet_slip": "[0, [0.05, 0.10, 3.0, 0.25]]",
           "joint_targets_rate": "[0, 1.0]",
           "lin_z": "[2, 0.1]",
-          "move_towards": "[0, [1.0, 0.9]]",
+          "move_towards": "[0, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_in_place": "[0, [0.5, 0.25, 0.1]]"
+          "stall_in_place": "[0, [0.2, 0.25, 0.1]]"
         }
       },
       "seed": 27,

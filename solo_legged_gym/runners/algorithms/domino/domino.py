@@ -35,7 +35,7 @@ class DOMINO:
         self.n_cfg = train_cfg.network
         self.device = device
         self.env = env
-        self.num_ext_values = len(self.env.cfg.rewards.powers)
+        self.num_ext_values = self.env.cfg.rewards.num_groups
 
         # set up the networks
         self.policy = MaskedPolicy(num_obs=self.env.num_obs,
