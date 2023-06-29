@@ -439,7 +439,7 @@ class DOMINO:
                     if kl_mean > self.a_cfg.desired_kl * 2.0:
                         self.learning_rate = max(1e-5, self.learning_rate / 1.5)
                     elif self.a_cfg.desired_kl / 2.0 > kl_mean > 0.0:
-                        self.learning_rate = min(1e-2, self.learning_rate * 1.5)
+                        self.learning_rate = min(5e-2, self.learning_rate * 1.5)
 
                     for param_group in self.optimizer.param_groups:
                         param_group["lr"] = self.learning_rate

@@ -90,22 +90,20 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         class terms:  # [group, sigma]
             lin_z = "[2, 0.1]"
             ang_xy = "[2, 0.2]"
+            # lin_acc_z = "[2, 10]"
+            # ang_acc_xy = "[2, 40]"
+            feet_acc = "[2, 300]"
+            joint_targets_rate = "[2, 1.0]"
 
             pos = "[1, 0.5]"  # sigma
 
-            joint_targets_rate = "[0, 1.0]"
-            move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_in_place = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, dist, sigma
-            feet_acc = "[0, 200]"
+            move_towards = "[0, [0.5, 0.8]]"  # sigma, clip/scale
+            stall_in_place = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, dist, sigma
+            # feet_slip = "[0, [0.05, 0.05, 1.0]]"  # target height, sigma, sigma+
+            # feet_height = "[0, [0.04, 0.10, 0.25]]"  # target height, sigma, pos threshold
 
-            # feet_slip = "[0, [0.05, 0.10, 3.0, 0.25]]"  # target height, sigma, sigma+, pos threshold
-            # feet_height = "[0, [0.06, 0.10, 0.25]]"  # target height, sigma, pos threshold
-
-            # lin_vel_z = "[2, 0.3]"
-            # ang_vel_xy = "[2, 1.0]"
-
-            # lin_acc_z = "[0, 10]"
-            # ang_acc_xy = "[0, 40]"
+            # lin_vel_z = "[0, 0.5]"
+            # ang_vel_xy = "[0, 2.0]"
 
             # stand_still = "[0, 0.01]"
             # stand_still_h = "[0, 0.05]"
@@ -166,10 +164,10 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.4, 1.4, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.5, 1.0]'
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
-        desired_kl = 0.01  # adjust the learning rate automatically
+        desired_kl = 0.02  # adjust the learning rate automatically
         max_grad_norm = 1.
 
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
@@ -200,7 +198,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'new_test2'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run

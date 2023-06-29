@@ -535,8 +535,10 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _reward_move_towards(self, sigma):
         target_pos_in_base = self.commands_in_base[:, 0:2]
-        target_pos_in_base_normalized = target_pos_in_base / (torch.norm(target_pos_in_base, dim=-1, keepdim=True) + 1e-8)
-        base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / (torch.norm(self.base_lin_vel[:, 0:2], dim=-1, keepdim=True) + 1e-8)
+        target_pos_in_base_normalized = target_pos_in_base / (
+                    torch.norm(target_pos_in_base, dim=-1, keepdim=True) + 1e-8)
+        base_lin_vel_normalized = self.base_lin_vel[:, 0:2] / (
+                    torch.norm(self.base_lin_vel[:, 0:2], dim=-1, keepdim=True) + 1e-8)
         towards_error = 1 - torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1)
         return torch.clip(torch.exp(-torch.square(towards_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
@@ -550,30 +552,31 @@ class Solo12DOMINOPosition(BaseTask):
         lin_z_error = self.root_states[:, 2] - self.cfg.rewards.base_height_target
         return torch.exp(-torch.square(lin_z_error / sigma))
 
-    # def _reward_lin_vel_z(self, sigma):
-    #     lin_vel_z = self.base_lin_vel[:, 2]
-    #     return torch.exp(-torch.square(lin_vel_z / sigma))
-    #
-    # def _reward_lin_acc_z(self, sigma):
-    #     lin_vel_z = self.base_lin_vel[:, 2]
-    #     last_lin_vel_z = self.last_root_vel[:, 2]
-    #     lin_acc_z = torch.abs(lin_vel_z - last_lin_vel_z)
-    #     return torch.exp(-torch.square(lin_acc_z / sigma))
+    def _reward_lin_vel_z(self, sigma):
+        lin_vel_z = self.base_lin_vel[:, 2]
+        return torch.exp(-torch.square(lin_vel_z / sigma))
+
+    def _reward_lin_acc_z(self, sigma):
+        lin_vel_z = self.base_lin_vel[:, 2]
+        last_lin_vel_z = self.last_root_vel[:, 2]
+        lin_acc_z = torch.abs(lin_vel_z - last_lin_vel_z)
+        return torch.exp(-torch.square(lin_acc_z / sigma))
 
     def _reward_ang_xy(self, sigma):
         ang_xy = torch.stack(list(get_euler_xyz(self.base_quat)[:2]), dim=1)
         ang_xy = torch.norm(ang_xy, p=2, dim=1)
         return torch.clip(torch.exp(-torch.square(ang_xy / sigma)), min=None, max=0.9) / 0.9
 
-    # def _reward_ang_vel_xy(self, sigma):
-    #     ang_vel_xy = torch.norm(self.base_ang_vel[:, :2], p=2, dim=1)
-    #     return torch.exp(-torch.square(ang_vel_xy / sigma))
-    #
-    # def _reward_ang_acc_xy(self, sigma):
-    #     ang_vel_xy = self.base_ang_vel[:, :2]
-    #     last_ang_vel_xy = self.last_root_vel[:, 3:5]
-    #     ang_acc_xy = torch.norm(ang_vel_xy - last_ang_vel_xy, p=2, dim=1)
-    #     return torch.exp(-torch.square(ang_acc_xy / sigma))
+    def _reward_ang_vel_xy(self, sigma):
+        ang_vel_xy = torch.norm(self.base_ang_vel[:, :2], p=2, dim=1)
+        return torch.exp(-torch.square(ang_vel_xy / sigma))
+
+    def _reward_ang_acc_xy(self, sigma):
+        ang_vel_xy = self.base_ang_vel[:, :2]
+        last_ang_vel_xy = self.last_root_vel[:, 3:5]
+        ang_acc_xy = torch.norm(ang_vel_xy - last_ang_vel_xy, p=2, dim=1)
+        return torch.exp(-torch.square(ang_acc_xy / sigma))
+
     #
     # def _reward_joint_default(self, sigma):
     #     joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
@@ -593,8 +596,6 @@ class Solo12DOMINOPosition(BaseTask):
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         sigma_ = sigma[1] + self.ee_global[:, :, 2] * sigma[2]
         feet_slip = torch.sum(feet_move * feet_low / sigma_, dim=1)
-        pos_error = torch.norm(self.commands[:, :2] - self.root_states[:, :2], dim=1, p=2)
-        feet_slip *= (pos_error >= sigma[3])
         return torch.exp(-torch.square(feet_slip))
 
     def _reward_feet_acc(self, sigma):
@@ -617,6 +618,7 @@ class Solo12DOMINOPosition(BaseTask):
     #
     def _reward_dof_acc(self, sigma):
         return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
+
     #
     # def _reward_stand_still(self, sigma):
     #     not_stand = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1) * (

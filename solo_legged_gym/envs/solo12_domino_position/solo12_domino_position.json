@@ -17,9 +17,9 @@
         "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
-        "desired_kl": 0.01,
+        "desired_kl": 0.02,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.4, 1.4, 1.0]",
+        "fixed_adv_coeff": "[1.5, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "new_test2",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230628_184551"
+        "wandb_group": "cluster_20230629_170659"
       }
     },
     "env_cfg": {
@@ -227,12 +227,12 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "ang_xy": "[2, 0.2]",
-          "feet_acc": "[0, 200]",
-          "joint_targets_rate": "[0, 1.0]",
+          "feet_acc": "[2, 300]",
+          "joint_targets_rate": "[2, 1.0]",
           "lin_z": "[2, 0.1]",
-          "move_towards": "[0, [0.5, 0.9]]",
+          "move_towards": "[0, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
-          "stall_in_place": "[0, [0.4, 0.25, 0.1]]"
+          "stall_in_place": "[0, [0.5, 0.25, 0.1]]"
         }
       },
       "seed": 27,
