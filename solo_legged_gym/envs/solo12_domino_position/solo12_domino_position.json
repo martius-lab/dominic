@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 5000,
+        "burning_expert_steps": 200,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -63,7 +63,7 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 500,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
@@ -72,10 +72,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "baseline",
+        "run_name": "diversity",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230629_170659"
+        "wandb_group": "cluster_20230629_180546"
       }
     },
     "env_cfg": {
@@ -160,7 +160,7 @@
         "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 7,
+        "num_features": 18,
         "num_observations": 48,
         "num_skills": 8,
         "play": false,
@@ -230,7 +230,7 @@
           "feet_acc": "[2, 300]",
           "joint_targets_rate": "[2, 1.0]",
           "lin_z": "[2, 0.1]",
-          "move_towards": "[0, [0.5, 0.8]]",
+          "move_towards": "[0, [0.5, 0.6]]",
           "pos": "[1, 0.5]",
           "stall_in_place": "[0, [0.5, 0.25, 0.1]]"
         }
