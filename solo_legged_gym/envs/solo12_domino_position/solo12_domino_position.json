@@ -14,13 +14,14 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 200,
+        "burning_expert_steps": 150,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.01,
         "fixed_adv_coeff": "[1.5, 1.5, 1.0]",
         "gamma": 0.99,
+        "intrinsic_adv_coeff": 10.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_learning_rate": 0.1,
         "lam": 0.95,
@@ -72,10 +73,10 @@
         "record_gif": true,
         "record_gif_interval": 100,
         "record_iters": 10,
-        "run_name": "diversity",
+        "run_name": "diversity2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230629_180546"
+        "wandb_group": "cluster_20230702_184740"
       }
     },
     "env_cfg": {
@@ -160,7 +161,7 @@
         "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 18,
+        "num_features": 9,
         "num_observations": 48,
         "num_skills": 8,
         "play": false,

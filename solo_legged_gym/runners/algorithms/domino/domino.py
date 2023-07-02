@@ -422,7 +422,7 @@ class DOMINO:
             advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0]
             advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]
             advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * lagrange_coeff
-            advantages += int_advantages * (1 - lagrange_coeff)
+            advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1 - lagrange_coeff)
 
             # Using KL to adaptively changing the learning rate
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":

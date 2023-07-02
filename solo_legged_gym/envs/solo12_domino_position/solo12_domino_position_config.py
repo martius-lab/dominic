@@ -10,7 +10,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 33 + 12 + 2 + 1  # #states + #actions + #commands + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 18
+        num_features = 9
         episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
@@ -165,6 +165,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         sigmoid_scale = 1.0
         fixed_adv_coeff = '[1.5, 1.5, 1.0]'
+        intrinsic_adv_coeff = 10.0
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.02  # adjust the learning rate automatically
@@ -187,7 +188,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_learning_rate = 1.e-3
 
-        burning_expert_steps = 200
+        burning_expert_steps = 150
 
     class runner:
         num_steps_per_env = 24  # per iteration
@@ -198,7 +199,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity'
+        run_name = 'diversity2'
 
         # load
         load_run = -1  # -1 = last run
