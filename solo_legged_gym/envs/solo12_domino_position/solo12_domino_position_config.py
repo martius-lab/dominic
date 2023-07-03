@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 9
-        episode_length_s = 10  # episode length in seconds
+        episode_length_s = 15  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
@@ -90,17 +90,18 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         class terms:  # [group, sigma]
             lin_z = "[2, 0.1]"
             ang_xy = "[2, 0.2]"
+            feet_height = "[2, [0.06, 0.1, 0.25]]"  # target height, sigma, pos threshold
+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 40]"
-            feet_acc = "[2, 300]"
-            joint_targets_rate = "[2, 1.0]"
 
-            pos = "[1, 0.5]"  # sigma
+            pos = "[1, 2.0]"  # sigma
 
-            move_towards = "[0, [0.5, 0.6]]"  # sigma, clip/scale
-            stall_in_place = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, dist, sigma
-            # feet_slip = "[0, [0.05, 0.05, 1.0]]"  # target height, sigma, sigma+
-            # feet_height = "[0, [0.04, 0.10, 0.25]]"  # target height, sigma, pos threshold
+            feet_acc = "[0, 300]"
+            joint_targets_rate = "[0, 1.0]"
+            move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
+            stall_in_place = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, dist, sigma
+            # feet_slip = "[0, [0.06, 0.05, 0.1]]"  # target height, sigma, sigma+
 
             # lin_vel_z = "[0, 0.5]"
             # ang_vel_xy = "[0, 2.0]"
@@ -164,7 +165,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.5, 1.5, 1.0]'
+        fixed_adv_coeff = '[2.0, 2.0, 1.2]'
         intrinsic_adv_coeff = 10.0
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -188,25 +189,25 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_learning_rate = 1.e-3
 
-        burning_expert_steps = 150
+        burning_expert_steps = 5000
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 500  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity2'
+        run_name = 'expert_test'
 
         # load
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
-        record_gif_interval = 100
+        record_gif_interval = 50
         record_iters = 10  # should be int * num_st   eps_per_env
 
         record_features = True

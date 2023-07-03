@@ -14,12 +14,12 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 150,
+        "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.5, 1.5, 1.0]",
+        "fixed_adv_coeff": "[2.0, 2.0, 1.2]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 10.0,
         "intrinsic_rew_scale": 5.0,
@@ -64,19 +64,19 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 500,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
         "record_features": true,
         "record_features_interval": 100,
         "record_gif": true,
-        "record_gif_interval": 100,
+        "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "diversity2",
+        "run_name": "expert_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230702_184740"
+        "wandb_group": "cluster_20230703_174913"
       }
     },
     "env_cfg": {
@@ -158,7 +158,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 10,
+        "episode_length_s": 15,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 9,
@@ -228,12 +228,13 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "ang_xy": "[2, 0.2]",
-          "feet_acc": "[2, 300]",
-          "joint_targets_rate": "[2, 1.0]",
+          "feet_acc": "[0, 300]",
+          "feet_height": "[2, [0.06, 0.1, 0.25]]",
+          "joint_targets_rate": "[0, 1.0]",
           "lin_z": "[2, 0.1]",
-          "move_towards": "[0, [0.5, 0.6]]",
-          "pos": "[1, 0.5]",
-          "stall_in_place": "[0, [0.5, 0.25, 0.1]]"
+          "move_towards": "[0, [0.5, 0.95]]",
+          "pos": "[1, 2.0]",
+          "stall_in_place": "[0, [0.2, 0.25, 0.1]]"
         }
       },
       "seed": 27,
