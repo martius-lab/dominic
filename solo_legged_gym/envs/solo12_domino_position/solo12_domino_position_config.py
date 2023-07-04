@@ -88,9 +88,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            lin_z = "[2, 0.1]"
-            ang_xy = "[2, 0.2]"
-            feet_height = "[2, [0.06, 0.1, 0.25]]"  # target height, sigma, pos threshold
+            # lin_z = "[2, 0.05]"
+            # ang_xy = "[2, 0.1]"
+            # ang_vel_xy = "[2, 2.0]"
+            # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
+            move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
+            stall_in_place = "[2, [0.2, 0.25, 0.1]]"  # minimal vel, dist, sigma
 
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 40]"
@@ -98,13 +101,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             pos = "[1, 2.0]"  # sigma
 
             feet_acc = "[0, 300]"
+            dof_acc = "[0, 1500]"
+            torques = "[0, 10]"
             joint_targets_rate = "[0, 1.0]"
-            move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
-            stall_in_place = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, dist, sigma
-            # feet_slip = "[0, [0.06, 0.05, 0.1]]"  # target height, sigma, sigma+
 
             # lin_vel_z = "[0, 0.5]"
-            # ang_vel_xy = "[0, 2.0]"
 
             # stand_still = "[0, 0.01]"
             # stand_still_h = "[0, 0.05]"
@@ -165,7 +166,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[2.0, 2.0, 1.2]'
+        fixed_adv_coeff = '[0.9, 1.0, 1.0]'
         intrinsic_adv_coeff = 10.0
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -200,7 +201,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'expert_test'
+        run_name = 'another'
 
         # load
         load_run = -1  # -1 = last run

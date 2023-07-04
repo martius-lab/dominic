@@ -599,7 +599,7 @@ class Solo12DOMINOPosition(BaseTask):
         return torch.exp(-torch.square(feet_slip))
 
     def _reward_feet_acc(self, sigma):
-        feet_acc_error = torch.sum(torch.norm(self.ee_acc_global[:, :, :2], p=2, dim=-1), dim=-1)
+        feet_acc_error = torch.sum(torch.norm(self.ee_acc_global, p=2, dim=-1), dim=-1)
         return torch.exp(-torch.square(feet_acc_error / sigma))
 
     # def _reward_feet_slip_h(self, sigma):
