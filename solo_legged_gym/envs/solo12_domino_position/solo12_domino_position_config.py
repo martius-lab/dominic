@@ -93,7 +93,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_vel_xy = "[2, 2.0]"
             # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
             move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
-            stall_in_place = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, dist, sigma
+            stall_in_place = "[0, [0.3, 0.25, 0.1]]"  # minimal vel, dist, sigma
+            # feet_slip = "[0, [0.06, 0.05, 0.1]]"  # target height, sigma, sigma+
 
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 40]"
@@ -101,8 +102,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             pos = "[1, 1.0]"  # sigma
 
             feet_acc = "[2, 300]"
-            dof_acc = "[2, 1500]"
-            torques = "[2, 10]"
+            dof_acc = "[2, 2000]"
+            torques = "[2, 15]"
             joint_targets_rate = "[2, 1.0]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -141,7 +142,7 @@ class Solo12DOMINOPositionTrainCfg:
     class network:
         log_std_init = 0.0
 
-        share_ratio = 1.0
+        share_ratio = 0.5
         policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [512, 256]
@@ -202,7 +203,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
