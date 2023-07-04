@@ -76,8 +76,8 @@ class DOMINO:
                                                     activation=self.n_cfg.succ_feat_activation,
                                                     device=self.device)
 
-            self.succ_feat_learning_rate = self.a_cfg.succ_feat_learning_rate
-            self.succ_feat_optimizer = optim.Adam(list(self.succ_feat.parameters()), lr=self.succ_feat_learning_rate)
+            self.succ_feat_lr = self.a_cfg.succ_feat_lr
+            self.succ_feat_optimizer = optim.Adam(list(self.succ_feat.parameters()), lr=self.succ_feat_lr)
 
         else:
             self.avg_features = torch.ones(self.env.num_skills, self.env.num_features, device=self.device,
@@ -115,14 +115,18 @@ class DOMINO:
         self.transition = RolloutBuffer.Transition()
 
         # set up optimizers
-        self.learning_rate = self.a_cfg.learning_rate
-        params_list = list(self.policy.parameters()) + list(self.int_value.parameters())
-        for i in range(self.num_ext_values):
-            params_list += list(self.ext_values[i].parameters())
-        self.optimizer = optim.Adam(params_list, lr=self.learning_rate)
+        self.policy_lr = self.a_cfg.policy_lr
+        policy_params_list = list(self.policy.parameters())
+        self.policy_optimizer = optim.Adam(policy_params_list, lr=self.policy_lr)
 
-        self.lagrange_learning_rate = self.a_cfg.lagrange_learning_rate
-        self.lagrange_optimizer = optim.Adam([self.lagrange], lr=self.lagrange_learning_rate)
+        self.value_lr = self.a_cfg.value_lr
+        value_params_list = list(self.int_value.parameters())
+        for i in range(self.num_ext_values):
+            value_params_list += list(self.ext_values[i].parameters())
+        self.value_optimizer = optim.Adam(value_params_list, lr=self.value_lr)
+
+        self.lagrange_lr = self.a_cfg.lagrange_lr
+        self.lagrange_optimizer = optim.Adam([self.lagrange], lr=self.lagrange_lr)
 
         # Log
         self.log_dir = log_dir
@@ -437,12 +441,12 @@ class DOMINO:
                     kl_mean = torch.mean(kl)
 
                     if kl_mean > self.a_cfg.desired_kl * 2.0:
-                        self.learning_rate = max(1e-5, self.learning_rate / 1.5)
+                        self.policy_lr = max(1e-5, self.policy_lr / 1.5)
                     elif self.a_cfg.desired_kl / 2.0 > kl_mean > 0.0:
-                        self.learning_rate = min(5e-2, self.learning_rate * 1.5)
+                        self.policy_lr = min(5e-2, self.policy_lr * 1.5)
 
-                    for param_group in self.optimizer.param_groups:
-                        param_group["lr"] = self.learning_rate
+                    for param_group in self.policy_optimizer.param_groups:
+                        param_group["lr"] = self.policy_lr
 
             # Surrogate loss
             ratio = torch.exp(actions_log_prob_batch - torch.squeeze(old_actions_log_prob))
@@ -452,9 +456,19 @@ class DOMINO:
             )
             surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
 
+            policy_loss = surrogate_loss - \
+                          self.a_cfg.entropy_coef * entropy_batch.mean()
+
+            # Gradient step
+            self.policy_optimizer.zero_grad()
+            policy_loss.backward()
+            policy_params_list = list(self.policy.parameters())
+            nn.utils.clip_grad_norm_(policy_params_list, self.a_cfg.max_grad_norm)  # clip grad norm
+            self.policy_optimizer.step()
+
+            ############################################################################################################
             # Value function loss
             ext_value_loss = [0 for _ in range(self.num_ext_values)]
-            exp_ext_value_loss = [0 for _ in range(self.num_ext_values)]
 
             if self.a_cfg.use_clipped_value_loss:
                 for i in range(self.num_ext_values):
@@ -477,26 +491,18 @@ class DOMINO:
             value_loss = 0
             for i in range(self.num_ext_values):
                 value_loss += ext_value_loss[i]
-                value_loss += exp_ext_value_loss[i]
 
             if not self.burning_expert:
                 value_loss += int_value_loss
 
-            weighted_loss = surrogate_loss + \
-                            self.a_cfg.value_loss_coef * value_loss - \
-                            self.a_cfg.entropy_coef * entropy_batch.mean()
-
             # Gradient step
-            self.optimizer.zero_grad()
-            weighted_loss.backward()
-
-            # clip grad norm
-            params_list = list(self.policy.parameters()) + list(self.int_value.parameters())
-
+            self.value_optimizer.zero_grad()
+            value_loss.backward()
+            value_params_list = list(self.int_value.parameters())
             for i in range(self.num_ext_values):
-                params_list += list(self.ext_values[i].parameters())
-            nn.utils.clip_grad_norm_(params_list, self.a_cfg.max_grad_norm)
-            self.optimizer.step()
+                value_params_list += list(self.ext_values[i].parameters())
+            nn.utils.clip_grad_norm_(value_params_list, self.a_cfg.max_grad_norm)  # clip grad norm
+            self.value_optimizer.step()
 
             ############################################################################################################
             # learn lagrange multipliers
@@ -549,7 +555,7 @@ class DOMINO:
             mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff, dim=0) /
                                      torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).detach().cpu().numpy()
             mean_constraint_satisfaction += (
-                        self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).detach().cpu().numpy()
+                    self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).detach().cpu().numpy()
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
             if self.a_cfg.use_succ_feat:
@@ -611,8 +617,7 @@ class DOMINO:
         for j in range(self.env.num_skills):
             self.writer.add_scalar(f'Skill/avg_ext_values_{j}', self.avg_ext_values[j], locs['it'])
 
-        self.writer.add_scalar('Learning/learning_rate', self.learning_rate, locs['it'])
-        self.writer.add_scalar('Learning/lagrange_learning_rate', self.lagrange_learning_rate, locs['it'])
+        self.writer.add_scalar('Learning/policy_lr', self.policy_lr, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
@@ -646,7 +651,7 @@ class DOMINO:
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
             "intrinsic_value_state_dict": self.int_value.state_dict(),
-            "optimizer_state_dict": self.optimizer.state_dict(),
+            "policy_optimizer_state_dict": self.policy_optimizer.state_dict(),
             "infos": infos,
         }
         for i in range(self.num_ext_values):
@@ -673,7 +678,7 @@ class DOMINO:
         if self.normalize_features and load_feat_normalizer:
             self.feat_normalizer.load_state_dict(loaded_dict["feat_norm_state_dict"])
         if load_optimizer:
-            self.optimizer.load_state_dict(loaded_dict["optimizer_state_dict"])
+            self.policy_optimizer.load_state_dict(loaded_dict["policy_optimizer_state_dict"])
         return loaded_dict["infos"]
 
     def get_inference_policy(self, device=None):

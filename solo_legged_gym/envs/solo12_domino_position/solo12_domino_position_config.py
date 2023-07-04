@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 9
-        episode_length_s = 15  # episode length in seconds
+        episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
@@ -92,18 +92,18 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
             # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
-            move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_in_place = "[2, [0.2, 0.25, 0.1]]"  # minimal vel, dist, sigma
+            move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
+            stall_in_place = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, dist, sigma
 
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 40]"
 
-            pos = "[1, 2.0]"  # sigma
+            pos = "[1, 1.0]"  # sigma
 
-            feet_acc = "[0, 300]"
-            dof_acc = "[0, 1500]"
-            torques = "[0, 10]"
-            joint_targets_rate = "[0, 1.0]"
+            feet_acc = "[2, 300]"
+            dof_acc = "[2, 1500]"
+            torques = "[2, 10]"
+            joint_targets_rate = "[2, 1.0]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -144,7 +144,7 @@ class Solo12DOMINOPositionTrainCfg:
         share_ratio = 1.0
         policy_hidden_dims = [512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [256, 128]
+        value_hidden_dims = [512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         succ_feat_hidden_dims = [512, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
@@ -152,21 +152,22 @@ class Solo12DOMINOPositionTrainCfg:
     class algorithm:
         # algorithm params
         bootstrap_value = False
-        value_loss_coef = 1.0
         use_clipped_value_loss = True
         clip_param = 0.2
         entropy_coef = 0.01
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
-        learning_rate = 1.e-3  # 5.e-4
+        policy_lr = 1.e-3  # 5.e-4
         schedule = 'adaptive'  # adaptive, fixed
 
-        lagrange_learning_rate = 1.e-1
+        value_lr = 1.e-3  # 1.e-3
+
+        lagrange_lr = 1.e-1
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 2.0, 0.8]'
         intrinsic_adv_coeff = 10.0
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -188,7 +189,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
-        succ_feat_learning_rate = 1.e-3
+        succ_feat_lr = 1.e-3
 
         burning_expert_steps = 5000
 
@@ -201,7 +202,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'another2'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run

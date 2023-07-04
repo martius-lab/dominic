@@ -19,45 +19,45 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
+        "fixed_adv_coeff": "[1.0, 2.0, 0.8]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 10.0,
         "intrinsic_rew_scale": 5.0,
-        "lagrange_learning_rate": 0.1,
+        "lagrange_lr": 0.1,
         "lam": 0.95,
-        "learning_rate": 0.001,
         "max_grad_norm": 1.0,
         "num_lagrange_steps": 10,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
+        "policy_lr": 0.001,
         "repulsive_power": 0,
         "schedule": "adaptive",
         "sigmoid_scale": 1.0,
         "succ_feat_gamma": 0.95,
-        "succ_feat_learning_rate": 0.001,
+        "succ_feat_lr": 0.001,
         "target_dist": 1.0,
         "use_clipped_value_loss": true,
         "use_succ_feat": true,
-        "value_loss_coef": 1.0
+        "value_lr": 0.001
       },
       "algorithm_name": "DOMINO",
       "network": {
         "log_std_init": 0.0,
         "policy_activation": "elu",
         "policy_hidden_dims": [
-          1024,
-          512
+          512,
+          256
         ],
-        "share_ratio": 0.125,
+        "share_ratio": 1.0,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
-          1024,
-          512
+          512,
+          256
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
-          256,
-          128
+          512,
+          256
         ]
       },
       "runner": {
@@ -73,10 +73,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "another2",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230704_133510"
+        "wandb_group": "cluster_20230704_165235"
       }
     },
     "env_cfg": {
@@ -158,7 +158,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 15,
+        "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 9,
@@ -227,13 +227,13 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "dof_acc": "[0, 1500]",
-          "feet_acc": "[0, 300]",
-          "joint_targets_rate": "[0, 1.0]",
-          "move_towards": "[2, [0.5, 0.9]]",
-          "pos": "[1, 2.0]",
-          "stall_in_place": "[2, [0.2, 0.25, 0.1]]",
-          "torques": "[0, 10]"
+          "dof_acc": "[2, 1500]",
+          "feet_acc": "[2, 300]",
+          "joint_targets_rate": "[2, 1.0]",
+          "move_towards": "[0, [0.5, 0.95]]",
+          "pos": "[1, 1.0]",
+          "stall_in_place": "[0, [0.4, 0.25, 0.1]]",
+          "torques": "[2, 10]"
         }
       },
       "seed": 27,
