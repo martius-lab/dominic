@@ -384,6 +384,8 @@ class Solo12DOMINOPosition(BaseTask):
 
         if self.cfg.env.play:
             self.skills[env_ids] = 0
+            for i in range(self.num_skills):
+                self.skills[i] = i
 
     def _compute_torques(self, joint_targets):
         # pd controller

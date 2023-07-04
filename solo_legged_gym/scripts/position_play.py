@@ -20,7 +20,7 @@ class keyboard_play:
 
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
-        env_cfg.env.num_envs = 5
+        env_cfg.env.num_envs = 8
         env_cfg.env.play = True
         env_cfg.env.debug = False
         env_cfg.observations.add_noise = False
@@ -95,17 +95,8 @@ class keyboard_play:
         self.keyboard_control = {
             "reset robot": "r",
         }
-        self.skill_control = {}
-        for i in range(self.env.num_skills):
-            key = "skill " + str(i)
-            value = str(i)
-            self.skill_control[key] = value
 
         for action, key in self.keyboard_control.items():
-            key_enum = getattr(gymapi.KeyboardInput, f"KEY_{key.upper()}")
-            self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
-
-        for action, key in self.skill_control.items():
             key_enum = getattr(gymapi.KeyboardInput, f"KEY_{key.upper()}")
             self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
 
@@ -168,8 +159,6 @@ class keyboard_play:
         for event in events:
             if event.action == "r" and event.value > 0:
                 self.env.reset()
-            elif event.action in list(self.skill_control.values()) and event.value > 0:
-                self.env.skills[:] = int(event.action)
 
             if event.value > 0 and event.action in list(self.skill_control.values()):
                 print(list(self.skill_control.keys())[list(self.skill_control.values()).index(event.action)])

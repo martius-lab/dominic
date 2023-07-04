@@ -94,7 +94,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
             move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
             stall_in_place = "[0, [0.3, 0.25, 0.1]]"  # minimal vel, dist, sigma
-            # feet_slip = "[0, [0.06, 0.05, 0.1]]"  # target height, sigma, sigma+
+            feet_slip = "[0, [0.04, 0.05, 0.05]]"  # target height, sigma, sigma+
 
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 40]"
@@ -192,18 +192,18 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 200
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 500  # number of policy updates
+        max_iterations = 2000  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test'
+        run_name = 'diversity'
 
         # load
         load_run = -1  # -1 = last run
