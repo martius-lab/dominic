@@ -186,13 +186,13 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0
+        attractive_coeff = 0.5
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 200
+        burning_expert_steps = 100
 
     class runner:
         num_steps_per_env = 24  # per iteration

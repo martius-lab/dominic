@@ -9,12 +9,12 @@
     "train_cfg": {
       "algorithm": {
         "alpha": 0.7,
-        "attractive_coeff": 0,
+        "attractive_coeff": 0.5,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 200,
+        "burning_expert_steps": 100,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -76,7 +76,7 @@
         "run_name": "diversity",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230704_215730"
+        "wandb_group": "cluster_20230705_092457"
       }
     },
     "env_cfg": {
