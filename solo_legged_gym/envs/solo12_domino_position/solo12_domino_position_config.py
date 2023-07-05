@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 33 + 12 + 2 + 1  # #states + #actions + #commands + #remaining_time
+        num_observations = 33 + 12 + 3 + 1  # #states + #actions + #commands + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 9
@@ -26,11 +26,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [2, 2, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 2  # default: sampled radius, direction
+        num_commands = 3  # default: sampled radius, direction, yaw
 
         class ranges:
             radius = [1.0, 5.0]  # [m]
             direction = [-np.pi, np.pi]  # [rad]
+            yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.40]  # x,y,z [m]
@@ -100,6 +101,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 40]"
 
             pos = "[1, 1.0]"  # sigma
+            yaw = "[1, 2.0]"  # sigma
 
             feet_acc = "[2, 300]"
             dof_acc = "[2, 2000]"
@@ -192,18 +194,18 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 100
+        burning_expert_steps = 5000
 
     class runner:
         num_steps_per_env = 24  # per iteration
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 500  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity'
+        run_name = 'yaw'
 
         # load
         load_run = -1  # -1 = last run

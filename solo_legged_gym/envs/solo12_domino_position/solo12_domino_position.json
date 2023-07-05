@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 100,
+        "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -64,7 +64,7 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 500,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
@@ -73,10 +73,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "diversity",
+        "run_name": "yaw",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230705_092457"
+        "wandb_group": "cluster_20230705_180237"
       }
     },
     "env_cfg": {
@@ -106,7 +106,7 @@
         "thickness": 0.01
       },
       "commands": {
-        "num_commands": 2,
+        "num_commands": 3,
         "ranges": {
           "direction": [
             -3.141592653589793,
@@ -115,6 +115,10 @@
           "radius": [
             1.0,
             5.0
+          ],
+          "yaw": [
+            -3.141592653589793,
+            3.141592653589793
           ]
         }
       },
@@ -162,7 +166,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 9,
-        "num_observations": 48,
+        "num_observations": 49,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -234,7 +238,8 @@
           "move_towards": "[0, [0.5, 0.95]]",
           "pos": "[1, 1.0]",
           "stall_in_place": "[0, [0.3, 0.25, 0.1]]",
-          "torques": "[2, 15]"
+          "torques": "[2, 15]",
+          "yaw": "[1, 2.0]"
         }
       },
       "seed": 27,

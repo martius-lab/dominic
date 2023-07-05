@@ -339,6 +339,8 @@ class Solo12DOMINOPosition(BaseTask):
         base_pos = self.root_states[env_ids, 0:2]  # x and y in global frame
 
         # sample from a ring (r, R) with uniform distribution
+        sampled_yaw = torch_rand_float(self.command_ranges["yaw"][0], self.command_ranges["yaw"][1], (len(env_ids), 1),
+                                       device=self.device).squeeze(1)
         sampled_direction = torch_rand_float(self.command_ranges["direction"][0], self.command_ranges["direction"][1],
                                              (len(env_ids), 1),
                                              device=self.device).squeeze(1)
@@ -347,21 +349,25 @@ class Solo12DOMINOPosition(BaseTask):
                                                device=self.device).squeeze(1)
         self.commands[env_ids, 0] = base_pos[:, 0] + sampled_radius * torch.cos(sampled_direction)
         self.commands[env_ids, 1] = base_pos[:, 1] + sampled_radius * torch.sin(sampled_direction)
+        self.commands[env_ids, 2] = sampled_yaw
 
     def _update_commands_in_base(self):
         base_pos = self.root_states[:, 0:2]  # x and y in global frame
+        base_yaw = 2 * torch.acos(get_quat_yaw(self.root_states[:, 3:7])[:, 3])
 
         target_pos_in_global = torch.cat((self.commands[:, 0:2] - base_pos,
-                                          torch.zeros_like(self.commands[:, 0:1])), dim=-1)  # fake z component
+                                          torch.zeros_like(self.commands[:, 2:3])), dim=-1)  # fake z component
         target_pos_in_base = quat_rotate_inverse(get_quat_yaw(self.base_quat), target_pos_in_global)[:, 0:2]
+        target_yaw_in_base = wrap_to_pi(self.commands[:, 2] - base_yaw)
 
         self.commands_in_base[:, 0:2] = target_pos_in_base
+        self.commands_in_base[:, 2] = target_yaw_in_base
 
     def _update_remaining_time(self):
         self.remaining_time = (self.max_episode_length - self.episode_length_buf) / self.max_episode_length
 
     def _prepare_draw(self):
-        self.box_geoms = [gymutil.WireframeBoxGeometry(0.1, 0.1, 0.4, color=(1, 1, 0)) for _ in range(self.num_envs)]
+        self.box_geoms = [gymutil.WireframeBoxGeometry(0.3, 0.15, 0.4, color=(1, 1, 0)) for _ in range(self.num_envs)]
         self.box_poses = [gymapi.Transform(gymapi.Vec3(0.0, 0.0, 0.25), gymapi.Quat(0, 0, 0, 1)) for _ in
                           range(self.num_envs)]
         self.box_geom_in_base = gymutil.WireframeBoxGeometry(0.1, 0.1, 0.1, color=(1, 0, 1))
@@ -372,11 +378,12 @@ class Solo12DOMINOPosition(BaseTask):
         for i in range(self.num_envs):
             if self.cfg.env.plot_target:
                 self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.25)
+                self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, self.commands[i, 2])
                 if self.remaining_time[i] < self.remaining_check_time:
                     color_ = (1, 0, 0)
                 else:
                     color_ = (1, 1, 0)
-                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.1, 0.1, self.remaining_time[i] * 0.4, color=color_)
+                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.15, self.remaining_time[i] * 0.4, color=color_)
                 gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
 
     def _resample_skills(self, env_ids):
@@ -530,10 +537,10 @@ class Solo12DOMINOPosition(BaseTask):
         rew = torch.exp(-torch.square(pos_error / sigma))
         return rew * (self.remaining_time < self.remaining_check_time)
 
-    # def _reward_yaw(self, sigma):
-    #     yaw_error = torch.abs(self.commands_in_base[:, 2])
-    #     rew = torch.exp(-torch.square(yaw_error / sigma))
-    #     return rew * (self.remaining_time < self.remaining_check_time)
+    def _reward_yaw(self, sigma):
+        yaw_error = torch.abs(self.commands_in_base[:, 2])
+        rew = torch.exp(-torch.square(yaw_error / sigma))
+        return rew * (self.remaining_time < self.remaining_check_time)
 
     def _reward_move_towards(self, sigma):
         target_pos_in_base = self.commands_in_base[:, 0:2]
