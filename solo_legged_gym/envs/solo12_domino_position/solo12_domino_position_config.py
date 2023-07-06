@@ -34,7 +34,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
-        pos = [0.0, 0.0, 0.40]  # x,y,z [m]
+        pos = [0.0, 0.0, 0.3]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -93,19 +93,24 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
             # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
+
             move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
-            stall_in_place = "[0, [0.3, 0.25, 0.1]]"  # minimal vel, dist, sigma
-            feet_slip = "[0, [0.04, 0.05, 0.05]]"  # target height, sigma, sigma+
+            # turn_towards = "[0, 0.2]"  # distance, sigma
+            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_yaw = "[0, [0.4, 0.1, 0.1]]"  # minimal ang vel, yaw distance, distance, sigma
 
-            # lin_acc_z = "[2, 10]"
-            # ang_acc_xy = "[2, 40]"
+            pos = "[1, 0.5]"  # sigma
+            yaw = "[1, 0.2]"  # sigma
+            # posl = "[1, 5.0]"  # max error
+            # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
+            # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
-            pos = "[1, 1.0]"  # sigma
-            yaw = "[1, 2.0]"  # sigma
-
-            feet_acc = "[2, 300]"
-            dof_acc = "[2, 2000]"
-            torques = "[2, 15]"
+            # feet_acc = "[2, 300]"
+            lin_acc_z = "[2, 10]"
+            ang_acc_xy = "[2, 20]"
+            feet_slip = "[2, [0.04, 0.05, 0.1]]"  # target height, sigma, sigma+
+            # dof_acc = "[2, 2000]"
+            # torques = "[2, 15]"
             joint_targets_rate = "[2, 1.0]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -170,7 +175,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 2.0, 0.8]'
+        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
         intrinsic_adv_coeff = 10.0
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -205,7 +210,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'yaw'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run

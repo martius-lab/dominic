@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.0, 2.0, 0.8]",
+        "fixed_adv_coeff": "[1.0, 1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 10.0,
         "intrinsic_rew_scale": 5.0,
@@ -73,10 +73,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "yaw",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230705_180237"
+        "wandb_group": "cluster_20230706_211808"
       }
     },
     "env_cfg": {
@@ -201,7 +201,7 @@
         "pos": [
           0.0,
           0.0,
-          0.4
+          0.3
         ],
         "rot": [
           0.0,
@@ -231,15 +231,15 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "dof_acc": "[2, 2000]",
-          "feet_acc": "[2, 300]",
-          "feet_slip": "[0, [0.04, 0.05, 0.05]]",
+          "ang_acc_xy": "[2, 20]",
+          "feet_slip": "[2, [0.04, 0.05, 0.1]]",
           "joint_targets_rate": "[2, 1.0]",
+          "lin_acc_z": "[2, 10]",
           "move_towards": "[0, [0.5, 0.95]]",
-          "pos": "[1, 1.0]",
-          "stall_in_place": "[0, [0.3, 0.25, 0.1]]",
-          "torques": "[2, 15]",
-          "yaw": "[1, 2.0]"
+          "pos": "[1, 0.5]",
+          "stall_pos": "[0, [0.4, 0.25, 0.1]]",
+          "stall_yaw": "[0, [0.4, 0.1, 0.1]]",
+          "yaw": "[1, 0.2]"
         }
       },
       "seed": 27,
