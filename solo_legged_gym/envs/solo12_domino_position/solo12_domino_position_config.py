@@ -105,13 +105,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
-            # feet_acc = "[2, 300]"
-            lin_acc_z = "[2, 10]"
-            ang_acc_xy = "[2, 20]"
-            feet_slip = "[2, [0.04, 0.05, 0.1]]"  # target height, sigma, sigma+
-            # dof_acc = "[2, 2000]"
-            # torques = "[2, 15]"
-            joint_targets_rate = "[2, 1.0]"
+            feet_acc = "[2, 400]"
+            # lin_acc_z = "[2, 10]"
+            # ang_acc_xy = "[2, 20]"
+            feet_slip = "[2, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
+            dof_acc = "[2, 3000]"
+            torques = "[2, 20]"
+            joint_targets_rate = "[2, 1.2]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -175,7 +175,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_lagrange_steps = 10
 
         sigmoid_scale = 1.0
-        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 2.0, 1.0]'
         intrinsic_adv_coeff = 10.0
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -206,11 +206,13 @@ class Solo12DOMINOPositionTrainCfg:
         max_iterations = 500  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
+        drop_assist = True
+        drop_assist_start_iter = 200  # take 200 iters to slowly drop it
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test'
+        run_name = 'drop_assist'
 
         # load
         load_run = -1  # -1 = last run
