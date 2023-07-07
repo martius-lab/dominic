@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 5000,
+        "burning_expert_steps": 500,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -66,7 +66,7 @@
         "drop_assist_start_iter": 200,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 500,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "drop_assist",
+        "run_name": "diversity",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230707_140245"
+        "wandb_group": "cluster_20230707_145609"
       }
     },
     "env_cfg": {

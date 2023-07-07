@@ -199,11 +199,12 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 500
 
     class runner:
+        max_iterations = 2000  # number of policy updates
+
         num_steps_per_env = 24  # per iteration
-        max_iterations = 500  # number of policy updates
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
         drop_assist = True
@@ -212,7 +213,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'drop_assist'
+        run_name = 'diversity'
 
         # load
         load_run = -1  # -1 = last run
