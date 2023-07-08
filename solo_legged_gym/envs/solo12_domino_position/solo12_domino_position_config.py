@@ -10,7 +10,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 33 + 12 + 3 + 1  # #states + #actions + #commands + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 9
+        num_features = 10
         episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
@@ -94,10 +94,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_vel_xy = "[2, 2.0]"
             # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
 
-            move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
-            # turn_towards = "[0, 0.2]"  # distance, sigma
-            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            stall_yaw = "[0, [0.4, 0.1, 0.1]]"  # minimal ang vel, yaw distance, distance, sigma
+            move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
+            stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_yaw = "[2, [0.2, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.2]"  # sigma
@@ -105,13 +104,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
-            feet_acc = "[2, 400]"
+            feet_acc = "[0, 400]"
+            feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
-            feet_slip = "[2, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
-            dof_acc = "[2, 3000]"
-            torques = "[2, 20]"
-            joint_targets_rate = "[2, 1.2]"
+            dof_acc = "[0, 3000]"
+            torques = "[0, 20]"
+            joint_targets_rate = "[0, 1.2]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -171,21 +170,21 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        lagrange_lr = 1.e-1
-        num_lagrange_steps = 10
-
-        sigmoid_scale = 1.0
         fixed_adv_coeff = '[1.0, 2.0, 1.0]'
-        intrinsic_adv_coeff = 10.0
+        intrinsic_adv_coeff = 1.0
+        intrinsic_rew_scale = 5.0
+
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
         desired_kl = 0.02  # adjust the learning rate automatically
         max_grad_norm = 1.
 
+        num_lagrange_steps = 10
+        lagrange_lr = 1.e-3
+        sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
-        alpha = 0.7  # optimality ratio
 
-        intrinsic_rew_scale = 5.0
+        alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -193,13 +192,13 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 500
+        burning_expert_steps = 200
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -207,13 +206,11 @@ class Solo12DOMINOPositionTrainCfg:
         num_steps_per_env = 24  # per iteration
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
-        drop_assist = True
-        drop_assist_start_iter = 200  # take 200 iters to slowly drop it
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
