@@ -73,10 +73,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "test",
+        "run_name": "terrain_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230708_171407"
+        "wandb_group": "cluster_20230710_120607"
       }
     },
     "env_cfg": {
@@ -164,7 +164,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 4096,
+        "num_envs": 50,
         "num_features": 10,
         "num_observations": 49,
         "num_skills": 8,
@@ -268,9 +268,24 @@
         "up_axis": 1
       },
       "terrain": {
+        "border_size": 15,
         "dynamic_friction": 1.0,
+        "horizontal_scale": 0.1,
+        "mesh_type": "trimesh",
+        "num_cols": 6,
+        "num_rows": 6,
+        "num_sub_terrains": 36,
+        "params": {
+          "height": 0.5,
+          "platform_size": 2.0
+        },
         "restitution": 0.0,
-        "static_friction": 1.0
+        "slope_threshold": 0.75,
+        "static_friction": 1.0,
+        "terrain_length": 8.0,
+        "terrain_width": 8.0,
+        "type": "box",
+        "vertical_scale": 0.005
       },
       "viewer": {
         "camera_env": 0,

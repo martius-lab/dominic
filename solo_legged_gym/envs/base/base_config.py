@@ -62,6 +62,33 @@ class BaseEnvCfg(ABCConfig):
         dynamic_friction = 1.0
         restitution = 0.
 
+        mesh_type = 'plane'  # plane, heightfield, trimesh
+
+        # all below are only used for heightfield and trimesh
+        # sub-terrain
+        terrain_length = 8.  # [m]
+        terrain_width = 8.  # [m]
+
+        num_rows = 10
+        num_cols = 10
+
+        border_size = 15  # [m]
+
+        horizontal_scale = 0.1  # [m]
+        vertical_scale = 0.005  # [m]
+        slope_threshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
+
+        # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
+        # pass the params as a dict
+        # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
+        # stepping_stones, gap, pit
+        type = "random_uniform"
+        params = {
+            "min_height": 0.0,
+            "max_height": 0.2,
+            "step": 0.01
+        }
+
     class commands:
         num_commands = None  # overwrite in the tasks
 

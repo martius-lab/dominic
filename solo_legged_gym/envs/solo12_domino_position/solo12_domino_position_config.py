@@ -6,7 +6,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 27
 
     class env(BaseEnvCfg.env):
-        num_envs = 4096
+        num_envs = 50
         num_observations = 33 + 12 + 3 + 1  # #states + #actions + #commands + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
@@ -17,6 +17,37 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         play = False
         debug = False
         plot_target = True
+
+    class terrain:
+        static_friction = 1.0
+        dynamic_friction = 1.0
+        restitution = 0.
+
+        mesh_type = 'trimesh'  # plane, heightfield, trimesh
+
+        # all below are only used for heightfield and trimesh
+        # sub-terrain
+        terrain_length = 8.  # [m]
+        terrain_width = 8.  # [m]
+
+        num_rows = 6
+        num_cols = 6
+
+        border_size = 15  # [m]
+
+        horizontal_scale = 0.1  # [m]
+        vertical_scale = 0.005  # [m]
+        slope_threshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
+
+        # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
+        # pass the params as a dict
+        # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
+        # stepping_stones, gap, pit
+        type = "box"
+        params = {
+            "height": 0.5,
+            "platform_size": 2.0
+        }
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
@@ -210,7 +241,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test'
+        run_name = 'terrain_test'
 
         # load
         load_run = -1  # -1 = last run
