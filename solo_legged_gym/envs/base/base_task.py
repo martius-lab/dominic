@@ -5,6 +5,7 @@ import sys
 import torch
 import os
 from solo_legged_gym import ROOT_DIR
+from solo_legged_gym.utils import quat_apply_yaw
 from solo_legged_gym.utils.terrain import Terrain
 
 
@@ -63,7 +64,6 @@ class BaseTask:
         self.enable_viewer_sync = True
         self.overview = self.cfg.viewer.overview
         self.viewer = None
-        self.debug_viz = False
 
         # if running with a viewer, set up keyboard shortcuts and camera
         if self.cfg.viewer.enable_viewer:
@@ -240,6 +240,38 @@ class BaseTask:
 
         self.gym.add_triangle_mesh(self.sim, self.terrain.vertices.flatten(order='C'), self.terrain.triangles.flatten(order='C'), tm_params)
         self.height_samples = torch.tensor(self.terrain.height_samples).view(self.terrain.tot_rows, self.terrain.tot_cols).to(self.device)
+
+    def _init_height_points(self):
+        y = torch.tensor(self.cfg.terrain.measured_points_y, device=self.device, requires_grad=False)
+        x = torch.tensor(self.cfg.terrain.measured_points_x, device=self.device, requires_grad=False)
+        grid_x, grid_y = torch.meshgrid(x, y)
+
+        self.num_height_points = grid_x.numel()
+        points = torch.zeros(self.num_envs, self.num_height_points, 3, device=self.device, requires_grad=False)
+        points[:, :, 0] = grid_x.flatten()
+        points[:, :, 1] = grid_y.flatten()
+        return points
+
+    def _measure_height(self):
+        if self.cfg.terrain.mesh_type == 'plane':
+            self.measured_height[:] = 0
+
+        points = quat_apply_yaw(self.base_quat.repeat(1, self.num_height_points), self.height_points) + (self.root_states[:, :3]).unsqueeze(1)
+
+        points += self.terrain.cfg.border_size
+        points = (points/self.terrain.cfg.horizontal_scale).long()
+        px = points[:, :, 0].view(-1)
+        py = points[:, :, 1].view(-1)
+        px = torch.clip(px, 0, self.height_samples.shape[0]-2)
+        py = torch.clip(py, 0, self.height_samples.shape[1]-2)
+
+        heights1 = self.height_samples[px, py]
+        heights2 = self.height_samples[px+1, py]
+        heights3 = self.height_samples[px, py+1]
+        heights = torch.min(heights1, heights2)
+        heights = torch.min(heights, heights3)
+
+        self.measured_height = heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
 
     def _create_envs(self):
         asset_path = self.cfg.asset.file.format(root=ROOT_DIR)
@@ -442,6 +474,10 @@ class BaseTask:
 
         # joint positions offsets and PD gains
         self.default_dof_pos = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)
+
+        if self.cfg.terrain.measure_height:
+            self.height_points = self._init_height_points()
+            self.measured_height = torch.zeros(self.num_envs, self.num_height_points, device=self.device, requires_grad=False)
 
     def _set_camera(self, position, lookat):
         cam_pos = gymapi.Vec3(position[0], position[1], position[2])

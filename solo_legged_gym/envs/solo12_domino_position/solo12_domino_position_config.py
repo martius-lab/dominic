@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 50
-        num_observations = 33 + 12 + 3 + 1  # #states + #actions + #commands + #remaining_time
+        num_observations = 33 + 12 + 3 + 11 * 7 + 1  # #states + #actions + #commands + height + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
@@ -24,6 +24,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         restitution = 0.
 
         mesh_type = 'trimesh'  # plane, heightfield, trimesh
+
+        measure_height = True  # measure the height samples
+        measured_points_x = list((np.arange(11) - 11 / 2) / 10)
+        measured_points_y = list((np.arange(7) - 7 / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -43,9 +47,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        type = "box"
+        type = "pit"
         params = {
-            "height": 0.5,
+            "depth": 0.4,
             "platform_size": 2.0
         }
 
@@ -171,6 +175,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             lin_vel = 0.2
             ang_vel = 0.2
             gravity = 0.1
+            height_measurements = 0.1
 
 
 class Solo12DOMINOPositionTrainCfg:

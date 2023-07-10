@@ -76,7 +76,7 @@
         "run_name": "terrain_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230710_120607"
+        "wandb_group": "cluster_20230710_135356"
       }
     },
     "env_cfg": {
@@ -166,7 +166,7 @@
         "num_actions": 12,
         "num_envs": 50,
         "num_features": 10,
-        "num_observations": 49,
+        "num_observations": 126,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -220,6 +220,7 @@
           "dof_pos": 0.05,
           "dof_vel": 1.0,
           "gravity": 0.1,
+          "height_measurements": 0.1,
           "lin_vel": 0.2
         }
       },
@@ -271,12 +272,35 @@
         "border_size": 15,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
+        "measure_height": true,
+        "measured_points_x": [
+          -0.55,
+          -0.45,
+          -0.35,
+          -0.25,
+          -0.15,
+          -0.05,
+          0.05,
+          0.15,
+          0.25,
+          0.35,
+          0.45
+        ],
+        "measured_points_y": [
+          -0.35,
+          -0.25,
+          -0.15,
+          -0.05,
+          0.05,
+          0.15,
+          0.25
+        ],
         "mesh_type": "trimesh",
         "num_cols": 6,
         "num_rows": 6,
         "num_sub_terrains": 36,
         "params": {
-          "height": 0.5,
+          "depth": 0.4,
           "platform_size": 2.0
         },
         "restitution": 0.0,
@@ -284,7 +308,7 @@
         "static_friction": 1.0,
         "terrain_length": 8.0,
         "terrain_width": 8.0,
-        "type": "box",
+        "type": "pit",
         "vertical_scale": 0.005
       },
       "viewer": {

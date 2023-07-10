@@ -5,7 +5,7 @@ from isaacgym import gymtorch, gymapi, gymutil
 from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, quat_rotate, quat_apply
 
 from solo_legged_gym.envs import BaseTask
-from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi, torch_rand_float_ring
+from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi, torch_rand_float_ring, quat_apply_yaw
 
 
 class Solo12DOMINOPosition(BaseTask):
@@ -235,6 +235,8 @@ class Solo12DOMINOPosition(BaseTask):
 
             if self.viewer and self.enable_viewer_sync:
                 self._draw_target()
+                if self.cfg.terrain.measure_height:
+                    self._draw_heights()
                 self.gym.draw_viewer(self.viewer, self.sim, True)
                 if sync_frame_time:
                     self.gym.sync_frame_time(self.sim)
@@ -261,6 +263,9 @@ class Solo12DOMINOPosition(BaseTask):
 
         self._update_remaining_time()
         self._update_commands_in_base()
+        if self.cfg.terrain.measure_height:
+            self._measure_height()
+
         self.compute_observations()
         self.compute_features()
 
@@ -286,6 +291,10 @@ class Solo12DOMINOPosition(BaseTask):
                                   self.commands_in_base,
                                   self.remaining_time.unsqueeze(-1),
                                   ), dim=-1)
+        if self.cfg.terrain.measure_height:
+            heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.5 - self.measured_height, -1, 1.)
+            self.obs_buf = torch.cat((self.obs_buf, heights), dim=-1)
+
         # add noise if needed
         if self.add_noise:
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
@@ -315,6 +324,11 @@ class Solo12DOMINOPosition(BaseTask):
         noise_vec[6:18] = noise_scales.dof_pos
         noise_vec[18:30] = noise_scales.dof_vel
         noise_vec[30:33] = noise_scales.gravity
+
+        if self.cfg.terrain.measure_height:
+            num_height_points = len(self.cfg.terrain.measured_points_x) * len(self.cfg.terrain.measured_points_y)
+            noise_vec[48:48 + num_height_points] = noise_scales.height_measurements
+
         return noise_vec * noise_level
 
     def _refresh_quantities(self):
@@ -389,13 +403,27 @@ class Solo12DOMINOPosition(BaseTask):
                 self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.15, self.remaining_time[i] * 0.4, color=color_)
                 gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
 
-    def _resample_skills(self, env_ids):
-        self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
+    def _draw_heights(self):
+        sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 1, 0))
+        for i in range(self.num_envs):
+            base_pos = (self.root_states[i, :3]).cpu().numpy()
+            heights = self.measured_height[i].cpu().numpy()
+            height_points = quat_apply_yaw(self.base_quat[i].repeat(heights.shape[0]),
+                                           self.height_points[i]).cpu().numpy()
+            for j in range(heights.shape[0]):
+                x = height_points[j, 0] + base_pos[0]
+                y = height_points[j, 1] + base_pos[1]
+                z = heights[j]
+                sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
+                gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)
 
-        if self.cfg.env.play:
-            self.skills[env_ids] = 0
-            for i in range(self.num_skills):
-                self.skills[i] = i
+    def _resample_skills(self, env_ids):
+            self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
+
+            if self.cfg.env.play:
+                self.skills[env_ids] = 0
+                for i in range(self.num_skills):
+                    self.skills[i] = i
 
     def _compute_torques(self, joint_targets):
         # pd controller
@@ -441,6 +469,7 @@ class Solo12DOMINOPosition(BaseTask):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :3] += self.env_origins[env_ids]
+        self.root_states[env_ids, :2] += torch_rand_float(-1., 1., (len(env_ids), 2), device=self.device)
         # base velocities
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0

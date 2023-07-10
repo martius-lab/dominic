@@ -1,4 +1,5 @@
 import inspect
+import numpy as np
 
 
 class ABCConfig:
@@ -63,6 +64,10 @@ class BaseEnvCfg(ABCConfig):
         restitution = 0.
 
         mesh_type = 'plane'  # plane, heightfield, trimesh
+
+        measure_height = False  # measure the height samples
+        measured_points_x = (np.arange(11) - 11 / 2) / 10
+        measured_points_y = (np.arange(7) - 7 / 2) / 10
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
