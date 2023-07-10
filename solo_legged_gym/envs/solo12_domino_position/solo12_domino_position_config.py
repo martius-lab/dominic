@@ -6,7 +6,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 27
 
     class env(BaseEnvCfg.env):
-        num_envs = 50
+        num_envs = 4096
         num_observations = 33 + 12 + 3 + 11 * 7 + 1  # #states + #actions + #commands + height + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
@@ -31,11 +31,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 8.  # [m]
-        terrain_width = 8.  # [m]
+        terrain_length = 10.  # [m]
+        terrain_width = 10.  # [m]
 
-        num_rows = 6
-        num_cols = 6
+        num_rows = 10
+        num_cols = 10
 
         border_size = 15  # [m]
 
@@ -47,10 +47,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        type = "pit"
+        type = "special_box"
         params = {
-            "depth": 0.4,
-            "platform_size": 2.0
+            "height": 0.4,
         }
 
     class viewer(BaseEnvCfg.viewer):
@@ -61,11 +60,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [2, 2, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 3  # default: sampled radius, direction, yaw
+        num_commands = 3  # default: target in x, y and yaw in base
+        num_targets = 12
+        targets_in_env_x = [0.5, 4.5, 5.5, 9.5, 0.5, 0.5, 9.5, 9.5, 0.5, 4.5, 5.5, 9.5]
+        targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 4.5, 5.5, 4.5, 5.5, 9.5, 9.5, 9.5, 9.5]
 
         class ranges:
-            radius = [1.0, 5.0]  # [m]
-            direction = [-np.pi, np.pi]  # [rad]
+        #     radius = [1.0, 5.0]  # [m]
+        #     direction = [-np.pi, np.pi]  # [rad]
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
@@ -140,7 +142,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
             feet_acc = "[0, 400]"
-            feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
+            # feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+  # TODO: this should be different with boxes
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
             dof_acc = "[0, 3000]"
@@ -234,10 +236,10 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 200
+        burning_expert_steps = 5000
 
     class runner:
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 1000  # number of policy updates
 
         num_steps_per_env = 24  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -246,7 +248,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'terrain_test'
+        run_name = 'boxes'
 
         # load
         load_run = -1  # -1 = last run

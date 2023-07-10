@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 200,
+        "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -73,10 +73,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "terrain_test",
+        "run_name": "boxes",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230710_135356"
+        "wandb_group": "cluster_20230710_151852"
       }
     },
     "env_cfg": {
@@ -107,20 +107,41 @@
       },
       "commands": {
         "num_commands": 3,
+        "num_targets": 12,
         "ranges": {
-          "direction": [
-            -3.141592653589793,
-            3.141592653589793
-          ],
-          "radius": [
-            1.0,
-            5.0
-          ],
           "yaw": [
             -3.141592653589793,
             3.141592653589793
           ]
-        }
+        },
+        "targets_in_env_x": [
+          0.5,
+          4.5,
+          5.5,
+          9.5,
+          0.5,
+          0.5,
+          9.5,
+          9.5,
+          0.5,
+          4.5,
+          5.5,
+          9.5
+        ],
+        "targets_in_env_y": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          4.5,
+          5.5,
+          4.5,
+          5.5,
+          9.5,
+          9.5,
+          9.5,
+          9.5
+        ]
       },
       "control": {
         "clip_joint_target": 100.0,
@@ -164,7 +185,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 50,
+        "num_envs": 4096,
         "num_features": 10,
         "num_observations": 126,
         "num_skills": 8,
@@ -234,7 +255,6 @@
         "terms": {
           "dof_acc": "[0, 3000]",
           "feet_acc": "[0, 400]",
-          "feet_slip": "[0, [0.04, 0.05, 0.2]]",
           "joint_targets_rate": "[0, 1.2]",
           "move_towards": "[2, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
@@ -296,19 +316,18 @@
           0.25
         ],
         "mesh_type": "trimesh",
-        "num_cols": 6,
-        "num_rows": 6,
-        "num_sub_terrains": 36,
+        "num_cols": 10,
+        "num_rows": 10,
+        "num_sub_terrains": 100,
         "params": {
-          "depth": 0.4,
-          "platform_size": 2.0
+          "height": 0.4
         },
         "restitution": 0.0,
         "slope_threshold": 0.75,
         "static_friction": 1.0,
-        "terrain_length": 8.0,
-        "terrain_width": 8.0,
-        "type": "pit",
+        "terrain_length": 10.0,
+        "terrain_width": 10.0,
+        "type": "special_box",
         "vertical_scale": 0.005
       },
       "viewer": {
