@@ -64,7 +64,7 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 1000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 24,
@@ -76,7 +76,7 @@
         "run_name": "boxes",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230710_151852"
+        "wandb_group": "cluster_20230710_152433"
       }
     },
     "env_cfg": {

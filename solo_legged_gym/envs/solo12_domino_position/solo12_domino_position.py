@@ -183,10 +183,10 @@ class Solo12DOMINOPosition(BaseTask):
         if self.cfg.viewer.record_camera_imgs:
             ref_pos = [self.root_states[self.image_env, 0].item() + self.cfg.viewer.camera_pos_b[0],
                        self.root_states[self.image_env, 1].item() + self.cfg.viewer.camera_pos_b[1],
-                       self.cfg.viewer.camera_pos_b[2]]
+                       self.root_states[self.image_env, 2].item() + self.cfg.viewer.camera_pos_b[2]]
             ref_lookat = [self.root_states[self.image_env, 0].item(),
                           self.root_states[self.image_env, 1].item(),
-                          0.2]
+                          self.root_states[self.image_env, 2].item() + 0.2]
             cam_pos = gymapi.Vec3(ref_pos[0], ref_pos[1], ref_pos[2])
             cam_target = gymapi.Vec3(ref_lookat[0], ref_lookat[1], ref_lookat[2])
 
@@ -216,10 +216,10 @@ class Solo12DOMINOPosition(BaseTask):
                         ref_pos = [
                             self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
                             self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
-                            self.cfg.viewer.ref_pos_b[2]]
+                            self.root_states[self.cfg.viewer.ref_env, 2].item() + self.cfg.viewer.ref_pos_b[2]]
                         ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
                                       self.root_states[self.cfg.viewer.ref_env, 1].item(),
-                                      0.2]
+                                      self.root_states[self.cfg.viewer.ref_env, 2].item() + 0.2]
                         self._set_camera(ref_pos, ref_lookat)
                     self.viewer_set = True
             else:
