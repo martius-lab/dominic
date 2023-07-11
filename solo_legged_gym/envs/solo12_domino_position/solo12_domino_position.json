@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.015,
-        "fixed_adv_coeff": "[3.0, 1.0, 2.0]",
+        "fixed_adv_coeff": "[2.0, 1.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -79,7 +79,7 @@
         "run_name": "test_curriculum",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230711_144510"
+        "wandb_group": "cluster_20230711_160223"
       }
     },
     "env_cfg": {
@@ -102,9 +102,7 @@
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
         "terminate_after_contacts_on": [
-          "base",
-          "SHOULDER",
-          "UPPER"
+          "base"
         ],
         "thickness": 0.01
       },
@@ -258,13 +256,13 @@
         "terms": {
           "dof_acc": "[0, 3000]",
           "feet_acc": "[0, 400]",
-          "feet_slip": "[0, [0.04, 0.05, 0.2]]",
+          "feet_slip": "[0, [0.04, 0.1, 0.2]]",
           "joint_targets_rate": "[0, 1.0]",
-          "move_towards": "[2, [0.5, 0.8]]",
+          "move_towards": "[2, [0.5, 0.6]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.4, 0.25, 0.1]]",
-          "stall_yaw": "[2, [0.2, 0.1, 0.2]]",
-          "torques": "[0, 15]",
+          "stall_pos": "[2, [0.2, 0.25, 0.1]]",
+          "stall_yaw": "[2, [0.1, 0.1, 0.2]]",
+          "torques": "[0, 20]",
           "yaw": "[1, 0.2]"
         }
       },
@@ -323,13 +321,13 @@
         "num_sub_terrains": 20,
         "params": [
           0.0,
+          0.05,
           0.1,
-          0.2,
-          0.30000000000000004,
-          0.4
+          0.15000000000000002,
+          0.2
         ],
         "restitution": 0.0,
-        "slope_threshold": 0.75,
+        "slope_threshold": 0.05,
         "static_friction": 1.0,
         "terrain_length": 10.0,
         "terrain_width": 10.0,

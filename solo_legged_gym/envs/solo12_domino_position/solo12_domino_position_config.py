@@ -40,14 +40,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
-        slope_threshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
+        slope_threshold = 0.05  # slopes above this threshold will be corrected to vertical surfaces
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(5) * 0.1)
+        params = list(np.arange(5) * 0.05)
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
@@ -101,7 +101,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        terminate_after_contacts_on = ["base"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -128,9 +128,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_vel_xy = "[2, 2.0]"
             # feet_height = "[2, [0.1, 0.1, 0.25]]"  # target height, sigma, pos threshold
 
-            move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
-            stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            stall_yaw = "[2, [0.2, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
+            move_towards = "[2, [0.5, 0.6]]"  # sigma, clip/scale
+            stall_pos = "[2, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_yaw = "[2, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.2]"  # sigma
@@ -139,11 +139,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
             feet_acc = "[0, 400]"
-            feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
+            feet_slip = "[0, [0.04, 0.1, 0.2]]"  # target height, sigma, sigma+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
             dof_acc = "[0, 3000]"
-            torques = "[0, 15]"
+            torques = "[0, 20]"
             joint_targets_rate = "[0, 1.0]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -206,7 +206,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.0, 2.0]'
+        fixed_adv_coeff = '[2.0, 1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
