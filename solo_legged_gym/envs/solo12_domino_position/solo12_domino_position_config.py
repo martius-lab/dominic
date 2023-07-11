@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 10  # episode length in seconds
+        episode_length_s = 15  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
@@ -34,7 +34,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_width = 10.  # [m]
 
         num_rows = 4
-        num_cols = 10
+        num_cols = 5
 
         border_size = 2  # [m]
 
@@ -47,7 +47,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(10) * 0.05)
+        params = list(np.arange(5) * 0.1)
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
@@ -138,13 +138,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
-            feet_acc = "[0, 600]"
+            feet_acc = "[0, 400]"
             feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
-            dof_acc = "[0, 4000]"
-            torques = "[0, 20]"
-            joint_targets_rate = "[0, 1.2]"
+            dof_acc = "[0, 3000]"
+            torques = "[0, 15]"
+            joint_targets_rate = "[0, 1.0]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -181,7 +181,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 0.0
+        log_std_init = 0.5
 
         share_ratio = 0.5
         policy_hidden_dims = [256, 256, 256]
@@ -196,7 +196,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.010
+        entropy_coef = 0.015
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -206,7 +206,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.0, 1.0, 2.0]'
+        fixed_adv_coeff = '[3.0, 1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
