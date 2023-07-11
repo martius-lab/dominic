@@ -23,6 +23,8 @@ class keyboard_play:
         env_cfg.env.num_envs = 8
         env_cfg.env.play = True
         env_cfg.env.debug = False
+        env_cfg.terrain.num_cols = 2
+        env_cfg.terrain.num_rows = 2
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
         env_cfg.domain_rand.push_robots = False

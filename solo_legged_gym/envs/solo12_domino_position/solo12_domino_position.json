@@ -18,7 +18,7 @@
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
-        "entropy_coef": 0.01,
+        "entropy_coef": 0.015,
         "fixed_adv_coeff": "[1.0, 2.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
@@ -42,21 +42,24 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "log_std_init": 0.0,
+        "log_std_init": 0.5,
         "policy_activation": "elu",
         "policy_hidden_dims": [
-          512,
+          256,
+          256,
           256
         ],
-        "share_ratio": 0.5,
+        "share_ratio": 1.0,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
-          512,
+          256,
+          256,
           256
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
-          512,
+          256,
+          256,
           256
         ]
       },
@@ -73,10 +76,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "boxes",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230710_152433"
+        "wandb_group": "cluster_20230710_200643"
       }
     },
     "env_cfg": {
@@ -222,7 +225,7 @@
         "pos": [
           0.0,
           0.0,
-          0.3
+          0.5
         ],
         "rot": [
           0.0,
@@ -255,6 +258,7 @@
         "terms": {
           "dof_acc": "[0, 3000]",
           "feet_acc": "[0, 400]",
+          "feet_slip": "[0, [0.04, 0.05, 0.2]]",
           "joint_targets_rate": "[0, 1.2]",
           "move_towards": "[2, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
@@ -320,7 +324,7 @@
         "num_rows": 10,
         "num_sub_terrains": 100,
         "params": {
-          "height": 0.4
+          "height": 0.05
         },
         "restitution": 0.0,
         "slope_threshold": 0.75,

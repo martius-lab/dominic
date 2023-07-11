@@ -186,7 +186,7 @@ class Solo12DOMINOPosition(BaseTask):
                        self.root_states[self.image_env, 2].item() + self.cfg.viewer.camera_pos_b[2]]
             ref_lookat = [self.root_states[self.image_env, 0].item(),
                           self.root_states[self.image_env, 1].item(),
-                          self.root_states[self.image_env, 2].item() + 0.2]
+                          self.root_states[self.image_env, 2].item()]
             cam_pos = gymapi.Vec3(ref_pos[0], ref_pos[1], ref_pos[2])
             cam_target = gymapi.Vec3(ref_lookat[0], ref_lookat[1], ref_lookat[2])
 
@@ -219,7 +219,7 @@ class Solo12DOMINOPosition(BaseTask):
                             self.root_states[self.cfg.viewer.ref_env, 2].item() + self.cfg.viewer.ref_pos_b[2]]
                         ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
                                       self.root_states[self.cfg.viewer.ref_env, 1].item(),
-                                      self.root_states[self.cfg.viewer.ref_env, 2].item() + 0.2]
+                                      self.root_states[self.cfg.viewer.ref_env, 2].item()]
                         self._set_camera(ref_pos, ref_lookat)
                     self.viewer_set = True
             else:
@@ -478,7 +478,7 @@ class Solo12DOMINOPosition(BaseTask):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :3] += self.env_origins[env_ids]
-        self.root_states[env_ids, :2] += torch_rand_float(-0.5, 0.5, (len(env_ids), 2), device=self.device)
+        self.root_states[env_ids, :2] += torch_rand_float(-1.2, 1.2, (len(env_ids), 2), device=self.device)
         # base velocities
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0
@@ -676,7 +676,34 @@ class Solo12DOMINOPosition(BaseTask):
         return torch.exp(-torch.square(feet_height_error / sigma[1]))
 
     def _reward_feet_slip(self, sigma):
-        feet_low = self.ee_global[:, :, 2] < sigma[0]
+        ee_globals = self.ee_global.clone()
+        ee_globals += self.terrain.cfg.border_size
+        ee_globals = (ee_globals / self.terrain.cfg.horizontal_scale).long()
+        ee_px = ee_globals[:, :, 0].view(-1)
+        ee_py = ee_globals[:, :, 1].view(-1)
+        ee_px = torch.clip(ee_px, 0, self.height_samples.shape[0]-2)
+        ee_py = torch.clip(ee_py, 0, self.height_samples.shape[1]-2)
+
+        ee_heights1 = self.height_samples[ee_px, ee_py]
+        ee_heights2 = self.height_samples[ee_px+1, ee_py]
+        ee_heights3 = self.height_samples[ee_px, ee_py+1]
+        ee_heights = torch.min(ee_heights1, ee_heights2)
+        ee_heights = torch.min(ee_heights, ee_heights3)
+
+        ee_terrain_heights = ee_heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
+
+        # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 0, 1))
+        # for i in range(self.num_envs):
+        #     heights = ee_terrain_heights[i].cpu().numpy()
+        #     height_points = self.ee_global[i, :, :2].cpu().numpy()
+        #     for j in range(heights.shape[0]):
+        #         x = height_points[j, 0]
+        #         y = height_points[j, 1]
+        #         z = heights[j]
+        #         sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
+        #         gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)
+
+        feet_low = self.ee_global[:, :, 2] < ee_terrain_heights + sigma[0]
         feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
         sigma_ = sigma[1] + self.ee_global[:, :, 2] * sigma[2]
         feet_slip = torch.sum(feet_move * feet_low / sigma_, dim=1)

@@ -49,7 +49,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # stepping_stones, gap, pit
         type = "special_box"
         params = {
-            "height": 0.4,
+            "height": 0.05,
         }
 
     class viewer(BaseEnvCfg.viewer):
@@ -71,7 +71,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
-        pos = [0.0, 0.0, 0.3]  # x,y,z [m]
+        pos = [0.0, 0.0, 0.5]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -142,7 +142,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
             feet_acc = "[0, 400]"
-            # feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+  # TODO: this should be different with boxes
+            feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
             dof_acc = "[0, 3000]"
@@ -184,14 +184,14 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 0.0
+        log_std_init = 0.5
 
-        share_ratio = 0.5
-        policy_hidden_dims = [512, 256]
+        share_ratio = 1.0  # TODO: something might go wrong
+        policy_hidden_dims = [256, 256, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [512, 256]
+        value_hidden_dims = [256, 256, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [512, 256]
+        succ_feat_hidden_dims = [256, 256, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -199,7 +199,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.01
+        entropy_coef = 0.015
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -248,7 +248,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'boxes'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
