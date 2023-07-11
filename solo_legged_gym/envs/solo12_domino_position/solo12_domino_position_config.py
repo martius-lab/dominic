@@ -139,7 +139,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
             feet_acc = "[0, 400]"
-            feet_slip = "[0, [0.04, 0.1, 0.2]]"  # target height, sigma, sigma+
+            # feet_slip = "[0, [0.04, 0.1, 0.2]]"  # target height, sigma, sigma+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
             dof_acc = "[0, 3000]"

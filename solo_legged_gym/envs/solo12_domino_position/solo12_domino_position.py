@@ -18,6 +18,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.num_targets = self.cfg.commands.num_targets
         self.targets_in_env_x = torch.Tensor(self.cfg.commands.targets_in_env_x).to(self.device)
         self.targets_in_env_y = torch.Tensor(self.cfg.commands.targets_in_env_y).to(self.device)
+        self.targets_height = torch.FloatTensor(self.cfg.terrain.params).to(self.device)
 
         self.commands_in_base = torch.zeros(self.num_envs, self.cfg.commands.num_commands, dtype=torch.float,
                                             device=self.device, requires_grad=False)
@@ -367,22 +368,10 @@ class Solo12DOMINOPosition(BaseTask):
 
         env_origin = self.env_origins[env_ids]
         sampled_target = torch.randint(0, self.num_targets, (len(env_ids),), device=self.device)
-
         self.commands[env_ids, 0] = env_origin[:, 0] + self.targets_in_env_x[sampled_target] - self.cfg.terrain.terrain_width / 2
         self.commands[env_ids, 1] = env_origin[:, 1] + self.targets_in_env_y[sampled_target] - self.cfg.terrain.terrain_length / 2
 
-        command_x = (self.commands[env_ids, 0] / self.terrain.cfg.horizontal_scale).long()
-        command_y = (self.commands[env_ids, 1] / self.terrain.cfg.horizontal_scale).long()
-        command_x = torch.clip(command_x, 0, self.height_samples.shape[0]-2)
-        command_y = torch.clip(command_y, 0, self.height_samples.shape[1]-2)
-
-        command_heights1 = self.height_samples[command_x, command_y]
-        command_heights2 = self.height_samples[command_x+1, command_y]
-        command_heights3 = self.height_samples[command_x, command_y+1]
-        command_heights = torch.min(command_heights1, command_heights2)
-        command_heights = torch.min(command_heights, command_heights3)
-
-        command_terrain_heights = command_heights * self.terrain.cfg.vertical_scale
+        command_terrain_heights = self.targets_height[self.terrain_cols[env_ids]]
 
         self.commands[env_ids, 2] = command_terrain_heights + self.cfg.rewards.base_height_target
         self.commands[env_ids, 3] = sampled_yaw

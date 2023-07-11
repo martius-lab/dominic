@@ -79,7 +79,7 @@
         "run_name": "test_curriculum2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230711_163235"
+        "wandb_group": "cluster_20230711_164336"
       }
     },
     "env_cfg": {
@@ -257,7 +257,6 @@
         "terms": {
           "dof_acc": "[0, 3000]",
           "feet_acc": "[0, 400]",
-          "feet_slip": "[0, [0.04, 0.1, 0.2]]",
           "joint_targets_rate": "[0, 1.0]",
           "move_towards": "[2, [0.5, 0.6]]",
           "pos": "[1, 0.5]",
