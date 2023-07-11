@@ -2,14 +2,15 @@ import torch
 import numpy as np
 import sys
 from isaacgym import gymtorch, gymapi, gymutil
-from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, quat_rotate, quat_apply
+from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, quat_apply
 
 from solo_legged_gym.envs import BaseTask
-from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi, torch_rand_float_ring, quat_apply_yaw
+from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi, quat_apply_yaw
 
 
 class Solo12DOMINOPosition(BaseTask):
     def __init__(self, cfg, sim_params, physics_engine, sim_device, headless):
+        self.init_done = False
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
         self.num_commands = self.cfg.commands.num_commands
         self.command_ranges = class_to_dict(self.cfg.commands.ranges)
@@ -101,6 +102,7 @@ class Solo12DOMINOPosition(BaseTask):
         if len(env_ids) == 0:
             return
 
+        self._update_env_origin(env_ids)  # curriculum
         self._reset_dofs(env_ids)
         self._reset_root_states(env_ids)
         self._resample_commands(env_ids)
@@ -145,6 +147,7 @@ class Solo12DOMINOPosition(BaseTask):
                                                  self.num_actions,
                                                  device=self.device,
                                                  requires_grad=False))
+        self.init_done = True
 
     def pre_physics_step(self, actions):
         self.actions = actions
@@ -459,6 +462,39 @@ class Solo12DOMINOPosition(BaseTask):
         else:
             raise NameError(f"Unknown controller type: {control_type}")
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
+
+    def _get_env_origins(self):
+        if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
+            self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
+            self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
+            self.terrain_cols = torch.zeros(self.num_envs, device=self.device).to(torch.long)
+            self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(torch.float)
+            self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
+        else:
+            self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
+            # create a grid of robots
+            num_cols = np.floor(np.sqrt(self.num_envs))
+            num_rows = np.ceil(self.num_envs / num_cols)
+            xx, yy = torch.meshgrid(torch.arange(num_rows), torch.arange(num_cols))
+            spacing = self.cfg.env.env_spacing
+            self.env_origins[:, 0] = spacing * xx.flatten()[:self.num_envs]
+            self.env_origins[:, 1] = spacing * yy.flatten()[:self.num_envs]
+            self.env_origins[:, 2] = 0.
+
+    def _update_env_origin(self, env_ids):
+        if not self.init_done:
+            return
+        pos_distance = torch.norm(self.commands_in_base[env_ids, 0:2], dim=1, p=2)
+        yaw_distance = torch.abs(self.commands_in_base[env_ids, 2])
+        move_up = (pos_distance < 0.25) * (yaw_distance < 0.1)
+        move_down = (pos_distance > 2.0) * ~move_up
+        self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
+        self.terrain_cols[env_ids] = torch.where(torch.Tensor(self.terrain_cols[env_ids] >= self.cfg.terrain.num_cols),
+                                                 torch.randint_like(input=self.terrain_cols[env_ids],
+                                                                    high=self.cfg.terrain.num_cols),
+                                                 torch.clip(input=self.terrain_cols[env_ids],
+                                                            min=0))
+        self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _reset_dofs(self, env_ids):
         if self.cfg.env.play:

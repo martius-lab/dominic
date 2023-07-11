@@ -29,30 +29,29 @@ class Terrain:
         self.height_field_raw = np.zeros((self.tot_rows, self.tot_cols), dtype=np.int16)
 
         terrain_type = self.cfg.type + "_terrain"
-        for k in range(self.cfg.num_sub_terrains):
-            (i, j) = np.unravel_index(k, (self.cfg.num_rows, self.cfg.num_cols))
+        for j in range(self.cfg.num_cols):
+            for i in range(self.cfg.num_rows):
+                terrain = SubTerrain("terrain",
+                                     width=self.width_per_env_pixels,
+                                     length=self.width_per_env_pixels,
+                                     vertical_scale=self.cfg.vertical_scale,
+                                     horizontal_scale=self.cfg.horizontal_scale)
+                eval(terrain_type)(terrain, self.cfg.params[j])
 
-            terrain = SubTerrain("terrain",
-                                 width=self.width_per_env_pixels,
-                                 length=self.width_per_env_pixels,
-                                 vertical_scale=self.cfg.vertical_scale,
-                                 horizontal_scale=self.cfg.horizontal_scale)
-            eval(terrain_type)(terrain, **self.cfg.params)
+                start_x = self.border + i * self.length_per_env_pixels
+                end_x = self.border + (i + 1) * self.length_per_env_pixels
+                start_y = self.border + j * self.width_per_env_pixels
+                end_y = self.border + (j + 1) * self.width_per_env_pixels
+                self.height_field_raw[start_x: end_x, start_y:end_y] = terrain.height_field_raw
 
-            start_x = self.border + i * self.length_per_env_pixels
-            end_x = self.border + (i + 1) * self.length_per_env_pixels
-            start_y = self.border + j * self.width_per_env_pixels
-            end_y = self.border + (j + 1) * self.width_per_env_pixels
-            self.height_field_raw[start_x: end_x, start_y:end_y] = terrain.height_field_raw
-
-            env_origin_x = (i + 0.5) * self.env_length
-            env_origin_y = (j + 0.5) * self.env_width
-            x1 = int((self.env_length / 2. - 1) / terrain.horizontal_scale)
-            x2 = int((self.env_length / 2. + 1) / terrain.horizontal_scale)
-            y1 = int((self.env_width / 2. - 1) / terrain.horizontal_scale)
-            y2 = int((self.env_width / 2. + 1) / terrain.horizontal_scale)
-            env_origin_z = np.max(terrain.height_field_raw[x1:x2, y1:y2]) * terrain.vertical_scale
-            self.sub_terrain_origins[i, j] = [env_origin_x, env_origin_y, env_origin_z]
+                env_origin_x = (i + 0.5) * self.env_length
+                env_origin_y = (j + 0.5) * self.env_width
+                x1 = int((self.env_length / 2. - 1) / terrain.horizontal_scale)
+                x2 = int((self.env_length / 2. + 1) / terrain.horizontal_scale)
+                y1 = int((self.env_width / 2. - 1) / terrain.horizontal_scale)
+                y2 = int((self.env_width / 2. + 1) / terrain.horizontal_scale)
+                env_origin_z = np.max(terrain.height_field_raw[x1:x2, y1:y2]) * terrain.vertical_scale
+                self.sub_terrain_origins[i, j] = [env_origin_x, env_origin_y, env_origin_z]
 
         self.height_samples = self.height_field_raw
 

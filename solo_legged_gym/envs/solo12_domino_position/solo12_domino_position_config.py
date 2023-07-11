@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 33 + 12 + 3 + 11 * 7 + 1  # #states + #actions + #commands + height + #remaining_time
+        num_observations = 33 + 12 + 3 + 7 * 9 + 1  # #states + #actions + #commands + height + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
@@ -15,7 +15,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         remaining_check_time = 0.2  # percentage
 
         play = False
-        debug = False
         plot_target = True
 
     class terrain:
@@ -26,7 +25,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         mesh_type = 'trimesh'  # plane, heightfield, trimesh
 
         measure_height = True  # measure the height samples
-        measured_points_x = list((np.arange(11) - 11 / 2) / 10)
+        measured_points_x = list((np.arange(9) - 9 / 2) / 10)
         measured_points_y = list((np.arange(7) - 7 / 2) / 10)
 
         # all below are only used for heightfield and trimesh
@@ -34,10 +33,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 10.  # [m]
         terrain_width = 10.  # [m]
 
-        num_rows = 10
+        num_rows = 4
         num_cols = 10
 
-        border_size = 15  # [m]
+        border_size = 2  # [m]
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
@@ -48,16 +47,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = {
-            "height": 0.05,
-        }
+        params = list(np.arange(10) * 0.05)
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
-        ref_pos_b = [1, 1, 0.5]
+        ref_pos_b = [1, 1, 0.4]
         record_camera_imgs = True
-        overview_pos = [-2, -2, 2]  # [m]
-        overview_lookat = [2, 2, 1]  # [m]
+        overview_pos = [-5, -5, 10]  # [m]
+        overview_lookat = [5, 5, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: target in x, y and yaw in base
@@ -66,8 +63,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 4.5, 5.5, 4.5, 5.5, 9.5, 9.5, 9.5, 9.5]
 
         class ranges:
-        #     radius = [1.0, 5.0]  # [m]
-        #     direction = [-np.pi, np.pi]  # [rad]
+            # radius = [1.0, 5.0]  # [m]
+            # direction = [-np.pi, np.pi]  # [rad]
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
@@ -141,11 +138,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
-            feet_acc = "[0, 400]"
+            feet_acc = "[0, 600]"
             feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
-            dof_acc = "[0, 3000]"
+            dof_acc = "[0, 4000]"
             torques = "[0, 20]"
             joint_targets_rate = "[0, 1.2]"
 
@@ -184,14 +181,14 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 0.5
+        log_std_init = 0.0
 
-        share_ratio = 1.0  # TODO: something might go wrong
-        policy_hidden_dims = [256, 256, 256]
+        share_ratio = 0.5
+        policy_hidden_dims = [512, 512, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [256, 256, 256]
+        value_hidden_dims = [512, 512, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [256, 256, 256]
+        succ_feat_hidden_dims = [512, 512, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -199,7 +196,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.015
+        entropy_coef = 0.010
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
