@@ -23,8 +23,8 @@ class keyboard_play:
         env_cfg.env.num_envs = 8
         env_cfg.env.play = True
         env_cfg.env.debug = False
-        env_cfg.terrain.num_cols = 2
-        env_cfg.terrain.num_rows = 2
+        env_cfg.terrain.num_cols = 10
+        env_cfg.terrain.num_rows = 1
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
         env_cfg.domain_rand.push_robots = False
@@ -127,9 +127,7 @@ class keyboard_play:
                   'base_x', 'base_y', 'base_z', 'base_ax', 'base_ay', 'base_az',
                   'base_vel_x', 'base_vel_y', 'base_vel_z',
                   'base_avel_x', 'base_avel_y', 'base_avel_z',
-                  'contact_FL', 'contact_FR', 'contact_RL', 'contact_RR',
                   'skill',
-                  'feet_contact_force',
                   'joint_targets_rate', 'torques', 'dof_vel', 'dof_acc'
                   ]
         with open(self.log_path, 'w+', encoding='UTF8') as f:
@@ -143,9 +141,7 @@ class keyboard_play:
         data.extend(torch.stack(get_euler_xyz(self.env.base_quat), dim=1)[0, :].tolist())
         data.extend(self.env.base_lin_vel[0, :].tolist())
         data.extend(self.env.base_ang_vel[0, :].tolist())
-        data.extend(map(lambda x: 1 if x else 0, self.env.ee_contact[0, :].tolist()))
         data.append(self.env.skills[0].item())
-        data.append(torch.norm(self.env.feet_contact_force[0, :], p=2).item())
         data.append(self.env.joint_targets_rate[0].item())
         data.append(torch.norm(self.env.torques[0, :], p=2).item())
         data.append(torch.norm(self.env.dof_vel[0, :], p=2).item())

@@ -33,7 +33,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 10.  # [m]
         terrain_width = 10.  # [m]
 
-        num_rows = 10
+        num_rows = 4
         num_cols = 10
 
         border_size = 2  # [m]
@@ -184,11 +184,11 @@ class Solo12DOMINOPositionTrainCfg:
         log_std_init = 0.0
 
         share_ratio = 0.5
-        policy_hidden_dims = [512, 512, 256]
+        policy_hidden_dims = [256, 256, 256]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [512, 512, 256]
+        value_hidden_dims = [256, 256, 256]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [512, 512, 256]
+        succ_feat_hidden_dims = [256, 256, 256]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -201,17 +201,17 @@ class Solo12DOMINOPositionTrainCfg:
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
         policy_lr = 1.e-3  # 5.e-4
+        desired_kl = 0.02  # adjust the learning rate automatically
         schedule = 'adaptive'  # adaptive, fixed
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 2.0, 1.0]'
+        fixed_adv_coeff = '[2.0, 1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
-        desired_kl = 0.02  # adjust the learning rate automatically
         max_grad_norm = 1.
 
         num_lagrange_steps = 10
@@ -245,7 +245,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test'
+        run_name = 'test_curriculum'
 
         # load
         load_run = -1  # -1 = last run
