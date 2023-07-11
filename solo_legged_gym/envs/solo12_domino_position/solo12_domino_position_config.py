@@ -6,7 +6,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 27
 
     class env(BaseEnvCfg.env):
-        num_envs = 50
+        num_envs = 4096
         num_observations = 33 + 12 + 4 + 7 * 9 + 1  # #states + #actions + #commands + height + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
@@ -206,7 +206,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.0, 1.0, 2.0]'
+        fixed_adv_coeff = '[3.0, 1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -245,7 +245,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_curriculum'
+        run_name = 'test_curriculum2'
 
         # load
         load_run = -1  # -1 = last run
