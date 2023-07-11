@@ -81,7 +81,6 @@ class Solo12DOMINOPosition(BaseTask):
                                           requires_grad=False)
         self.ee_local = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                     requires_grad=False)
-        self.ee_contact = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device, requires_grad=False)
         self.ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                          requires_grad=False)
         self.last_ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
@@ -92,10 +91,6 @@ class Solo12DOMINOPosition(BaseTask):
                                                dtype=torch.float, device=self.device, requires_grad=False)
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
                                                 size=[self.num_envs], device=self.device)
-        self.feet_contact_force = torch.zeros(self.num_envs, self.feet_indices.shape[0], dtype=torch.float,
-                                              device=self.device, requires_grad=False)
-        self.last_contacts = torch.zeros(self.num_envs, len(self.feet_indices), dtype=torch.bool, device=self.device,
-                                         requires_grad=False)
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -345,8 +340,6 @@ class Solo12DOMINOPosition(BaseTask):
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
 
-        self.feet_contact_force = torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1)
-        self.ee_contact = self.feet_contact_force > 0.1
         self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
         self.ee_vel_global = self.rigid_body_state[:, self.feet_indices, 7:10]
         ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
@@ -501,8 +494,7 @@ class Solo12DOMINOPosition(BaseTask):
             self.dof_pos[env_ids] = self.default_dof_pos
         else:
             self.dof_pos[env_ids] = self.default_dof_pos
-            self.dof_pos[env_ids][:, [1, 2, 4, 5, 7, 8, 10, 11]] += torch_rand_float(-0.25, 0.25, (len(env_ids), 8),
-                                                                                     device=self.device)
+            self.dof_pos[env_ids] += torch_rand_float(-0.5, 0.5, (len(env_ids), 12), device=self.device)
 
         self.dof_vel[env_ids] = 0.
         env_ids_int32 = env_ids.to(dtype=torch.int32)
@@ -514,7 +506,7 @@ class Solo12DOMINOPosition(BaseTask):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :3] += self.env_origins[env_ids]
-        self.root_states[env_ids, :2] += torch_rand_float(-1.2, 1.2, (len(env_ids), 2), device=self.device)
+        self.root_states[env_ids, :2] += torch_rand_float(-2.0, 2.0, (len(env_ids), 2), device=self.device)
         # base velocities
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0
@@ -779,6 +771,3 @@ class Solo12DOMINOPosition(BaseTask):
     #
     def _reward_torques(self, sigma):
         return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
-    #
-    # def _reward_feet_contact_force(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.feet_contact_force, p=2, dim=1) / sigma))

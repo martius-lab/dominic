@@ -623,6 +623,8 @@ class DOMINO:
         self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
+
+        self.writer.add_scalar('Train/mean_curriculum', np.mean(self.env.terrain_cols.detach().cpu().numpy()), locs['it'])
         if len(locs['len_buffer']) > 0:
             ext_rew_bufs = locs['ext_rew_buffers']
             for i in range(self.num_ext_values):

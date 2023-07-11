@@ -79,7 +79,7 @@
         "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230711_111129"
+        "wandb_group": "cluster_20230711_113349"
       }
     },
     "env_cfg": {
@@ -319,8 +319,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 10,
-        "num_rows": 4,
-        "num_sub_terrains": 40,
+        "num_rows": 10,
+        "num_sub_terrains": 100,
         "params": [
           0.0,
           0.05,

@@ -33,7 +33,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 10.  # [m]
         terrain_width = 10.  # [m]
 
-        num_rows = 4
+        num_rows = 10
         num_cols = 10
 
         border_size = 2  # [m]
