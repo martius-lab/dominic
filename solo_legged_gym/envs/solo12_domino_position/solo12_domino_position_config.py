@@ -6,8 +6,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 27
 
     class env(BaseEnvCfg.env):
-        num_envs = 4096
-        num_observations = 33 + 12 + 3 + 7 * 9 + 1  # #states + #actions + #commands + height + #remaining_time
+        num_envs = 50
+        num_observations = 33 + 12 + 4 + 7 * 9 + 1  # #states + #actions + #commands + height + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
@@ -30,8 +30,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 10.  # [m]
-        terrain_width = 10.  # [m]
+        terrain_length = 8.  # [m]
+        terrain_width = 8.  # [m]
 
         num_rows = 4
         num_cols = 5
@@ -57,10 +57,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [5, 5, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 3  # default: target in x, y and yaw in base
+        num_commands = 4  # default: target in x, y, z and yaw in base
         num_targets = 12
-        targets_in_env_x = [0.5, 4.5, 5.5, 9.5, 0.5, 0.5, 9.5, 9.5, 0.5, 4.5, 5.5, 9.5]
-        targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 4.5, 5.5, 4.5, 5.5, 9.5, 9.5, 9.5, 9.5]
+        targets_in_env_x = [1.5, 3.5, 4.5, 6.5, 1.5, 1.5, 6.5, 6.5, 1.5, 3.5, 4.5, 6.5]
+        targets_in_env_y = [1.5, 1.5, 1.5, 1.5, 3.5, 4.5, 3.5, 4.5, 6.5, 6.5, 6.5, 6.5]
 
         class ranges:
             # radius = [1.0, 5.0]  # [m]
@@ -101,7 +101,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base"]
+        terminate_after_contacts_on = ["base", "SHOULDER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 

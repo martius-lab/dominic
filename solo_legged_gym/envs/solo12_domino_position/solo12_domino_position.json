@@ -79,7 +79,7 @@
         "run_name": "test_curriculum",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230711_160223"
+        "wandb_group": "cluster_20230711_162733"
       }
     },
     "env_cfg": {
@@ -102,12 +102,13 @@
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
         "terminate_after_contacts_on": [
-          "base"
+          "base",
+          "SHOULDER"
         ],
         "thickness": 0.01
       },
       "commands": {
-        "num_commands": 3,
+        "num_commands": 4,
         "num_targets": 12,
         "ranges": {
           "yaw": [
@@ -116,32 +117,32 @@
           ]
         },
         "targets_in_env_x": [
-          0.5,
+          1.5,
+          3.5,
           4.5,
-          5.5,
-          9.5,
-          0.5,
-          0.5,
-          9.5,
-          9.5,
-          0.5,
+          6.5,
+          1.5,
+          1.5,
+          6.5,
+          6.5,
+          1.5,
+          3.5,
           4.5,
-          5.5,
-          9.5
+          6.5
         ],
         "targets_in_env_y": [
-          0.5,
-          0.5,
-          0.5,
-          0.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          3.5,
           4.5,
-          5.5,
+          3.5,
           4.5,
-          5.5,
-          9.5,
-          9.5,
-          9.5,
-          9.5
+          6.5,
+          6.5,
+          6.5,
+          6.5
         ]
       },
       "control": {
@@ -186,9 +187,9 @@
         "env_spacing": 2.0,
         "episode_length_s": 15,
         "num_actions": 12,
-        "num_envs": 4096,
+        "num_envs": 50,
         "num_features": 10,
-        "num_observations": 112,
+        "num_observations": 113,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -329,8 +330,8 @@
         "restitution": 0.0,
         "slope_threshold": 0.05,
         "static_friction": 1.0,
-        "terrain_length": 10.0,
-        "terrain_width": 10.0,
+        "terrain_length": 8.0,
+        "terrain_width": 8.0,
         "type": "special_box",
         "vertical_scale": 0.005
       },
