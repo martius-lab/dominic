@@ -26,18 +26,6 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-     "param": "solo_legged_gym.train_cfg.network.log_std_init",
-     "values": [0.0, 0.5, 1.0]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.entropy_coef",
-     "values": [0.01, 0.015, 0.02, 0.025]
-    },
-    {
-     "param": "solo_legged_gym.train_cfg.algorithm.desired_kl",
-     "values": [0.01, 0.02, 0.03]
-    },
-    {
      "param": "solo_legged_gym.env_cfg.seed",
      "values": [22, 27, 42]
     }

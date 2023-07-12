@@ -132,7 +132,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
             stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
             stall_yaw = "[2, [0.2, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
-            feet_height = "[2, [0.04, 0.05, 0.25]]"  # target height, sigma, pos threshold
+            feet_height = "[2, [0.06, 0.04, 0.25]]"  # target height, sigma, pos threshold
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.2]"  # sigma
@@ -147,7 +147,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
             # dof_acc = "[0, 3000]"
 
-            joint_targets_rate = "[0, 1.5]"
+            joint_targets_rate = "[0, 1.0]"
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -185,7 +185,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 0.0
+        log_std_init = 1.0
 
         share_ratio = 0.5
         policy_hidden_dims = [256, 256, 256]
@@ -200,7 +200,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.010
+        entropy_coef = 0.02
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -249,7 +249,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'no_regularization_test'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run

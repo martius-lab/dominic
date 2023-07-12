@@ -18,7 +18,7 @@
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
-        "entropy_coef": 0.01,
+        "entropy_coef": 0.02,
         "fixed_adv_coeff": "[1.0, 1.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
@@ -42,7 +42,7 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "log_std_init": 0.0,
+        "log_std_init": 1.0,
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
@@ -76,10 +76,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "no_regularization_test",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230712_093159"
+        "wandb_group": "cluster_20230712_132359"
       }
     },
     "env_cfg": {
@@ -255,8 +255,8 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_height": "[2, [0.04, 0.05, 0.25]]",
-          "joint_targets_rate": "[0, 1.5]",
+          "feet_height": "[2, [0.06, 0.04, 0.25]]",
+          "joint_targets_rate": "[0, 1.0]",
           "move_towards": "[2, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
           "stall_pos": "[2, [0.4, 0.25, 0.1]]",
