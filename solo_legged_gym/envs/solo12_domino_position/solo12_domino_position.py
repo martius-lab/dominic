@@ -239,7 +239,7 @@ class Solo12DOMINOPosition(BaseTask):
 
             if self.viewer and self.enable_viewer_sync:
                 self._draw_target()
-                if self.cfg.terrain.measure_height:
+                if self.cfg.terrain.measure_height and self.cfg.env.play:
                     self._draw_heights()
                 self.gym.draw_viewer(self.viewer, self.sim, True)
                 if sync_frame_time:
@@ -663,6 +663,52 @@ class Solo12DOMINOPosition(BaseTask):
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
+    def _reward_feet_height(self, sigma):
+        distance = torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2)
+        ee_globals = self.ee_global.clone()
+        ee_globals += self.terrain.cfg.border_size
+        ee_globals = (ee_globals / self.terrain.cfg.horizontal_scale).long()
+        ee_px = ee_globals[:, :, 0].view(-1)
+        ee_py = ee_globals[:, :, 1].view(-1)
+        ee_px = torch.clip(ee_px, 2, self.height_samples.shape[0]-2)
+        ee_py = torch.clip(ee_py, 2, self.height_samples.shape[1]-2)
+
+        ee_heights1 = self.height_samples[ee_px, ee_py]
+        ee_heights2 = self.height_samples[ee_px+1, ee_py]
+        ee_heights3 = self.height_samples[ee_px, ee_py+1]
+        ee_heights4 = self.height_samples[ee_px-1, ee_py]
+        ee_heights5 = self.height_samples[ee_px, ee_py-1]
+        ee_heights6 = self.height_samples[ee_px+1, ee_py+1]
+        ee_heights7 = self.height_samples[ee_px-1, ee_py+1]
+        ee_heights8 = self.height_samples[ee_px+1, ee_py-1]
+        ee_heights9 = self.height_samples[ee_px-1, ee_py-1]
+
+        ee_heights = torch.max(torch.stack([ee_heights1,
+                                            ee_heights2,
+                                            ee_heights3,
+                                            ee_heights4,
+                                            ee_heights5,
+                                            ee_heights6,
+                                            ee_heights7,
+                                            ee_heights8,
+                                            ee_heights9], dim=1), dim=1)[0]
+        ee_terrain_heights = ee_heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
+
+        # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 0, 1))
+        # for i in range(self.num_envs):
+        #     heights = (ee_terrain_heights + sigma[0])[i].cpu().numpy()
+        #     height_points = self.ee_global[i, :, :2].cpu().numpy()
+        #     for j in range(heights.shape[0]):
+        #         x = height_points[j, 0]
+        #         y = height_points[j, 1]
+        #         z = heights[j]
+        #         sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
+        #         gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)
+
+        feet_height_error = torch.norm(self.ee_global[:, :, 2] - (ee_terrain_heights + sigma[0]), p=2, dim=1)
+        feet_height_error *= distance > sigma[2]
+        return torch.exp(-torch.square(feet_height_error / sigma[1]))
+
     def _reward_feet_slip(self, sigma):
         ee_globals = self.ee_global.clone()
         ee_globals += self.terrain.cfg.border_size
@@ -672,12 +718,7 @@ class Solo12DOMINOPosition(BaseTask):
         ee_px = torch.clip(ee_px, 0, self.height_samples.shape[0]-2)
         ee_py = torch.clip(ee_py, 0, self.height_samples.shape[1]-2)
 
-        ee_heights1 = self.height_samples[ee_px, ee_py]
-        ee_heights2 = self.height_samples[ee_px+1, ee_py]
-        ee_heights3 = self.height_samples[ee_px, ee_py+1]
-        ee_heights = torch.min(ee_heights1, ee_heights2)
-        ee_heights = torch.min(ee_heights, ee_heights3)
-
+        ee_heights = self.height_samples[ee_px, ee_py]
         ee_terrain_heights = ee_heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
 
         # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 0, 1))
