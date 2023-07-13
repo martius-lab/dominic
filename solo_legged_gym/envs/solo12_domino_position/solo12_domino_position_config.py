@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 10  # episode length in seconds
+        episode_length_s = 6  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
@@ -106,7 +106,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER"]
+        terminate_after_contacts_on = []
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -244,7 +244,7 @@ class Solo12DOMINOPositionTrainCfg:
     class runner:
         max_iterations = 1000  # number of policy updates
 
-        num_steps_per_env = 24  # per iteration
+        num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
@@ -255,7 +255,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'trial'
+        run_name = 'test_again'
 
         # load
         load_run = -1  # -1 = last run

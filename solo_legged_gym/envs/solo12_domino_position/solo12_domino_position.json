@@ -73,16 +73,16 @@
         "max_iterations": 1000,
         "normalize_features": true,
         "normalize_observation": true,
-        "num_steps_per_env": 24,
+        "num_steps_per_env": 48,
         "record_features": true,
         "record_features_interval": 100,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "trial",
+        "run_name": "test_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_164359"
+        "wandb_group": "cluster_20230713_175822"
       }
     },
     "env_cfg": {
@@ -104,10 +104,7 @@
         "penalize_contacts_on": [],
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
-        "terminate_after_contacts_on": [
-          "base",
-          "SHOULDER"
-        ],
+        "terminate_after_contacts_on": [],
         "thickness": 0.01
       },
       "commands": {
@@ -188,7 +185,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 10,
+        "episode_length_s": 6,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 10,
