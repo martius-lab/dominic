@@ -248,9 +248,9 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
-        drop_assist = False
+        drop_assist = True
         drop_assist_start_iter = 100
-        drop_assist_iter = 200  # take drop_assist_iter iters to slowly drop it
+        drop_assist_iter = 300  # take drop_assist_iter iters to slowly drop it
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
