@@ -82,7 +82,7 @@
         "run_name": "base_terrain",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_090748"
+        "wandb_group": "cluster_20230713_102220"
       }
     },
     "env_cfg": {
@@ -294,8 +294,10 @@
         "up_axis": 1
       },
       "terrain": {
+        "base_check": 3,
         "border_size": 1,
         "dynamic_friction": 1.0,
+        "ee_check": 1,
         "horizontal_scale": 0.1,
         "measure_height": true,
         "measured_points_x": [
