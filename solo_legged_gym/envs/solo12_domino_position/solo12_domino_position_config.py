@@ -131,8 +131,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            move_towards = "[0, [0.5, 0.7]]"  # sigma, clip/scale
+            stall_pos = "[0, [0.1, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
@@ -212,7 +212,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0, 2.0]'
+        fixed_adv_coeff = '[1.0, 1.0, 3.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -255,7 +255,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'new_test2'
+        run_name = 'trial'
 
         # load
         load_run = -1  # -1 = last run

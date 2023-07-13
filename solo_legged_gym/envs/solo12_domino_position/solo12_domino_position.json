@@ -82,7 +82,7 @@
         "run_name": "new_test2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_150242"
+        "wandb_group": "cluster_20230713_163726"
       }
     },
     "env_cfg": {
@@ -190,7 +190,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 4096,
+        "num_envs": 50,
         "num_features": 10,
         "num_observations": 113,
         "num_skills": 8,
@@ -262,9 +262,9 @@
           "feet_slip": "[2, [0.06, 0.05, 0.2]]",
           "joint_targets_rate": "[2, 1.5]",
           "lin_z": "[2, 0.05]",
-          "move_towards": "[0, [0.5, 0.9]]",
+          "move_towards": "[0, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[0, [0.2, 0.25, 0.1]]",
+          "stall_pos": "[0, [0.1, 0.25, 0.1]]",
           "yaw": "[1, 1.0]"
         }
       },
@@ -324,11 +324,11 @@
         "num_rows": 20,
         "num_sub_terrains": 100,
         "params": [
-          0.0,
           0.05,
           0.1,
           0.15000000000000002,
-          0.2
+          0.2,
+          0.25
         ],
         "restitution": 0.0,
         "slope_threshold": 0.05,
