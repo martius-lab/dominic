@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 15  # episode length in seconds
+        episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
@@ -33,10 +33,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 8.  # [m]
         terrain_width = 8.  # [m]
 
-        num_rows = 5
+        num_rows = 20
         num_cols = 5
 
-        border_size = 2  # [m]
+        border_size = 1  # [m]
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
@@ -48,6 +48,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # stepping_stones, gap, pit
         type = "special_box"
         params = list(np.arange(5) * 0.05)
+        train_all_together = False
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -79,10 +80,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             "HL_HAA": 0.05,
             "FR_HAA": -0.05,
             "HR_HAA": -0.05,
-            "FL_HFE": 0.6,
-            "HL_HFE": -0.6,
-            "FR_HFE": 0.6,
-            "HR_HFE": -0.6,
+            "FL_HFE": 0.9,
+            "HL_HFE": -0.9,
+            "FR_HFE": 0.9,
+            "HR_HFE": -0.9,
             "FL_KFE": -1.4,
             "HL_KFE": 1.4,
             "FR_KFE": -1.4,
@@ -125,14 +126,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
-            # lin_z = "[2, 0.05]"
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            stall_yaw = "[2, [0.2, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
-            feet_height = "[2, [0.06, 0.04, 0.25]]"  # target height, sigma, pos threshold
+            move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
+            stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.2]"  # sigma
@@ -143,12 +142,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            # feet_acc = "[0, 600]"
-            # feet_slip = "[0, [0.04, 0.05, 0.2]]"  # target height, sigma, sigma+
-            # dof_acc = "[0, 3000]"
-
-            joint_targets_rate = "[0, 1.0]"
-            # torques = "[0, 30]"
+            lin_z = "[2, 0.05]"
+            # feet_acc = "[2, 600]"
+            feet_height = "[2, [0.06, 0.1, 0.25]]"  # target height, sigma, pos threshold
+            feet_slip = "[2, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
+            # dof_acc = "[2, 4000]"
+            joint_targets_rate = "[2, 1.5]"
+            # torques = "[2, 30]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -185,14 +185,14 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 1.0
+        log_std_init = 0.5
 
         share_ratio = 0.5
-        policy_hidden_dims = [256, 256, 256]
+        policy_hidden_dims = [256, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [256, 256, 256]
+        value_hidden_dims = [256, 256, 128]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [256, 256, 256]
+        succ_feat_hidden_dims = [256, 256, 128]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -246,10 +246,14 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
+        drop_assist = False
+        drop_assist_start_iter = 200
+        drop_assist_iter = 100  # take drop_assist_iter iters to slowly drop it
+
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test'
+        run_name = 'base_terrain'
 
         # load
         load_run = -1  # -1 = last run

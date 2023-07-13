@@ -42,29 +42,32 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "log_std_init": 1.0,
+        "log_std_init": 0.5,
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
           256,
-          256
+          128
         ],
         "share_ratio": 0.5,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
           256,
           256,
-          256
+          128
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
           256,
           256,
-          256
+          128
         ]
       },
       "runner": {
         "checkpoint": -1,
+        "drop_assist": false,
+        "drop_assist_iter": 100,
+        "drop_assist_start_iter": 200,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
         "max_iterations": 1000,
@@ -76,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "test",
+        "run_name": "base_terrain",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230712_132359"
+        "wandb_group": "cluster_20230713_090748"
       }
     },
     "env_cfg": {
@@ -185,7 +188,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 15,
+        "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 10,
@@ -207,10 +210,10 @@
           "HL_HAA": 0.05,
           "FR_HAA": -0.05,
           "HR_HAA": -0.05,
-          "FL_HFE": 0.6,
-          "HL_HFE": -0.6,
-          "FR_HFE": 0.6,
-          "HR_HFE": -0.6,
+          "FL_HFE": 0.9,
+          "HL_HFE": -0.9,
+          "FR_HFE": 0.9,
+          "HR_HFE": -0.9,
           "FL_KFE": -1.4,
           "HL_KFE": 1.4,
           "FR_KFE": -1.4,
@@ -255,12 +258,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_height": "[2, [0.06, 0.04, 0.25]]",
-          "joint_targets_rate": "[0, 1.0]",
-          "move_towards": "[2, [0.5, 0.9]]",
+          "feet_height": "[2, [0.06, 0.1, 0.25]]",
+          "feet_slip": "[2, [0.06, 0.05, 0.2]]",
+          "joint_targets_rate": "[2, 1.5]",
+          "lin_z": "[2, 0.05]",
+          "move_towards": "[0, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.4, 0.25, 0.1]]",
-          "stall_yaw": "[2, [0.2, 0.1, 0.2]]",
+          "stall_pos": "[0, [0.2, 0.25, 0.1]]",
+          "stall_yaw": "[0, [0.1, 0.1, 0.2]]",
           "yaw": "[1, 0.2]"
         }
       },
@@ -289,7 +294,7 @@
         "up_axis": 1
       },
       "terrain": {
-        "border_size": 2,
+        "border_size": 1,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
         "measure_height": true,
@@ -315,8 +320,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 5,
-        "num_rows": 5,
-        "num_sub_terrains": 25,
+        "num_rows": 20,
+        "num_sub_terrains": 100,
         "params": [
           0.0,
           0.05,
@@ -329,6 +334,7 @@
         "static_friction": 1.0,
         "terrain_length": 8.0,
         "terrain_width": 8.0,
+        "train_all_together": false,
         "type": "special_box",
         "vertical_scale": 0.005
       },
