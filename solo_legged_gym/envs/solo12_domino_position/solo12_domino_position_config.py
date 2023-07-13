@@ -106,7 +106,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = []
+        terminate_after_contacts_on = ["base", "SHOULDER"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -133,8 +133,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
             stall_pos = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            feet_height = "[2, [0.06, 0.1, 0.25]]"  # target height, sigma, pos threshold
-            lin_z = "[2, 0.05]"
+            feet_height = "[2, [0.06, 0.05, 0.25]]"  # target height, sigma, pos threshold
+            lin_z = "[2, 0.1]"
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
@@ -146,7 +146,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            # feet_acc = "[0, 400]"
+            feet_acc = "[0, 500]"
             feet_slip = "[0, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
             # dof_acc = "[0, 4000]"
             joint_targets_rate = "[0, 1.5]"
@@ -212,7 +212,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0, 2.0]'
+        fixed_adv_coeff = '[1.0, 1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
