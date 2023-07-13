@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 1.0, 3.0]",
+        "fixed_adv_coeff": "[1.0, 1.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -65,7 +65,7 @@
       },
       "runner": {
         "checkpoint": -1,
-        "drop_assist": true,
+        "drop_assist": false,
         "drop_assist_iter": 300,
         "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
@@ -82,7 +82,7 @@
         "run_name": "test_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_191932"
+        "wandb_group": "cluster_20230713_195427"
       }
     },
     "env_cfg": {
@@ -187,7 +187,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 6,
         "num_actions": 12,
-        "num_envs": 4096,
+        "num_envs": 2048,
         "num_features": 10,
         "num_observations": 113,
         "num_skills": 8,
@@ -255,14 +255,13 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[2, 400]",
           "feet_height": "[2, [0.06, 0.1, 0.25]]",
           "feet_slip": "[2, [0.06, 0.05, 0.2]]",
           "joint_targets_rate": "[2, 1.5]",
           "lin_z": "[2, 0.05]",
           "move_towards": "[0, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[0, [0.2, 0.25, 0.1]]",
+          "stall_pos": "[0, [0.5, 0.25, 0.1]]",
           "yaw": "[1, 1.0]"
         }
       },

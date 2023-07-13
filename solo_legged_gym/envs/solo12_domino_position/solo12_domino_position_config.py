@@ -6,7 +6,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 27
 
     class env(BaseEnvCfg.env):
-        num_envs = 4096
+        num_envs = 2048
         num_observations = 33 + 12 + 4 + 7 * 9 + 1  # #states + #actions + #commands + height + #remaining_time
         num_skills = 8  # latent space
         num_actions = 12
@@ -132,7 +132,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_vel_xy = "[2, 2.0]"
 
             move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
@@ -145,7 +145,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             lin_z = "[2, 0.05]"
-            feet_acc = "[2, 400]"
+            # feet_acc = "[2, 400]"
             feet_height = "[2, [0.06, 0.1, 0.25]]"  # target height, sigma, pos threshold
             feet_slip = "[2, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
             # dof_acc = "[2, 4000]"
@@ -212,7 +212,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0, 3.0]'
+        fixed_adv_coeff = '[1.0, 1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -248,7 +248,7 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
-        drop_assist = True
+        drop_assist = False
         drop_assist_start_iter = 100
         drop_assist_iter = 300  # take drop_assist_iter iters to slowly drop it
 
