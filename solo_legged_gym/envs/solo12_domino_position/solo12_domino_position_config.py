@@ -96,7 +96,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 2.5
+        torque_limits = 5.0
         dof_vel_limits = 10.0  # not used anyway...
         scale_joint_target = 0.25
         clip_joint_target = 100.
@@ -131,8 +131,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            move_towards = "[0, [0.5, 0.7]]"  # sigma, clip/scale
-            stall_pos = "[0, [0.1, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
+            stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
@@ -145,7 +145,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             lin_z = "[2, 0.05]"
-            # feet_acc = "[2, 600]"
+            feet_acc = "[2, 400]"
             feet_height = "[2, [0.06, 0.1, 0.25]]"  # target height, sigma, pos threshold
             feet_slip = "[2, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
             # dof_acc = "[2, 4000]"
@@ -187,7 +187,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 0.5
+        log_std_init = 0.0
 
         share_ratio = 0.5
         policy_hidden_dims = [256, 256, 128]

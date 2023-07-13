@@ -42,7 +42,7 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "log_std_init": 0.5,
+        "log_std_init": 0.0,
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
@@ -82,7 +82,7 @@
         "run_name": "test_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_175822"
+        "wandb_group": "cluster_20230713_191932"
       }
     },
     "env_cfg": {
@@ -161,7 +161,7 @@
           "HFE": 5.0,
           "KFE": 5.0
         },
-        "torque_limits": 2.5
+        "torque_limits": 5.0
       },
       "domain_rand": {
         "actuator_lag": true,
@@ -255,13 +255,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
+          "feet_acc": "[2, 400]",
           "feet_height": "[2, [0.06, 0.1, 0.25]]",
           "feet_slip": "[2, [0.06, 0.05, 0.2]]",
           "joint_targets_rate": "[2, 1.5]",
           "lin_z": "[2, 0.05]",
-          "move_towards": "[0, [0.5, 0.7]]",
+          "move_towards": "[0, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[0, [0.1, 0.25, 0.1]]",
+          "stall_pos": "[0, [0.2, 0.25, 0.1]]",
           "yaw": "[1, 1.0]"
         }
       },
