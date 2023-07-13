@@ -30,10 +30,6 @@
      "values": [22, 27, 42]
     },
     {
-      "param": "solo_legged_gym.train_cfg.runner.drop_assist",
-      "values": [true, false]
-    },
-    {
       "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
       "values": ["[1.0, 1.0, 1.0]","[1.0, 1.0, 2.0]", "[1.0, 1.0, 3.0]", "[1.0, 1.0, 4.0]"]
     }

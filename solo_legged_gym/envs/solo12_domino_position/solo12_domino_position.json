@@ -82,7 +82,7 @@
         "run_name": "test_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_195427"
+        "wandb_group": "cluster_20230713_204600"
       }
     },
     "env_cfg": {
@@ -256,12 +256,12 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "feet_height": "[2, [0.06, 0.1, 0.25]]",
-          "feet_slip": "[2, [0.06, 0.05, 0.2]]",
-          "joint_targets_rate": "[2, 1.5]",
+          "feet_slip": "[0, [0.06, 0.05, 0.2]]",
+          "joint_targets_rate": "[0, 1.5]",
           "lin_z": "[2, 0.05]",
-          "move_towards": "[0, [0.5, 0.9]]",
+          "move_towards": "[2, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[0, [0.5, 0.25, 0.1]]",
+          "stall_pos": "[2, [0.5, 0.25, 0.1]]",
           "yaw": "[1, 1.0]"
         }
       },
