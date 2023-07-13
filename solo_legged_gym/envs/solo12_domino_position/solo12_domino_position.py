@@ -504,8 +504,7 @@ class Solo12DOMINOPosition(BaseTask):
             return
 
         pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
-        yaw_distance = torch.abs(self.commands_in_base[env_ids, 3])
-        move_up = (pos_distance < 0.25) * (yaw_distance < 0.1)
+        move_up = (pos_distance < 0.25)
         move_down = (pos_distance > 2.0) * ~move_up
         self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
         self.terrain_cols[env_ids] = torch.where(torch.Tensor(self.terrain_cols[env_ids] >= self.cfg.terrain.num_cols),

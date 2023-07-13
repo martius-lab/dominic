@@ -49,7 +49,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         type = "special_box"
         params = list(np.arange(5) * 0.05)
         train_all_together = False
-        ee_check = 1
+        ee_check = 2
         base_check = 3
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
@@ -133,10 +133,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[0, [0.5, 0.9]]"  # sigma, clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
+            # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
-            yaw = "[1, 0.2]"  # sigma
+            yaw = "[1, 1.0]"  # sigma
             # posl = "[1, 5.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
@@ -249,13 +249,13 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_features = True
 
         drop_assist = False
-        drop_assist_start_iter = 200
-        drop_assist_iter = 100  # take drop_assist_iter iters to slowly drop it
+        drop_assist_start_iter = 100
+        drop_assist_iter = 200  # take drop_assist_iter iters to slowly drop it
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'base_terrain'
+        run_name = 'new_test2'
 
         # load
         load_run = -1  # -1 = last run

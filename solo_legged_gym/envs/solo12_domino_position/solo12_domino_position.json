@@ -66,8 +66,8 @@
       "runner": {
         "checkpoint": -1,
         "drop_assist": false,
-        "drop_assist_iter": 100,
-        "drop_assist_start_iter": 200,
+        "drop_assist_iter": 200,
+        "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
         "max_iterations": 1000,
@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "base_terrain",
+        "run_name": "new_test2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_102220"
+        "wandb_group": "cluster_20230713_150242"
       }
     },
     "env_cfg": {
@@ -265,8 +265,7 @@
           "move_towards": "[0, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
           "stall_pos": "[0, [0.2, 0.25, 0.1]]",
-          "stall_yaw": "[0, [0.1, 0.1, 0.2]]",
-          "yaw": "[1, 0.2]"
+          "yaw": "[1, 1.0]"
         }
       },
       "seed": 27,
@@ -297,7 +296,7 @@
         "base_check": 3,
         "border_size": 1,
         "dynamic_friction": 1.0,
-        "ee_check": 1,
+        "ee_check": 2,
         "horizontal_scale": 0.1,
         "measure_height": true,
         "measured_points_x": [
