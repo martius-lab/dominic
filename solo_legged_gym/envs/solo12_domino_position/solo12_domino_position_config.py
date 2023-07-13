@@ -49,6 +49,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         type = "special_box"
         params = list(np.arange(5) * 0.05)
         train_all_together = False
+        ee_check = 1
+        base_check = 3
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
