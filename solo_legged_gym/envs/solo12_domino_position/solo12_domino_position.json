@@ -76,10 +76,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "test_terrain",
+        "run_name": "better_terrain",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230714_172305"
+        "wandb_group": "cluster_20230714_172846"
       }
     },
     "env_cfg": {
@@ -322,11 +322,11 @@
         "num_rows": 20,
         "num_sub_terrains": 100,
         "params": [
+          0.0,
           0.1,
           0.2,
           0.30000000000000004,
-          0.4,
-          0.5
+          0.4
         ],
         "restitution": 0.0,
         "slope_threshold": 0.05,
