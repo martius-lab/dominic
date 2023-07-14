@@ -106,7 +106,6 @@ def special_box_terrain(terrain, height):
     terrain.height_field_raw[x[0]:x[1], x[2]:x[3]] = height
     terrain.height_field_raw[x[0]:x[1], x[4]:x[5]] = height
     terrain.height_field_raw[x[2]:x[3], x[0]:x[1]] = height
-    terrain.height_field_raw[x[2]:x[3], x[2]:x[3]] = height
     terrain.height_field_raw[x[2]:x[3], x[4]:x[5]] = height
     terrain.height_field_raw[x[4]:x[5], x[0]:x[1]] = height
     terrain.height_field_raw[x[4]:x[5], x[2]:x[3]] = height

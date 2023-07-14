@@ -531,10 +531,7 @@ class Solo12DOMINOPosition(BaseTask):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :3] += self.env_origins[env_ids]
-        if self.cfg.init_state.init_outside:
-            self.root_states[env_ids, :2] += torch_rand_float(-2.0, 2.0, (len(env_ids), 2), device=self.device)
-        else:
-            self.root_states[env_ids, :2] += torch_rand_float(-0.5, 0.5, (len(env_ids), 2), device=self.device)
+        self.root_states[env_ids, :2] += torch_rand_float(-1.5, 1.5, (len(env_ids), 2), device=self.device)
         # base velocities
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0

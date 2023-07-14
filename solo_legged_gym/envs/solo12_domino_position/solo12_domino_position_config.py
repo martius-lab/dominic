@@ -47,7 +47,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(5) * 0.05)
+        params = list(np.arange(5) * 0.1 + 0.1)
         train_all_together = False
         ee_check = 2
         base_check = 3
@@ -64,8 +64,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class commands(BaseEnvCfg.commands):
         num_commands = 4  # default: target in x, y, z and yaw in base
         num_targets = 12
-        targets_in_env_x = [1.5, 3.5, 4.5, 6.5, 1.5, 1.5, 6.5, 6.5, 1.5, 3.5, 4.5, 6.5]
-        targets_in_env_y = [1.5, 1.5, 1.5, 1.5, 3.5, 4.5, 3.5, 4.5, 6.5, 6.5, 6.5, 6.5]
+        targets_in_env_x = [0.5, 3.5, 4.5, 7.5, 0.5, 0.5, 7.5, 7.5, 0.5, 3.5, 4.5, 7.5]
+        targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 3.5, 4.5, 3.5, 4.5, 7.5, 7.5, 7.5, 7.5]
 
         class ranges:
             # radius = [1.0, 5.0]  # [m]
@@ -73,7 +73,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
-        init_outside = False
         pos = [0.0, 0.0, 0.4]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
@@ -113,15 +112,15 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class domain_rand(BaseEnvCfg.domain_rand):
         randomize_friction = True
-        friction_range = [0.5, 1.5]
+        friction_range = [0.8, 1.2]
 
         randomize_base_mass = True
-        added_mass_range = [-0.5, 0.5]
+        added_mass_range = [-0.2, 0.2]
 
         push_robots = True
         push_interval_s = 5
-        max_push_vel_xyz = 0.5
-        max_push_avel_xyz = 0.5
+        max_push_vel_xyz = 0.2
+        max_push_avel_xyz = 0.2
 
         actuator_lag = True
         randomize_actuator_lag = False
@@ -177,7 +176,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         class noise_scales:
             dof_pos = 0.05
-            dof_vel = 1.0
+            dof_vel = 0.5
             lin_vel = 0.2
             ang_vel = 0.2
             gravity = 0.1
@@ -256,10 +255,10 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_3'
+        run_name = 'test_terrain'
 
         # load
-        load_run = '1_curriculum/20230714_115159_279183_test_again'  # -1 = last run
+        load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
