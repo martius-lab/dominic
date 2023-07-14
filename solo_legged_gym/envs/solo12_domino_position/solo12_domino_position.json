@@ -82,7 +82,7 @@
         "run_name": "test_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230713_225240"
+        "wandb_group": "cluster_20230714_075335"
       }
     },
     "env_cfg": {
@@ -188,7 +188,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 6,
+        "episode_length_s": 10,
         "num_actions": 12,
         "num_envs": 2048,
         "num_features": 10,

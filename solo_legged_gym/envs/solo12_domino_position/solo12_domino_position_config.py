@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 6  # episode length in seconds
+        episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2  # percentage
 
         play = False
