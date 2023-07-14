@@ -73,6 +73,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
+        init_outside = False
         pos = [0.0, 0.0, 0.4]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
@@ -138,7 +139,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
-            yaw = "[1, 1.0]"  # sigma
+            yaw = "[1, 0.5]"  # sigma
             # posl = "[1, 5.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
@@ -146,10 +147,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 500]"
+            feet_acc = "[0, 400]"
             feet_slip = "[0, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
             # dof_acc = "[0, 4000]"
-            joint_targets_rate = "[0, 1.5]"
+            joint_targets_rate = "[0, 1.0]"
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
