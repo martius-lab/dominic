@@ -82,7 +82,7 @@
         "run_name": "test_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230714_075335"
+        "wandb_group": "cluster_20230714_094509"
       }
     },
     "env_cfg": {

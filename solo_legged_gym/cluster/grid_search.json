@@ -30,8 +30,16 @@
      "values": [22, 27, 42]
     },
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
-      "values": ["[1.0, 1.0, 1.0]","[1.0, 1.0, 2.0]", "[1.0, 1.0, 3.0]", "[1.0, 1.0, 4.0]"]
+      "param": "solo_legged_gym.env_cfg.rewards.terms.feet_acc",
+      "values": ["[0, 500]", "[0, 400]", "[0, 600]"]
+    },
+    {
+      "param": "solo_legged_gym.env_cfg.rewards.terms.feet_height",
+      "values": ["[2, [0.02, 0.05, 0.25]]", "[2, [0.04, 0.05, 0.25]]", "[2, [0.06, 0.05, 0.25]]", "[2, [0.08, 0.05, 0.25]]"]
+    },
+    {
+      "param": "solo_legged_gym.env_cfg.rewards.terms.joint_targets_rate",
+      "values": ["[0, 1.5]", "[0, 1.0]", "[0, 2.0]"]
     }
   ]
 }
