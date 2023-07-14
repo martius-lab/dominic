@@ -69,7 +69,7 @@
         "drop_assist_iter": 300,
         "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
-        "load_run": -1,
+        "load_run": "1_curriculum/20230714_115159_279183_test_again",
         "max_iterations": 1000,
         "normalize_features": true,
         "normalize_observation": true,
@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "test_again",
+        "run_name": "test_3",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230714_114855"
+        "wandb_group": "cluster_20230714_141607"
       }
     },
     "env_cfg": {
@@ -259,14 +259,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
+          "dof_acc": "[0, 3000]",
           "feet_acc": "[0, 400]",
           "feet_height": "[2, [0.06, 0.05, 0.25]]",
-          "feet_slip": "[0, [0.06, 0.05, 0.2]]",
           "joint_targets_rate": "[0, 1.0]",
           "lin_z": "[2, 0.1]",
-          "move_towards": "[2, [0.5, 0.9]]",
+          "move_towards": "[2, [0.5, 0.7]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.5, 0.25, 0.1]]",
+          "stall_pos": "[2, [0.2, 0.25, 0.1]]",
           "yaw": "[1, 0.5]"
         }
       },

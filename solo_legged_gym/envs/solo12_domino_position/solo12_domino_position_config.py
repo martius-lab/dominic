@@ -132,8 +132,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_pos = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            move_towards = "[2, [0.5, 0.7]]"  # sigma, clip/scale
+            stall_pos = "[2, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
             feet_height = "[2, [0.06, 0.05, 0.25]]"  # target height, sigma, pos threshold
             lin_z = "[2, 0.1]"
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
@@ -148,8 +148,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             feet_acc = "[0, 400]"
-            feet_slip = "[0, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
-            # dof_acc = "[0, 4000]"
+            # feet_slip = "[0, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
+            dof_acc = "[0, 3000]"
             joint_targets_rate = "[0, 1.0]"
             # torques = "[0, 30]"
 
@@ -256,10 +256,10 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_again'
+        run_name = 'test_3'
 
         # load
-        load_run = -1  # -1 = last run
+        load_run = '1_curriculum/20230714_115159_279183_test_again'  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
