@@ -310,7 +310,7 @@ class Solo12DOMINOPosition(BaseTask):
                                   self.remaining_time.unsqueeze(-1),
                                   ), dim=-1)
         if self.cfg.terrain.measure_height:
-            heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.5 - self.measured_height, -1, 1.)
+            heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.25 - self.measured_height, -1, 1.)
             self.obs_buf = torch.cat((self.obs_buf, heights), dim=-1)
 
         # add noise if needed

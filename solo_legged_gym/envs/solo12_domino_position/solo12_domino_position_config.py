@@ -30,8 +30,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 8.  # [m]
-        terrain_width = 8.  # [m]
+        terrain_length = 6.  # [m]
+        terrain_width = 6.  # [m]
 
         num_rows = 20
         num_cols = 5
@@ -50,7 +50,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         params = list(np.arange(5) * 0.1)
         train_all_together = False
         ee_check = 2
-        base_check = 3
+        base_check = 4
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -63,9 +63,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 4  # default: target in x, y, z and yaw in base
-        num_targets = 12
-        targets_in_env_x = [0.5, 3.5, 4.5, 7.5, 0.5, 0.5, 7.5, 7.5, 0.5, 3.5, 4.5, 7.5]
-        targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 3.5, 4.5, 3.5, 4.5, 7.5, 7.5, 7.5, 7.5]
+        num_targets = 4
+        targets_in_env_x = [0.5, 5.5, 0.5, 5.5]
+        targets_in_env_y = [0.5, 0.5, 5.5, 5.5]
 
         class ranges:
             # radius = [1.0, 5.0]  # [m]
@@ -82,14 +82,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             "HL_HAA": 0.05,
             "FR_HAA": -0.05,
             "HR_HAA": -0.05,
-            "FL_HFE": 0.9,
-            "HL_HFE": -0.9,
-            "FR_HFE": 0.9,
-            "HR_HFE": -0.9,
-            "FL_KFE": -1.4,
-            "HL_KFE": 1.4,
-            "FR_KFE": -1.4,
-            "HR_KFE": 1.4,
+            "FL_HFE": 0.8,
+            "HL_HFE": -0.8,
+            "FR_HFE": 0.8,
+            "HR_HFE": -0.8,
+            "FL_KFE": -1.2,
+            "HL_KFE": 1.2,
+            "FR_KFE": -1.2,
+            "HR_KFE": 1.2,
         }
 
     class control(BaseEnvCfg.control):
@@ -133,10 +133,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[3, [0.5, 0.7]]"  # sigma, clip/scale
             stall_pos = "[3, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
-
-            feet_height = "[2, [0.06, 0.05, 0.25]]"  # target height, sigma, pos threshold
-            lin_z = "[2, 0.1]"
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
+
+            lin_z = "[2, 0.1]"
+            feet_slip = "[2, [0.08, 0.05, 0.2]]"  # target height, sigma, sigma+
+            feet_height = "[2, [0.08, 0.05, 0.25]]"  # target height, sigma, pos threshold
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.5]"  # sigma
@@ -147,10 +148,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 400]"
-            # feet_slip = "[0, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
-            dof_acc = "[0, 3000]"
-            joint_targets_rate = "[0, 1.0]"
+            feet_acc = "[0, 800]"
+            # dof_acc = "[0, 3000]"
+            joint_targets_rate = "[0, 4.0]"
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -213,7 +213,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0, 5.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 1.0, 5.0, 5.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
