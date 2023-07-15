@@ -501,7 +501,10 @@ class Solo12DOMINOPosition(BaseTask):
             self.dof_pos[env_ids] += torch_rand_float(-0.5, 0.5, (len(env_ids), 12), device=self.device)
 
         self.dof_vel[env_ids] = 0.
-        self.gym.set_dof_state_tensor(self.sim, gymtorch.unwrap_tensor(self.dof_state))
+        env_ids_int32 = env_ids.to(dtype=torch.int32)
+        self.gym.set_dof_state_tensor_indexed(self.sim,
+                                              gymtorch.unwrap_tensor(self.dof_state),
+                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
     def _reset_root_states(self, env_ids):
         # base position
@@ -512,10 +515,13 @@ class Solo12DOMINOPosition(BaseTask):
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0
         else:
-            self.root_states[env_ids, 7:13] = torch_rand_float(-1.0, 1.0, (len(env_ids), 6),
+            self.root_states[env_ids, 7:13] = torch_rand_float(-0.5, 0.5, (len(env_ids), 6),
                                                                device=self.device)  # [7:10]: lin vel, [10:13]: ang vel
 
-        self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
+        env_ids_int32 = env_ids.to(dtype=torch.int32)
+        self.gym.set_actor_root_state_tensor_indexed(self.sim,
+                                                     gymtorch.unwrap_tensor(self.root_states),
+                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
     def _update_env_origin(self, env_ids):
         if not self.init_done:

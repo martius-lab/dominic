@@ -78,7 +78,7 @@
         "run_name": "cool",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230715_210425"
+        "wandb_group": "cluster_20230715_211817"
       }
     },
     "env_cfg": {
@@ -301,8 +301,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 5,
-        "num_rows": 5,
-        "num_sub_terrains": 25,
+        "num_rows": 20,
+        "num_sub_terrains": 100,
         "params": [
           0.0,
           0.1,

@@ -73,7 +73,7 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=0.0)
+        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
         return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
 
     def act_inference(self, input_x):
@@ -83,7 +83,7 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=0.0)
+        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
         return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
 
 
