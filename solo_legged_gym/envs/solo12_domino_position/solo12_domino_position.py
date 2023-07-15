@@ -112,7 +112,6 @@ class Solo12DOMINOPosition(BaseTask):
         if len(env_ids) == 0:
             return
 
-        self._update_env_origin(env_ids)  # curriculum
         self._reset_dofs(env_ids)
         self._reset_root_states(env_ids)
         self._resample_commands(env_ids)
@@ -479,10 +478,7 @@ class Solo12DOMINOPosition(BaseTask):
         if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
             self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
             self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
-            if self.cfg.terrain.train_all_together:
-                self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,), device=self.device)
-            else:
-                self.terrain_cols = torch.zeros(self.num_envs, device=self.device).to(torch.long)
+            self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,), device=self.device)
             self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(torch.float)
             self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
         else:
@@ -496,30 +492,12 @@ class Solo12DOMINOPosition(BaseTask):
             self.env_origins[:, 1] = spacing * yy.flatten()[:self.num_envs]
             self.env_origins[:, 2] = 0.
 
-    def _update_env_origin(self, env_ids):
-        if not self.init_done:
-            return
-
-        if self.cfg.terrain.train_all_together:
-            return
-
-        pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
-        move_up = (pos_distance < 0.25)
-        move_down = (pos_distance > 2.0) * ~move_up
-        self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
-        self.terrain_cols[env_ids] = torch.where(torch.Tensor(self.terrain_cols[env_ids] >= self.cfg.terrain.num_cols),
-                                                 torch.randint_like(input=self.terrain_cols[env_ids],
-                                                                    high=self.cfg.terrain.num_cols),
-                                                 torch.clip(input=self.terrain_cols[env_ids],
-                                                            min=0))
-        self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
-
     def _reset_dofs(self, env_ids):
         if self.cfg.env.play:
             self.dof_pos[env_ids] = self.default_dof_pos
         else:
             self.dof_pos[env_ids] = self.default_dof_pos
-            self.dof_pos[env_ids] += torch_rand_float(-0.5, 0.5, (len(env_ids), 12), device=self.device)
+            self.dof_pos[env_ids] += torch_rand_float(-1.0, 1.0, (len(env_ids), 12), device=self.device)
 
         self.dof_vel[env_ids] = 0.
         env_ids_int32 = env_ids.to(dtype=torch.int32)
@@ -531,7 +509,7 @@ class Solo12DOMINOPosition(BaseTask):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :3] += self.env_origins[env_ids]
-        self.root_states[env_ids, :2] += torch_rand_float(-1.5, 1.5, (len(env_ids), 2), device=self.device)
+        self.root_states[env_ids, :2] += torch_rand_float(-2.5, 2.5, (len(env_ids), 2), device=self.device)
         # base velocities
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0

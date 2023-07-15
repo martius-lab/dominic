@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 1.0, 5.0, 5.0]",
+        "fixed_adv_coeff": "[3.0, 1.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -42,14 +42,13 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "log_std_init": 0.0,
+        "drop_out_rate": 1.0,
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
           256,
           128
         ],
-        "share_ratio": 0.5,
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
           256,
@@ -76,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "better_terrain",
+        "run_name": "newer_ideas",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230715_091731"
+        "wandb_group": "cluster_20230715_162207"
       }
     },
     "env_cfg": {
@@ -171,7 +170,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 50,
+        "num_envs": 2048,
         "num_features": 10,
         "num_observations": 113,
         "num_skills": 8,
@@ -234,19 +233,17 @@
       "rewards": {
         "base_height_target": 0.25,
         "max_contact_force": 100.0,
-        "num_groups": 4,
+        "num_groups": 3,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 800]",
-          "feet_height": "[2, [0.08, 0.05, 0.25]]",
-          "feet_slip": "[2, [0.08, 0.05, 0.2]]",
-          "joint_targets_rate": "[0, 4.0]",
-          "lin_z": "[2, 0.1]",
-          "move_towards": "[3, [0.5, 0.7]]",
+          "feet_acc": "[0, 400]",
+          "feet_slip": "[0, [0.08, 0.05, 0.2]]",
+          "joint_targets_rate": "[0, 1.5]",
+          "move_towards": "[2, [0.5, 0.7]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[3, [0.2, 0.25, 0.1]]",
+          "stall_pos": "[2, [0.2, 0.25, 0.1]]",
           "yaw": "[1, 0.5]"
         }
       },
@@ -303,8 +300,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 5,
-        "num_rows": 20,
-        "num_sub_terrains": 100,
+        "num_rows": 5,
+        "num_sub_terrains": 25,
         "params": [
           0.0,
           0.1,
@@ -317,7 +314,6 @@
         "static_friction": 1.0,
         "terrain_length": 6.0,
         "terrain_width": 6.0,
-        "train_all_together": false,
         "type": "special_box",
         "vertical_scale": 0.005
       },

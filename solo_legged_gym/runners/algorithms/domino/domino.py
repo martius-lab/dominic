@@ -41,15 +41,14 @@ class DOMINO:
         self.policy = MaskedPolicy(num_obs=self.env.num_obs,
                                    num_skills=self.env.num_skills,
                                    num_actions=self.env.num_actions,
-                                   share_ratio=self.n_cfg.share_ratio,
+                                   drop_out_rate=self.n_cfg.drop_out_rate,
                                    hidden_dims=self.n_cfg.policy_hidden_dims,
                                    activation=self.n_cfg.policy_activation,
-                                   log_std_init=self.n_cfg.log_std_init,
                                    device=self.device).to(self.device)
 
         self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
                                        num_skills=self.env.num_skills,
-                                       share_ratio=self.n_cfg.share_ratio,
+                                       drop_out_rate=self.n_cfg.drop_out_rate,
                                        hidden_dims=self.n_cfg.value_hidden_dims,
                                        activation=self.n_cfg.value_activation,
                                        device=self.device)
@@ -57,7 +56,7 @@ class DOMINO:
 
         self.int_value = MaskedValue(num_obs=self.env.num_obs,
                                      num_skills=self.env.num_skills,
-                                     share_ratio=self.n_cfg.share_ratio,
+                                     drop_out_rate=self.n_cfg.drop_out_rate,
                                      hidden_dims=self.n_cfg.value_hidden_dims,
                                      activation=self.n_cfg.value_activation,
                                      device=self.device)
@@ -71,7 +70,7 @@ class DOMINO:
             self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
                                                     num_skills=self.env.num_skills,
                                                     num_features=self.env.num_features,
-                                                    share_ratio=self.n_cfg.share_ratio,
+                                                    drop_out_rate=self.n_cfg.drop_out_rate,
                                                     hidden_dims=self.n_cfg.succ_feat_hidden_dims,
                                                     activation=self.n_cfg.succ_feat_activation,
                                                     device=self.device)
@@ -426,8 +425,7 @@ class DOMINO:
             # The most important part of the algorithm
             advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0]
             advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]
-            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2]
-            advantages += eval(self.a_cfg.fixed_adv_coeff)[3] * ext_advantages[3] * lagrange_coeff
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * lagrange_coeff
             advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1 - lagrange_coeff)
 
             # Using KL to adaptively changing the learning rate

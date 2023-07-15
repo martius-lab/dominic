@@ -8,10 +8,9 @@ class MaskedPolicy(nn.Module):
                  num_obs,
                  num_skills,
                  num_actions,
-                 share_ratio,
+                 drop_out_rate,
                  hidden_dims=None,
                  activation='elu',
-                 log_std_init=0.0,
                  device='cpu',
                  **kwargs):
         if hidden_dims is None:
@@ -36,13 +35,13 @@ class MaskedPolicy(nn.Module):
             self.policy_latent_layers.append(activation)
 
         self.distribution = DiagGaussianDistribution(action_dim=num_actions)
-        self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1],
-                                                                                      log_std_init=log_std_init)
+        self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
+        self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
 
         # Mask
         self.masks = nn.ParameterList()
         for la in range(self.num_hidden_dim):
-            self.masks.append(torch.nn.Parameter((torch.rand((num_skills, hidden_dims[la])) <= share_ratio).float(),
+            self.masks.append(torch.nn.Parameter((torch.rand((num_skills, hidden_dims[la])) <= drop_out_rate).float(),
                                                  requires_grad=False).to(self.device))
 
     def reset(self, dones=None):
@@ -71,7 +70,8 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
+        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=0.0)
+        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
 
     def act_inference(self, input_x):
         x, z = input_x
@@ -80,7 +80,8 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
+        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=0.0)
+        return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
 
 
 def get_activation(act_name):

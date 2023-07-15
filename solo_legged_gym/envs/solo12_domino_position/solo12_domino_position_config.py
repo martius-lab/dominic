@@ -33,7 +33,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 6.  # [m]
         terrain_width = 6.  # [m]
 
-        num_rows = 20
+        num_rows = 5
         num_cols = 5
 
         border_size = 1  # [m]
@@ -48,7 +48,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # stepping_stones, gap, pit
         type = "special_box"
         params = list(np.arange(5) * 0.1)
-        train_all_together = False
         ee_check = 2
         base_check = 4
         # params = list(np.zeros(5))
@@ -100,6 +99,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         dof_vel_limits = 10.0  # not used anyway...
         scale_joint_target = 0.25
         clip_joint_target = 100.
+        # dof sequence:
+        # FL_HAA, FL_HFE, FL_KFE,
+        # FR_HAA, FR_HFE, FR_KFE,
+        # HL_HAA, HL_HFE, HL_KFE,
+        # HR_HAA, HR_HFE, HR_KFE
         decimation = 4
 
     class asset(BaseEnvCfg.asset):
@@ -131,13 +135,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            move_towards = "[3, [0.5, 0.7]]"  # sigma, clip/scale
-            stall_pos = "[3, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            move_towards = "[2, [0.5, 0.7]]"  # sigma, clip/scale
+            stall_pos = "[2, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
-            lin_z = "[2, 0.1]"
-            feet_slip = "[2, [0.08, 0.05, 0.2]]"  # target height, sigma, sigma+
-            feet_height = "[2, [0.08, 0.05, 0.25]]"  # target height, sigma, pos threshold
+            # lin_z = "[2, 0.1]"
+            # feet_height = "[0, [0.08, 0.05, 0.25]]"  # target height, sigma, pos threshold
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.5]"  # sigma
@@ -148,9 +151,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 800]"
+            feet_acc = "[0, 400]"
+            feet_slip = "[0, [0.08, 0.05, 0.2]]"  # target height, sigma, sigma+
+            joint_targets_rate = "[0, 1.5]"
             # dof_acc = "[0, 3000]"
-            joint_targets_rate = "[0, 4.0]"
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -165,7 +169,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # dof_vel = "[0, 50.0]"
             # feet_air_time = "[0, None]"
 
-        num_groups = 4
+        num_groups = 3
 
         base_height_target = 0.25
 
@@ -188,9 +192,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        log_std_init = 0.0
-
-        share_ratio = 0.5
+        drop_out_rate = 1.0
         policy_hidden_dims = [256, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [256, 256, 128]
@@ -213,7 +215,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0, 5.0, 5.0]'
+        fixed_adv_coeff = '[3.0, 1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -252,7 +254,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'better_terrain'
+        run_name = 'newer_ideas'
 
         # load
         load_run = -1  # -1 = last run

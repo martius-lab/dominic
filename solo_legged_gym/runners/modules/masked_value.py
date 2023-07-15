@@ -6,7 +6,7 @@ class MaskedValue(nn.Module):
     def __init__(self,
                  num_obs,
                  num_skills,
-                 share_ratio,
+                 drop_out_rate,
                  hidden_dims=None,
                  activation='elu',
                  device='cpu',
@@ -38,7 +38,7 @@ class MaskedValue(nn.Module):
         # Mask
         self.masks = nn.ParameterList()
         for la in range(self.num_hidden_dim):
-            self.masks.append(torch.nn.Parameter((torch.rand((num_skills, hidden_dims[la])) <= share_ratio).float(),
+            self.masks.append(torch.nn.Parameter((torch.rand((num_skills, hidden_dims[la])) <= drop_out_rate).float(),
                                                  requires_grad=False).to(self.device))
 
     @staticmethod
