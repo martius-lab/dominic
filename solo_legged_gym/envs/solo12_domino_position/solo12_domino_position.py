@@ -112,6 +112,7 @@ class Solo12DOMINOPosition(BaseTask):
         if len(env_ids) == 0:
             return
 
+        # self._update_env_origin(env_ids)  # curriculum
         self._reset_dofs(env_ids)
         self._reset_root_states(env_ids)
         self._resample_commands(env_ids)
@@ -497,30 +498,40 @@ class Solo12DOMINOPosition(BaseTask):
             self.dof_pos[env_ids] = self.default_dof_pos
         else:
             self.dof_pos[env_ids] = self.default_dof_pos
-            self.dof_pos[env_ids] += torch_rand_float(-1.0, 1.0, (len(env_ids), 12), device=self.device)
+            self.dof_pos[env_ids] += torch_rand_float(-0.5, 0.5, (len(env_ids), 12), device=self.device)
 
         self.dof_vel[env_ids] = 0.
-        env_ids_int32 = env_ids.to(dtype=torch.int32)
-        self.gym.set_dof_state_tensor_indexed(self.sim,
-                                              gymtorch.unwrap_tensor(self.dof_state),
-                                              gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_dof_state_tensor(self.sim, gymtorch.unwrap_tensor(self.dof_state))
 
     def _reset_root_states(self, env_ids):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :3] += self.env_origins[env_ids]
-        self.root_states[env_ids, :2] += torch_rand_float(-2.5, 2.5, (len(env_ids), 2), device=self.device)
+        self.root_states[env_ids, :2] += torch_rand_float(-1.5, 1.5, (len(env_ids), 2), device=self.device)
         # base velocities
         if self.cfg.env.play:
             self.root_states[env_ids, 7:13] = 0.0
         else:
-            self.root_states[env_ids, 7:13] = torch_rand_float(-0.5, 0.5, (len(env_ids), 6),
+            self.root_states[env_ids, 7:13] = torch_rand_float(-1.0, 1.0, (len(env_ids), 6),
                                                                device=self.device)  # [7:10]: lin vel, [10:13]: ang vel
 
-        env_ids_int32 = env_ids.to(dtype=torch.int32)
-        self.gym.set_actor_root_state_tensor_indexed(self.sim,
-                                                     gymtorch.unwrap_tensor(self.root_states),
-                                                     gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
+        self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
+
+    def _update_env_origin(self, env_ids):
+        if not self.init_done:
+            return
+
+        self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),), device=self.device)
+        self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
+        # pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
+        # move_up = (pos_distance < 0.25)
+        # move_down = (pos_distance > 2.0) * ~move_up
+        # self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
+        # self.terrain_cols[env_ids] = torch.where(torch.Tensor(self.terrain_cols[env_ids] >= self.cfg.terrain.num_cols),
+        #                                          torch.randint_like(input=self.terrain_cols[env_ids],
+        #                                                             high=self.cfg.terrain.num_cols),
+        #                                          torch.clip(input=self.terrain_cols[env_ids],
+        #                                                     min=0))
 
     def _push_robots(self):
         # base velocity impulse

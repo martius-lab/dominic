@@ -38,6 +38,9 @@ class MaskedPolicy(nn.Module):
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
         self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
 
+        # nn.init.orthogonal_(self.action_mean_net.weight, gain=0.01)
+        # nn.init.uniform_(self.log_std_net.bias, 0.0, 0.5)
+
         # Mask
         self.masks = nn.ParameterList()
         for la in range(self.num_hidden_dim):
