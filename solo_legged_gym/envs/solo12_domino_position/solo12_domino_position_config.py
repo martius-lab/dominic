@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
-    seed = 27
+    seed = 42
 
     class env(BaseEnvCfg.env):
         num_envs = 2048
@@ -136,7 +136,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_vel_xy = "[2, 2.0]"
 
             move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
-            stall_pos = "[2, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             # lin_z = "[2, 0.1]"
@@ -152,7 +152,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             feet_acc = "[0, 800]"
             feet_slip = "[0, [0.06, 0.05, 0.2]]"  # target height, sigma, sigma+
-            feet_height = "[0, [0.06, 0.05, 0.25]]"  # target height, sigma, pos threshold
+            feet_height = "[0, [0.06, 0.2, 0.25]]"  # target height, sigma, pos threshold
             joint_targets_rate = "[0, 2.0]"
             # dof_acc = "[0, 3000]"
             # torques = "[0, 30]"
@@ -254,7 +254,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'newerr_ideas'
+        run_name = 'cool'
 
         # load
         load_run = -1  # -1 = last run

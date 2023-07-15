@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "newerr_ideas",
+        "run_name": "cool",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230715_185509"
+        "wandb_group": "cluster_20230715_210425"
       }
     },
     "env_cfg": {
@@ -239,16 +239,16 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "feet_acc": "[0, 800]",
-          "feet_height": "[0, [0.06, 0.05, 0.25]]",
+          "feet_height": "[0, [0.06, 0.2, 0.25]]",
           "feet_slip": "[0, [0.06, 0.05, 0.2]]",
           "joint_targets_rate": "[0, 2.0]",
           "move_towards": "[2, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.3, 0.25, 0.1]]",
+          "stall_pos": "[2, [0.5, 0.25, 0.1]]",
           "yaw": "[1, 0.5]"
         }
       },
-      "seed": 27,
+      "seed": 42,
       "sim": {
         "dt": 0.005,
         "gravity": [
