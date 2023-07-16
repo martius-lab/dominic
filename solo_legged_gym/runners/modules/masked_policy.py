@@ -34,15 +34,15 @@ class MaskedPolicy(nn.Module):
             self.policy_latent_layers.append(nn.Linear(hidden_dims[la], hidden_dims[la + 1]).to(self.device))
             self.policy_latent_layers.append(activation)
 
-        # self.distribution = DiagGaussianDistribution(action_dim=num_actions)
+        self.distribution = DiagGaussianDistribution(action_dim=num_actions)
         # self.distribution = SquashedDiagGaussianDistribution(action_dim=num_actions)
-        self.distribution = ColoredNoiseDist(beta=1, seq_len=500, action_dim=num_actions, device=self.device)
-
-        # self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1],
-        #                                                                               log_std_init=0.0)
+        # self.distribution = ColoredNoiseDist(beta=1, seq_len=48, action_dim=num_actions, device=self.device)
 
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
-        self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
+        self.log_std = nn.Parameter(torch.ones(num_actions) * 0.0, requires_grad=True)
+
+        # self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
+        # self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
 
         # nn.init.orthogonal_(self.action_mean_net.weight, gain=0.01)
         # nn.init.uniform_(self.log_std_net.bias, -1.0, 0.0)
@@ -71,6 +71,17 @@ class MaskedPolicy(nn.Module):
     def entropy(self):
         return self.distribution.entropy()
 
+    def update_distribution(self, input_x):
+        x, z = input_x
+        skill_idxs = z.argmax(dim=1).flatten()
+        batched_masks = [self.masks[la][skill_idxs] for la in range(self.num_hidden_dim)]
+        for la in range(self.num_hidden_dim):
+            x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
+        mean = self.action_mean_net(x)
+        # log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
+        # self.distribution.proba_distribution(mean_actions=mean, log_std=log_std)
+        self.distribution.proba_distribution(mean_actions=mean, log_std=self.log_std)
+
     def act_and_log_prob(self, input_x):
         # return actions and log_prob
         x, z = input_x
@@ -79,9 +90,9 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
-        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
-        # return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
+        # log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
+        # return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
+        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
 
     def act_inference(self, input_x):
         x, z = input_x
@@ -90,9 +101,9 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
-        return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
-        # return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
+        # log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
+        # return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
+        return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
 
 
 def get_activation(act_name):

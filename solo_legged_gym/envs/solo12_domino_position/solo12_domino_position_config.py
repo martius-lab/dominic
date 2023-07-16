@@ -42,6 +42,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.05  # slopes above this threshold will be corrected to vertical surfaces
 
+        train_all_together = True  # train all terrains together or separately
+
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
@@ -95,13 +97,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 2.5
+        torque_limits = 5.0
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2]
         scale_joint_target = 0.25
-        clip_joint_target = 10.0
+        clip_joint_target = 100.0
         # dof sequence:
         # FL_HAA, FL_HFE, FL_KFE,
         # FR_HAA, FR_HFE, FR_KFE,
@@ -140,8 +142,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
             stall_pos = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            lin_z = "[2, 0.1]"
-            feet_height = "[2, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
+            # lin_z = "[2, 0.1]"
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             pos = "[1, 0.5]"  # sigma
@@ -153,9 +154,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 600]"
+            feet_acc = "[0, 400]"
+            # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # feet_slip = "[0, [0.08, 0.05, 0.2]]"  # target height, sigma, sigma+
-            joint_targets_rate = "[0, 1.5]"
+            joint_targets_rate = "[0, 1.0]"
             dof_acc = "[0, 3000]"
             # torques = "[0, 30]"
 
@@ -208,7 +210,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.01
+        entropy_coef = 0.02
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -218,7 +220,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 2.0, 3.0]'
+        fixed_adv_coeff = '[2.0, 2.0, 3.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -257,7 +259,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'color4'
+        run_name = 'NO_COLOR'
 
         # load
         load_run = -1  # -1 = last run

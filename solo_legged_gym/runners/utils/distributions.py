@@ -23,13 +23,6 @@ class Distribution(ABC):
         self.distribution = None
 
     @abstractmethod
-    def proba_distribution_net(self, *args, **kwargs) -> Union[nn.Module, Tuple[nn.Module, nn.Parameter]]:
-        """Create the layers and parameters that represent the distribution.
-
-        Subclasses must define this, but the arguments and return type vary between
-        concrete classes."""
-
-    @abstractmethod
     def proba_distribution(self: SelfDistribution, *args, **kwargs) -> SelfDistribution:
         """Set parameters of the distribution.
 
@@ -122,14 +115,9 @@ class DiagGaussianDistribution(Distribution):
         self.mean_actions = None
         self.log_std = None
 
-    def proba_distribution_net(self, latent_dim: int, log_std_init: float = 0.0):
-        mean_actions = nn.Linear(latent_dim, self.action_dim)
-        log_std = nn.Parameter(th.ones(self.action_dim) * log_std_init, requires_grad=True)
-        return mean_actions, log_std
-
     def proba_distribution(self: SelfDiagGaussianDistribution, mean_actions: th.Tensor, log_std: th.Tensor):
-        action_std = th.ones_like(mean_actions) * log_std.exp()
-        self.distribution = Normal(mean_actions, action_std)
+        # action_std = th.ones_like(mean_actions) * log_std.exp()
+        self.distribution = Normal(mean_actions, log_std.exp())
         return self
 
     def log_prob(self, actions: th.Tensor) -> th.Tensor:
@@ -150,8 +138,9 @@ class DiagGaussianDistribution(Distribution):
         self.proba_distribution(mean_actions, log_std)
         return self.get_actions(deterministic=deterministic)
 
-    def log_prob_from_params(self, mean_actions: th.Tensor, log_std: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
-        actions = self.actions_from_params(mean_actions, log_std)
+    def log_prob_from_params(self, mean_actions: th.Tensor, log_std: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor]:
+        self.proba_distribution(mean_actions, log_std)
+        actions = self.get_actions(deterministic=deterministic)
         log_prob = self.log_prob(actions)
         return actions, log_prob
 

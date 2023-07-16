@@ -404,7 +404,7 @@ class DOMINO:
             # PPO step
             # using the current policy to get action log prob
             obs_skills = (obs, self.encode_skills(skills))
-            _, _ = self.policy.act_and_log_prob(obs_skills)
+            self.policy.update_distribution(obs_skills)
             actions_log_prob_batch = self.policy.distribution.log_prob(actions)
 
             # get values
