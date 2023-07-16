@@ -81,14 +81,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             "HL_HAA": 0.05,
             "FR_HAA": -0.05,
             "HR_HAA": -0.05,
-            "FL_HFE": 0.6,
-            "HL_HFE": -0.6,
-            "FR_HFE": 0.6,
-            "HR_HFE": -0.6,
-            "FL_KFE": -1.4,
-            "HL_KFE": 1.4,
-            "FR_KFE": -1.4,
-            "HR_KFE": 1.4,
+            "FL_HFE": 0.8,
+            "HL_HFE": -0.8,
+            "FR_HFE": 0.8,
+            "HR_HFE": -0.8,
+            "FL_KFE": -1.2,
+            "HL_KFE": 1.2,
+            "FR_KFE": -1.2,
+            "HR_KFE": 1.2,
         }
 
     class control(BaseEnvCfg.control):
@@ -192,7 +192,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        drop_out_rate = 1.0
+        drop_out_rate = 0.5
         policy_hidden_dims = [256, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [256, 256, 128]
@@ -215,7 +215,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[5.0, 5.0, 3.0]'
+        fixed_adv_coeff = '[2.0, 2.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 

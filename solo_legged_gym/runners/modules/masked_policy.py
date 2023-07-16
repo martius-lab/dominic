@@ -35,6 +35,9 @@ class MaskedPolicy(nn.Module):
             self.policy_latent_layers.append(activation)
 
         self.distribution = DiagGaussianDistribution(action_dim=num_actions)
+        # self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1],
+        #                                                                               log_std_init=0.0)
+
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
         self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
 
@@ -75,6 +78,7 @@ class MaskedPolicy(nn.Module):
         mean = self.action_mean_net(x)
         log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
         return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
+        # return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
 
     def act_inference(self, input_x):
         x, z = input_x
@@ -85,6 +89,7 @@ class MaskedPolicy(nn.Module):
         mean = self.action_mean_net(x)
         log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
         return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
+        # return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
 
 
 def get_activation(act_name):

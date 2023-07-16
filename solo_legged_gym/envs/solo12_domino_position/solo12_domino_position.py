@@ -523,12 +523,12 @@ class Solo12DOMINOPosition(BaseTask):
                                                      gymtorch.unwrap_tensor(self.root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
-    def _update_env_origin(self, env_ids):
-        if not self.init_done:
-            return
-
-        self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),), device=self.device)
-        self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
+    # def _update_env_origin(self, env_ids):
+    #     if not self.init_done:
+    #         return
+    #
+    #     self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),), device=self.device)
+    #     self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
         # pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
         # move_up = (pos_distance < 0.25)
         # move_down = (pos_distance > 2.0) * ~move_up
