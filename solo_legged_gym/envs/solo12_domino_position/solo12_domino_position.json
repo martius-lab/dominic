@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[2.0, 1.0, 2.0]",
+        "fixed_adv_coeff": "[5.0, 2.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "cool2",
+        "run_name": "color2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230716_084638"
+        "wandb_group": "cluster_20230716_115823"
       }
     },
     "env_cfg": {
@@ -129,7 +129,7 @@
         ]
       },
       "control": {
-        "clip_joint_target": 100.0,
+        "clip_joint_target": 10.0,
         "control_type": "P",
         "damping": {
           "HAA": 0.1,
@@ -137,28 +137,40 @@
           "KFE": 0.1
         },
         "decimation": 4,
-        "dof_vel_limits": 10.0,
-        "scale_joint_target": 0.25,
+        "scale_joint_target": [
+          0.7853981633974483,
+          0.7853981633974483,
+          1.5707963267948966,
+          0.7853981633974483,
+          0.7853981633974483,
+          1.5707963267948966,
+          0.7853981633974483,
+          0.7853981633974483,
+          1.5707963267948966,
+          0.7853981633974483,
+          0.7853981633974483,
+          1.5707963267948966
+        ],
         "stiffness": {
           "HAA": 5.0,
           "HFE": 5.0,
           "KFE": 5.0
         },
-        "torque_limits": 5.0
+        "torque_limits": 2.5
       },
       "domain_rand": {
         "actuator_lag": true,
         "actuator_lag_steps": 3,
         "added_mass_range": [
-          -0.2,
-          0.2
+          -0.5,
+          0.5
         ],
         "friction_range": [
-          0.8,
-          1.2
+          0.5,
+          1.5
         ],
-        "max_push_avel_xyz": 0.2,
-        "max_push_vel_xyz": 0.2,
+        "max_push_avel_xyz": 0.5,
+        "max_push_vel_xyz": 0.5,
         "push_interval_s": 5,
         "push_robots": true,
         "randomize_actuator_lag": false,
@@ -186,18 +198,18 @@
           0.0
         ],
         "default_joint_angles": {
-          "FL_HAA": 0.05,
-          "HL_HAA": 0.05,
-          "FR_HAA": -0.05,
-          "HR_HAA": -0.05,
-          "FL_HFE": 0.8,
-          "HL_HFE": -0.8,
-          "FR_HFE": 0.8,
-          "HR_HFE": -0.8,
-          "FL_KFE": -1.2,
-          "HL_KFE": 1.2,
-          "FR_KFE": -1.2,
-          "HR_KFE": 1.2
+          "FL_HAA": 0.0,
+          "HL_HAA": 0.0,
+          "FR_HAA": 0.0,
+          "HR_HAA": 0.0,
+          "FL_HFE": 0.7853981633974483,
+          "HL_HFE": -0.7853981633974483,
+          "FR_HFE": 0.7853981633974483,
+          "HR_HFE": -0.7853981633974483,
+          "FL_KFE": -1.5707963267948966,
+          "HL_KFE": 1.5707963267948966,
+          "FR_KFE": -1.5707963267948966,
+          "HR_KFE": 1.5707963267948966
         },
         "lin_vel": [
           0.0,
@@ -207,7 +219,7 @@
         "pos": [
           0.0,
           0.0,
-          0.4
+          0.3
         ],
         "rot": [
           0.0,
@@ -231,6 +243,7 @@
         }
       },
       "rewards": {
+        "base_height_danger": 0.1,
         "base_height_target": 0.25,
         "max_contact_force": 100.0,
         "num_groups": 3,
@@ -238,8 +251,9 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 600]",
-          "joint_targets_rate": "[0, 1.5]",
+          "dof_acc": "[0, 2000]",
+          "feet_acc": "[0, 400]",
+          "joint_targets_rate": "[0, 1.0]",
           "move_towards": "[2, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
           "stall_pos": "[2, [0.4, 0.25, 0.1]]",
@@ -271,10 +285,10 @@
         "up_axis": 1
       },
       "terrain": {
-        "base_check": 4,
+        "base_check": 3,
         "border_size": 1,
         "dynamic_friction": 1.0,
-        "ee_check": 2,
+        "ee_check": 1,
         "horizontal_scale": 0.1,
         "measure_height": true,
         "measured_points_x": [

@@ -26,16 +26,16 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.env_cfg.rewards.terms.dof_acc",
-      "values": ["[0, 2000]", "[0, 3000]", "[0, 4000]"]
+      "param": "solo_legged_gym.train_cfg.algorithm.clip_param",
+      "values": [0.1, 0.2, 0.3]
     },
     {
-      "param": "solo_legged_gym.env_cfg.control.torque_limits",
-      "values": [2.5, 5.0, 7.5, 10.0]
+      "param": "solo_legged_gym.train_cfg.algorithm.entropy_coef",
+      "values": [0.00, 0.01, 0.02, 0.03]
     },
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
-      "values": ["[1.0, 1.0, 5.0, 1.0]", "[1.0, 1.0, 2.0, 1.0]", "[1.0, 1.0, 5.0, 2.0]", "[1.0, 1.0, 2.0, 2.0]"]
+      "param": "solo_legged_gym.train_cfg.algorithm.desired_kl",
+      "values": [0.01, 0.015, 0.02, 0.03]
     }
   ]
 }

@@ -48,8 +48,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # stepping_stones, gap, pit
         type = "special_box"
         params = list(np.arange(5) * 0.1)
-        ee_check = 2
-        base_check = 4
+        ee_check = 1
+        base_check = 3
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -72,33 +72,35 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
-        pos = [0.0, 0.0, 0.4]  # x,y,z [m]
+        pos = [0.0, 0.0, 0.3]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
         default_joint_angles = {  # = target angles [rad] when action = 0.0
-            "FL_HAA": 0.05,
-            "HL_HAA": 0.05,
-            "FR_HAA": -0.05,
-            "HR_HAA": -0.05,
-            "FL_HFE": 0.8,
-            "HL_HFE": -0.8,
-            "FR_HFE": 0.8,
-            "HR_HFE": -0.8,
-            "FL_KFE": -1.2,
-            "HL_KFE": 1.2,
-            "FR_KFE": -1.2,
-            "HR_KFE": 1.2,
+            "FL_HAA": 0.0,
+            "HL_HAA": 0.0,
+            "FR_HAA": 0.0,
+            "HR_HAA": 0.0,
+            "FL_HFE": np.pi / 4,
+            "HL_HFE": -np.pi / 4,
+            "FR_HFE": np.pi / 4,
+            "HR_HFE": -np.pi / 4,
+            "FL_KFE": -np.pi / 2,
+            "HL_KFE": np.pi / 2,
+            "FR_KFE": -np.pi / 2,
+            "HR_KFE": np.pi / 2,
         }
 
     class control(BaseEnvCfg.control):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 5.0
-        dof_vel_limits = 10.0  # not used anyway...
-        scale_joint_target = 0.25
-        clip_joint_target = 100.
+        torque_limits = 2.5
+        scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
+                              np.pi / 4, np.pi / 4, np.pi / 2,
+                              np.pi / 4, np.pi / 4, np.pi / 2,
+                              np.pi / 4, np.pi / 4, np.pi / 2]
+        clip_joint_target = 10.0
         # dof sequence:
         # FL_HAA, FL_HFE, FL_KFE,
         # FR_HAA, FR_HFE, FR_KFE,
@@ -116,15 +118,15 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class domain_rand(BaseEnvCfg.domain_rand):
         randomize_friction = True
-        friction_range = [0.8, 1.2]
+        friction_range = [0.5, 1.5]
 
         randomize_base_mass = True
-        added_mass_range = [-0.2, 0.2]
+        added_mass_range = [-0.5, 0.5]
 
         push_robots = True
         push_interval_s = 5
-        max_push_vel_xyz = 0.2
-        max_push_avel_xyz = 0.2
+        max_push_vel_xyz = 0.5
+        max_push_avel_xyz = 0.5
 
         actuator_lag = True
         randomize_actuator_lag = False
@@ -137,10 +139,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
             stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            # lin_z = "[2, 0.1]"
             # feet_height = "[2, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
-
-            # lin_z = "[2, 0.1]"
 
             pos = "[1, 0.5]"  # sigma
             yaw = "[1, 0.5]"  # sigma
@@ -151,10 +152,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 600]"
+            feet_acc = "[0, 400]"
             # feet_slip = "[0, [0.08, 0.05, 0.2]]"  # target height, sigma, sigma+
-            joint_targets_rate = "[0, 1.5]"
-            # dof_acc = "[0, 3000]"
+            joint_targets_rate = "[0, 1.0]"
+            dof_acc = "[0, 2000]"
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -172,6 +173,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_groups = 3
 
         base_height_target = 0.25
+        base_height_danger = 0.1
 
     class observations:
         clip_obs = True
@@ -215,7 +217,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.0, 1.0, 2.0]'
+        fixed_adv_coeff = '[5.0, 2.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -254,7 +256,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'cool2'
+        run_name = 'color2'
 
         # load
         load_run = -1  # -1 = last run

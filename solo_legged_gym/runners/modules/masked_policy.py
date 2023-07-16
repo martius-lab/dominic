@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from solo_legged_gym.runners.utils.distributions import DiagGaussianDistribution
+from solo_legged_gym.runners.utils.distributions import SquashedDiagGaussianDistribution, DiagGaussianDistribution, ColoredNoiseDist
 
 
 class MaskedPolicy(nn.Module):
@@ -34,7 +34,10 @@ class MaskedPolicy(nn.Module):
             self.policy_latent_layers.append(nn.Linear(hidden_dims[la], hidden_dims[la + 1]).to(self.device))
             self.policy_latent_layers.append(activation)
 
-        self.distribution = DiagGaussianDistribution(action_dim=num_actions)
+        # self.distribution = DiagGaussianDistribution(action_dim=num_actions)
+        # self.distribution = SquashedDiagGaussianDistribution(action_dim=num_actions)
+        self.distribution = ColoredNoiseDist(beta=1, seq_len=500, action_dim=num_actions, device=self.device)
+
         # self.action_mean_net, self.log_std = self.distribution.proba_distribution_net(latent_dim=hidden_dims[-1],
         #                                                                               log_std_init=0.0)
 
@@ -42,7 +45,7 @@ class MaskedPolicy(nn.Module):
         self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
 
         # nn.init.orthogonal_(self.action_mean_net.weight, gain=0.01)
-        # nn.init.uniform_(self.log_std_net.bias, 0.0, 0.5)
+        # nn.init.uniform_(self.log_std_net.bias, -1.0, 0.0)
 
         # Mask
         self.masks = nn.ParameterList()
