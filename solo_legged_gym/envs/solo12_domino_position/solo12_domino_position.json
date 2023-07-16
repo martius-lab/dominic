@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "SCRATCH",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230716_195522"
+        "wandb_group": "cluster_20230716_214937"
       }
     },
     "env_cfg": {
@@ -104,14 +104,8 @@
         "thickness": 0.01
       },
       "commands": {
-        "num_commands": 3,
+        "num_commands": 2,
         "num_targets": 4,
-        "ranges": {
-          "yaw": [
-            -3.141592653589793,
-            3.141592653589793
-          ]
-        },
         "targets_in_env_x": [
           0.5,
           5.5,
@@ -168,7 +162,7 @@
         "num_actions": 12,
         "num_envs": 2048,
         "num_features": 10,
-        "num_observations": 111,
+        "num_observations": 110,
         "num_skills": 8,
         "play": false,
         "plot_target": true
@@ -242,8 +236,7 @@
           "lin_z": "[2, 0.1]",
           "move_towards": "[1, [0.5, 0.8]]",
           "pos": "[1, 1.5]",
-          "stall_pos": "[1, [0.4, 0.5, 0.1]]",
-          "yaw": "[1, 0.5]"
+          "stall_pos": "[1, [0.4, 0.5, 0.1]]"
         }
       },
       "seed": 42,
@@ -276,6 +269,7 @@
         "dynamic_friction": 1.0,
         "ee_check": 1,
         "horizontal_scale": 0.1,
+        "init_range": 2.5,
         "measure_height": true,
         "measured_points_x": [
           -0.45,

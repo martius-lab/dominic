@@ -13,7 +13,6 @@ class Solo12DOMINOPosition(BaseTask):
         self.init_done = False
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
         self.num_commands = self.cfg.commands.num_commands
-        self.command_ranges = class_to_dict(self.cfg.commands.ranges)
 
         self.num_targets = self.cfg.commands.num_targets
         self.targets_in_env_x = torch.Tensor(self.cfg.commands.targets_in_env_x).to(self.device)
@@ -425,9 +424,6 @@ class Solo12DOMINOPosition(BaseTask):
         #         gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)
 
     def _resample_commands(self, env_ids):
-        sampled_yaw = torch_rand_float(self.command_ranges["yaw"][0], self.command_ranges["yaw"][1], (len(env_ids), 1),
-                                       device=self.device).squeeze(1)
-
         env_origin = self.env_origins[env_ids]
         sampled_target = torch.randint(0, self.num_targets, (len(env_ids),), device=self.device)
         self.commands[env_ids, 0] = env_origin[:, 0] + self.targets_in_env_x[
@@ -435,19 +431,12 @@ class Solo12DOMINOPosition(BaseTask):
         self.commands[env_ids, 1] = env_origin[:, 1] + self.targets_in_env_y[
             sampled_target] - self.cfg.terrain.terrain_length / 2
 
-        self.commands[env_ids, 2] = sampled_yaw
-
     def _update_commands_in_base(self):
-        forward_global = quat_apply(self.base_quat, self.forward_vec)
-        base_yaw = torch.atan2(forward_global[:, 1], forward_global[:, 0])
-
         target_pos_in_global = torch.cat((self.commands[:, 0:2] - self.root_states[:, 0:2],
-                                          torch.zeros_like(self.commands[:, 2:3])), dim=-1)  # fake z component
+                                          torch.zeros_like(self.commands[:, 1:2])), dim=-1)  # fake z component
         target_pos_in_base = quat_rotate_inverse(get_quat_yaw(self.base_quat), target_pos_in_global)[:, 0:2]
-        target_yaw_in_base = wrap_to_pi(self.commands[:, 2] - base_yaw)
 
         self.commands_in_base[:, 0:2] = target_pos_in_base
-        self.commands_in_base[:, 2] = target_yaw_in_base
 
     def _prepare_draw(self):
         self.box_geoms = [gymutil.WireframeBoxGeometry(0.3, 0.15, 0.4, color=(1, 1, 0)) for _ in range(self.num_envs)]
@@ -461,8 +450,8 @@ class Solo12DOMINOPosition(BaseTask):
         for i in range(self.num_envs):
             if self.cfg.env.plot_target:
                 self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.25)
-                self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, self.commands[i, 2])
-                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.3, 0.15, 0.15, color=(1, 1, 0))
+                self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, 0)
+                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.15, 0.15, 0.15, color=(1, 1, 0))
                 gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
 
     def _draw_heights(self):
@@ -551,7 +540,9 @@ class Solo12DOMINOPosition(BaseTask):
         # base position
         self.root_states[env_ids] = self.base_init_state
         self.root_states[env_ids, :2] += self.env_origins[env_ids, :2]
-        self.root_states[env_ids, :2] += torch_rand_float(-1.0, 1.0, (len(env_ids), 2), device=self.device)
+        self.root_states[env_ids, :2] += torch_rand_float(-self.cfg.terrain.init_range,
+                                                          self.cfg.terrain.init_range,
+                                                          (len(env_ids), 2), device=self.device)
 
         base_global = self.root_states[env_ids, :2].clone()
         base_global += self.terrain.cfg.border_size
@@ -674,10 +665,10 @@ class Solo12DOMINOPosition(BaseTask):
         rew = torch.exp(-torch.square(pos_error / sigma))
         return rew
 
-    def _reward_yaw(self, sigma):
-        yaw_error = torch.clip(torch.abs(self.commands_in_base[:, 2]), min=None, max=2 * sigma)
-        rew = torch.exp(-torch.square(yaw_error / sigma))
-        return rew
+    # def _reward_yaw(self, sigma):
+    #     yaw_error = torch.clip(torch.abs(self.commands_in_base[:, 2]), min=None, max=2 * sigma)
+    #     rew = torch.exp(-torch.square(yaw_error / sigma))
+    #     return rew
 
     def _reward_move_towards(self, sigma):
         target_pos_in_base = self.commands_in_base[:, 0:2]

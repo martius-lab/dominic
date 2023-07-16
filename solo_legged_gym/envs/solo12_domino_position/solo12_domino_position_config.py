@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 2048
-        num_observations = 33 + 7 * 9 + 12 + 3  # #states + #height + #actions + #commands
+        num_observations = 33 + 7 * 9 + 12 + 2  # #states + #height + #actions + #commands
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
@@ -31,6 +31,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # sub-terrain
         terrain_length = 6.  # [m]
         terrain_width = 6.  # [m]
+
+        init_range = 2.5  # [m]
 
         num_rows = 5
         num_cols = 5
@@ -62,15 +64,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [5, 5, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 3  # default: target in x, y and yaw in base
+        num_commands = 2  # default: target in x, y in base
         num_targets = 4
         targets_in_env_x = [0.5, 5.5, 0.5, 5.5]
         targets_in_env_y = [0.5, 0.5, 5.5, 5.5]
-
-        class ranges:
-            # radius = [1.0, 5.0]  # [m]
-            # direction = [-np.pi, np.pi]  # [rad]
-            yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.5]  # x,y,z [m]
@@ -147,7 +144,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             move_towards = "[1, [0.5, 0.8]]"  # sigma, clip/scale
             stall_pos = "[1, [0.4, 0.5, 0.1]]"  # minimal vel, distance, sigma
             pos = "[1, 1.5]"  # sigma
-            yaw = "[1, 0.5]"  # sigma
+            # yaw = "[1, 0.5]"  # sigma
             # posl = "[1, 5.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
@@ -258,7 +255,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'SCRATCH'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
