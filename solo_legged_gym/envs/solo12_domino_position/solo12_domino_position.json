@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[2.0, 2.0, 3.0]",
+        "fixed_adv_coeff": "[1.0, 4.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "NO_COLOR",
+        "run_name": "SCRATCH",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230716_164040"
+        "wandb_group": "cluster_20230716_195522"
       }
     },
     "env_cfg": {
@@ -100,14 +100,11 @@
         "penalize_contacts_on": [],
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
-        "terminate_after_contacts_on": [
-          "base",
-          "SHOULDER"
-        ],
+        "terminate_after_contacts_on": [],
         "thickness": 0.01
       },
       "commands": {
-        "num_commands": 4,
+        "num_commands": 3,
         "num_targets": 4,
         "ranges": {
           "yaw": [
@@ -171,11 +168,10 @@
         "num_actions": 12,
         "num_envs": 2048,
         "num_features": 10,
-        "num_observations": 113,
+        "num_observations": 111,
         "num_skills": 8,
         "play": false,
-        "plot_target": true,
-        "remaining_check_time": 0.2
+        "plot_target": true
       },
       "init_member_classes": {},
       "init_state": {
@@ -240,10 +236,13 @@
         "terms": {
           "dof_acc": "[0, 3000]",
           "feet_acc": "[0, 400]",
+          "feet_height": "[2, [0.08, 0.1, 0.5]]",
+          "feet_slip": "[2, [0.08, 0.1, 0.2]]",
           "joint_targets_rate": "[0, 1.0]",
-          "move_towards": "[2, [0.5, 0.9]]",
-          "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.5, 0.25, 0.1]]",
+          "lin_z": "[2, 0.1]",
+          "move_towards": "[1, [0.5, 0.8]]",
+          "pos": "[1, 1.5]",
+          "stall_pos": "[1, [0.4, 0.5, 0.1]]",
           "yaw": "[1, 0.5]"
         }
       },

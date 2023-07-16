@@ -7,12 +7,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 2048
-        num_observations = 33 + 12 + 4 + 7 * 9 + 1  # #states + #actions + #commands + height + #remaining_time
+        num_observations = 33 + 7 * 9 + 12 + 3  # #states + #height + #actions + #commands
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
         episode_length_s = 10  # episode length in seconds
-        remaining_check_time = 0.2  # percentage
 
         play = False
         plot_target = True
@@ -63,7 +62,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [5, 5, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 4  # default: target in x, y, z and yaw in base
+        num_commands = 3  # default: target in x, y and yaw in base
         num_targets = 4
         targets_in_env_x = [0.5, 5.5, 0.5, 5.5]
         targets_in_env_y = [0.5, 0.5, 5.5, 5.5]
@@ -115,7 +114,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        terminate_after_contacts_on = ["base", "SHOULDER"]
+        terminate_after_contacts_on = []
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
 
@@ -140,12 +139,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            move_towards = "[2, [0.5, 0.9]]"  # sigma, clip/scale
-            stall_pos = "[2, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            # lin_z = "[2, 0.1]"
+            lin_z = "[2, 0.1]"
+            feet_height = "[2, [0.08, 0.1, 0.5]]"  # target height, sigma, pos threshold
+            feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
-            pos = "[1, 0.5]"  # sigma
+            move_towards = "[1, [0.5, 0.8]]"  # sigma, clip/scale
+            stall_pos = "[1, [0.4, 0.5, 0.1]]"  # minimal vel, distance, sigma
+            pos = "[1, 1.5]"  # sigma
             yaw = "[1, 0.5]"  # sigma
             # posl = "[1, 5.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
@@ -155,8 +156,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             feet_acc = "[0, 400]"
-            # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
-            # feet_slip = "[0, [0.08, 0.05, 0.2]]"  # target height, sigma, sigma+
             joint_targets_rate = "[0, 1.0]"
             dof_acc = "[0, 3000]"
             # torques = "[0, 30]"
@@ -220,7 +219,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.0, 2.0, 3.0]'
+        fixed_adv_coeff = '[1.0, 4.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -259,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'NO_COLOR'
+        run_name = 'SCRATCH'
 
         # load
         load_run = -1  # -1 = last run
