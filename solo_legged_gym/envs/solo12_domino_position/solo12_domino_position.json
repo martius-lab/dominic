@@ -18,8 +18,8 @@
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
-        "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[5.0, 2.0, 2.0]",
+        "entropy_coef": 0.01,
+        "fixed_adv_coeff": "[1.0, 2.0, 3.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "color2",
+        "run_name": "color4",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230716_115823"
+        "wandb_group": "cluster_20230716_125226"
       }
     },
     "env_cfg": {
@@ -137,20 +137,7 @@
           "KFE": 0.1
         },
         "decimation": 4,
-        "scale_joint_target": [
-          0.7853981633974483,
-          0.7853981633974483,
-          1.5707963267948966,
-          0.7853981633974483,
-          0.7853981633974483,
-          1.5707963267948966,
-          0.7853981633974483,
-          0.7853981633974483,
-          1.5707963267948966,
-          0.7853981633974483,
-          0.7853981633974483,
-          1.5707963267948966
-        ],
+        "scale_joint_target": 0.25,
         "stiffness": {
           "HAA": 5.0,
           "HFE": 5.0,
@@ -219,7 +206,7 @@
         "pos": [
           0.0,
           0.0,
-          0.3
+          0.5
         ],
         "rot": [
           0.0,
@@ -251,12 +238,14 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "dof_acc": "[0, 2000]",
-          "feet_acc": "[0, 400]",
-          "joint_targets_rate": "[0, 1.0]",
-          "move_towards": "[2, [0.5, 0.8]]",
+          "dof_acc": "[0, 3000]",
+          "feet_acc": "[0, 600]",
+          "feet_height": "[2, [0.08, 0.2, 0.25]]",
+          "joint_targets_rate": "[0, 1.5]",
+          "lin_z": "[2, 0.1]",
+          "move_towards": "[2, [0.5, 0.9]]",
           "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.4, 0.25, 0.1]]",
+          "stall_pos": "[2, [0.5, 0.25, 0.1]]",
           "yaw": "[1, 0.5]"
         }
       },
