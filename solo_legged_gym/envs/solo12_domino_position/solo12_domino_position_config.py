@@ -138,7 +138,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_vel_xy = "[2, 2.0]"
 
             # lin_z = "[2, 0.1]"
-            feet_height = "[2, [0.08, 0.1, 0.25]]"  # target height, sigma, pos threshold
             # feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
             move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
@@ -153,9 +152,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 400]"
+            feet_acc = "[0, 500]"
             joint_targets_rate = "[0, 1.5]"
-            dof_acc = "[0, 4000]"
+            # dof_acc = "[0, 4000]"
+            feet_height = "[0, [0.08, 0.1, 0.25]]"  # target height, sigma, pos threshold
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -217,7 +217,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 2.0, 2.0]'
+        fixed_adv_coeff = '[2.0, 2.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -253,10 +253,14 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
+        drop_assist = False
+        drop_assist_start_iter = 100
+        drop_assist_duration = 100
+
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'D3POS'
+        run_name = 'drop_assist'
 
         # load
         load_run = -1  # -1 = last run

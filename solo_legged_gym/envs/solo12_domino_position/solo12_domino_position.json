@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 2.0, 2.0]",
+        "fixed_adv_coeff": "[2.0, 2.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -64,6 +64,9 @@
       },
       "runner": {
         "checkpoint": -1,
+        "drop_assist": true,
+        "drop_assist_duration": 100,
+        "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
         "max_iterations": 1000,
@@ -75,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "D3POS",
+        "run_name": "drop_assist",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230717_090745"
+        "wandb_group": "cluster_20230717_120012"
       }
     },
     "env_cfg": {
@@ -229,9 +232,8 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "dof_acc": "[0, 4000]",
-          "feet_acc": "[0, 400]",
-          "feet_height": "[2, [0.08, 0.1, 0.25]]",
+          "feet_acc": "[0, 500]",
+          "feet_height": "[0, [0.08, 0.1, 0.25]]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[2, [0.5, 0.8]]",
           "pos": "[1, 0.5]",

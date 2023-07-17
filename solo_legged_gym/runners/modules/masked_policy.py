@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 from solo_legged_gym.runners.utils.distributions import SquashedDiagGaussianDistribution, DiagGaussianDistribution, ColoredNoiseDist
@@ -39,7 +40,8 @@ class MaskedPolicy(nn.Module):
         # self.distribution = ColoredNoiseDist(beta=1, seq_len=48, action_dim=num_actions, device=self.device)
 
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
-        self.log_std = nn.Parameter(torch.ones(num_actions) * 0.0, requires_grad=True)
+        init_log_std = [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]
+        self.log_std = nn.Parameter(torch.tensor(np.array(init_log_std)).to(torch.float32), requires_grad=True)
 
         # self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
         # self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
