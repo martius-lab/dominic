@@ -70,6 +70,8 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.base_terrain_heights = torch.zeros(self.num_envs, dtype=torch.float, device=self.device,
                                                 requires_grad=False)
+        self.base_target_terrain_heights = torch.zeros(self.num_envs, dtype=torch.float, device=self.device,
+                                                requires_grad=False)
         self.joint_targets = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
                                          requires_grad=False)
         self.last_joint_targets = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
@@ -100,19 +102,14 @@ class Solo12DOMINOPosition(BaseTask):
         self.actuator_lag_index = torch.randint(low=0, high=self.cfg.domain_rand.actuator_lag_steps,
                                                 size=[self.num_envs], device=self.device)
 
-        self.ee_check_px, self.ee_check_py = torch.meshgrid(torch.arange(-int(self.cfg.terrain.ee_check),
-                                                                         int(self.cfg.terrain.ee_check) + 1,
-                                                                         device=self.device),
-                                                            torch.arange(-int(self.cfg.terrain.ee_check),
-                                                                         int(self.cfg.terrain.ee_check) + 1,
-                                                                         device=self.device))
+        self.ee_check_px, self.ee_check_py = torch.meshgrid(torch.arange(-1, 2, device=self.device),
+                                                            torch.arange(-1, 2, device=self.device))
 
-        self.base_check_px, self.base_check_py = torch.meshgrid(torch.arange(-int(self.cfg.terrain.base_check),
-                                                                             int(self.cfg.terrain.base_check) + 1,
-                                                                             device=self.device),
-                                                                torch.arange(-int(self.cfg.terrain.base_check),
-                                                                             int(self.cfg.terrain.base_check) + 1,
-                                                                             device=self.device))
+        self.base_check_px, self.base_check_py = torch.meshgrid(torch.arange(-1, 2, device=self.device),
+                                                                torch.arange(-1, 2, device=self.device))
+
+        self.base_target_check_px, self.base_target_check_py = torch.meshgrid(torch.arange(-3, 4, device=self.device),
+                                                                              torch.arange(-3, 4, device=self.device))
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -370,20 +367,27 @@ class Solo12DOMINOPosition(BaseTask):
         base_global = (base_global / self.terrain.cfg.horizontal_scale).long()
         base_px = base_global[:, 0]
         base_py = base_global[:, 1]
-        base_px = torch.clip(base_px, 2 * int(self.cfg.terrain.base_check),
-                             self.height_samples.shape[0] - 2 * int(self.cfg.terrain.base_check))
-        base_py = torch.clip(base_py, 2 * int(self.cfg.terrain.base_check),
-                             self.height_samples.shape[1] - 2 * int(self.cfg.terrain.base_check))
+        base_terrain_px = torch.clip(base_px, 2, self.height_samples.shape[0] - 2)
+        base_terrain_py = torch.clip(base_py, 2, self.height_samples.shape[1] - 2)
 
-        base_px = base_px.unsqueeze(1) + torch.flatten(self.base_check_px)
-        base_py = base_py.unsqueeze(1) + torch.flatten(self.base_check_py)
-        base_heights = self.height_samples[base_px, base_py]
+        base_terrain_px = base_terrain_px.unsqueeze(1) + torch.flatten(self.base_check_px)
+        base_terrain_py = base_terrain_py.unsqueeze(1) + torch.flatten(self.base_check_py)
+        base_heights = self.height_samples[base_terrain_px, base_terrain_py]
         base_heights = torch.max(base_heights, dim=1)[0]
         self.base_terrain_heights = base_heights * self.terrain.cfg.vertical_scale
 
+        base_target_px = torch.clip(base_px, 6, self.height_samples.shape[0] - 6)
+        base_target_py = torch.clip(base_py, 6, self.height_samples.shape[1] - 6)
+
+        base_target_px = base_target_px.unsqueeze(1) + torch.flatten(self.base_target_check_px)
+        base_target_py = base_target_py.unsqueeze(1) + torch.flatten(self.base_target_check_py)
+        base_target_heights = self.height_samples[base_target_px, base_target_py]
+        base_target_heights = torch.max(base_target_heights, dim=1)[0]
+        self.base_target_terrain_heights = base_target_heights * self.terrain.cfg.vertical_scale
+
         # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 0, 1))
         # for i in range(self.num_envs):
-        #     heights = self.base_terrain_heights[i].cpu().numpy()
+        #     heights = self.base_target_terrain_heights[i].cpu().numpy()
         #     height_points = self.root_states[i, :2].cpu().numpy()
         #     x = height_points[0]
         #     y = height_points[1]
@@ -407,10 +411,8 @@ class Solo12DOMINOPosition(BaseTask):
         ee_globals = (ee_globals / self.terrain.cfg.horizontal_scale).long()
         ee_px = ee_globals[:, :, 0].view(-1)
         ee_py = ee_globals[:, :, 1].view(-1)
-        ee_px = torch.clip(ee_px, 2 * int(self.cfg.terrain.ee_check),
-                           self.height_samples.shape[0] - 2 * int(self.cfg.terrain.ee_check))
-        ee_py = torch.clip(ee_py, 2 * int(self.cfg.terrain.ee_check),
-                           self.height_samples.shape[1] - 2 * int(self.cfg.terrain.ee_check))
+        ee_px = torch.clip(ee_px, 2, self.height_samples.shape[0] - 2)
+        ee_py = torch.clip(ee_py, 2, self.height_samples.shape[1] - 2)
 
         ee_px = ee_px.unsqueeze(1) + torch.flatten(self.ee_check_px)
         ee_py = ee_py.unsqueeze(1) + torch.flatten(self.ee_check_py)
@@ -589,10 +591,8 @@ class Solo12DOMINOPosition(BaseTask):
         base_global = (base_global / self.terrain.cfg.horizontal_scale).long()
         base_px = base_global[:, 0]
         base_py = base_global[:, 1]
-        base_px = torch.clip(base_px, 2 * int(self.cfg.terrain.base_check),
-                             self.height_samples.shape[0] - 2 * int(self.cfg.terrain.base_check))
-        base_py = torch.clip(base_py, 2 * int(self.cfg.terrain.base_check),
-                             self.height_samples.shape[1] - 2 * int(self.cfg.terrain.base_check))
+        base_px = torch.clip(base_px, 2, self.height_samples.shape[0] - 2)
+        base_py = torch.clip(base_py, 2, self.height_samples.shape[1] - 2)
 
         base_px = base_px.unsqueeze(1) + torch.flatten(self.base_check_px)
         base_py = base_py.unsqueeze(1) + torch.flatten(self.base_check_py)
@@ -736,7 +736,7 @@ class Solo12DOMINOPosition(BaseTask):
     #     return torch.exp(-torch.square(base_ang_vel_low / sigma[2]))
 
     def _reward_lin_z(self, sigma):
-        lin_z_error = self.root_states[:, 2] - (self.base_terrain_heights + self.cfg.rewards.base_height_target)
+        lin_z_error = self.root_states[:, 2] - (self.base_target_terrain_heights + self.cfg.rewards.base_height_target)
         return torch.exp(-torch.square(lin_z_error / sigma))
 
     # def _reward_lin_vel_z(self, sigma):

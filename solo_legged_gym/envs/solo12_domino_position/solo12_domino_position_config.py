@@ -52,8 +52,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # stepping_stones, gap, pit
         type = "special_box"
         params = list(np.arange(6) * 0.05)
-        ee_check = 1  # px
-        base_check = 1  # px
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -137,7 +135,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            # lin_z = "[2, 0.1]"
             # feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
             move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
@@ -154,8 +151,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             feet_acc = "[0, 500]"
             joint_targets_rate = "[0, 1.5]"
+            lin_z = "[0, 0.1]"
             # dof_acc = "[0, 4000]"
-            feet_height = "[0, [0.08, 0.1, 0.25]]"  # target height, sigma, pos threshold
+            # feet_height = "[0, [0.08, 0.1, 0.25]]"  # target height, sigma, pos threshold
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -172,8 +170,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         num_groups = 3
 
-        base_height_target = 0.25
-        base_height_danger = 0.05
+        base_height_target = 0.5
+        base_height_danger = 0.1
 
     class observations:
         clip_obs = True
@@ -260,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'drop_assist'
+        run_name = 'jumpy'
 
         # load
         load_run = -1  # -1 = last run
