@@ -25,8 +25,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         mesh_type = 'trimesh'  # plane, heightfield, trimesh
 
         measure_height = True  # measure the height samples
-        measured_points_x = list((np.arange(9) - 9 / 2) / 10)
-        measured_points_y = list((np.arange(7) - 7 / 2) / 10)
+        measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
+        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -151,9 +151,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 2.0]"
-            lin_z = "[0, 0.2]"
+            lin_z = "[0, 0.4]"
+            feet_height = "[0, [0.1, 0.08, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
-            # feet_height = "[0, [0.08, 0.1, 0.25]]"  # target height, sigma, pos threshold
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -205,7 +205,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.02
+        entropy_coef = 0.010
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'jumpy_only'
+        run_name = 'jumpy_only2'
 
         # load
         load_run = -1  # -1 = last run

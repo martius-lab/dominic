@@ -373,7 +373,7 @@ class Solo12DOMINOPosition(BaseTask):
         base_terrain_px = base_terrain_px.unsqueeze(1) + torch.flatten(self.base_check_px)
         base_terrain_py = base_terrain_py.unsqueeze(1) + torch.flatten(self.base_check_py)
         base_heights = self.height_samples[base_terrain_px, base_terrain_py]
-        base_heights = torch.max(base_heights, dim=1)[0]
+        base_heights = torch.min(base_heights, dim=1)[0]
         self.base_terrain_heights = base_heights * self.terrain.cfg.vertical_scale
 
         base_target_px = torch.clip(base_px, 6, self.height_samples.shape[0] - 6)
@@ -417,7 +417,7 @@ class Solo12DOMINOPosition(BaseTask):
         ee_px = ee_px.unsqueeze(1) + torch.flatten(self.ee_check_px)
         ee_py = ee_py.unsqueeze(1) + torch.flatten(self.ee_check_py)
         ee_heights = self.height_samples[ee_px, ee_py]
-        ee_heights = torch.max(ee_heights, dim=1)[0]
+        ee_heights = torch.min(ee_heights, dim=1)[0]
         self.ee_terrain_heights = ee_heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
 
         # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(0, 1, 1))
