@@ -7,11 +7,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 2048
-        num_observations = 33 + 7 * 9 + 12 + 2  # #states + #height + #actions + #commands
+        num_observations = 33 + 7 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
         episode_length_s = 10  # episode length in seconds
+        remaining_check_time = 0.4
 
         play = False
         plot_target = True
@@ -35,7 +36,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 2.5  # [m]
 
         num_rows = 5
-        num_cols = 5
+        num_cols = 6
 
         border_size = 1  # [m]
 
@@ -50,9 +51,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(5) * 0.1)
-        ee_check = 1
-        base_check = 3
+        params = list(np.arange(6) * 0.05)
+        ee_check = 1  # px
+        base_check = 1  # px
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -64,10 +65,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [5, 5, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 2  # default: target in x, y in base
+        num_commands = 3  # default: target in x, y, z in base
         num_targets = 4
-        targets_in_env_x = [0.5, 5.5, 0.5, 5.5]
-        targets_in_env_y = [0.5, 0.5, 5.5, 5.5]
+        targets_in_env_x = [1.0, 5.0, 1.0, 5.0]
+        targets_in_env_y = [1.0, 1.0, 5.0, 5.0]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.5]  # x,y,z [m]
@@ -136,14 +137,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            lin_z = "[2, 0.1]"
-            feet_height = "[2, [0.08, 0.1, 0.5]]"  # target height, sigma, pos threshold
-            feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
+            # lin_z = "[2, 0.1]"
+            feet_height = "[2, [0.08, 0.1, 0.25]]"  # target height, sigma, pos threshold
+            # feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
+            move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
+            stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[1, [0.5, 0.8]]"  # sigma, clip/scale
-            stall_pos = "[1, [0.4, 0.5, 0.1]]"  # minimal vel, distance, sigma
-            pos = "[1, 1.5]"  # sigma
+            pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
             # posl = "[1, 5.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
@@ -153,8 +154,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             feet_acc = "[0, 400]"
-            joint_targets_rate = "[0, 1.0]"
-            dof_acc = "[0, 3000]"
+            joint_targets_rate = "[0, 1.5]"
+            dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
 
             # lin_vel_z = "[0, 0.5]"
@@ -172,7 +173,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_groups = 3
 
         base_height_target = 0.25
-        base_height_danger = 0.1
+        base_height_danger = 0.05
 
     class observations:
         clip_obs = True
@@ -186,7 +187,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             lin_vel = 0.2
             ang_vel = 0.2
             gravity = 0.1
-            height_measurements = 0.1
+            height_measurements = 0.05
 
 
 class Solo12DOMINOPositionTrainCfg:
@@ -216,7 +217,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 4.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 2.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -255,7 +256,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'D3POS'
 
         # load
         load_run = -1  # -1 = last run

@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[1.0, 4.0, 1.0]",
+        "fixed_adv_coeff": "[1.0, 2.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -75,10 +75,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "baseline",
+        "run_name": "D3POS",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230716_214937"
+        "wandb_group": "cluster_20230717_090745"
       }
     },
     "env_cfg": {
@@ -104,19 +104,19 @@
         "thickness": 0.01
       },
       "commands": {
-        "num_commands": 2,
+        "num_commands": 3,
         "num_targets": 4,
         "targets_in_env_x": [
-          0.5,
-          5.5,
-          0.5,
-          5.5
+          1.0,
+          5.0,
+          1.0,
+          5.0
         ],
         "targets_in_env_y": [
-          0.5,
-          0.5,
-          5.5,
-          5.5
+          1.0,
+          1.0,
+          5.0,
+          5.0
         ]
       },
       "control": {
@@ -162,10 +162,11 @@
         "num_actions": 12,
         "num_envs": 2048,
         "num_features": 10,
-        "num_observations": 110,
+        "num_observations": 112,
         "num_skills": 8,
         "play": false,
-        "plot_target": true
+        "plot_target": true,
+        "remaining_check_time": 0.4
       },
       "init_member_classes": {},
       "init_state": {
@@ -215,12 +216,12 @@
           "dof_pos": 0.05,
           "dof_vel": 0.5,
           "gravity": 0.1,
-          "height_measurements": 0.1,
+          "height_measurements": 0.05,
           "lin_vel": 0.2
         }
       },
       "rewards": {
-        "base_height_danger": 0.1,
+        "base_height_danger": 0.05,
         "base_height_target": 0.25,
         "max_contact_force": 100.0,
         "num_groups": 3,
@@ -228,15 +229,13 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "dof_acc": "[0, 3000]",
+          "dof_acc": "[0, 4000]",
           "feet_acc": "[0, 400]",
-          "feet_height": "[2, [0.08, 0.1, 0.5]]",
-          "feet_slip": "[2, [0.08, 0.1, 0.2]]",
-          "joint_targets_rate": "[0, 1.0]",
-          "lin_z": "[2, 0.1]",
-          "move_towards": "[1, [0.5, 0.8]]",
-          "pos": "[1, 1.5]",
-          "stall_pos": "[1, [0.4, 0.5, 0.1]]"
+          "feet_height": "[2, [0.08, 0.1, 0.25]]",
+          "joint_targets_rate": "[0, 1.5]",
+          "move_towards": "[2, [0.5, 0.8]]",
+          "pos": "[1, 0.5]",
+          "stall_pos": "[2, [0.4, 0.25, 0.1]]"
         }
       },
       "seed": 42,
@@ -264,7 +263,7 @@
         "up_axis": 1
       },
       "terrain": {
-        "base_check": 3,
+        "base_check": 1,
         "border_size": 1,
         "dynamic_friction": 1.0,
         "ee_check": 1,
@@ -292,15 +291,16 @@
           0.25
         ],
         "mesh_type": "trimesh",
-        "num_cols": 5,
+        "num_cols": 6,
         "num_rows": 5,
-        "num_sub_terrains": 25,
+        "num_sub_terrains": 30,
         "params": [
           0.0,
+          0.05,
           0.1,
+          0.15000000000000002,
           0.2,
-          0.30000000000000004,
-          0.4
+          0.25
         ],
         "restitution": 0.0,
         "slope_threshold": 0.05,

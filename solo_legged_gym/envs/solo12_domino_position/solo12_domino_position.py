@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import sys
 from isaacgym import gymtorch, gymapi, gymutil
-from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, quat_apply
+from isaacgym.torch_utils import torch_rand_float, quat_rotate_inverse, get_euler_xyz, quat_apply, quat_rotate
 
 from solo_legged_gym.envs import BaseTask
 from solo_legged_gym.utils import class_to_dict, get_quat_yaw, wrap_to_pi, quat_apply_yaw
@@ -21,6 +21,9 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.commands_in_base = torch.zeros(self.num_envs, self.cfg.commands.num_commands, dtype=torch.float,
                                             device=self.device, requires_grad=False)
+
+        self.remaining_time = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
+        self.remaining_check_time = self.cfg.env.remaining_check_time
 
         self.num_skills = self.cfg.env.num_skills
         self.skills = torch.zeros(self.num_envs, dtype=torch.long, device=self.device, requires_grad=False)
@@ -155,6 +158,7 @@ class Solo12DOMINOPosition(BaseTask):
     def reset(self):
         """ Reset all robots"""
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
+        self._update_remaining_time()
         self._update_commands_in_base()
 
         _, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
@@ -279,6 +283,7 @@ class Solo12DOMINOPosition(BaseTask):
         env_ids_reset = self.reset_buf.nonzero().flatten()
         self.reset_idx(env_ids_reset)
 
+        self._update_remaining_time()
         self._update_commands_in_base()
         if self.cfg.terrain.measure_height:
             self._measure_height()
@@ -294,7 +299,7 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _check_termination(self):
         self.terminate_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
-        # self.terminate_buf |= self.root_states[:, 2] < self.base_terrain_heights + self.cfg.rewards.base_height_danger
+        self.terminate_buf |= self.root_states[:, 2] < self.base_terrain_heights + self.cfg.rewards.base_height_danger
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length  # no terminal reward for time-outs
 
@@ -315,6 +320,7 @@ class Solo12DOMINOPosition(BaseTask):
             self.obs_buf,
             self.actions,
             self.commands_in_base,
+            self.remaining_time.unsqueeze(-1),
         ), dim=-1)
 
         # add noise if needed
@@ -431,12 +437,37 @@ class Solo12DOMINOPosition(BaseTask):
         self.commands[env_ids, 1] = env_origin[:, 1] + self.targets_in_env_y[
             sampled_target] - self.cfg.terrain.terrain_length / 2
 
-    def _update_commands_in_base(self):
-        target_pos_in_global = torch.cat((self.commands[:, 0:2] - self.root_states[:, 0:2],
-                                          torch.zeros_like(self.commands[:, 1:2])), dim=-1)  # fake z component
-        target_pos_in_base = quat_rotate_inverse(get_quat_yaw(self.base_quat), target_pos_in_global)[:, 0:2]
+        command_global = self.commands[env_ids, :2].clone()
+        command_global += self.terrain.cfg.border_size
+        command_global = (command_global / self.terrain.cfg.horizontal_scale).long()
+        command_px = command_global[:, 0]
+        command_py = command_global[:, 1]
+        command_px = torch.clip(command_px, 2, self.height_samples.shape[0] - 2)
+        command_py = torch.clip(command_py, 2, self.height_samples.shape[1] - 2)
 
-        self.commands_in_base[:, 0:2] = target_pos_in_base
+        command_height_0 = self.height_samples[command_px, command_py]
+        command_height_1 = self.height_samples[command_px + 1, command_py]
+        command_height_2 = self.height_samples[command_px, command_py + 1]
+        command_height_3 = self.height_samples[command_px - 1, command_py]
+        command_height_4 = self.height_samples[command_px, command_py - 1]
+
+        command_heights = torch.min(torch.cat((
+            command_height_0.unsqueeze(1),
+            command_height_1.unsqueeze(1),
+            command_height_2.unsqueeze(1),
+            command_height_3.unsqueeze(1),
+            command_height_4.unsqueeze(1)
+        ), dim=1), dim=1)[0]
+        command_terrain_heights = command_heights * self.terrain.cfg.vertical_scale
+        self.commands[env_ids, 2] = command_terrain_heights + self.cfg.rewards.base_height_target
+
+    def _update_remaining_time(self):
+        self.remaining_time = (self.max_episode_length - self.episode_length_buf) / self.max_episode_length
+
+    def _update_commands_in_base(self):
+        target_pos_in_global = self.commands - self.root_states[:, 0:3]
+        target_pos_in_base = quat_rotate_inverse(get_quat_yaw(self.base_quat), target_pos_in_global)
+        self.commands_in_base[:, :] = target_pos_in_base
 
     def _prepare_draw(self):
         self.box_geoms = [gymutil.WireframeBoxGeometry(0.3, 0.15, 0.4, color=(1, 1, 0)) for _ in range(self.num_envs)]
@@ -447,12 +478,21 @@ class Solo12DOMINOPosition(BaseTask):
                                   range(self.num_envs)]
 
     def _draw_target(self):
+        # target_pos_in_base = quat_rotate(get_quat_yaw(self.base_quat), self.commands_in_base) + self.root_states[:, 0:3]
         for i in range(self.num_envs):
             if self.cfg.env.plot_target:
-                self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], 0.25)
+                self.box_poses[i].p = gymapi.Vec3(self.commands[i, 0], self.commands[i, 1], self.commands[i, 2])
                 self.box_poses[i].r = gymapi.Quat.from_euler_zyx(0, 0, 0)
-                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.15, 0.15, 0.15, color=(1, 1, 0))
+                if self.remaining_time[i] < self.remaining_check_time:
+                    color_ = (1, 0, 0)
+                else:
+                    color_ = (1, 1, 0)
+                self.box_geoms[i] = gymutil.WireframeBoxGeometry(0.15, 0.15, self.remaining_time[i] * 0.4, color=color_)
                 gymutil.draw_lines(self.box_geoms[i], self.gym, self.viewer, self.envs[i], self.box_poses[i])
+
+                # self.box_poses_in_base[i].p = gymapi.Vec3(target_pos_in_base[i, 0], target_pos_in_base[i, 1], target_pos_in_base[i, 2])
+                # self.box_poses_in_base[i].r = gymapi.Quat.from_euler_zyx(0, 0, 0)
+                # gymutil.draw_lines(self.box_geom_in_base, self.gym, self.viewer, self.envs[i], self.box_poses_in_base[i])
 
     def _draw_heights(self):
         sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 1, 0))
@@ -580,7 +620,7 @@ class Solo12DOMINOPosition(BaseTask):
             self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),), device=self.device)
             self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
         else:
-            pos_distance = torch.norm(self.commands_in_base[env_ids, 0:2], dim=1, p=2)
+            pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
             move_up = (pos_distance < 0.25)
             move_down = (pos_distance > 2.0) * ~move_up
             self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
@@ -661,9 +701,9 @@ class Solo12DOMINOPosition(BaseTask):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _reward_pos(self, sigma):
-        pos_error = torch.clip(torch.norm(self.commands_in_base[:, 0:2], dim=1, p=2), min=None, max=2 * sigma)
+        pos_error = torch.clip(torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2), min=None, max=2 * sigma)
         rew = torch.exp(-torch.square(pos_error / sigma))
-        return rew
+        return rew * (self.remaining_time < self.remaining_check_time)
 
     # def _reward_yaw(self, sigma):
     #     yaw_error = torch.clip(torch.abs(self.commands_in_base[:, 2]), min=None, max=2 * sigma)
@@ -671,17 +711,15 @@ class Solo12DOMINOPosition(BaseTask):
     #     return rew
 
     def _reward_move_towards(self, sigma):
-        target_pos_in_base = self.commands_in_base[:, 0:2]
-        base_vel_in_base = self.base_lin_vel[:, 0:2]
-        target_pos_in_base_normalized = target_pos_in_base / (
-                torch.norm(target_pos_in_base, dim=-1, keepdim=True) + 1e-8)
-        base_lin_vel_normalized = base_vel_in_base / (
-                torch.norm(base_vel_in_base, dim=-1, keepdim=True) + 1e-8)
+        target_pos_in_base_normalized = self.commands_in_base / (
+                torch.norm(self.commands_in_base, dim=-1, keepdim=True) + 1e-8)
+        base_lin_vel_normalized = self.base_lin_vel / (
+                torch.norm(self.base_lin_vel, dim=-1, keepdim=True) + 1e-8)
         towards_error = 1 - torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1)
         return torch.clip(torch.exp(-torch.square(towards_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
     def _reward_stall_pos(self, sigma):
-        distance = torch.norm(self.commands_in_base[:, 0:2], dim=1, p=2)
+        distance = torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2)
         base_vel = torch.norm(self.base_lin_vel, dim=-1, p=2)
         base_vel_low = torch.clip(sigma[0] - base_vel, min=0.0, max=None) * (distance > sigma[1])
         return torch.exp(-torch.square(base_vel_low / sigma[2]))
@@ -735,7 +773,7 @@ class Solo12DOMINOPosition(BaseTask):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
 
     def _reward_feet_height(self, sigma):
-        distance = torch.norm(self.commands_in_base[:, 0:2], dim=1, p=2)
+        distance = torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2)
         feet_height_error = torch.norm(self.ee_global[:, :, 2] - (self.ee_terrain_heights + sigma[0]), p=2, dim=1)
         feet_height_error *= distance > sigma[2]
         return torch.exp(-torch.square(feet_height_error / sigma[1]))
