@@ -151,7 +151,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 2.0]"
-            lin_z = "[0, 0.4]"
+            lin_z = "[0, 0.3]"
             feet_height = "[0, [0.1, 0.08, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'jumpy_only2'
+        run_name = 'jumpy_only3'
 
         # load
         load_run = -1  # -1 = last run

@@ -81,7 +81,7 @@
         "run_name": "jumpy_only2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230717_163505"
+        "wandb_group": "cluster_20230717_170625"
       }
     },
     "env_cfg": {
