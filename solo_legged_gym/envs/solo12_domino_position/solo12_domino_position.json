@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.02,
-        "fixed_adv_coeff": "[2.0, 2.0, 2.0]",
+        "fixed_adv_coeff": "[1.0, 0.0, 0.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -78,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "large_target_height",
+        "run_name": "jumpy_only",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230717_140030"
+        "wandb_group": "cluster_20230717_140951"
       }
     },
     "env_cfg": {
@@ -163,7 +163,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 100,
+        "num_envs": 2048,
         "num_features": 10,
         "num_observations": 112,
         "num_skills": 8,
@@ -232,9 +232,9 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 500]",
-          "joint_targets_rate": "[0, 1.5]",
-          "lin_z": "[0, 0.1]",
+          "feet_acc": "[0, 600]",
+          "joint_targets_rate": "[0, 2.0]",
+          "lin_z": "[0, 0.2]",
           "move_towards": "[2, [0.5, 0.8]]",
           "pos": "[1, 0.5]",
           "stall_pos": "[2, [0.4, 0.25, 0.1]]"
