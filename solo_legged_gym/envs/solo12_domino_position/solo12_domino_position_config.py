@@ -69,7 +69,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         targets_in_env_y = [1.0, 1.0, 5.0, 5.0]
 
     class init_state(BaseEnvCfg.init_state):
-        pos = [0.0, 0.0, 0.5]  # x,y,z [m]
+        pos = [0.0, 0.0, 0.4]  # x,y,z [m]
         rot = [0.0, 0.0, 0.0, 1.0]  # x,y,z,w [quat]
         lin_vel = [0.0, 0.0, 0.0]  # x,y,z [m/s]
         ang_vel = [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -78,14 +78,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             "HL_HAA": 0.0,
             "FR_HAA": 0.0,
             "HR_HAA": 0.0,
-            "FL_HFE": np.pi / 4,
-            "HL_HFE": -np.pi / 4,
-            "FR_HFE": np.pi / 4,
-            "HR_HFE": -np.pi / 4,
-            "FL_KFE": -np.pi / 2,
-            "HL_KFE": np.pi / 2,
-            "FR_KFE": -np.pi / 2,
-            "HR_KFE": np.pi / 2,
+            "FL_HFE": np.pi / 3,
+            "HL_HFE": -np.pi / 3,
+            "FR_HFE": np.pi / 3,
+            "HR_HFE": -np.pi / 3,
+            "FL_KFE": -2 * np.pi / 3,
+            "HL_KFE": 2 * np.pi / 3,
+            "FR_KFE": -2 * np.pi / 3,
+            "HR_KFE": 2 * np.pi / 3,
         }
 
     class control(BaseEnvCfg.control):
@@ -149,9 +149,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 400]"
-            joint_targets_rate = "[0, 1.5]"
-            lin_z = "[0, 0.25]"
+            # feet_acc = "[0, 400]"
+            joint_targets_rate = "[0, 2.0]"
+            lin_z = "[0, 0.2]"
             feet_height = "[0, [0.06, 0.04, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
@@ -170,8 +170,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         num_groups = 2
 
-        base_height_target = 0.35
-        base_height_danger = 0.1
+        base_height_target = 0.5
+        base_height_danger = 0.05
 
     class observations:
         clip_obs = True
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'lower_height'
+        run_name = 'lower_default'
 
         # load
         load_run = -1  # -1 = last run

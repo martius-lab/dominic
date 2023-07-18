@@ -78,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "lower_height",
+        "run_name": "lower_default",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230718_100615"
+        "wandb_group": "cluster_20230718_123007"
       }
     },
     "env_cfg": {
@@ -183,14 +183,14 @@
           "HL_HAA": 0.0,
           "FR_HAA": 0.0,
           "HR_HAA": 0.0,
-          "FL_HFE": 0.7853981633974483,
-          "HL_HFE": -0.7853981633974483,
-          "FR_HFE": 0.7853981633974483,
-          "HR_HFE": -0.7853981633974483,
-          "FL_KFE": -1.5707963267948966,
-          "HL_KFE": 1.5707963267948966,
-          "FR_KFE": -1.5707963267948966,
-          "HR_KFE": 1.5707963267948966
+          "FL_HFE": 1.0471975511965976,
+          "HL_HFE": -1.0471975511965976,
+          "FR_HFE": 1.0471975511965976,
+          "HR_HFE": -1.0471975511965976,
+          "FL_KFE": -2.0943951023931953,
+          "HL_KFE": 2.0943951023931953,
+          "FR_KFE": -2.0943951023931953,
+          "HR_KFE": 2.0943951023931953
         },
         "lin_vel": [
           0.0,
@@ -200,7 +200,7 @@
         "pos": [
           0.0,
           0.0,
-          0.5
+          0.4
         ],
         "rot": [
           0.0,
@@ -224,18 +224,17 @@
         }
       },
       "rewards": {
-        "base_height_danger": 0.1,
-        "base_height_target": 0.35,
+        "base_height_danger": 0.05,
+        "base_height_target": 0.5,
         "max_contact_force": 100.0,
         "num_groups": 2,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 400]",
           "feet_height": "[0, [0.06, 0.04, 0.25]]",
-          "joint_targets_rate": "[0, 1.5]",
-          "lin_z": "[0, 0.25]",
+          "joint_targets_rate": "[0, 2.0]",
+          "lin_z": "[0, 0.2]",
           "posl": "[1, 2.0]"
         }
       },
