@@ -82,10 +82,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             "HL_HFE": -np.pi / 3,
             "FR_HFE": np.pi / 3,
             "HR_HFE": -np.pi / 3,
-            "FL_KFE": -np.pi / 3,
-            "HL_KFE": np.pi / 3,
-            "FR_KFE": -np.pi / 3,
-            "HR_KFE": np.pi / 3,
+            "FL_KFE": -np.pi / 2,
+            "HL_KFE": np.pi / 2,
+            "FR_KFE": -np.pi / 2,
+            "HR_KFE": np.pi / 2,
         }
 
     class control(BaseEnvCfg.control):
