@@ -429,7 +429,6 @@ class DOMINO:
             # The most important part of the algorithm
             advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0] * lagrange_coeff
             advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]
-            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * self.assist_adv_percentage
             advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1 - lagrange_coeff)
 
             # Using KL to adaptively changing the learning rate
@@ -445,7 +444,7 @@ class DOMINO:
                     kl_mean = torch.mean(kl)
 
                     if kl_mean > self.a_cfg.desired_kl * 2.0:
-                        self.policy_lr = max(1e-5, self.policy_lr / 1.5)
+                        self.policy_lr = max(1e-3, self.policy_lr / 1.5)
                     elif self.a_cfg.desired_kl / 2.0 > kl_mean > 0.0:
                         self.policy_lr = min(5e-2, self.policy_lr * 1.5)
 

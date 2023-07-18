@@ -92,7 +92,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 5.0
+        torque_limits = 10.0
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
@@ -137,12 +137,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
-            move_towards = "[2, [0.5, 0.8]]"  # sigma, clip/scale
-            stall_pos = "[2, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            # move_towards = "[2, [0.5, 0.7]]"  # sigma, clip/scale
+            # stall_pos = "[2, [0.2, 0.25, 0.2]]"  # minimal vel, distance, sigma
 
-            pos = "[1, 0.5]"  # sigma
+            # pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
-            # posl = "[1, 5.0]"  # max error
+            posl = "[1, 2.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
@@ -151,7 +151,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 2.0]"
-            lin_z = "[0, 0.3]"
+            lin_z = "[0, 0.8]"
             feet_height = "[0, [0.1, 0.08, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
@@ -168,9 +168,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # dof_vel = "[0, 50.0]"
             # feet_air_time = "[0, None]"
 
-        num_groups = 3
+        num_groups = 2
 
-        base_height_target = 0.5
+        base_height_target = 0.8
         base_height_danger = 0.1
 
     class observations:
@@ -215,7 +215,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 0.0, 0.0]'
+        fixed_adv_coeff = '[1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'jumpy_only3'
+        run_name = 'let_it_train_l'
 
         # load
         load_run = -1  # -1 = last run

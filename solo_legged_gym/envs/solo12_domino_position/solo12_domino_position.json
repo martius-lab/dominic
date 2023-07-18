@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.0, 0.0, 0.0]",
+        "fixed_adv_coeff": "[1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -78,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "jumpy_only2",
+        "run_name": "let_it_train_l",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230717_170625"
+        "wandb_group": "cluster_20230717_233157"
       }
     },
     "env_cfg": {
@@ -137,7 +137,7 @@
           "HFE": 5.0,
           "KFE": 5.0
         },
-        "torque_limits": 5.0
+        "torque_limits": 10.0
       },
       "domain_rand": {
         "actuator_lag": true,
@@ -225,9 +225,9 @@
       },
       "rewards": {
         "base_height_danger": 0.1,
-        "base_height_target": 0.5,
+        "base_height_target": 0.8,
         "max_contact_force": 100.0,
-        "num_groups": 3,
+        "num_groups": 2,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
@@ -235,10 +235,8 @@
           "feet_acc": "[0, 600]",
           "feet_height": "[0, [0.1, 0.08, 0.25]]",
           "joint_targets_rate": "[0, 2.0]",
-          "lin_z": "[0, 0.4]",
-          "move_towards": "[2, [0.5, 0.8]]",
-          "pos": "[1, 0.5]",
-          "stall_pos": "[2, [0.4, 0.25, 0.1]]"
+          "lin_z": "[0, 0.8]",
+          "posl": "[1, 2.0]"
         }
       },
       "seed": 42,
