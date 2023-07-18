@@ -121,7 +121,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         randomize_base_mass = True
         added_mass_range = [-0.5, 0.5]
 
-        push_robots = True
+        push_robots = False
         push_interval_s = 5
         max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
@@ -142,7 +142,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
-            posl = "[1, 2.0]"  # max error
+            posl = "[1, 1.5]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
@@ -151,8 +151,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # feet_acc = "[0, 400]"
             joint_targets_rate = "[0, 2.0]"
-            lin_z = "[0, 0.2]"
-            feet_height = "[0, [0.06, 0.04, 0.25]]"  # target height, sigma, pos threshold
+            lin_z = "[0, 0.6]"
+            feet_height = "[0, [0.08, 0.04, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
 
@@ -170,7 +170,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         num_groups = 2
 
-        base_height_target = 0.5
+        base_height_target = 1.0
         base_height_danger = 0.05
 
     class observations:
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'lower_default'
+        run_name = 'higher_target'
 
         # load
         load_run = -1  # -1 = last run

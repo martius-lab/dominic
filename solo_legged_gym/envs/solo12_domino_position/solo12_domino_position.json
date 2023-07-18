@@ -78,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "lower_default",
+        "run_name": "higher_target",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230718_123007"
+        "wandb_group": "cluster_20230718_141043"
       }
     },
     "env_cfg": {
@@ -153,7 +153,7 @@
         "max_push_avel_xyz": 0.5,
         "max_push_vel_xyz": 0.5,
         "push_interval_s": 5,
-        "push_robots": true,
+        "push_robots": false,
         "randomize_actuator_lag": false,
         "randomize_base_mass": true,
         "randomize_friction": true
@@ -225,17 +225,17 @@
       },
       "rewards": {
         "base_height_danger": 0.05,
-        "base_height_target": 0.5,
+        "base_height_target": 1.0,
         "max_contact_force": 100.0,
         "num_groups": 2,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_height": "[0, [0.06, 0.04, 0.25]]",
+          "feet_height": "[0, [0.08, 0.04, 0.25]]",
           "joint_targets_rate": "[0, 2.0]",
-          "lin_z": "[0, 0.2]",
-          "posl": "[1, 2.0]"
+          "lin_z": "[0, 0.6]",
+          "posl": "[1, 1.5]"
         }
       },
       "seed": 42,
