@@ -149,10 +149,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 600]"
-            joint_targets_rate = "[0, 2.0]"
-            lin_z = "[0, 0.8]"
-            feet_height = "[0, [0.1, 0.08, 0.25]]"  # target height, sigma, pos threshold
+            feet_acc = "[0, 400]"
+            joint_targets_rate = "[0, 1.5]"
+            lin_z = "[0, 0.25]"
+            feet_height = "[0, [0.06, 0.04, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
 
@@ -170,7 +170,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         num_groups = 2
 
-        base_height_target = 0.8
+        base_height_target = 0.35
         base_height_danger = 0.1
 
     class observations:
@@ -215,7 +215,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0]'
+        fixed_adv_coeff = '[1.0, 2.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'let_it_train_l'
+        run_name = 'lower_height'
 
         # load
         load_run = -1  # -1 = last run

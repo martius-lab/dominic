@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.0, 1.0]",
+        "fixed_adv_coeff": "[1.0, 2.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -78,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "let_it_train_l",
+        "run_name": "lower_height",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230717_233157"
+        "wandb_group": "cluster_20230718_095727"
       }
     },
     "env_cfg": {
@@ -225,17 +225,17 @@
       },
       "rewards": {
         "base_height_danger": 0.1,
-        "base_height_target": 0.8,
+        "base_height_target": 0.35,
         "max_contact_force": 100.0,
         "num_groups": 2,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 600]",
-          "feet_height": "[0, [0.1, 0.08, 0.25]]",
-          "joint_targets_rate": "[0, 2.0]",
-          "lin_z": "[0, 0.8]",
+          "feet_acc": "[0, 400]",
+          "feet_height": "[0, [0.06, 0.04, 0.25]]",
+          "joint_targets_rate": "[0, 1.5]",
+          "lin_z": "[0, 0.25]",
           "posl": "[1, 2.0]"
         }
       },
