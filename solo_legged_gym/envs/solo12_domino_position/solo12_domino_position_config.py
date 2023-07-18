@@ -6,7 +6,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
-        num_envs = 2048
+        num_envs = 3072
         num_observations = 33 + 7 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12

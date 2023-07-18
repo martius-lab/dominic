@@ -81,7 +81,7 @@
         "run_name": "lower_height",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230718_095727"
+        "wandb_group": "cluster_20230718_100615"
       }
     },
     "env_cfg": {
@@ -163,7 +163,7 @@
         "env_spacing": 2.0,
         "episode_length_s": 10,
         "num_actions": 12,
-        "num_envs": 2048,
+        "num_envs": 3072,
         "num_features": 10,
         "num_observations": 112,
         "num_skills": 8,
