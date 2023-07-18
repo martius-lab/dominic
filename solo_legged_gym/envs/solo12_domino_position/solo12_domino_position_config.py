@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 3072
-        num_observations = 33 + 7 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 33 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
@@ -26,14 +26,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         measure_height = True  # measure the height samples
         measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
-        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
+        measured_points_y = list((np.arange(9) - (9-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 6.  # [m]
-        terrain_width = 6.  # [m]
+        terrain_length = 10.  # [m]
+        terrain_width = 10.  # [m]
 
-        init_range = 2.5  # [m]
+        init_range = 4.5  # [m]
 
         num_rows = 5
         num_cols = 6
@@ -65,8 +65,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: target in x, y, z in base
         num_targets = 4
-        targets_in_env_x = [1.0, 5.0, 1.0, 5.0]
-        targets_in_env_y = [1.0, 1.0, 5.0, 5.0]
+        targets_in_env_x = [1.0, 9.0, 1.0, 9.0]
+        targets_in_env_y = [1.0, 1.0, 9.0, 9.0]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.4]  # x,y,z [m]
@@ -78,10 +78,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             "HL_HAA": 0.0,
             "FR_HAA": 0.0,
             "HR_HAA": 0.0,
-            "FL_HFE": np.pi / 3,
-            "HL_HFE": -np.pi / 3,
-            "FR_HFE": np.pi / 3,
-            "HR_HFE": -np.pi / 3,
+            "FL_HFE": np.pi / 4,
+            "HL_HFE": -np.pi / 4,
+            "FR_HFE": np.pi / 4,
+            "HR_HFE": -np.pi / 4,
             "FL_KFE": -np.pi / 2,
             "HL_KFE": np.pi / 2,
             "FR_KFE": -np.pi / 2,
@@ -142,7 +142,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
-            posl = "[1, 1.5]"  # max error
+            posl = "[1, 1.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
@@ -150,9 +150,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             # feet_acc = "[0, 400]"
-            joint_targets_rate = "[0, 2.0]"
-            lin_z = "[0, 0.6]"
-            feet_height = "[0, [0.08, 0.04, 0.25]]"  # target height, sigma, pos threshold
+            joint_targets_rate = "[0, 1.5]"
+            lin_z = "[0, 0.05]"
+            feet_height = "[0, [0.04, 0.04, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
             # torques = "[0, 30]"
 
@@ -170,7 +170,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         num_groups = 2
 
-        base_height_target = 1.0
+        base_height_target = 0.25
         base_height_danger = 0.05
 
     class observations:
@@ -205,7 +205,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.010
+        entropy_coef = 1e-4
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -215,7 +215,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 2.0]'
+        fixed_adv_coeff = '[1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'higher_target'
+        run_name = 'colored'
 
         # load
         load_run = -1  # -1 = last run

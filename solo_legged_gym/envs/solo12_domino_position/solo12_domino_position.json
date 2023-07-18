@@ -18,8 +18,8 @@
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
-        "entropy_coef": 0.01,
-        "fixed_adv_coeff": "[1.0, 2.0]",
+        "entropy_coef": 0.0001,
+        "fixed_adv_coeff": "[1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -78,10 +78,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "higher_target",
+        "run_name": "colored",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230718_144136"
+        "wandb_group": "cluster_20230718_174705"
       }
     },
     "env_cfg": {
@@ -111,15 +111,15 @@
         "num_targets": 4,
         "targets_in_env_x": [
           1.0,
-          5.0,
+          9.0,
           1.0,
-          5.0
+          9.0
         ],
         "targets_in_env_y": [
           1.0,
           1.0,
-          5.0,
-          5.0
+          9.0,
+          9.0
         ]
       },
       "control": {
@@ -165,7 +165,7 @@
         "num_actions": 12,
         "num_envs": 3072,
         "num_features": 10,
-        "num_observations": 112,
+        "num_observations": 130,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -183,10 +183,10 @@
           "HL_HAA": 0.0,
           "FR_HAA": 0.0,
           "HR_HAA": 0.0,
-          "FL_HFE": 1.0471975511965976,
-          "HL_HFE": -1.0471975511965976,
-          "FR_HFE": 1.0471975511965976,
-          "HR_HFE": -1.0471975511965976,
+          "FL_HFE": 0.7853981633974483,
+          "HL_HFE": -0.7853981633974483,
+          "FR_HFE": 0.7853981633974483,
+          "HR_HFE": -0.7853981633974483,
           "FL_KFE": -1.5707963267948966,
           "HL_KFE": 1.5707963267948966,
           "FR_KFE": -1.5707963267948966,
@@ -225,17 +225,17 @@
       },
       "rewards": {
         "base_height_danger": 0.05,
-        "base_height_target": 1.0,
+        "base_height_target": 0.25,
         "max_contact_force": 100.0,
         "num_groups": 2,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_height": "[0, [0.08, 0.04, 0.25]]",
-          "joint_targets_rate": "[0, 2.0]",
-          "lin_z": "[0, 0.6]",
-          "posl": "[1, 1.5]"
+          "feet_height": "[0, [0.04, 0.04, 0.25]]",
+          "joint_targets_rate": "[0, 1.5]",
+          "lin_z": "[0, 0.05]",
+          "posl": "[1, 1.0]"
         }
       },
       "seed": 42,
@@ -266,7 +266,7 @@
         "border_size": 1,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
-        "init_range": 2.5,
+        "init_range": 4.5,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -280,13 +280,15 @@
           0.4
         ],
         "measured_points_y": [
+          -0.4,
           -0.3,
           -0.2,
           -0.1,
           0.0,
           0.1,
           0.2,
-          0.3
+          0.3,
+          0.4
         ],
         "mesh_type": "trimesh",
         "num_cols": 6,
@@ -303,8 +305,8 @@
         "restitution": 0.0,
         "slope_threshold": 0.05,
         "static_friction": 1.0,
-        "terrain_length": 6.0,
-        "terrain_width": 6.0,
+        "terrain_length": 10.0,
+        "terrain_width": 10.0,
         "train_all_together": true,
         "type": "special_box",
         "vertical_scale": 0.005

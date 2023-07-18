@@ -98,11 +98,17 @@ def box_terrain(terrain, height, platform_size=1.):
 
 
 def special_box_terrain(terrain, height):
-    # for 10 x 10 terrain
+    # for 6 x 6 terrain
     height = int(height / terrain.vertical_scale)
-    x = [0, 2, 4, 6]
+    x = [0, 2, 4, 6, 8, 10]
     x = [int(i / terrain.horizontal_scale) for i in x]
     terrain.height_field_raw[x[0]:x[1], x[0]:x[1]] = height
     terrain.height_field_raw[x[0]:x[1], x[2]:x[3]] = height
     terrain.height_field_raw[x[2]:x[3], x[0]:x[1]] = height
     terrain.height_field_raw[x[2]:x[3], x[2]:x[3]] = height
+    terrain.height_field_raw[x[0]:x[1], x[4]:x[5]] = height
+    terrain.height_field_raw[x[4]:x[5], x[2]:x[3]] = height
+    terrain.height_field_raw[x[2]:x[3], x[4]:x[5]] = height
+    terrain.height_field_raw[x[4]:x[5], x[4]:x[5]] = height
+    terrain.height_field_raw[x[4]:x[5], x[0]:x[1]] = height
+

@@ -112,8 +112,8 @@ class Solo12DOMINOPosition(BaseTask):
         self.base_check_px, self.base_check_py = torch.meshgrid(torch.arange(-1, 2, device=self.device),
                                                                 torch.arange(-1, 2, device=self.device))
 
-        self.base_target_check_px, self.base_target_check_py = torch.meshgrid(torch.arange(-3, 4, device=self.device),
-                                                                              torch.arange(-3, 4, device=self.device))
+        self.base_target_check_px, self.base_target_check_py = torch.meshgrid(torch.arange(-4, 5, device=self.device),
+                                                                              torch.arange(-4, 5, device=self.device))
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -381,8 +381,8 @@ class Solo12DOMINOPosition(BaseTask):
         base_heights = torch.min(base_heights, dim=1)[0]
         self.base_terrain_heights = base_heights * self.terrain.cfg.vertical_scale
 
-        base_target_px = torch.clip(base_px, 6, self.height_samples.shape[0] - 6)
-        base_target_py = torch.clip(base_py, 6, self.height_samples.shape[1] - 6)
+        base_target_px = torch.clip(base_px, 8, self.height_samples.shape[0] - 8)
+        base_target_py = torch.clip(base_py, 8, self.height_samples.shape[1] - 8)
 
         base_target_px = base_target_px.unsqueeze(1) + torch.flatten(self.base_target_check_px)
         base_target_py = base_target_py.unsqueeze(1) + torch.flatten(self.base_target_check_py)
