@@ -40,7 +40,7 @@ class MaskedPolicy(nn.Module):
         # self.distribution = ColoredNoiseDist(beta=1, seq_len=48, action_dim=num_actions, device=self.device)
 
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
-        init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * 0.0
+        init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * 1.0
         self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
 
         # self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)

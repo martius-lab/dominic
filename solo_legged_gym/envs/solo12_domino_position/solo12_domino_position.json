@@ -81,7 +81,7 @@
         "run_name": "higher_target",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230718_141043"
+        "wandb_group": "cluster_20230718_142011"
       }
     },
     "env_cfg": {
