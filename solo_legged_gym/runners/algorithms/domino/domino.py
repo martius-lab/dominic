@@ -44,7 +44,8 @@ class DOMINO:
                                    drop_out_rate=self.n_cfg.drop_out_rate,
                                    hidden_dims=self.n_cfg.policy_hidden_dims,
                                    activation=self.n_cfg.policy_activation,
-                                   device=self.device).to(self.device)
+                                   device=self.device,
+                                   init_log_std=self.n_cfg.init_log_std).to(self.device)
 
         self.ext_values = [MaskedValue(num_obs=self.env.num_obs,
                                        num_skills=self.env.num_skills,

@@ -13,6 +13,7 @@ class MaskedPolicy(nn.Module):
                  hidden_dims=None,
                  activation='elu',
                  device='cpu',
+                 init_log_std=0.0,
                  **kwargs):
         if hidden_dims is None:
             hidden_dims = [256, 256]
@@ -41,7 +42,7 @@ class MaskedPolicy(nn.Module):
 
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
 
-        init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * 0.5
+        init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * init_log_std
         # init_log_std = np.ones(12) * 0.0
         self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
 

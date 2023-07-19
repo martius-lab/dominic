@@ -26,6 +26,10 @@
   "restarts": 1,
   "hyperparam_list": [
     {
+      "param": "solo_legged_gym.train_cfg.network.init_log_std",
+      "values": [0.0, 0.5, 1.0]
+    },
+    {
       "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
       "values": ["[1.0, 1.0]", "[1.0, 5.0]", "[1.0, 2.0]", "[5.0, 1.0]", "[2.0, 1.0]"]
     },

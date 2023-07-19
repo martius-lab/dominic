@@ -43,6 +43,7 @@
       "algorithm_name": "DOMINO",
       "network": {
         "drop_out_rate": 0.5,
+        "init_log_std": 0.5,
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
@@ -81,7 +82,7 @@
         "run_name": "new_terrain2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_094717"
+        "wandb_group": "cluster_20230719_095842"
       }
     },
     "env_cfg": {

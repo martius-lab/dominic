@@ -192,6 +192,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
+        init_log_std = 0.5
         drop_out_rate = 0.5
         policy_hidden_dims = [256, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
