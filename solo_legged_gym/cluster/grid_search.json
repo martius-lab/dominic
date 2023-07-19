@@ -27,19 +27,19 @@
   "hyperparam_list": [
     {
       "param": "solo_legged_gym.train_cfg.network.init_log_std",
-      "values": [0.0, 0.5, 1.0]
+      "values": [0.0, 0.5]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.entropy_coef",
-      "values": [0.01, 0.015, 0.02]
+      "values": [0.01, 0.02, 0.03, 0.04]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
-      "values": ["[1.0, 1.0]", "[1.0, 3.0]", "[1.0, 2.0]", "[3.0, 1.0]", "[2.0, 1.0]"]
+      "values": ["[1.0, 1.0]", "[1.0, 1.5]", "[1.5, 1.0]", "[2.0, 1.0]"]
     },
     {
       "param": "solo_legged_gym.env_cfg.control.torque_limits",
-      "values": [2.5, 5.0, 10.0]
+      "values": [5.0, 7.5]
     }
   ]
 }
