@@ -82,7 +82,7 @@
         "run_name": "curriculum2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_223225"
+        "wandb_group": "cluster_20230719_225154"
       }
     },
     "env_cfg": {
@@ -265,7 +265,7 @@
         "border_size": 10,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
-        "init_range": 1.0,
+        "init_range": 1.5,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -291,8 +291,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 6,
-        "num_rows": 10,
-        "num_sub_terrains": 60,
+        "num_rows": 20,
+        "num_sub_terrains": 120,
         "params": [
           0.0,
           0.05,

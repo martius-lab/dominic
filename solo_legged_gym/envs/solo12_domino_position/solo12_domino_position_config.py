@@ -33,9 +33,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 6.  # [m]
         terrain_width = 6.  # [m]
 
-        init_range = 1.0  # [m]
+        init_range = 1.5  # [m]
 
-        num_rows = 10
+        num_rows = 20
         num_cols = 6
 
         border_size = 10  # [m]
@@ -149,7 +149,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 500]"
+            feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 1.0]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
@@ -208,7 +208,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.03
+        entropy_coef = 0.04
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -218,7 +218,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.0, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
