@@ -82,7 +82,7 @@
         "run_name": "curriculum3",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_231218"
+        "wandb_group": "cluster_20230719_233509"
       }
     },
     "env_cfg": {
@@ -291,8 +291,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 6,
-        "num_rows": 20,
-        "num_sub_terrains": 120,
+        "num_rows": 10,
+        "num_sub_terrains": 60,
         "params": [
           0.0,
           0.05,
