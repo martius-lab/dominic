@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "from_scratch",
+        "run_name": "from_scratch_grid",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_180536"
+        "wandb_group": "cluster_20230719_184928"
       }
     },
     "env_cfg": {

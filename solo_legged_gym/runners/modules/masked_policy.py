@@ -42,9 +42,9 @@ class MaskedPolicy(nn.Module):
 
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
 
-        # init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * init_log_std
-        init_log_std = np.ones(12) * 0.0
-        self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
+        # init_log_std_ = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * init_log_std
+        init_log_std_ = np.ones(12) * init_log_std
+        self.log_std = nn.Parameter(torch.tensor(init_log_std_).to(torch.float32), requires_grad=True)
 
         # self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
         # nn.init.uniform_(self.log_std_net.bias, init_log_std - 0.2, init_log_std + 0.2)
