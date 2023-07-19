@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "after_grid",
+        "run_name": "from_scratch",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_175252"
+        "wandb_group": "cluster_20230719_180536"
       }
     },
     "env_cfg": {
@@ -290,8 +290,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 6,
-        "num_rows": 5,
-        "num_sub_terrains": 30,
+        "num_rows": 10,
+        "num_sub_terrains": 60,
         "params": [
           0.0,
           0.05,
