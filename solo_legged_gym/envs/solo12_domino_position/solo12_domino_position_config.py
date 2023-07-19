@@ -33,7 +33,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 6.  # [m]
         terrain_width = 6.  # [m]
 
-        init_range = 2.5  # [m]
+        init_range = 1.0  # [m]
 
         num_rows = 10
         num_cols = 6
@@ -44,7 +44,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.05  # slopes above this threshold will be corrected to vertical surfaces
 
-        train_all_together = True  # train all terrains together or separately
+        train_all_together = False  # train all terrains together or separately
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
         # pass the params as a dict
@@ -93,7 +93,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 2.5
+        torque_limits = 5.0
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
@@ -149,10 +149,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            # feet_acc = "[0, 400]"
+            feet_acc = "[0, 500]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 1.0]"  # clip/scale
-            stall_pos = "[0, [0.1, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 3000]"
@@ -208,7 +208,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.01
+        entropy_coef = 0.03
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -218,7 +218,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0]'
+        fixed_adv_coeff = '[2.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -261,7 +261,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'from_scratch_grid'
+        run_name = 'curriculum2'
 
         # load
         load_run = -1  # -1 = last run

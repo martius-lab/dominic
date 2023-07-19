@@ -657,12 +657,12 @@ class Solo12DOMINOPosition(BaseTask):
         # base velocity impulse
         max_vel = self.cfg.domain_rand.max_push_vel_xyz
 
-        self.root_states[:, 7:10] += torch_rand_float(-max_vel, max_vel, (self.num_envs, 3),
+        self.root_states[:, 9:10] += torch_rand_float(0.5, 2.0, (self.num_envs, 1),
                                                       device=self.device)  # lin vel x/y/z
 
-        max_avel = self.cfg.domain_rand.max_push_avel_xyz
-        self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
-                                                       device=self.device)  # ang vel x/y/z
+        # max_avel = self.cfg.domain_rand.max_push_avel_xyz
+        # self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
+        #                                                device=self.device)  # ang vel x/y/z
         self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
         self.gym.refresh_net_contact_force_tensor(self.sim)
 

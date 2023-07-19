@@ -26,7 +26,8 @@ class keyboard_play:
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 2.5
-        env_cfg.terrain.params = [0.25]
+        env_cfg.terrain.params = [0.1]
+        env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
