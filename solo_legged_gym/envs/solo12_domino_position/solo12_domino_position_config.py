@@ -149,7 +149,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # feet_acc = "[0, 400]"
             joint_targets_rate = "[0, 1.5]"
-            move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
+            move_towards = "[0, [0.5, 0.8]]"  # sigma, clip/scale
             stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
@@ -171,7 +171,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_groups = 2
 
         base_height_target = 0.25
-        base_height_danger = 0.05
+        base_height_danger = 0.1
 
     class observations:
         clip_obs = True
@@ -192,7 +192,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        init_log_std = 0.5
+        init_log_std = 0.0
         drop_out_rate = 0.5
         policy_hidden_dims = [256, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
@@ -259,10 +259,10 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'conditioned'
+        run_name = 'after_grid'
 
         # load
-        load_run = "1_new/20230719_100157_292595_conditioned"  # -1 = last run
+        load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb

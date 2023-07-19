@@ -43,7 +43,7 @@
   <joint name="FL_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="FL_SHOULDER"/>
-    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
+    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="0.2141 0.08750000000000001 0"/>
@@ -216,7 +216,7 @@
   <joint name="FR_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="FR_SHOULDER"/>
-    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
+    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="0.2141 -0.08750000000000001 0"/>
@@ -389,7 +389,7 @@
   <joint name="HL_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="HL_SHOULDER"/>
-    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
+    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="-0.2141 0.08750000000000001 0"/>
@@ -562,7 +562,7 @@
   <joint name="HR_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="HR_SHOULDER"/>
-    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
+    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="-0.2141 -0.08750000000000001 0"/>

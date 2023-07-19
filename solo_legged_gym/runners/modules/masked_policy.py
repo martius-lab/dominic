@@ -47,7 +47,7 @@ class MaskedPolicy(nn.Module):
         # self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
 
         self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
-        nn.init.uniform_(self.log_std_net.bias, init_log_std - 0.5, init_log_std + 0.5)
+        nn.init.uniform_(self.log_std_net.bias, init_log_std - 0.2, init_log_std + 0.2)
 
         # Mask
         self.masks = nn.ParameterList()
