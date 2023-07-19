@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "new_terrain2",
+        "run_name": "conditioned",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_095842"
+        "wandb_group": "cluster_20230719_100037"
       }
     },
     "env_cfg": {
