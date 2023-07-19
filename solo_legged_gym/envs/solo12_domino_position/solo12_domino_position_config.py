@@ -7,12 +7,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 33 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 10  # episode length in seconds
-        remaining_check_time = 0.2
+        episode_length_s = 6  # episode length in seconds
+        remaining_check_time_s = 1
 
         play = False
         plot_target = True
@@ -38,7 +38,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_rows = 5
         num_cols = 6
 
-        border_size = 1  # [m]
+        border_size = 10  # [m]
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
@@ -64,9 +64,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: target in x, y, z in base
-        num_targets = 20
-        targets_in_env_x = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 0.5, 5.5, 0.5, 5.5, 0.5, 5.5, 0.5, 5.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
-        targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5]
+        class ranges:
+            radius = [1.0, 4.0]  # [m]
+            direction = [-np.pi, np.pi]  # [rad]
+            # yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.4]  # x,y,z [m]
@@ -123,7 +124,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         push_robots = True
         push_interval_s = 2
-        max_push_vel_xyz = 2.0
+        max_push_vel_xyz = 0.5
         max_push_avel_xyz = 0.5
 
         actuator_lag = True
@@ -140,7 +141,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
-            posl = "[1, 5.0]"  # max error
+            # posl = "[1, 5.0]"  # max error
+            posi = "[1, 1.0]"  # scale of the error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
@@ -149,8 +151,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # feet_acc = "[0, 400]"
             joint_targets_rate = "[0, 1.5]"
-            move_towards = "[0, [0.5, 0.8]]"  # sigma, clip/scale
-            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            move_towards = "[0, 1.0]"  # clip/scale
+            stall_pos = "[0, [0.1, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 3000]"
@@ -248,7 +250,7 @@ class Solo12DOMINOPositionTrainCfg:
     class runner:
         max_iterations = 1000  # number of policy updates
 
-        num_steps_per_env = 24  # per iteration
+        num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
