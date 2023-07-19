@@ -595,6 +595,10 @@ class Solo12DOMINOPosition(BaseTask):
     def _reset_root_states(self, env_ids):
         # base position
         self.root_states[env_ids] = self.base_init_state
+        sampled_yaw = torch_rand_float(-np.pi, np.pi, (len(env_ids), 1), device=self.device).squeeze(1)
+        self.root_states[env_ids, 5] = torch.sin(sampled_yaw / 2)  # z
+        self.root_states[env_ids, 6] = torch.cos(sampled_yaw / 2)  # w
+
         self.root_states[env_ids, :2] += self.env_origins[env_ids, :2]
         self.root_states[env_ids, :2] += torch_rand_float(-self.cfg.terrain.init_range,
                                                           self.cfg.terrain.init_range,
@@ -649,11 +653,12 @@ class Solo12DOMINOPosition(BaseTask):
     def _push_robots(self):
         # base velocity impulse
         max_vel = self.cfg.domain_rand.max_push_vel_xyz
-        self.root_states[:, 7:10] += torch_rand_float(-max_vel, max_vel, (self.num_envs, 3),
-                                                      device=self.device)  # lin vel x/y/z
-        max_avel = self.cfg.domain_rand.max_push_avel_xyz
-        self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
-                                                       device=self.device)  # ang vel x/y/z
+
+        self.root_states[:, 9:10] += torch_rand_float(0.5, max_vel, (self.num_envs, 1), device=self.device)  # lin vel x/y/z
+
+        # max_avel = self.cfg.domain_rand.max_push_avel_xyz
+        # self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
+        #                                                device=self.device)  # ang vel x/y/z
         self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
         self.gym.refresh_net_contact_force_tensor(self.sim)
 
@@ -738,19 +743,19 @@ class Solo12DOMINOPosition(BaseTask):
     #     rew = torch.exp(-torch.square(yaw_error / sigma))
     #     return rew
 
-    # def _reward_move_towards(self, sigma):
-    #     target_pos_in_base_normalized = self.commands_in_base[:, :2] / (
-    #             torch.norm(self.commands_in_base[:, :2], dim=-1, keepdim=True) + 1e-8)
-    #     base_lin_vel_normalized = self.base_lin_vel[:, :2] / (
-    #             torch.norm(self.base_lin_vel[:, :2], dim=-1, keepdim=True) + 1e-8)
-    #     towards_error = 1 - torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1)
-    #     return torch.clip(torch.exp(-torch.square(towards_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
-    #
-    # def _reward_stall_pos(self, sigma):
-    #     distance = torch.norm(self.commands_in_base[:, :2], dim=1, p=2)
-    #     base_vel = torch.norm(self.base_lin_vel[:, :2], dim=-1, p=2)
-    #     base_vel_low = torch.clip(sigma[0] - base_vel, min=0.0, max=None) * (distance > sigma[1])
-    #     return torch.exp(-torch.square(base_vel_low / sigma[2]))
+    def _reward_move_towards(self, sigma):
+        target_pos_in_base_normalized = self.commands_in_base / (
+                torch.norm(self.commands_in_base, dim=-1, keepdim=True) + 1e-8)
+        base_lin_vel_normalized = self.base_lin_vel / (
+                torch.norm(self.base_lin_vel, dim=-1, keepdim=True) + 1e-8)
+        towards_error = 1 - torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1)
+        return torch.clip(torch.exp(-torch.square(towards_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
+
+    def _reward_stall_pos(self, sigma):
+        distance = torch.norm(self.commands_in_base, dim=1, p=2)
+        base_vel = torch.norm(self.base_lin_vel, dim=-1, p=2)
+        base_vel_low = torch.clip(sigma[0] - base_vel, min=0.0, max=None) * (distance > sigma[1])
+        return torch.exp(-torch.square(base_vel_low / sigma[2]))
 
     # def _reward_stall_yaw(self, sigma):
     #     yaw_distance = torch.abs(self.commands_in_base[:, 2])

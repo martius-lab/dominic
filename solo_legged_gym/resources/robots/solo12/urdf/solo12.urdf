@@ -43,7 +43,7 @@
   <joint name="FL_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="FL_SHOULDER"/>
-    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="0.2141 0.08750000000000001 0"/>
@@ -81,7 +81,7 @@
   <joint name="FL_HFE" type="revolute">
     <parent link="FL_SHOULDER"/>
     <child link="FL_UPPER_LEG"/>
-    <limit effort="1000" lower="0.0" upper="1.57079632679" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="-0.0195 0.014 0"/>
@@ -126,7 +126,7 @@
   <joint name="FL_KFE" type="revolute">
     <parent link="FL_UPPER_LEG"/>
     <child link="FL_LOWER_LEG"/>
-    <limit effort="1000" lower="-3.14159265359" upper="0.0" velocity="30"/>
+    <limit effort="1000" lower="-3.14159265359" upper="3.14159265359" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0 0.037450000000000004 -0.16"/>
@@ -216,7 +216,7 @@
   <joint name="FR_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="FR_SHOULDER"/>
-    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="0.2141 -0.08750000000000001 0"/>
@@ -254,7 +254,7 @@
   <joint name="FR_HFE" type="revolute">
     <parent link="FR_SHOULDER"/>
     <child link="FR_UPPER_LEG"/>
-    <limit effort="1000" lower="0.0" upper="1.57079632679" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="-0.0195 -0.014 0"/>
@@ -299,7 +299,7 @@
   <joint name="FR_KFE" type="revolute">
     <parent link="FR_UPPER_LEG"/>
     <child link="FR_LOWER_LEG"/>
-    <limit effort="1000" lower="-3.14159265359" upper="0.0" velocity="30"/>
+    <limit effort="1000" lower="-3.14159265359" upper="3.14159265359" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0 -0.037450000000000004 -0.16"/>
@@ -389,7 +389,7 @@
   <joint name="HL_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="HL_SHOULDER"/>
-    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="-0.2141 0.08750000000000001 0"/>
@@ -427,7 +427,7 @@
   <joint name="HL_HFE" type="revolute">
     <parent link="HL_SHOULDER"/>
     <child link="HL_UPPER_LEG"/>
-    <limit effort="1000" lower="-1.57079632679" upper="0.0" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0.0195 0.014 0"/>
@@ -472,7 +472,7 @@
   <joint name="HL_KFE" type="revolute">
     <parent link="HL_UPPER_LEG"/>
     <child link="HL_LOWER_LEG"/>
-    <limit effort="1000" lower="0.0" upper="3.14159265359" velocity="30"/>
+    <limit effort="1000" lower="-3.14159265359" upper="3.14159265359" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0 0.037450000000000004 -0.16"/>
@@ -562,7 +562,7 @@
   <joint name="HR_HAA" type="revolute">
     <parent link="base_link"/>
     <child link="HR_SHOULDER"/>
-    <limit effort="1000" lower="-1.0471975512" upper="1.0471975512" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the x-axis -->
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="-0.2141 -0.08750000000000001 0"/>
@@ -600,7 +600,7 @@
   <joint name="HR_HFE" type="revolute">
     <parent link="HR_SHOULDER"/>
     <child link="HR_UPPER_LEG"/>
-    <limit effort="1000" lower="-1.57079632679" upper="0.0" velocity="30"/>
+    <limit effort="1000" lower="-1.57079632679" upper="1.57079632679" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0.0195 -0.014 0"/>
@@ -645,7 +645,7 @@
   <joint name="HR_KFE" type="revolute">
     <parent link="HR_UPPER_LEG"/>
     <child link="HR_LOWER_LEG"/>
-    <limit effort="1000" lower="0.0" upper="3.14159265359" velocity="30"/>
+    <limit effort="1000" lower="-3.14159265359" upper="3.14159265359" velocity="30"/>
     <!-- joints rotates around the y-axis -->
     <axis xyz="0 1 0"/>
     <origin rpy="0 0 0" xyz="0 -0.037450000000000004 -0.16"/>

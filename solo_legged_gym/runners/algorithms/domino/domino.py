@@ -444,7 +444,7 @@ class DOMINO:
                     kl_mean = torch.mean(kl)
 
                     if kl_mean > self.a_cfg.desired_kl * 2.0:
-                        self.policy_lr = max(1e-3, self.policy_lr / 1.5)
+                        self.policy_lr = max(1e-5, self.policy_lr / 1.5)
                     elif self.a_cfg.desired_kl / 2.0 > kl_mean > 0.0:
                         self.policy_lr = min(5e-2, self.policy_lr * 1.5)
 

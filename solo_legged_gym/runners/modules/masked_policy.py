@@ -35,18 +35,17 @@ class MaskedPolicy(nn.Module):
             self.policy_latent_layers.append(nn.Linear(hidden_dims[la], hidden_dims[la + 1]).to(self.device))
             self.policy_latent_layers.append(activation)
 
-        # self.distribution = DiagGaussianDistribution(action_dim=num_actions)
+        self.distribution = DiagGaussianDistribution(action_dim=num_actions)
         # self.distribution = SquashedDiagGaussianDistribution(action_dim=num_actions)
-        self.distribution = ColoredNoiseDist(beta=1, seq_len=48, action_dim=num_actions, device=self.device)
+        # self.distribution = ColoredNoiseDist(beta=1, seq_len=48, action_dim=num_actions, device=self.device)
 
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
+
         init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * 0.5
+        # init_log_std = np.ones(12) * 0.0
         self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
 
-        # self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
         # self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
-
-        # nn.init.orthogonal_(self.action_mean_net.weight, gain=0.01)
         # nn.init.uniform_(self.log_std_net.bias, -0.5, 0.5)
 
         # Mask

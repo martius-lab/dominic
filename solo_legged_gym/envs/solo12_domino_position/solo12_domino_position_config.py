@@ -6,13 +6,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
-        num_envs = 3072
+        num_envs = 4096
         num_observations = 33 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 10  # episode length in seconds
-        remaining_check_time = 0.4
+        episode_length_s = 5  # episode length in seconds
+        remaining_check_time = 0.2
 
         play = False
         plot_target = True
@@ -30,10 +30,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 10.  # [m]
-        terrain_width = 10.  # [m]
+        terrain_length = 6.  # [m]
+        terrain_width = 6.  # [m]
 
-        init_range = 4.5  # [m]
+        init_range = 2.5  # [m]
 
         num_rows = 5
         num_cols = 6
@@ -64,9 +64,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: target in x, y, z in base
-        num_targets = 4
-        targets_in_env_x = [1.0, 9.0, 1.0, 9.0]
-        targets_in_env_y = [1.0, 1.0, 9.0, 9.0]
+        num_targets = 20
+        targets_in_env_x = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 0.5, 5.5, 0.5, 5.5, 0.5, 5.5, 0.5, 5.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+        targets_in_env_y = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.4]  # x,y,z [m]
@@ -92,7 +92,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 10.0
+        torque_limits = 2.5
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
@@ -121,9 +121,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         randomize_base_mass = True
         added_mass_range = [-0.5, 0.5]
 
-        push_robots = False
-        push_interval_s = 5
-        max_push_vel_xyz = 0.5
+        push_robots = True
+        push_interval_s = 2
+        max_push_vel_xyz = 2.0
         max_push_avel_xyz = 0.5
 
         actuator_lag = True
@@ -137,12 +137,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
-            # move_towards = "[2, [0.5, 0.7]]"  # sigma, clip/scale
-            # stall_pos = "[2, [0.2, 0.25, 0.2]]"  # minimal vel, distance, sigma
 
             # pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
-            posl = "[1, 1.0]"  # max error
+            posl = "[1, 5.0]"  # max error
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
@@ -151,10 +149,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             # feet_acc = "[0, 400]"
             joint_targets_rate = "[0, 1.5]"
-            lin_z = "[0, 0.05]"
-            feet_height = "[0, [0.04, 0.04, 0.25]]"  # target height, sigma, pos threshold
-            # dof_acc = "[0, 4000]"
-            # torques = "[0, 30]"
+            move_towards = "[0, [0.5, 0.95]]"  # sigma, clip/scale
+            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            # lin_z = "[0, 0.2]"
+            # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
+            # dof_acc = "[0, 3000]"
+            # torques = "[0, 20]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -205,7 +205,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 1e-4
+        entropy_coef = 0.01
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -247,7 +247,7 @@ class Solo12DOMINOPositionTrainCfg:
     class runner:
         max_iterations = 1000  # number of policy updates
 
-        num_steps_per_env = 48  # per iteration
+        num_steps_per_env = 24  # per iteration
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'colored'
+        run_name = 'new_terrain2'
 
         # load
         load_run = -1  # -1 = last run
