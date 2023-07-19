@@ -43,11 +43,11 @@ class MaskedPolicy(nn.Module):
         self.action_mean_net = nn.Linear(hidden_dims[-1], num_actions)
 
         # init_log_std = np.array([0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]) * init_log_std
-        # init_log_std = np.ones(12) * 0.0
-        # self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
+        init_log_std = np.ones(12) * 0.0
+        self.log_std = nn.Parameter(torch.tensor(init_log_std).to(torch.float32), requires_grad=True)
 
-        self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
-        nn.init.uniform_(self.log_std_net.bias, init_log_std - 0.2, init_log_std + 0.2)
+        # self.log_std_net = nn.Linear(hidden_dims[-1], num_actions)
+        # nn.init.uniform_(self.log_std_net.bias, init_log_std - 0.2, init_log_std + 0.2)
 
         # Mask
         self.masks = nn.ParameterList()
@@ -80,9 +80,9 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
-        self.distribution.proba_distribution(mean_actions=mean, log_std=log_std)
-        # self.distribution.proba_distribution(mean_actions=mean, log_std=self.log_std)
+        # log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
+        # self.distribution.proba_distribution(mean_actions=mean, log_std=log_std)
+        self.distribution.proba_distribution(mean_actions=mean, log_std=self.log_std)
 
     def act_and_log_prob(self, input_x):
         # return actions and log_prob
@@ -92,9 +92,9 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
-        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
-        # return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
+        # log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
+        # return self.distribution.log_prob_from_params(mean_actions=mean, log_std=log_std)
+        return self.distribution.log_prob_from_params(mean_actions=mean, log_std=self.log_std)
 
     def act_inference(self, input_x):
         x, z = input_x
@@ -103,9 +103,9 @@ class MaskedPolicy(nn.Module):
         for la in range(self.num_hidden_dim):
             x = self.policy_latent_layers[2*la+1](self.policy_latent_layers[2*la](x)) * batched_masks[la]
         mean = self.action_mean_net(x)
-        log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
-        return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
-        # return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
+        # log_std = torch.clamp(self.log_std_net(x), min=-20.0, max=1.0)
+        # return self.distribution.actions_from_params(mean_actions=mean, log_std=log_std, deterministic=True)
+        return self.distribution.actions_from_params(mean_actions=mean, log_std=self.log_std, deterministic=True)
 
 
 def get_activation(act_name):
