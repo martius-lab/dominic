@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 5  # episode length in seconds
+        episode_length_s = 10  # episode length in seconds
         remaining_check_time = 0.2
 
         play = False
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'conditioned'
 
         # load
-        load_run = -1  # -1 = last run
+        load_run = "1_new/20230719_100157_292595_conditioned"  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
