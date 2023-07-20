@@ -42,7 +42,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
-        slope_threshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
+        slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
         train_all_together = False  # train all terrains together or separately
 
@@ -248,7 +248,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 5000
 
     class runner:
-        max_iterations = 500  # number of policy updates
+        max_iterations = 1000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster

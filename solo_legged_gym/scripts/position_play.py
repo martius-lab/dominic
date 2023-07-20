@@ -25,7 +25,7 @@ class keyboard_play:
         env_cfg.env.debug = False
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
-        env_cfg.terrain.init_range = 2.5
+        env_cfg.terrain.init_range = 0.5
         env_cfg.terrain.params = [0.1]
         env_cfg.terrain.border_size = 5
 

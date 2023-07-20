@@ -70,7 +70,7 @@
         "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 500,
+        "max_iterations": 1000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
@@ -82,7 +82,7 @@
         "run_name": "try_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230720_085248"
+        "wandb_group": "cluster_20230720_095247"
       }
     },
     "env_cfg": {
@@ -301,7 +301,7 @@
           0.25
         ],
         "restitution": 0.0,
-        "slope_threshold": 0.75,
+        "slope_threshold": 0.5,
         "static_friction": 1.0,
         "terrain_length": 6.0,
         "terrain_width": 6.0,
