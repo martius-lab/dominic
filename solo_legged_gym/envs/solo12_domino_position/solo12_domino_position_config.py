@@ -11,7 +11,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 10
-        episode_length_s = 6  # episode length in seconds
+        episode_length_s = 5  # episode length in seconds
         remaining_check_time_s = 1
 
         play = False
@@ -33,7 +33,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 6.  # [m]
         terrain_width = 6.  # [m]
 
-        init_range = 1.5  # [m]
+        init_range = 0.5  # [m]
 
         num_rows = 10
         num_cols = 6
@@ -42,7 +42,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
-        slope_threshold = 0.05  # slopes above this threshold will be corrected to vertical surfaces
+        slope_threshold = 0.75  # slopes above this threshold will be corrected to vertical surfaces
 
         train_all_together = False  # train all terrains together or separately
 
@@ -149,7 +149,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 600]"
+            # feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 1.0]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
@@ -208,7 +208,7 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.04
+        entropy_coef = 0.02
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
@@ -218,7 +218,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.5, 1.0]'
+        fixed_adv_coeff = '[1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -261,7 +261,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'curriculum3'
+        run_name = 'try_again'
 
         # load
         load_run = -1  # -1 = last run

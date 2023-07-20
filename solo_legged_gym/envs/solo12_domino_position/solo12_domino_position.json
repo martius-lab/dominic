@@ -18,8 +18,8 @@
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
-        "entropy_coef": 0.04,
-        "fixed_adv_coeff": "[1.5, 1.0]",
+        "entropy_coef": 0.02,
+        "fixed_adv_coeff": "[1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "curriculum3",
+        "run_name": "try_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230719_233509"
+        "wandb_group": "cluster_20230720_082732"
       }
     },
     "env_cfg": {
@@ -159,7 +159,7 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 6,
+        "episode_length_s": 5,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 10,
@@ -230,7 +230,6 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 600]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[0, 1.0]",
           "posi": "[1, 1.0]",
@@ -265,7 +264,7 @@
         "border_size": 10,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
-        "init_range": 1.5,
+        "init_range": 0.5,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -302,7 +301,7 @@
           0.25
         ],
         "restitution": 0.0,
-        "slope_threshold": 0.05,
+        "slope_threshold": 0.75,
         "static_friction": 1.0,
         "terrain_length": 6.0,
         "terrain_width": 6.0,
