@@ -36,7 +36,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 0.5  # [m]
 
         num_rows = 20
-        num_cols = 6
+        num_cols = 7
 
         border_size = 2  # [m]
 
@@ -51,7 +51,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(6) * 0.05)
+        params = [0.0, 0.05] + list(np.arange(5) * 0.1 + 0.1)
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -111,6 +111,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
+        # terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
         terminate_after_contacts_on = []
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
@@ -149,7 +150,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            # feet_acc = "[0, 600]"
+            feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
@@ -194,7 +195,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        init_log_std = 0.0
+        init_log_std = 0.5
         drop_out_rate = 0.5
         policy_hidden_dims = [256, 256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
@@ -208,17 +209,17 @@ class Solo12DOMINOPositionTrainCfg:
         bootstrap_value = False
         use_clipped_value_loss = True
         clip_param = 0.2
-        entropy_coef = 0.02
+        entropy_coef = 0.03
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
-        policy_lr = 1.e-3  # 5.e-4
+        policy_lr = 5.e-4  # 5.e-4
         desired_kl = 0.02  # adjust the learning rate automatically
-        schedule = 'adaptive'  # adaptive, fixed
+        schedule = 'fixed'  # adaptive, fixed
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -261,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'try_again'
+        run_name = 'deeper'
 
         # load
         load_run = -1  # -1 = last run
