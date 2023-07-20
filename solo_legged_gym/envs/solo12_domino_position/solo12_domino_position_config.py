@@ -149,7 +149,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 600]"
+            # feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma

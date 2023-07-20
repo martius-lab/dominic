@@ -82,7 +82,7 @@
         "run_name": "try_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230720_084156"
+        "wandb_group": "cluster_20230720_084444"
       }
     },
     "env_cfg": {
@@ -230,7 +230,6 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 600]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[0, 0.8]",
           "posi": "[1, 1.0]",
