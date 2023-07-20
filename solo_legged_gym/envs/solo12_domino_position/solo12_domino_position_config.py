@@ -35,10 +35,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         init_range = 0.5  # [m]
 
-        num_rows = 10
+        num_rows = 20
         num_cols = 6
 
-        border_size = 10  # [m]
+        border_size = 2  # [m]
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
@@ -149,9 +149,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            # feet_acc = "[0, 600]"
+            feet_acc = "[0, 600]"
             joint_targets_rate = "[0, 1.5]"
-            move_towards = "[0, 1.0]"  # clip/scale
+            move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold

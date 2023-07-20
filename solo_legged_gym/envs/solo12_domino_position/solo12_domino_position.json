@@ -82,7 +82,7 @@
         "run_name": "try_again",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230720_082732"
+        "wandb_group": "cluster_20230720_084156"
       }
     },
     "env_cfg": {
@@ -230,8 +230,9 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
+          "feet_acc": "[0, 600]",
           "joint_targets_rate": "[0, 1.5]",
-          "move_towards": "[0, 1.0]",
+          "move_towards": "[0, 0.8]",
           "posi": "[1, 1.0]",
           "stall_pos": "[0, [0.2, 0.25, 0.1]]"
         }
@@ -261,7 +262,7 @@
         "up_axis": 1
       },
       "terrain": {
-        "border_size": 10,
+        "border_size": 2,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
         "init_range": 0.5,
@@ -290,8 +291,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 6,
-        "num_rows": 10,
-        "num_sub_terrains": 60,
+        "num_rows": 20,
+        "num_sub_terrains": 120,
         "params": [
           0.0,
           0.05,

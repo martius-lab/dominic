@@ -31,15 +31,11 @@
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.entropy_coef",
-      "values": [0.01, 0.02, 0.03, 0.04]
+      "values": [0.01, 0.02, 0.03]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.fixed_adv_coeff",
       "values": ["[1.0, 1.0]", "[1.0, 1.5]", "[1.5, 1.0]", "[2.0, 1.0]"]
-    },
-    {
-      "param": "solo_legged_gym.env_cfg.control.torque_limits",
-      "values": [5.0, 7.5]
     }
   ]
 }
