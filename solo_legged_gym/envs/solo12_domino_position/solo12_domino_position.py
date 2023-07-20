@@ -652,6 +652,7 @@ class Solo12DOMINOPosition(BaseTask):
                                    high=self.cfg.terrain.num_cols),
                 torch.clip(input=self.terrain_cols[env_ids],
                            min=0))
+            self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _push_robots(self):
         # base velocity impulse
