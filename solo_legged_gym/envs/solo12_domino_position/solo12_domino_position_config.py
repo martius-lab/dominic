@@ -36,7 +36,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 0.5  # [m]
 
         num_rows = 20
-        num_cols = 7
+        num_cols = 11
 
         border_size = 2  # [m]
 
@@ -51,7 +51,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = [0.0, 0.05] + list(np.arange(5) * 0.1 + 0.1)
+        params = list(np.arange(11) * 0.05)
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -249,7 +249,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 5000
 
     class runner:
-        max_iterations = 1000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'deeper'
+        run_name = 'long_deep_test'
 
         # load
         load_run = -1  # -1 = last run

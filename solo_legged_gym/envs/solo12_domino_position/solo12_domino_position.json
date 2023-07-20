@@ -70,7 +70,7 @@
         "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 1000,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
@@ -79,10 +79,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "deeper",
+        "run_name": "long_deep_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230720_142823"
+        "wandb_group": "cluster_20230720_154541"
       }
     },
     "env_cfg": {
@@ -290,16 +290,20 @@
           0.4
         ],
         "mesh_type": "trimesh",
-        "num_cols": 7,
+        "num_cols": 11,
         "num_rows": 20,
-        "num_sub_terrains": 140,
+        "num_sub_terrains": 220,
         "params": [
           0.0,
           0.05,
           0.1,
+          0.15000000000000002,
           0.2,
+          0.25,
           0.30000000000000004,
+          0.35000000000000003,
           0.4,
+          0.45,
           0.5
         ],
         "restitution": 0.0,
