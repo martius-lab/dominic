@@ -30,13 +30,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 6.  # [m]
-        terrain_width = 6.  # [m]
+        terrain_length = 7.  # [m]
+        terrain_width = 7.  # [m]
 
-        init_range = 0.5  # [m]
+        init_range = 1.5  # [m]
 
-        num_rows = 20
-        num_cols = 11
+        num_rows = 40
+        num_cols = 6
 
         border_size = 2  # [m]
 
@@ -51,7 +51,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(11) * 0.05)
+        params = list(np.arange(6) * 0.1)
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -93,7 +93,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 5.0
+        torque_limits = 2.5
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
@@ -255,14 +255,10 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_observation = True  # it will make the training much faster
         normalize_features = True
 
-        drop_assist = False
-        drop_assist_start_iter = 100
-        drop_assist_duration = 100
-
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'long_deep_test'
+        run_name = 'long_deep_test7'
 
         # load
         load_run = -1  # -1 = last run
@@ -271,9 +267,6 @@ class Solo12DOMINOPositionTrainCfg:
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
         record_iters = 10  # should be int * num_st   eps_per_env
-
-        record_features = True
-        record_features_interval = 100
 
         wandb = False  # by default is false, set to true from command line
         wandb_group = 'test'

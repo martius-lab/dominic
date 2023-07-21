@@ -144,7 +144,6 @@ class DOMINO:
             self.burning_expert = False
         self.env.reset()
         self.avg_score = 0
-        self.assist_adv_percentage = 1.0
 
     def learn(self):
         self.env.episode_length_buf = torch.randint_like(
@@ -383,9 +382,6 @@ class DOMINO:
         mean_lagrange_coeffs = np.zeros(self.env.num_skills)
         mean_constraint_satisfaction = np.zeros(self.env.num_skills - 1)
 
-        if self.r_cfg.drop_assist:
-            self.assist_adv_percentage = np.clip(1 - (it - self.r_cfg.drop_assist_start_iter) / self.r_cfg.drop_assist_duration, 0, 1)
-
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
 
@@ -608,7 +604,6 @@ class DOMINO:
             self.writer.add_scalar(f'Learning/ext_value_function_loss_{i}', mean_ext_value_losses[i], locs['it'])
         self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
         self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
-        self.writer.add_scalar('Learning/assist_adv_percentage', self.assist_adv_percentage, locs['it'])
         if self.a_cfg.use_succ_feat:
             self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'], locs['it'])
 

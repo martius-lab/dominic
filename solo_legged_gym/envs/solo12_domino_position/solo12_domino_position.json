@@ -65,24 +65,19 @@
       },
       "runner": {
         "checkpoint": -1,
-        "drop_assist": false,
-        "drop_assist_duration": 100,
-        "drop_assist_start_iter": 100,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
         "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
-        "record_features": true,
-        "record_features_interval": 100,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "long_deep_test",
+        "run_name": "long_deep_test7",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230720_154541"
+        "wandb_group": "cluster_20230721_100245"
       }
     },
     "env_cfg": {
@@ -104,7 +99,10 @@
         "penalize_contacts_on": [],
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
-        "terminate_after_contacts_on": [],
+        "terminate_after_contacts_on": [
+          "base",
+          "SHOULDER"
+        ],
         "thickness": 0.01
       },
       "commands": {
@@ -135,7 +133,7 @@
           "HFE": 5.0,
           "KFE": 5.0
         },
-        "torque_limits": 5.0
+        "torque_limits": 2.5
       },
       "domain_rand": {
         "actuator_lag": true,
@@ -265,7 +263,7 @@
         "border_size": 2,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
-        "init_range": 0.5,
+        "init_range": 1.5,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -290,27 +288,22 @@
           0.4
         ],
         "mesh_type": "trimesh",
-        "num_cols": 11,
-        "num_rows": 20,
-        "num_sub_terrains": 220,
+        "num_cols": 6,
+        "num_rows": 40,
+        "num_sub_terrains": 240,
         "params": [
           0.0,
-          0.05,
           0.1,
-          0.15000000000000002,
           0.2,
-          0.25,
           0.30000000000000004,
-          0.35000000000000003,
           0.4,
-          0.45,
           0.5
         ],
         "restitution": 0.0,
         "slope_threshold": 0.5,
         "static_friction": 1.0,
-        "terrain_length": 6.0,
-        "terrain_width": 6.0,
+        "terrain_length": 7.0,
+        "terrain_width": 7.0,
         "train_all_together": false,
         "type": "special_box",
         "vertical_scale": 0.005

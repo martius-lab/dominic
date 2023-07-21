@@ -42,21 +42,21 @@ class Solo12DOMINOPosition(BaseTask):
         self.num_features = self.cfg.env.num_features
         self.feature_buf = torch.zeros(self.num_envs, self.num_features, device=self.device, dtype=torch.float)
 
-        self.HAA_indices = torch.tensor(
-            [i for i in range(self.num_dof) if "HAA" not in self.dof_names[i]],
-            device=self.device,
-            requires_grad=False,
-        )
-        self.KFE_indices = torch.tensor(
-            [i for i in range(self.num_dof) if "KFE" not in self.dof_names[i]],
-            device=self.device,
-            requires_grad=False,
-        )
-        self.HFE_indices = torch.tensor(
-            [i for i in range(self.num_dof) if "HFE" in self.dof_names[i]],
-            device=self.device,
-            requires_grad=False,
-        )
+        # self.HAA_indices = torch.tensor(
+        #     [i for i in range(self.num_dof) if "HAA" not in self.dof_names[i]],
+        #     device=self.device,
+        #     requires_grad=False,
+        # )
+        # self.KFE_indices = torch.tensor(
+        #     [i for i in range(self.num_dof) if "KFE" not in self.dof_names[i]],
+        #     device=self.device,
+        #     requires_grad=False,
+        # )
+        # self.HFE_indices = torch.tensor(
+        #     [i for i in range(self.num_dof) if "HFE" in self.dof_names[i]],
+        #     device=self.device,
+        #     requires_grad=False,
+        # )
         self.torque_limits[:] = self.cfg.control.torque_limits
 
         # self.dof_vel_limits = torch.zeros_like(self.dof_vel)
@@ -76,12 +76,12 @@ class Solo12DOMINOPosition(BaseTask):
                                               requires_grad=False)
         self.torques = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
                                    requires_grad=False)
-        self.total_power = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
+        # self.total_power = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
         self.total_torque = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False)
-        self.ee_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
-                                     requires_grad=False)
-        self.last_ee_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
-                                          requires_grad=False)
+        # self.ee_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+        #                              requires_grad=False)
+        # self.last_ee_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
+        #                                   requires_grad=False)
         # self.ee_local = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
         #                             requires_grad=False)
         self.ee_vel_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
@@ -127,9 +127,9 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_actions[env_ids] = 0.
         self.last_dof_vel[env_ids] = 0.
         self.last_root_vel[env_ids] = 0.
-        self.last_ee_global[env_ids] = 0.
+        # self.last_ee_global[env_ids] = 0.
         self.last_ee_vel_global[env_ids] = 0.
-        self.total_power[env_ids] = 0.
+        # self.total_power[env_ids] = 0.
         self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
 
@@ -175,9 +175,9 @@ class Solo12DOMINOPosition(BaseTask):
         for _ in range(self.cfg.control.decimation):
             self.torques = self._compute_torques(self.joint_targets).view(self.torques.shape)
             power_ = self.torques * self.dof_vel
-            total_power_ = torch.sum(power_ * (power_ >= 0), dim=1)
+            # total_power_ = torch.sum(power_ * (power_ >= 0), dim=1)
             total_torque_ = torch.sum(torch.square(self.torques), dim=1)
-            self.total_power += total_power_
+            # self.total_power += total_power_
             self.total_torque += total_torque_
             self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(self.torques))
             self.gym.simulate(self.sim)
@@ -291,7 +291,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
         self.last_joint_targets[:] = self.joint_targets[:]
-        self.last_ee_global[:] = self.ee_global[:]
+        # self.last_ee_global[:] = self.ee_global[:]
         self.last_ee_vel_global[:] = self.ee_vel_global[:]
 
     def _check_termination(self):
@@ -395,7 +395,7 @@ class Solo12DOMINOPosition(BaseTask):
         #     sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
         #     gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)
 
-        self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
+        # self.ee_global = self.rigid_body_state[:, self.feet_indices, 0:3]
         self.ee_vel_global = self.rigid_body_state[:, self.feet_indices, 7:10]
         #
         # ee_local_ = self.rigid_body_state[:, self.feet_indices, 0:3]
@@ -461,21 +461,17 @@ class Solo12DOMINOPosition(BaseTask):
         command_global = (command_global / self.terrain.cfg.horizontal_scale).long()
         command_px = command_global[:, 0]
         command_py = command_global[:, 1]
-        command_px = torch.clip(command_px, 2, self.height_samples.shape[0] - 2)
-        command_py = torch.clip(command_py, 2, self.height_samples.shape[1] - 2)
+        command_px = torch.clip(command_px, 0, self.height_samples.shape[0] - 2)
+        command_py = torch.clip(command_py, 0, self.height_samples.shape[1] - 2)
 
         command_height_0 = self.height_samples[command_px, command_py]
         command_height_1 = self.height_samples[command_px + 1, command_py]
         command_height_2 = self.height_samples[command_px, command_py + 1]
-        command_height_3 = self.height_samples[command_px - 1, command_py]
-        command_height_4 = self.height_samples[command_px, command_py - 1]
 
         command_heights = torch.max(torch.cat((
             command_height_0.unsqueeze(1),
             command_height_1.unsqueeze(1),
             command_height_2.unsqueeze(1),
-            command_height_3.unsqueeze(1),
-            command_height_4.unsqueeze(1)
         ), dim=1), dim=1)[0]
         command_terrain_heights = command_heights * self.terrain.cfg.vertical_scale
         self.commands[env_ids, 2] = command_terrain_heights + self.cfg.rewards.base_height_target
@@ -658,12 +654,12 @@ class Solo12DOMINOPosition(BaseTask):
         # base velocity impulse
         max_vel = self.cfg.domain_rand.max_push_vel_xyz
 
-        self.root_states[:, 9:10] += torch_rand_float(0.5, 2.0, (self.num_envs, 1),
+        self.root_states[:, 7:10] += torch_rand_float(-max_vel, max_vel, (self.num_envs, 3),
                                                       device=self.device)  # lin vel x/y/z
 
-        # max_avel = self.cfg.domain_rand.max_push_avel_xyz
-        # self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
-        #                                                device=self.device)  # ang vel x/y/z
+        max_avel = self.cfg.domain_rand.max_push_avel_xyz
+        self.root_states[:, 10:13] += torch_rand_float(-max_avel, max_avel, (self.num_envs, 3),
+                                                       device=self.device)  # ang vel x/y/z
         self.gym.set_actor_root_state_tensor(self.sim, gymtorch.unwrap_tensor(self.root_states))
         self.gym.refresh_net_contact_force_tensor(self.sim)
 
@@ -726,16 +722,16 @@ class Solo12DOMINOPosition(BaseTask):
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    def _reward_pos(self, sigma):
-        pos_error = torch.clip(torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2), min=None, max=2 * sigma)
-        rew = torch.exp(-torch.square(pos_error / sigma))
-        return rew * (self.remaining_time < self.remaining_check_time)
-
-    def _reward_posl(self, sigma):
-        pos_error = torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2)
-        max_pos_error = sigma
-        rew = (max_pos_error - torch.abs(pos_error)) / max_pos_error
-        return rew * (self.remaining_time < self.remaining_check_time)
+    # def _reward_pos(self, sigma):
+    #     pos_error = torch.clip(torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2), min=None, max=2 * sigma)
+    #     rew = torch.exp(-torch.square(pos_error / sigma))
+    #     return rew * (self.remaining_time < self.remaining_check_time)
+    #
+    # def _reward_posl(self, sigma):
+    #     pos_error = torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2)
+    #     max_pos_error = sigma
+    #     rew = (max_pos_error - torch.abs(pos_error)) / max_pos_error
+    #     return rew * (self.remaining_time < self.remaining_check_time)
 
     def _reward_posi(self, sigma):
         pos_error = torch.norm(self.commands_in_base[:, 0:3], dim=1, p=2)
@@ -846,8 +842,8 @@ class Solo12DOMINOPosition(BaseTask):
     # def _reward_dof_vel(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
     #
-    def _reward_dof_acc(self, sigma):
-        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
+    # def _reward_dof_acc(self, sigma):
+    #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
-    def _reward_torques(self, sigma):
-        return torch.exp(-torch.square(torch.norm(self.torques, p=2, dim=1) / sigma))
+    # def _reward_torques(self, sigma):
+    #     return torch.exp(-torch.square(self.total_torque / sigma))
