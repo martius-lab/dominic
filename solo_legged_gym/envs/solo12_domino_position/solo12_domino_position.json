@@ -74,10 +74,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "long_test_with_more_flat",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230721_112931"
+        "wandb_group": "cluster_20230721_123803"
       }
     },
     "env_cfg": {
@@ -260,7 +260,7 @@
         "border_size": 2,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
-        "init_range": 1.0,
+        "init_range": 0.5,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -286,8 +286,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 11,
-        "num_rows": 15,
-        "num_sub_terrains": 165,
+        "num_rows": 20,
+        "num_sub_terrains": 220,
         "params": [
           0.0,
           0.05,
@@ -304,8 +304,8 @@
         "restitution": 0.0,
         "slope_threshold": 0.5,
         "static_friction": 1.0,
-        "terrain_length": 7.0,
-        "terrain_width": 7.0,
+        "terrain_length": 6.0,
+        "terrain_width": 6.0,
         "train_all_together": false,
         "type": "special_box",
         "vertical_scale": 0.005
