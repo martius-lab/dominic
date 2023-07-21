@@ -30,12 +30,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 7.  # [m]
-        terrain_width = 7.  # [m]
+        terrain_length = 6.  # [m]
+        terrain_width = 6.  # [m]
 
-        init_range = 1.0  # [m]
+        init_range = 0.5  # [m]
 
-        num_rows = 15
+        num_rows = 20
         num_cols = 11
 
         border_size = 2  # [m]
@@ -64,6 +64,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class commands(BaseEnvCfg.commands):
         num_commands = 3  # default: target in x, y, z in base
+
         class ranges:
             radius = [1.0, 4.0]  # [m]
             direction = [-np.pi, np.pi]  # [rad]
@@ -258,7 +259,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'long_test_with_more_flat'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
