@@ -33,10 +33,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 7.  # [m]
         terrain_width = 7.  # [m]
 
-        init_range = 1.5  # [m]
+        init_range = 1.0  # [m]
 
-        num_rows = 40
-        num_cols = 6
+        num_rows = 15
+        num_cols = 11
 
         border_size = 2  # [m]
 
@@ -51,7 +51,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(6) * 0.1)
+        params = list(np.arange(11) * 0.05)
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'long_deep_test7'
+        run_name = 'long_test_with_more_flat'
 
         # load
         load_run = -1  # -1 = last run
