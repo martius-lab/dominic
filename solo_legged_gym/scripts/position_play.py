@@ -1,3 +1,5 @@
+import time
+
 from isaacgym import gymapi
 from isaacgym.torch_utils import get_euler_xyz
 import torch.nn.functional as func
@@ -20,13 +22,13 @@ class keyboard_play:
 
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
-        env_cfg.env.num_envs = 8
+        env_cfg.env.num_envs = 1
         env_cfg.env.play = True
         env_cfg.env.debug = False
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
-        env_cfg.terrain.params = [0.5]
+        env_cfg.terrain.params = [0.0]
         env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False
@@ -109,6 +111,7 @@ class keyboard_play:
     def play(self):
         while True:
             self.step()
+            # time.sleep(0.1)
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))

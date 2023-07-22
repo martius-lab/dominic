@@ -29,7 +29,7 @@
         "num_lagrange_steps": 10,
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
-        "policy_lr": 0.0005,
+        "policy_lr": 0.001,
         "repulsive_power": 0,
         "schedule": "fixed",
         "sigmoid_scale": 1.0,
@@ -47,20 +47,20 @@
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
-          256,
-          128
+          128,
+          64
         ],
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
           256,
-          256,
-          128
+          128,
+          64
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
           256,
-          256,
-          128
+          128,
+          64
         ]
       },
       "runner": {
@@ -74,10 +74,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "baseline",
+        "run_name": "feet_acc",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230721_123803"
+        "wandb_group": "cluster_20230722_175128"
       }
     },
     "env_cfg": {
@@ -96,7 +96,11 @@
         "max_angular_velocity": 1000.0,
         "max_linear_velocity": 1000.0,
         "name": "solo12",
-        "penalize_contacts_on": [],
+        "penalize_contacts_on": [
+          "base",
+          "SHOULDER",
+          "UPPER"
+        ],
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
         "terminate_after_contacts_on": [],
@@ -111,7 +115,7 @@
           ],
           "radius": [
             1.0,
-            4.0
+            3.0
           ]
         }
       },
@@ -130,7 +134,7 @@
           "HFE": 5.0,
           "KFE": 5.0
         },
-        "torque_limits": 2.5
+        "torque_limits": 5.0
       },
       "domain_rand": {
         "actuator_lag": true,
@@ -225,7 +229,8 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "feet_acc": "[0, 600]",
+          "contact": "[0, 100]",
+          "feet_acc": "[0, 1500]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[0, 0.8]",
           "posi": "[1, 1.0]",
@@ -260,7 +265,7 @@
         "border_size": 2,
         "dynamic_friction": 1.0,
         "horizontal_scale": 0.1,
-        "init_range": 0.5,
+        "init_range": 1.0,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -285,9 +290,9 @@
           0.4
         ],
         "mesh_type": "trimesh",
-        "num_cols": 11,
+        "num_cols": 7,
         "num_rows": 20,
-        "num_sub_terrains": 220,
+        "num_sub_terrains": 140,
         "params": [
           0.0,
           0.05,
@@ -295,18 +300,14 @@
           0.15000000000000002,
           0.2,
           0.25,
-          0.30000000000000004,
-          0.35000000000000003,
-          0.4,
-          0.45,
-          0.5
+          0.30000000000000004
         ],
         "restitution": 0.0,
         "slope_threshold": 0.5,
         "static_friction": 1.0,
         "terrain_length": 6.0,
         "terrain_width": 6.0,
-        "train_all_together": false,
+        "train_all_together": 1,
         "type": "special_box",
         "vertical_scale": 0.005
       },

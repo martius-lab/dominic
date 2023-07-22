@@ -33,10 +33,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 6.  # [m]
         terrain_width = 6.  # [m]
 
-        init_range = 0.5  # [m]
+        init_range = 1.0  # [m]
 
         num_rows = 20
-        num_cols = 11
+        num_cols = 7
 
         border_size = 2  # [m]
 
@@ -44,14 +44,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
-        train_all_together = False  # train all terrains together or separately
+        train_all_together = 1  # 0: train all together, 1: train curriculum, 2: train jump curriculum
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         type = "special_box"
-        params = list(np.arange(11) * 0.05)
+        params = list(np.arange(7) * 0.05)
         # params = list(np.zeros(5))
         # params = list(np.ones(5) * 0.1)
 
@@ -66,7 +66,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_commands = 3  # default: target in x, y, z in base
 
         class ranges:
-            radius = [1.0, 4.0]  # [m]
+            radius = [1.0, 3.0]  # [m]
             direction = [-np.pi, np.pi]  # [rad]
             # yaw = [-np.pi, np.pi]  # [rad]
 
@@ -94,7 +94,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 2.5
+        torque_limits = 5.0
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
@@ -112,7 +112,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        # terminate_after_contacts_on = ["base", "SHOULDER", "UPPER"]
+        penalize_contacts_on = ["base", "SHOULDER", "UPPER"]
         terminate_after_contacts_on = []
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
@@ -151,14 +151,15 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 600]"
+            feet_acc = "[0, 1500]"
+            # torques = "[0, 200]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            contact = "[0, 100]"
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
-            # dof_acc = "[0, 3000]"
-            # torques = "[0, 20]"
+            # dof_acc = "[0, 4000]"
 
             # lin_vel_z = "[0, 0.5]"
 
@@ -198,11 +199,11 @@ class Solo12DOMINOPositionTrainCfg:
     class network:
         init_log_std = 0.5
         drop_out_rate = 0.5
-        policy_hidden_dims = [256, 256, 128]
+        policy_hidden_dims = [256, 128, 64]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [256, 256, 128]
+        value_hidden_dims = [256, 128, 64]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [256, 256, 128]
+        succ_feat_hidden_dims = [256, 128, 64]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -214,7 +215,7 @@ class Solo12DOMINOPositionTrainCfg:
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
-        policy_lr = 5.e-4  # 5.e-4
+        policy_lr = 1e-3  # 5.e-4
         desired_kl = 0.02  # adjust the learning rate automatically
         schedule = 'fixed'  # adaptive, fixed
 
@@ -259,7 +260,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'feet_acc'
 
         # load
         load_run = -1  # -1 = last run

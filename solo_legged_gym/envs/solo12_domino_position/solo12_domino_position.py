@@ -129,8 +129,6 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_root_vel[env_ids] = 0.
         # self.last_ee_global[env_ids] = 0.
         self.last_ee_vel_global[env_ids] = 0.
-        # self.total_power[env_ids] = 0.
-        self.total_torque[env_ids] = 0.
         self.actuator_lag_buffer[env_ids] = 0.
 
         self.episode_length_buf[env_ids] = 0
@@ -172,6 +170,8 @@ class Solo12DOMINOPosition(BaseTask):
         self.pre_physics_step(actions)
         # step physics and render each frame
         self.render()
+        self.total_torque[:] = 0
+        # self.total_power[:] = 0
         for _ in range(self.cfg.control.decimation):
             self.torques = self._compute_torques(self.joint_targets).view(self.torques.shape)
             power_ = self.torques * self.dof_vel
@@ -295,8 +295,8 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_ee_vel_global[:] = self.ee_vel_global[:]
 
     def _check_termination(self):
-        # self.terminate_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
-        self.terminate_buf = self.root_states[:, 2] < self.base_terrain_heights + self.cfg.rewards.base_height_danger
+        self.terminate_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
+        self.terminate_buf |= self.root_states[:, 2] < self.base_terrain_heights + self.cfg.rewards.base_height_danger
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length  # no terminal reward for time-outs
 
@@ -528,8 +528,8 @@ class Solo12DOMINOPosition(BaseTask):
 
         if self.cfg.env.play:
             self.skills[env_ids] = 0
-            for i in range(self.num_skills):
-                self.skills[i] = i
+            # for i in range(self.num_skills):
+            #     self.skills[i] = i
 
     def _compute_torques(self, joint_targets):
         # pd controller
@@ -561,10 +561,14 @@ class Solo12DOMINOPosition(BaseTask):
         if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
             self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
             self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
-            if self.cfg.terrain.train_all_together:
+            if self.cfg.terrain.train_all_together == 0:
                 self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,), device=self.device)
-            else:
+            elif self.cfg.terrain.train_all_together == 1:
                 self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+            elif self.cfg.terrain.train_all_together == 2:
+                self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+            else:
+                raise NotImplementedError
             self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(torch.float)
             self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
         else:
@@ -633,11 +637,10 @@ class Solo12DOMINOPosition(BaseTask):
         if not self.init_done:
             return
 
-        if self.cfg.terrain.train_all_together:
+        if self.cfg.terrain.train_all_together == 0:
             self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),),
                                                        device=self.device)
-            self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
-        else:
+        elif self.cfg.terrain.train_all_together == 1:
             pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
             move_up = (pos_distance < 0.25)
             move_down = (pos_distance > 2.0) * ~move_up
@@ -648,7 +651,16 @@ class Solo12DOMINOPosition(BaseTask):
                                    high=self.cfg.terrain.num_cols),
                 torch.clip(input=self.terrain_cols[env_ids],
                            min=0))
-            self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
+        elif self.cfg.terrain.train_all_together == 2:
+            pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
+            move_up = (pos_distance < 0.25)
+            move_down = (pos_distance > 3.0) * ~move_up
+            self.terrain_cols[env_ids] = torch.where(move_up, torch.randint_like(input=self.terrain_cols[env_ids],
+                                                                                 high=self.cfg.terrain.num_cols),
+                                                     self.terrain_cols[env_ids])
+            self.terrain_cols[env_ids] = torch.where(move_down, torch.zeros_like(input=self.terrain_cols[env_ids]),
+                                                     self.terrain_cols[env_ids])
+        self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _push_robots(self):
         # base velocity impulse
@@ -842,8 +854,13 @@ class Solo12DOMINOPosition(BaseTask):
     # def _reward_dof_vel(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.dof_vel, p=2, dim=1) / sigma))
     #
-    # def _reward_dof_acc(self, sigma):
-    #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
+    def _reward_dof_acc(self, sigma):
+        return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
-    # def _reward_torques(self, sigma):
-    #     return torch.exp(-torch.square(self.total_torque / sigma))
+    def _reward_torques(self, sigma):
+        return torch.exp(-torch.square(self.total_torque / sigma))
+
+    def _reward_contact(self, sigma):
+        contact_sum = torch.sum(torch.norm(self.contact_forces[:, self.penalised_contact_indices, :], dim=-1), dim=1)
+        return torch.exp(-torch.square(contact_sum / sigma))
+
