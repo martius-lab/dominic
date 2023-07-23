@@ -67,17 +67,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 1500,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "feet_acc",
+        "run_name": "try_again2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230722_175128"
+        "wandb_group": "cluster_20230723_180137"
       }
     },
     "env_cfg": {
@@ -229,8 +229,9 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "contact": "[0, 100]",
-          "feet_acc": "[0, 1500]",
+          "contact": "[0, 50]",
+          "feet_acc": "[0, [1000, 0.9]]",
+          "joint_default": "[0, [2.5, 0.7]]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[0, 0.8]",
           "posi": "[1, 1.0]",

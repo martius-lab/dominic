@@ -66,8 +66,8 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.base_terrain_heights = torch.zeros(self.num_envs, dtype=torch.float, device=self.device,
                                                 requires_grad=False)
-        # self.base_target_terrain_heights = torch.zeros(self.num_envs, dtype=torch.float, device=self.device,
-        #                                                requires_grad=False)
+        self.base_target_terrain_heights = torch.zeros(self.num_envs, dtype=torch.float, device=self.device,
+                                                       requires_grad=False)
         self.joint_targets = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
                                          requires_grad=False)
         self.last_joint_targets = torch.zeros(self.num_envs, 12, dtype=torch.float, device=self.device,
@@ -107,9 +107,9 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.base_check_px, self.base_check_py = torch.meshgrid(torch.arange(-1, 2, device=self.device),
                                                                 torch.arange(-1, 2, device=self.device))
-        #
-        # self.base_target_check_px, self.base_target_check_py = torch.meshgrid(torch.arange(-4, 5, device=self.device),
-        #                                                                       torch.arange(-4, 5, device=self.device))
+
+        self.base_target_check_px, self.base_target_check_py = torch.meshgrid(torch.arange(-3, 4, device=self.device),
+                                                                              torch.arange(-3, 4, device=self.device))
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -375,15 +375,15 @@ class Solo12DOMINOPosition(BaseTask):
         base_heights = self.height_samples[base_terrain_px, base_terrain_py]
         base_heights = torch.min(base_heights, dim=1)[0]
         self.base_terrain_heights = base_heights * self.terrain.cfg.vertical_scale
-        #
-        # base_target_px = torch.clip(base_px, 8, self.height_samples.shape[0] - 8)
-        # base_target_py = torch.clip(base_py, 8, self.height_samples.shape[1] - 8)
-        #
-        # base_target_px = base_target_px.unsqueeze(1) + torch.flatten(self.base_target_check_px)
-        # base_target_py = base_target_py.unsqueeze(1) + torch.flatten(self.base_target_check_py)
-        # base_target_heights = self.height_samples[base_target_px, base_target_py]
-        # base_target_heights = torch.max(base_target_heights, dim=1)[0]
-        # self.base_target_terrain_heights = base_target_heights * self.terrain.cfg.vertical_scale
+
+        base_target_px = torch.clip(base_px, 8, self.height_samples.shape[0] - 8)
+        base_target_py = torch.clip(base_py, 8, self.height_samples.shape[1] - 8)
+
+        base_target_px = base_target_px.unsqueeze(1) + torch.flatten(self.base_target_check_px)
+        base_target_py = base_target_py.unsqueeze(1) + torch.flatten(self.base_target_check_py)
+        base_target_heights = self.height_samples[base_target_px, base_target_py]
+        base_target_heights = torch.max(base_target_heights, dim=1)[0]
+        self.base_target_terrain_heights = base_target_heights * self.terrain.cfg.vertical_scale
 
         # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 0, 1))
         # for i in range(self.num_envs):
@@ -815,10 +815,9 @@ class Solo12DOMINOPosition(BaseTask):
     #     ang_acc_xy = torch.norm(ang_vel_xy - last_ang_vel_xy, p=2, dim=1)
     #     return torch.exp(-torch.square(ang_acc_xy / sigma))
 
-    #
-    # def _reward_joint_default(self, sigma):
-    #     joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
-    #     return torch.clip(torch.exp(-torch.square(joint_deviation / sigma)), min=None, max=0.7) / 0.7
+    def _reward_joint_default(self, sigma):
+        joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
+        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
     def _reward_joint_targets_rate(self, sigma):
         return torch.exp(-torch.square(self.joint_targets_rate / sigma))
@@ -838,7 +837,7 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _reward_feet_acc(self, sigma):
         feet_acc_error = torch.sum(torch.norm(self.ee_acc_global, p=2, dim=-1), dim=-1)
-        return torch.exp(-torch.square(feet_acc_error / sigma))
+        return torch.clip(torch.exp(-torch.square(feet_acc_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
     # def _reward_feet_slip_h(self, sigma):
     #     feet_too_low = self.ee_global[:, :, 2] < sigma[0]

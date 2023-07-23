@@ -151,12 +151,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, 1500]"
-            # torques = "[0, 200]"
+            feet_acc = "[0, [1000, 0.9]]"
+            # torques = "[0, 400]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            contact = "[0, 100]"
+            contact = "[0, 50]"
+            joint_default = "[0, [2.5, 0.7]]"
+
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
@@ -166,7 +168,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # stand_still = "[0, 0.01]"
             # stand_still_h = "[0, 0.05]"
             # feet_contact_force = "[0, 20.0]"
-            # joint_default = "[0, 1.5]"
 
             # feet_slip_h = "[0, [0.01, 0.01]]"
             # feet_slip_v = "[0, [0.04, 0.8]]"
@@ -251,7 +252,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 5000
 
     class runner:
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 1500  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -260,7 +261,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'feet_acc'
+        run_name = 'try_again2'
 
         # load
         load_run = -1  # -1 = last run
