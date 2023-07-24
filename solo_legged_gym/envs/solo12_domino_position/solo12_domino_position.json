@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[1.5, 1.0]",
+        "fixed_adv_coeff": "[1.5, 1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -47,20 +47,17 @@
         "policy_activation": "elu",
         "policy_hidden_dims": [
           256,
-          128,
-          64
+          128
         ],
         "succ_feat_activation": "elu",
         "succ_feat_hidden_dims": [
           256,
-          128,
-          64
+          128
         ],
         "value_activation": "elu",
         "value_hidden_dims": [
           256,
-          128,
-          64
+          128
         ]
       },
       "runner": {
@@ -74,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "try_again2",
+        "run_name": "rebase",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230723_180137"
+        "wandb_group": "cluster_20230724_111403"
       }
     },
     "env_cfg": {
@@ -161,9 +158,9 @@
         "episode_length_s": 5,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 10,
+        "num_features": 5,
         "num_observations": 127,
-        "num_skills": 8,
+        "num_skills": 5,
         "play": false,
         "plot_target": true,
         "remaining_check_time_s": 1
@@ -224,14 +221,14 @@
         "base_height_danger": 0.1,
         "base_height_target": 0.25,
         "max_contact_force": 100.0,
-        "num_groups": 2,
+        "num_groups": 3,
         "soft_dof_pos_limit": 0.9,
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "contact": "[0, 50]",
-          "feet_acc": "[0, [1000, 0.9]]",
-          "joint_default": "[0, [2.5, 0.7]]",
+          "contact": "[2, 50]",
+          "feet_acc": "[2, [1000, 0.9]]",
+          "joint_default": "[2, [2.5, 0.7]]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[0, 0.8]",
           "posi": "[1, 1.0]",

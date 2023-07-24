@@ -424,8 +424,9 @@ class DOMINO:
                 lagrange_coeff = self.get_lagrange_coeff(skills, self.burning_expert)
 
             # The most important part of the algorithm
-            advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0] * lagrange_coeff
-            advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]
+            advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0]  # regularizers
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]  # track pos
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * lagrange_coeff
             advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1 - lagrange_coeff)
 
             # Using KL to adaptively changing the learning rate

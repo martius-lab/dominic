@@ -8,9 +8,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class env(BaseEnvCfg.env):
         num_envs = 4096
         num_observations = 30 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
-        num_skills = 8  # latent space
+        num_skills = 5  # latent space
         num_actions = 12
-        num_features = 10
+        num_features = 5
         episode_length_s = 5  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -151,14 +151,15 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            feet_acc = "[0, [1000, 0.9]]"
-            # torques = "[0, 400]"
             joint_targets_rate = "[0, 1.5]"
             move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            contact = "[0, 50]"
-            joint_default = "[0, [2.5, 0.7]]"
 
+            feet_acc = "[2, [1000, 0.9]]"
+            contact = "[2, 50]"
+            joint_default = "[2, [2.5, 0.7]]"
+
+            # torques = "[0, 400]"
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
@@ -174,7 +175,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # dof_vel = "[0, 50.0]"
             # feet_air_time = "[0, None]"
 
-        num_groups = 2
+        num_groups = 3
 
         base_height_target = 0.25
         base_height_danger = 0.1
@@ -200,11 +201,11 @@ class Solo12DOMINOPositionTrainCfg:
     class network:
         init_log_std = 0.5
         drop_out_rate = 0.5
-        policy_hidden_dims = [256, 128, 64]
+        policy_hidden_dims = [256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        value_hidden_dims = [256, 128, 64]
+        value_hidden_dims = [256, 128]
         value_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
-        succ_feat_hidden_dims = [256, 128, 64]
+        succ_feat_hidden_dims = [256, 128]
         succ_feat_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
     class algorithm:
@@ -216,13 +217,13 @@ class Solo12DOMINOPositionTrainCfg:
         num_learning_epochs = 5
         num_mini_batches = 4  # mini batch size = num_envs * num_steps / num_minibatches
 
-        policy_lr = 1e-3  # 5.e-4
+        policy_lr = 1.e-3  # 5.e-4
         desired_kl = 0.02  # adjust the learning rate automatically
         schedule = 'fixed'  # adaptive, fixed
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.5, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -261,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'try_again2'
+        run_name = 'rebase'
 
         # load
         load_run = -1  # -1 = last run
