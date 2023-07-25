@@ -14,12 +14,12 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 5000,
+        "burning_expert_steps": 100,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[1.5, 1.0, 1.0]",
+        "fixed_adv_coeff": "[1.5, 1.0, 0.5]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "rebase",
+        "run_name": "diversity3",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230724_111403"
+        "wandb_group": "cluster_20230724_215854"
       }
     },
     "env_cfg": {
@@ -155,10 +155,10 @@
       "env": {
         "debug": false,
         "env_spacing": 2.0,
-        "episode_length_s": 5,
+        "episode_length_s": 6,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 5,
+        "num_features": 7,
         "num_observations": 127,
         "num_skills": 5,
         "play": false,
@@ -226,9 +226,9 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "contact": "[2, 50]",
-          "feet_acc": "[2, [1000, 0.9]]",
-          "joint_default": "[2, [2.5, 0.7]]",
+          "contact": "[2, 25]",
+          "feet_acc": "[2, [800, 0.9]]",
+          "joint_default": "[2, [2.0, 0.8]]",
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[0, 0.8]",
           "posi": "[1, 1.0]",

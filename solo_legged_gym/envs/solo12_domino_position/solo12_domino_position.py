@@ -334,7 +334,7 @@ class Solo12DOMINOPosition(BaseTask):
             # self.root_states[:, 2:3],  # 1
             self.base_lin_vel[:, 2:3],  # 1
             # self.projected_gravity,  # 3
-            # self.base_ang_vel[:, 0:2],  # 2
+            self.base_ang_vel[:, 0:2],  # 2
             self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
 
@@ -528,8 +528,8 @@ class Solo12DOMINOPosition(BaseTask):
 
         if self.cfg.env.play:
             self.skills[env_ids] = 0
-            # for i in range(self.num_skills):
-            #     self.skills[i] = i
+            for i in range(self.num_skills):
+                self.skills[i] = i
 
     def _compute_torques(self, joint_targets):
         # pd controller

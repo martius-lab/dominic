@@ -10,8 +10,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 30 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 5  # latent space
         num_actions = 12
-        num_features = 5
-        episode_length_s = 5  # episode length in seconds
+        num_features = 7
+        episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
         play = False
@@ -155,9 +155,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             move_towards = "[0, 0.8]"  # clip/scale
             stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            feet_acc = "[2, [1000, 0.9]]"
-            contact = "[2, 50]"
-            joint_default = "[2, [2.5, 0.7]]"
+            feet_acc = "[2, [800, 0.9]]"
+            contact = "[2, 25]"
+            joint_default = "[2, [2.0, 0.8]]"
 
             # torques = "[0, 400]"
             # lin_z = "[0, 0.2]"
@@ -223,7 +223,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.5, 1.0, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.0, 0.5]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -250,7 +250,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 100
 
     class runner:
         max_iterations = 1500  # number of policy updates
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'rebase'
+        run_name = 'diversity3'
 
         # load
         load_run = -1  # -1 = last run
