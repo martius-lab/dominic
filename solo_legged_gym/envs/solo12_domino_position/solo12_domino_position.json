@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[1.5, 1.0, 2.0]",
+        "fixed_adv_coeff": "[1.5, 1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -70,11 +70,11 @@
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
-        "record_iters": 10,
-        "run_name": "diversity6",
+        "record_iters": 5,
+        "run_name": "diverse",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230725_151108"
+        "wandb_group": "cluster_20230725_182000"
       }
     },
     "env_cfg": {
@@ -159,7 +159,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 7,
-        "num_observations": 127,
+        "num_observations": 109,
         "num_skills": 5,
         "play": false,
         "plot_target": true,
@@ -230,9 +230,9 @@
           "feet_acc": "[0, [800, 0.9]]",
           "joint_default": "[2, [2.0, 0.8]]",
           "joint_targets_rate": "[0, 1.5]",
-          "move_towards": "[2, 1.0]",
+          "move_towards": "[2, 0.95]",
           "posi": "[1, 1.0]",
-          "stall_pos": "[0, [0.5, 0.25, 0.1]]"
+          "stall_pos": "[0, [0.4, 0.25, 0.1]]"
         }
       },
       "seed": 42,
@@ -277,15 +277,13 @@
           0.4
         ],
         "measured_points_y": [
-          -0.4,
           -0.3,
           -0.2,
           -0.1,
           0.0,
           0.1,
           0.2,
-          0.3,
-          0.4
+          0.3
         ],
         "mesh_type": "trimesh",
         "num_cols": 7,

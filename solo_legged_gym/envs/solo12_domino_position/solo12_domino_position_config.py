@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 9 * 9 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 9 * 7 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 5  # latent space
         num_actions = 12
         num_features = 7
@@ -26,7 +26,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         measure_height = True  # measure the height samples
         measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
-        measured_points_y = list((np.arange(9) - (9-1) / 2) / 10)
+        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -154,9 +154,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 1.5]"
             feet_acc = "[0, [800, 0.9]]"
             contact = "[0, 25]"
-            stall_pos = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 1.0]"  # clip/scale
+            move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
 
             # torques = "[0, 400]"
@@ -223,7 +223,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.5, 1.5, 1.0]'
+        fixed_adv_coeff = '[1.5, 1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity6'
+        run_name = 'diverse'
 
         # load
         load_run = -1  # -1 = last run
@@ -270,7 +270,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
-        record_iters = 10  # should be int * num_st   eps_per_env
+        record_iters = 5  # should be int * num_st   eps_per_env
 
         wandb = False  # by default is false, set to true from command line
         wandb_group = 'test'
