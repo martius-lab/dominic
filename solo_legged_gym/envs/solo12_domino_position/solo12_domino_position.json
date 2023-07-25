@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[1.5, 1.0, 0.5]",
+        "fixed_adv_coeff": "[1.5, 1.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "diversity3",
+        "run_name": "diversity4",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230724_215854"
+        "wandb_group": "cluster_20230725_085356"
       }
     },
     "env_cfg": {
@@ -226,13 +226,13 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "contact": "[2, 25]",
-          "feet_acc": "[2, [800, 0.9]]",
+          "contact": "[0, 25]",
+          "feet_acc": "[0, [800, 0.9]]",
           "joint_default": "[2, [2.0, 0.8]]",
           "joint_targets_rate": "[0, 1.5]",
-          "move_towards": "[0, 0.8]",
+          "move_towards": "[2, 0.8]",
           "posi": "[1, 1.0]",
-          "stall_pos": "[0, [0.2, 0.25, 0.1]]"
+          "stall_pos": "[0, [0.25, 0.25, 0.1]]"
         }
       },
       "seed": 42,

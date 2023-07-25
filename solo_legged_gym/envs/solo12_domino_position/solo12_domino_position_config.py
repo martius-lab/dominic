@@ -152,11 +152,11 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_acc_xy = "[2, 20]"
 
             joint_targets_rate = "[0, 1.5]"
-            move_towards = "[0, 0.8]"  # clip/scale
-            stall_pos = "[0, [0.2, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            feet_acc = "[0, [800, 0.9]]"
+            contact = "[0, 25]"
+            stall_pos = "[0, [0.25, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            feet_acc = "[2, [800, 0.9]]"
-            contact = "[2, 25]"
+            move_towards = "[2, 0.8]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
 
             # torques = "[0, 400]"
@@ -223,7 +223,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.5, 1.0, 0.5]'
+        fixed_adv_coeff = '[1.5, 1.0, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity3'
+        run_name = 'diversity4'
 
         # load
         load_run = -1  # -1 = last run
