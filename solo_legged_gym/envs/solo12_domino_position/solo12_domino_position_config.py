@@ -154,9 +154,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 1.5]"
             feet_acc = "[0, [800, 0.9]]"
             contact = "[0, 25]"
-            stall_pos = "[0, [0.25, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.8]"  # clip/scale
+            move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
 
             # torques = "[0, 400]"
@@ -253,7 +253,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 100
 
     class runner:
-        max_iterations = 1500  # number of policy updates
+        max_iterations = 2000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversity4'
+        run_name = 'diversity5'
 
         # load
         load_run = -1  # -1 = last run

@@ -64,17 +64,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 1500,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "diversity4",
+        "run_name": "diversity5",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230725_085356"
+        "wandb_group": "cluster_20230725_114419"
       }
     },
     "env_cfg": {
@@ -230,9 +230,9 @@
           "feet_acc": "[0, [800, 0.9]]",
           "joint_default": "[2, [2.0, 0.8]]",
           "joint_targets_rate": "[0, 1.5]",
-          "move_towards": "[2, 0.8]",
+          "move_towards": "[2, 0.95]",
           "posi": "[1, 1.0]",
-          "stall_pos": "[0, [0.25, 0.25, 0.1]]"
+          "stall_pos": "[0, [0.3, 0.25, 0.1]]"
         }
       },
       "seed": 42,
