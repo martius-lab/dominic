@@ -8,7 +8,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class env(BaseEnvCfg.env):
         num_envs = 4096
         num_observations = 30 + 9 * 7 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
-        num_skills = 5  # latent space
+        num_skills = 8  # latent space
         num_actions = 12
         num_features = 7
         episode_length_s = 6  # episode length in seconds
@@ -57,7 +57,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
-        ref_pos_b = [1, 1, 0.4]
+        ref_pos_b = [1, 1, 0.6]
         record_camera_imgs = True
         overview_pos = [-5, -5, 10]  # [m]
         overview_lookat = [5, 5, 1]  # [m]
@@ -154,7 +154,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 1.5]"
             feet_acc = "[0, [800, 0.9]]"
             contact = "[0, 25]"
-            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
             move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
@@ -253,7 +253,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 100
 
     class runner:
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 4000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diverse'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run

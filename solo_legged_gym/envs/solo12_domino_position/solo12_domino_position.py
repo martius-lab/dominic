@@ -110,6 +110,21 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.base_target_check_px, self.base_target_check_py = torch.meshgrid(torch.arange(-3, 4, device=self.device),
                                                                               torch.arange(-3, 4, device=self.device))
+        self.play_skill = 0
+        self.draw_height_colors = [(0.75, 0, 0),
+                                   (0, 0.75, 0),
+                                   (0, 0, 0.75),
+                                   (0.75, 0.75, 0),
+                                   (0, 0.75, 0.75),
+                                   (0.75, 0, 0.75),
+                                   (0.75, 0.75, 0.75),
+                                   (0.5, 0.75, 0),
+                                   (0.5, 0, 0.75),
+                                   (0.75, 0.5, 0),
+                                   (0, 0.5, 0.75),
+                                   (0.75, 0, 0.5),
+                                   (0, 0.75, 0.5),
+                                   ]
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -223,19 +238,28 @@ class Solo12DOMINOPosition(BaseTask):
 
             # step graphics
             if self.enable_viewer_sync:
-                if not self.viewer_set:
-                    if self.overview:
-                        self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
-                    else:
-                        ref_pos = [
-                            self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
-                            self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
-                            self.root_states[self.cfg.viewer.ref_env, 2].item() + self.cfg.viewer.ref_pos_b[2]]
-                        ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
-                                      self.root_states[self.cfg.viewer.ref_env, 1].item(),
-                                      self.root_states[self.cfg.viewer.ref_env, 2].item()]
-                        self._set_camera(ref_pos, ref_lookat)
-                    self.viewer_set = True
+                if self.cfg.env.play:
+                    ref_pos = [self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                               self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                               self.cfg.viewer.ref_pos_b[2]]
+                    ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
+                                  self.root_states[self.cfg.viewer.ref_env, 1].item(),
+                                  0.2]
+                    self._set_camera(ref_pos, ref_lookat)
+                else:
+                    if not self.viewer_set:
+                        if self.overview:
+                            self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
+                        else:
+                            ref_pos = [
+                                self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                                self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                                self.root_states[self.cfg.viewer.ref_env, 2].item() + self.cfg.viewer.ref_pos_b[2]]
+                            ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
+                                          self.root_states[self.cfg.viewer.ref_env, 1].item(),
+                                          self.root_states[self.cfg.viewer.ref_env, 2].item()]
+                            self._set_camera(ref_pos, ref_lookat)
+                        self.viewer_set = True
             else:
                 self.gym.poll_viewer_events(self.viewer)
 
@@ -295,7 +319,8 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_ee_vel_global[:] = self.ee_vel_global[:]
 
     def _check_termination(self):
-        self.terminate_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
+        self.terminate_buf = torch.any(
+            torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
         self.terminate_buf |= self.root_states[:, 2] < self.base_terrain_heights + self.cfg.rewards.base_height_danger
 
         self.time_out_buf = self.episode_length_buf > self.max_episode_length  # no terminal reward for time-outs
@@ -510,8 +535,9 @@ class Solo12DOMINOPosition(BaseTask):
                 # gymutil.draw_lines(self.box_geom_in_base, self.gym, self.viewer, self.envs[i], self.box_poses_in_base[i])
 
     def _draw_heights(self):
-        sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 1, 0))
         for i in range(self.num_envs):
+            color_ = self.draw_height_colors[self.skills[i].item()]
+            sphere_geom = gymutil.WireframeSphereGeometry(0.02, 8, 8, None, color=color_)
             base_pos = (self.root_states[i, :3]).cpu().numpy()
             heights = self.measured_height[i].cpu().numpy()
             height_points = quat_apply_yaw(self.base_quat[i].repeat(heights.shape[0]),
@@ -527,9 +553,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
 
         if self.cfg.env.play:
-            self.skills[env_ids] = 0
-            for i in range(self.num_skills):
-                self.skills[i] = i
+            self.skills[env_ids] = self.play_skill
 
     def _compute_torques(self, joint_targets):
         # pd controller
@@ -862,4 +886,3 @@ class Solo12DOMINOPosition(BaseTask):
     def _reward_contact(self, sigma):
         contact_sum = torch.sum(torch.norm(self.contact_forces[:, self.penalised_contact_indices, :], dim=-1), dim=1)
         return torch.exp(-torch.square(contact_sum / sigma))
-

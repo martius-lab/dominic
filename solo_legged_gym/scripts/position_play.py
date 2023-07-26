@@ -1,3 +1,4 @@
+import json
 import time
 
 from isaacgym import gymapi
@@ -6,7 +7,8 @@ import torch.nn.functional as func
 
 from solo_legged_gym import ROOT_DIR
 from solo_legged_gym.envs import task_registry
-from solo_legged_gym.utils import get_args, export_policy_as_jit, export_policy_as_onnx, get_load_path
+from solo_legged_gym.utils import get_args, export_policy_as_jit, export_policy_as_onnx, get_load_path, \
+    update_cfgs_from_dict
 import os
 import numpy as np
 import torch
@@ -15,6 +17,7 @@ import csv
 
 EXPORT_POLICY = False
 LOG_DATA = True
+REAL_TIME = True
 np.set_printoptions(precision=2)
 
 
@@ -22,9 +25,27 @@ class keyboard_play:
 
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
-        env_cfg.env.num_envs = 5
+
+        train_cfg.runner.load_run = '20230725_182000_977696_diverse'
+        train_cfg.runner.checkpoint = -1
+
+        load_path = get_load_path(
+            os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),
+            load_run=train_cfg.runner.load_run,
+            checkpoint=train_cfg.runner.checkpoint,
+        )
+        print(f"Loading model from: {load_path}")
+
+        load_config_path = os.path.join(os.path.dirname(load_path), f"{train_cfg.runner.experiment_name}.json")
+        f = open(load_config_path)
+        load_config = json.load(f)
+        update_cfgs_from_dict(env_cfg, train_cfg, load_config)
+
+        env_cfg.env.num_envs = 1
         env_cfg.env.play = True
         env_cfg.env.debug = False
+        env_cfg.viewer.overview = False
+        env_cfg.viewer.ref_pos_b = [1.5, 1.5, 1.0]
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
@@ -43,13 +64,6 @@ class keyboard_play:
         self.env = env
         self.runner = task_registry.make_alg_runner(env=self.env, name=args.task, args=args, env_cfg=env_cfg, train_cfg=train_cfg)
         self.obs = self.env.get_observations()
-
-        load_path = get_load_path(
-            os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),
-            load_run=train_cfg.runner.load_run,
-            checkpoint=train_cfg.runner.checkpoint,
-        )
-        print(f"Loading model from: {load_path}")
         self.runner.load(load_path)
         self.policy = self.runner.get_inference_policy(device=self.env.device)
 
@@ -104,14 +118,28 @@ class keyboard_play:
             "reset robot": "r",
         }
 
+        self.skill_control = {}
+        for i in range(self.env.num_skills):
+            key = "skill " + str(i)
+            value = str(i)
+            self.skill_control[key] = value
+
+        for action, key in self.skill_control.items():
+            key_enum = getattr(gymapi.KeyboardInput, f"KEY_{key.upper()}")
+            self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
+
         for action, key in self.keyboard_control.items():
             key_enum = getattr(gymapi.KeyboardInput, f"KEY_{key.upper()}")
             self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
 
     def play(self):
-        while True:
+        if REAL_TIME:
+            threading.Timer(1 / 50, self.play).start()
             self.step()
-            # time.sleep(0.1)
+        else:
+            while True:
+                self.step()
+                # time.sleep(0.1)
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
@@ -164,6 +192,8 @@ class keyboard_play:
         for event in events:
             if event.action == "r" and event.value > 0:
                 self.env.reset()
+            elif event.action in list(self.skill_control.values()) and event.value > 0:
+                self.env.play_skill = int(event.action)
 
             if event.value > 0 and event.action in list(self.skill_control.values()):
                 print(list(self.skill_control.keys())[list(self.skill_control.values()).index(event.action)])
