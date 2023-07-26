@@ -8,9 +8,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class env(BaseEnvCfg.env):
         num_envs = 4096
         num_observations = 30 + 9 * 7 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
-        num_skills = 5  # latent space
+        num_skills = 8  # latent space
         num_actions = 12
-        num_features = 7
+        num_features = 5
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -253,7 +253,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 100
 
     class runner:
-        max_iterations = 4000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'base_feet_height_features'
 
         # load
         load_run = -1  # -1 = last run
