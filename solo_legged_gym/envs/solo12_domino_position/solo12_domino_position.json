@@ -74,7 +74,7 @@
         "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230726_081104"
+        "wandb_group": "cluster_20230726_121930"
       }
     },
     "env_cfg": {
@@ -160,7 +160,7 @@
         "num_envs": 4096,
         "num_features": 7,
         "num_observations": 109,
-        "num_skills": 8,
+        "num_skills": 5,
         "play": false,
         "plot_target": true,
         "remaining_check_time_s": 1
@@ -232,7 +232,7 @@
           "joint_targets_rate": "[0, 1.5]",
           "move_towards": "[2, 0.95]",
           "posi": "[1, 1.0]",
-          "stall_pos": "[0, [0.5, 0.25, 0.1]]"
+          "stall_pos": "[0, [0.4, 0.25, 0.1]]"
         }
       },
       "seed": 42,

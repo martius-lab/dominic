@@ -8,7 +8,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class env(BaseEnvCfg.env):
         num_envs = 4096
         num_observations = 30 + 9 * 7 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
-        num_skills = 8  # latent space
+        num_skills = 5  # latent space
         num_actions = 12
         num_features = 7
         episode_length_s = 6  # episode length in seconds
@@ -154,7 +154,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 1.5]"
             feet_acc = "[0, [800, 0.9]]"
             contact = "[0, 25]"
-            stall_pos = "[0, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
             move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
