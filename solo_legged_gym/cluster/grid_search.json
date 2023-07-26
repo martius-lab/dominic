@@ -11,7 +11,7 @@
     "request_cpus": 1,
     "request_gpus": 1,
     "memory_in_mb": 10000,
-    "gpu_memory_mb": 12000,
+    "gpu_memory_mb": 18000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 15,
     "forbidden_hostnames": ["g095", "g023", "g020", "g097"]
