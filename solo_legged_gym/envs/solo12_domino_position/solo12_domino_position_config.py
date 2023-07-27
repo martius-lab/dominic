@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'ee_clearance'
+        run_name = 'int_adv_coeff_grid'
 
         # load
         load_run = -1  # -1 = last run

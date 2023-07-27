@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "ee_clearance",
+        "run_name": "int_adv_coeff_grid",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230727_144125"
+        "wandb_group": "cluster_20230727_214905"
       }
     },
     "env_cfg": {
