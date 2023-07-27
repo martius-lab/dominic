@@ -138,7 +138,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
-            # feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
             # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
 
             # pos = "[1, 0.5]"  # sigma
@@ -158,6 +157,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
+            feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
 
             # torques = "[0, 400]"
             # lin_z = "[0, 0.2]"
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'base_feet_height_features'
+        run_name = 'ee_clearance'
 
         # load
         load_run = -1  # -1 = last run
