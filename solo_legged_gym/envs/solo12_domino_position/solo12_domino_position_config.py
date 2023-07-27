@@ -157,7 +157,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
-            feet_slip = "[2, [0.08, 0.1, 0.2]]"  # target height, sigma, sigma+
+            feet_slip = "[2, [0.04, 0.2, 0.6]]"  # target height, sigma, sigma+
 
             # torques = "[0, 400]"
             # lin_z = "[0, 0.2]"
