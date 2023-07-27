@@ -154,7 +154,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[0, 1.5]"
             feet_acc = "[0, [800, 0.9]]"
             contact = "[0, 25]"
-            stall_pos = "[0, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[0, [0.6, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
             move_towards = "[2, 0.95]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"

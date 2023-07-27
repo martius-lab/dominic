@@ -468,18 +468,23 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _resample_commands(self, env_ids):
         # get current position
-        base_pos = self.root_states[env_ids, 0:2]  # x and y in global frame
+        if self.cfg.env.play:
+            self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 2.0
+            self.commands[env_ids, 1] = self.env_origins[env_ids, 1]
 
-        # sample from a ring (r, R) with uniform distribution
-        sampled_direction = torch_rand_float(self.command_ranges["direction"][0],
-                                             self.command_ranges["direction"][1],
-                                             (len(env_ids), 1),
-                                             device=self.device).squeeze(1)
-        sampled_radius = torch_rand_float_ring(self.command_ranges["radius"][0],
-                                               self.command_ranges["radius"][1], (len(env_ids), 1),
-                                               device=self.device).squeeze(1)
-        self.commands[env_ids, 0] = base_pos[:, 0] + sampled_radius * torch.cos(sampled_direction)
-        self.commands[env_ids, 1] = base_pos[:, 1] + sampled_radius * torch.sin(sampled_direction)
+        else:
+            base_pos = self.root_states[env_ids, 0:2]  # x and y in global frame
+
+            # sample from a ring (r, R) with uniform distribution
+            sampled_direction = torch_rand_float(self.command_ranges["direction"][0],
+                                                 self.command_ranges["direction"][1],
+                                                 (len(env_ids), 1),
+                                                 device=self.device).squeeze(1)
+            sampled_radius = torch_rand_float_ring(self.command_ranges["radius"][0],
+                                                   self.command_ranges["radius"][1], (len(env_ids), 1),
+                                                   device=self.device).squeeze(1)
+            self.commands[env_ids, 0] = base_pos[:, 0] + sampled_radius * torch.cos(sampled_direction)
+            self.commands[env_ids, 1] = base_pos[:, 1] + sampled_radius * torch.sin(sampled_direction)
 
         command_global = self.commands[env_ids, :2].clone()
         command_global += self.terrain.cfg.border_size
@@ -622,14 +627,18 @@ class Solo12DOMINOPosition(BaseTask):
     def _reset_root_states(self, env_ids):
         # base position
         self.root_states[env_ids] = self.base_init_state
-        sampled_yaw = torch_rand_float(-np.pi, np.pi, (len(env_ids), 1), device=self.device).squeeze(1)
-        self.root_states[env_ids, 5] = torch.sin(sampled_yaw / 2)  # z
-        self.root_states[env_ids, 6] = torch.cos(sampled_yaw / 2)  # w
-
         self.root_states[env_ids, :2] += self.env_origins[env_ids, :2]
-        self.root_states[env_ids, :2] += torch_rand_float(-self.cfg.terrain.init_range,
-                                                          self.cfg.terrain.init_range,
-                                                          (len(env_ids), 2), device=self.device)
+
+        if self.cfg.env.play:
+            self.root_states[env_ids, 5] = 1.0  # z
+            self.root_states[env_ids, 6] = 0.0  # w
+        else:
+            sampled_yaw = torch_rand_float(-np.pi, np.pi, (len(env_ids), 1), device=self.device).squeeze(1)
+            self.root_states[env_ids, 5] = torch.sin(sampled_yaw / 2)  # z
+            self.root_states[env_ids, 6] = torch.cos(sampled_yaw / 2)  # w
+            self.root_states[env_ids, :2] += torch_rand_float(-self.cfg.terrain.init_range,
+                                                              self.cfg.terrain.init_range,
+                                                              (len(env_ids), 2), device=self.device)
 
         base_global = self.root_states[env_ids, :2].clone()
         base_global += self.terrain.cfg.border_size

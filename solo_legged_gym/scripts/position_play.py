@@ -17,7 +17,7 @@ import csv
 
 EXPORT_POLICY = False
 LOG_DATA = True
-REAL_TIME = True
+REAL_TIME = False
 np.set_printoptions(precision=2)
 
 
@@ -26,7 +26,7 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        train_cfg.runner.load_run = '20230725_182000_977696_diverse'
+        train_cfg.runner.load_run = '1_stall_pos/20230726_152735_281469_base_feet_height_features'
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
@@ -37,9 +37,10 @@ class keyboard_play:
         print(f"Loading model from: {load_path}")
 
         load_config_path = os.path.join(os.path.dirname(load_path), f"{train_cfg.runner.experiment_name}.json")
-        f = open(load_config_path)
-        load_config = json.load(f)
-        update_cfgs_from_dict(env_cfg, train_cfg, load_config)
+        if os.path.isfile(load_config_path):
+            f = open(load_config_path)
+            load_config = json.load(f)
+            update_cfgs_from_dict(env_cfg, train_cfg, load_config)
 
         env_cfg.env.num_envs = 1
         env_cfg.env.play = True
