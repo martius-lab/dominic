@@ -21,7 +21,7 @@
         "entropy_coef": 0.03,
         "fixed_adv_coeff": "[1.5, 1.0, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 1.0,
+        "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "int_adv_coeff_grid",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230727_214905"
+        "wandb_group": "cluster_20230728_081253"
       }
     },
     "env_cfg": {

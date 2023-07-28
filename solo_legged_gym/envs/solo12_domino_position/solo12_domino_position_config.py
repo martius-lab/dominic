@@ -224,7 +224,7 @@ class Solo12DOMINOPositionTrainCfg:
         value_lr = 1.e-3  # 1.e-3
 
         fixed_adv_coeff = '[1.5, 1.0, 1.0]'
-        intrinsic_adv_coeff = 1.0
+        intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'int_adv_coeff_grid'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run
