@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "test_box",
+        "run_name": "test_pit_and_then_box",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230728_105203"
+        "wandb_group": "cluster_20230728_170126"
       }
     },
     "env_cfg": {
@@ -309,7 +309,7 @@
         "static_friction": 1.0,
         "terrain_length": 6.0,
         "terrain_width": 6.0,
-        "train_all_together": 1,
+        "train_all_together": 2,
         "vertical_scale": 0.005
       },
       "viewer": {

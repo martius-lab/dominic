@@ -44,7 +44,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
-        train_all_together = 1  # 0: train all together, 1: train curriculum, 2: train jump curriculum
+        train_all_together = 2  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
+        # 2: train curriculum in difficulty and firstly pit then box
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
         # pass the params as a dict
@@ -262,7 +263,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_box'
+        run_name = 'test_pit_and_then_box'
 
         # load
         load_run = -1  # -1 = last run

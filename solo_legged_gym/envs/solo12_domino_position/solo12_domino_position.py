@@ -537,13 +537,15 @@ class Solo12DOMINOPosition(BaseTask):
     def _get_env_origins(self):
         if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
             self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
-            self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
             if self.cfg.terrain.train_all_together == 0:
                 self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,), device=self.device)
+                self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
             elif self.cfg.terrain.train_all_together == 1:
                 self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+                self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
             elif self.cfg.terrain.train_all_together == 2:
                 self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+                self.terrain_rows = torch.randint(0, int(self.cfg.terrain.num_rows / 2), (self.num_envs,), device=self.device)
             else:
                 raise NotImplementedError
             self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(torch.float)
@@ -617,13 +619,14 @@ class Solo12DOMINOPosition(BaseTask):
         if not self.init_done:
             return
 
-        self.terrain_rows[env_ids] = torch.randint(0, self.cfg.terrain.num_rows, (len(env_ids),),
-                                                   device=self.device)
-
         if self.cfg.terrain.train_all_together == 0:
             self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),),
                                                        device=self.device)
+            self.terrain_rows[env_ids] = torch.randint(0, self.cfg.terrain.num_rows, (len(env_ids),),
+                                                       device=self.device)
         elif self.cfg.terrain.train_all_together == 1:
+            self.terrain_rows[env_ids] = torch.randint(0, self.cfg.terrain.num_rows, (len(env_ids),),
+                                                       device=self.device)
             pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
             move_up = (pos_distance < 0.25)
             move_down = (pos_distance > 2.0) * ~move_up
@@ -637,12 +640,18 @@ class Solo12DOMINOPosition(BaseTask):
         elif self.cfg.terrain.train_all_together == 2:
             pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
             move_up = (pos_distance < 0.25)
-            move_down = (pos_distance > 3.0) * ~move_up
-            self.terrain_cols[env_ids] = torch.where(move_up, torch.randint_like(input=self.terrain_cols[env_ids],
-                                                                                 high=self.cfg.terrain.num_cols),
-                                                     self.terrain_cols[env_ids])
-            self.terrain_cols[env_ids] = torch.where(move_down, torch.zeros_like(input=self.terrain_cols[env_ids]),
-                                                     self.terrain_cols[env_ids])
+            move_down = (pos_distance > 2.0) * ~move_up
+            self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
+            finish = torch.Tensor(self.terrain_cols[env_ids] >= self.cfg.terrain.num_cols)
+            self.terrain_cols[env_ids] = torch.where(finish,
+                torch.randint_like(input=self.terrain_cols[env_ids],
+                                   high=self.cfg.terrain.num_cols),
+                torch.clip(input=self.terrain_cols[env_ids],
+                           min=0))
+            self.terrain_rows[env_ids] = torch.where(finish,
+                torch.randint_like(input=self.terrain_rows[env_ids],
+                                   high=self.cfg.terrain.num_rows),
+                self.terrain_rows[env_ids])
         self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _push_robots(self):

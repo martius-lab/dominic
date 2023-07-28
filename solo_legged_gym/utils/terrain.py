@@ -35,7 +35,7 @@ class Terrain:
                                      length=self.width_per_env_pixels,
                                      vertical_scale=self.cfg.vertical_scale,
                                      horizontal_scale=self.cfg.horizontal_scale)
-                if (i % 2) == 0:
+                if i < (self.cfg.num_rows / 2):
                     terrain_type = "pit_terrain"
                 else:
                     terrain_type = "box_terrain"
