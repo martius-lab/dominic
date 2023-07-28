@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 9 * 7 + 12 + 3 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 9 * 7 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 5
@@ -63,12 +63,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         overview_lookat = [5, 5, 1]  # [m]
 
     class commands(BaseEnvCfg.commands):
-        num_commands = 3  # default: target in x, y, z in base
+        num_commands = 4  # default: target in x, y, z in base, yaw in base
 
         class ranges:
             radius = [1.0, 3.0]  # [m]
             direction = [-np.pi, np.pi]  # [rad]
-            # yaw = [-np.pi, np.pi]  # [rad]
+            yaw = [-np.pi, np.pi]  # [rad]
 
     class init_state(BaseEnvCfg.init_state):
         pos = [0.0, 0.0, 0.4]  # x,y,z [m]
@@ -135,6 +135,18 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class rewards(BaseEnvCfg.rewards):
         class terms:  # [group, sigma]
+            posi = "[0, 1.0]"  # scale of the error
+            yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
+
+            joint_targets_rate = "[1, 1.5]"
+            feet_acc = "[1, [800, 0.9]]"
+            contact = "[1, 25]"
+            stall_pos = "[1, [0.6, 0.25, 0.1]]"  # minimal vel, distance, sigma
+
+            move_towards = "[2, 0.95]"  # clip/scale
+            joint_default = "[2, [2.0, 0.8]]"
+            feet_slip = "[2, [0.04, 0.2, 0.6]]"  # target height, sigma, sigma+
+
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
 
@@ -143,21 +155,12 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # pos = "[1, 0.5]"  # sigma
             # yaw = "[1, 0.5]"  # sigma
             # posl = "[1, 5.0]"  # max error
-            posi = "[1, 1.0]"  # scale of the error
+
             # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
             # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
 
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
-
-            joint_targets_rate = "[0, 1.5]"
-            feet_acc = "[0, [800, 0.9]]"
-            contact = "[0, 25]"
-            stall_pos = "[0, [0.6, 0.25, 0.1]]"  # minimal vel, distance, sigma
-
-            move_towards = "[2, 0.95]"  # clip/scale
-            joint_default = "[2, [2.0, 0.8]]"
-            feet_slip = "[2, [0.04, 0.2, 0.6]]"  # target height, sigma, sigma+
 
             # torques = "[0, 400]"
             # lin_z = "[0, 0.2]"
@@ -223,8 +226,8 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.5, 1.0, 1.0]'
-        intrinsic_adv_coeff = 2.0
+        fixed_adv_coeff = '[1.0, 1.5, 1.0]'
+        intrinsic_adv_coeff = 1.5
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -250,7 +253,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 100
+        burning_expert_steps = 5000
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -262,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'test_pos_yaw'
 
         # load
         load_run = -1  # -1 = last run
