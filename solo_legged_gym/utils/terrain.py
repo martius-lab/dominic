@@ -28,7 +28,6 @@ class Terrain:
 
         self.height_field_raw = np.zeros((self.tot_rows, self.tot_cols), dtype=np.int16)
 
-        terrain_type = self.cfg.type + "_terrain"
         for j in range(self.cfg.num_cols):
             for i in range(self.cfg.num_rows):
                 terrain = SubTerrain("terrain",
@@ -36,8 +35,12 @@ class Terrain:
                                      length=self.width_per_env_pixels,
                                      vertical_scale=self.cfg.vertical_scale,
                                      horizontal_scale=self.cfg.horizontal_scale)
-                eval(terrain_type)(terrain, self.cfg.params[j])
+                if (i % 2) == 0:
+                    terrain_type = "pit_terrain"
+                else:
+                    terrain_type = "box_terrain"
 
+                eval(terrain_type)(terrain, self.cfg.params[j])
                 start_x = self.border + i * self.length_per_env_pixels
                 end_x = self.border + (i + 1) * self.length_per_env_pixels
                 start_y = self.border + j * self.width_per_env_pixels
@@ -62,42 +65,17 @@ class Terrain:
                                                                            self.cfg.slope_threshold)
 
 
-def gap_terrain(terrain, gap_size, platform_size=1.):
-    gap_size = int(gap_size / terrain.horizontal_scale)
-    platform_size = int(platform_size / terrain.horizontal_scale)
-
-    center_x = terrain.length // 2
-    center_y = terrain.width // 2
-    x1 = (terrain.length - platform_size) // 2
-    x2 = x1 + gap_size
-    y1 = (terrain.width - platform_size) // 2
-    y2 = y1 + gap_size
-
-    terrain.height_field_raw[center_x - x2: center_x + x2, center_y - y2: center_y + y2] = -1000
-    terrain.height_field_raw[center_x - x1: center_x + x1, center_y - y1: center_y + y1] = 0
-
-
-def pit_terrain(terrain, depth, platform_size=1.):
-    depth = int(depth / terrain.vertical_scale)
-    platform_size = int(platform_size / terrain.horizontal_scale / 2)
-    x1 = terrain.length // 2 - platform_size
-    x2 = terrain.length // 2 + platform_size
-    y1 = terrain.width // 2 - platform_size
-    y2 = terrain.width // 2 + platform_size
-    terrain.height_field_raw[x1:x2, y1:y2] = -depth
-
-
-def box_terrain(terrain, height, platform_size=1.):
+def box_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    platform_size = int(platform_size / terrain.horizontal_scale / 2)
-    x1 = terrain.length // 2 - platform_size
-    x2 = terrain.length // 2 + platform_size
-    y1 = terrain.width // 2 - platform_size
-    y2 = terrain.width // 2 + platform_size
-    terrain.height_field_raw[x1:x2, y1:y2] = height
+    x = [1, 2, 4, 5]
+    x = [int(i / terrain.horizontal_scale) for i in x]
+    terrain.height_field_raw[x[0]:x[1], x[2]:x[3]] = height
+    terrain.height_field_raw[x[2]:x[3], x[2]:x[3]] = height
+    terrain.height_field_raw[x[0]:x[1], x[0]:x[1]] = height
+    terrain.height_field_raw[x[2]:x[3], x[0]:x[1]] = height
 
 
-def special_box_terrain(terrain, height):
+def pit_terrain(terrain, height):
     # for 6 x 6 terrain
     height = int(height / terrain.vertical_scale)
     x = [2.0, 4.0]

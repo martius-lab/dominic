@@ -617,6 +617,9 @@ class Solo12DOMINOPosition(BaseTask):
         if not self.init_done:
             return
 
+        self.terrain_rows[env_ids] = torch.randint(0, self.cfg.terrain.num_rows, (len(env_ids),),
+                                                   device=self.device)
+
         if self.cfg.terrain.train_all_together == 0:
             self.terrain_cols[env_ids] = torch.randint(0, self.cfg.terrain.num_cols, (len(env_ids),),
                                                        device=self.device)

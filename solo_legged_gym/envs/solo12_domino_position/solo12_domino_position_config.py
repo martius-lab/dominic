@@ -50,10 +50,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        type = "special_box"
         params = list(np.arange(7) * 0.05)
-        # params = list(np.zeros(5))
-        # params = list(np.ones(5) * 0.1)
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
@@ -265,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_pos_yaw'
+        run_name = 'test_box'
 
         # load
         load_run = -1  # -1 = last run
