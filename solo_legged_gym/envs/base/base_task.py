@@ -44,7 +44,7 @@ class BaseTask:
 
         mesh_type = self.cfg.terrain.mesh_type
         if mesh_type in ['heightfield', 'trimesh']:
-            self.terrain = Terrain(self.cfg.terrain, self.num_envs)
+            self.terrain = Terrain(self.cfg.terrain, self.num_envs, self.cfg.env.play)
 
         if mesh_type == 'plane':
             self._create_ground_plane()

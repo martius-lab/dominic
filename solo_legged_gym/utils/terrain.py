@@ -3,7 +3,7 @@ from isaacgym.terrain_utils import *
 
 
 class Terrain:
-    def __init__(self, cfg, num_robots) -> None:
+    def __init__(self, cfg, num_robots, play) -> None:
 
         self.cfg = cfg
         self.num_robots = num_robots
@@ -35,10 +35,13 @@ class Terrain:
                                      length=self.width_per_env_pixels,
                                      vertical_scale=self.cfg.vertical_scale,
                                      horizontal_scale=self.cfg.horizontal_scale)
-                if i < (self.cfg.num_rows / 2):
-                    terrain_type = "pit_terrain"
+                if play:
+                    terrain_type = self.cfg.play_terrain + "_terrain"
                 else:
-                    terrain_type = "box_terrain"
+                    if i < int(self.cfg.frac_box * self.cfg.num_rows):
+                        terrain_type = "pit_terrain"
+                    else:
+                        terrain_type = "box_terrain"
 
                 eval(terrain_type)(terrain, self.cfg.params[j])
                 start_x = self.border + i * self.length_per_env_pixels

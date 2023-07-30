@@ -422,10 +422,16 @@ class Solo12DOMINOPosition(BaseTask):
     def _resample_commands(self, env_ids):
         # get current position
         if self.cfg.env.play:
-            self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 2.0
-            self.commands[env_ids, 1] = self.env_origins[env_ids, 1]
-            sampled_yaw = 0.0
-
+            if self.cfg.terrain.play_terrain == "pit":
+                self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 2.0
+                self.commands[env_ids, 1] = self.env_origins[env_ids, 1]
+                sampled_yaw = 0.0
+            elif self.cfg.terrain.play_terrain == "box":
+                self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 2.5
+                self.commands[env_ids, 1] = self.env_origins[env_ids, 1] - 2.5
+                sampled_yaw = 0.0
+            else:
+                raise NotImplementedError
         else:
             base_pos = self.root_states[env_ids, 0:2]  # x and y in global frame
             sampled_yaw = torch_rand_float(self.command_ranges["yaw"][0], self.command_ranges["yaw"][1],
@@ -535,31 +541,41 @@ class Solo12DOMINOPosition(BaseTask):
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
 
     def _get_env_origins(self):
-        if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
-            self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
-            if self.cfg.terrain.train_all_together == 0:
-                self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,), device=self.device)
-                self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
-            elif self.cfg.terrain.train_all_together == 1:
-                self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-                self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,), device=self.device)
-            elif self.cfg.terrain.train_all_together == 2:
-                self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-                self.terrain_rows = torch.randint(0, int(self.cfg.terrain.num_rows / 2), (self.num_envs,), device=self.device)
-            else:
-                raise NotImplementedError
+        self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
+        if self.cfg.env.play:
+            self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+            self.terrain_rows = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
             self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(torch.float)
             self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
         else:
-            self.env_origins = torch.zeros(self.num_envs, 3, device=self.device, requires_grad=False)
-            # create a grid of robots
-            num_cols = np.floor(np.sqrt(self.num_envs))
-            num_rows = np.ceil(self.num_envs / num_cols)
-            xx, yy = torch.meshgrid(torch.arange(num_rows), torch.arange(num_cols))
-            spacing = self.cfg.env.env_spacing
-            self.env_origins[:, 0] = spacing * xx.flatten()[:self.num_envs]
-            self.env_origins[:, 1] = spacing * yy.flatten()[:self.num_envs]
-            self.env_origins[:, 2] = 0.
+            if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
+                if self.cfg.terrain.train_all_together == 0:
+                    self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,),
+                                                      device=self.device)
+                    self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
+                                                      device=self.device)
+                elif self.cfg.terrain.train_all_together == 1:
+                    self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+                    self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
+                                                      device=self.device)
+                elif self.cfg.terrain.train_all_together == 2:
+                    self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+                    self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_box * self.terrain.cfg.num_rows),
+                                                      (self.num_envs,), device=self.device)
+                else:
+                    raise NotImplementedError
+                self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(
+                    torch.float)
+                self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
+            else:
+                # create a grid of robots
+                num_cols = np.floor(np.sqrt(self.num_envs))
+                num_rows = np.ceil(self.num_envs / num_cols)
+                xx, yy = torch.meshgrid(torch.arange(num_rows), torch.arange(num_cols))
+                spacing = self.cfg.env.env_spacing
+                self.env_origins[:, 0] = spacing * xx.flatten()[:self.num_envs]
+                self.env_origins[:, 1] = spacing * yy.flatten()[:self.num_envs]
+                self.env_origins[:, 2] = 0.
 
     def _reset_dofs(self, env_ids):
         self.dof_pos[env_ids] = self.default_dof_pos
@@ -616,6 +632,9 @@ class Solo12DOMINOPosition(BaseTask):
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
 
     def _update_env_origin(self, env_ids):
+        if self.cfg.env.play:
+            return
+
         if not self.init_done:
             return
 
@@ -644,14 +663,14 @@ class Solo12DOMINOPosition(BaseTask):
             self.terrain_cols[env_ids] += 1 * move_up - 1 * move_down
             finish = torch.Tensor(self.terrain_cols[env_ids] >= self.cfg.terrain.num_cols)
             self.terrain_cols[env_ids] = torch.where(finish,
-                torch.randint_like(input=self.terrain_cols[env_ids],
-                                   high=self.cfg.terrain.num_cols),
-                torch.clip(input=self.terrain_cols[env_ids],
-                           min=0))
+                                                     torch.randint_like(input=self.terrain_cols[env_ids],
+                                                                        high=self.cfg.terrain.num_cols),
+                                                     torch.clip(input=self.terrain_cols[env_ids],
+                                                                min=0))
             self.terrain_rows[env_ids] = torch.where(finish,
-                torch.randint_like(input=self.terrain_rows[env_ids],
-                                   high=self.cfg.terrain.num_rows),
-                self.terrain_rows[env_ids])
+                                                     torch.randint_like(input=self.terrain_rows[env_ids],
+                                                                        high=self.cfg.terrain.num_rows),
+                                                     self.terrain_rows[env_ids])
         self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _push_robots(self):

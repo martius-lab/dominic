@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 5000,
+        "burning_expert_steps": 100,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -64,17 +64,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 4000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "test_pit_and_then_box",
+        "run_name": "test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230728_170126"
+        "wandb_group": "cluster_20230729_163254"
       }
     },
     "env_cfg": {
@@ -268,6 +268,7 @@
       "terrain": {
         "border_size": 2,
         "dynamic_friction": 1.0,
+        "frac_box": 0.75,
         "horizontal_scale": 0.1,
         "init_range": 1.0,
         "measure_height": true,
@@ -304,12 +305,13 @@
           0.25,
           0.30000000000000004
         ],
+        "play_terrain": "pit",
         "restitution": 0.0,
         "slope_threshold": 0.5,
         "static_friction": 1.0,
         "terrain_length": 6.0,
         "terrain_width": 6.0,
-        "train_all_together": 2,
+        "train_all_together": 1,
         "vertical_scale": 0.005
       },
       "viewer": {

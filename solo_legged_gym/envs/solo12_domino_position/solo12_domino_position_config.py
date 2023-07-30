@@ -36,6 +36,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 1.0  # [m]
 
         num_rows = 20
+        frac_box = 0.75
         num_cols = 7
 
         border_size = 2  # [m]
@@ -44,7 +45,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
-        train_all_together = 2  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
+        train_all_together = 1  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
         # 2: train curriculum in difficulty and firstly pit then box
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
@@ -52,6 +53,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
         params = list(np.arange(7) * 0.05)
+        play_terrain = "pit"
 
     class viewer(BaseEnvCfg.viewer):
         overview = True
@@ -251,10 +253,10 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 100
 
     class runner:
-        max_iterations = 2000  # number of policy updates
+        max_iterations = 4000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -263,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_pit_and_then_box'
+        run_name = 'test'
 
         # load
         load_run = -1  # -1 = last run
