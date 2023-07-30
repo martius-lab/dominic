@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "test",
+        "run_name": "test2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230729_163254"
+        "wandb_group": "cluster_20230730_204057"
       }
     },
     "env_cfg": {
@@ -232,12 +232,12 @@
         "terms": {
           "contact": "[1, 25]",
           "feet_acc": "[1, [800, 0.9]]",
-          "feet_slip": "[2, [0.04, 0.2, 0.6]]",
+          "feet_slip": "[2, [0.04, 0.1, 0.4]]",
           "joint_default": "[2, [2.0, 0.8]]",
           "joint_targets_rate": "[1, 1.5]",
           "move_towards": "[2, 0.95]",
           "posi": "[0, 1.0]",
-          "stall_pos": "[1, [0.6, 0.25, 0.1]]",
+          "stall_pos": "[1, [0.4, 0.25, 0.1]]",
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
@@ -268,7 +268,7 @@
       "terrain": {
         "border_size": 2,
         "dynamic_friction": 1.0,
-        "frac_box": 0.75,
+        "frac_box": 0.5,
         "horizontal_scale": 0.1,
         "init_range": 1.0,
         "measure_height": true,
