@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "test2",
+        "run_name": "new_test",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230730_204057"
+        "wandb_group": "cluster_20230731_112530"
       }
     },
     "env_cfg": {
@@ -112,7 +112,7 @@
           ],
           "radius": [
             1.0,
-            3.0
+            4.0
           ],
           "yaw": [
             -3.141592653589793,
@@ -163,7 +163,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 5,
-        "num_observations": 110,
+        "num_observations": 128,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -232,10 +232,9 @@
         "terms": {
           "contact": "[1, 25]",
           "feet_acc": "[1, [800, 0.9]]",
-          "feet_slip": "[2, [0.04, 0.1, 0.4]]",
           "joint_default": "[2, [2.0, 0.8]]",
           "joint_targets_rate": "[1, 1.5]",
-          "move_towards": "[2, 0.95]",
+          "move_towards": "[2, 0.9]",
           "posi": "[0, 1.0]",
           "stall_pos": "[1, [0.4, 0.25, 0.1]]",
           "yawi": "[0, [1.0, 0.25]]"
@@ -284,13 +283,15 @@
           0.4
         ],
         "measured_points_y": [
+          -0.4,
           -0.3,
           -0.2,
           -0.1,
           0.0,
           0.1,
           0.2,
-          0.3
+          0.3,
+          0.4
         ],
         "mesh_type": "trimesh",
         "num_cols": 7,

@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 9 * 7 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 9 * 9 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 5
@@ -26,7 +26,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         measure_height = True  # measure the height samples
         measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
-        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
+        measured_points_y = list((np.arange(9) - (9-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -66,7 +66,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_commands = 4  # default: target in x, y, z in base, yaw in base
 
         class ranges:
-            radius = [1.0, 3.0]  # [m]
+            radius = [1.0, 4.0]  # [m]
             direction = [-np.pi, np.pi]  # [rad]
             yaw = [-np.pi, np.pi]  # [rad]
 
@@ -143,9 +143,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             contact = "[1, 25]"
             stall_pos = "[1, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.95]"  # clip/scale
+            move_towards = "[2, 0.9]"  # clip/scale
             joint_default = "[2, [2.0, 0.8]]"
-            feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
+            # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
             # ang_vel_xy = "[2, 2.0]"
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test2'
+        run_name = 'new_test'
 
         # load
         load_run = -1  # -1 = last run

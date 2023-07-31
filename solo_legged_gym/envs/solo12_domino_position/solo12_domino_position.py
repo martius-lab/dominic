@@ -83,7 +83,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.ee_acc_global = torch.zeros(self.num_envs, 4, 3, dtype=torch.float, device=self.device,
                                          requires_grad=False)
 
-        self.ee_terrain_heights = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device)
+        # self.ee_terrain_heights = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device)
 
         self.actuator_lag_buffer = torch.zeros(self.num_envs, self.cfg.domain_rand.actuator_lag_steps + 1, 12,
                                                dtype=torch.float, device=self.device, requires_grad=False)
@@ -394,19 +394,19 @@ class Solo12DOMINOPosition(BaseTask):
         self.dof_acc = (self.last_dof_vel - self.dof_vel) / self.dt
         self.ee_acc_global = (self.last_ee_vel_global - self.ee_vel_global) / self.dt
 
-        ee_globals = self.ee_global.clone()
-        ee_globals += self.terrain.cfg.border_size
-        ee_globals = (ee_globals / self.terrain.cfg.horizontal_scale).long()
-        ee_px = ee_globals[:, :, 0].view(-1)
-        ee_py = ee_globals[:, :, 1].view(-1)
-        ee_terrain_px = torch.clip(ee_px, 2, self.height_samples.shape[0] - 2)
-        ee_terrain_py = torch.clip(ee_py, 2, self.height_samples.shape[1] - 2)
-
-        ee_terrain_px = ee_terrain_px.unsqueeze(1) + torch.flatten(self.ee_check_px)
-        ee_terrain_py = ee_terrain_py.unsqueeze(1) + torch.flatten(self.ee_check_py)
-        ee_terrain_heights = self.height_samples[ee_terrain_px, ee_terrain_py]
-        ee_terrain_heights = torch.min(ee_terrain_heights, dim=1)[0]
-        self.ee_terrain_heights = ee_terrain_heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
+        # ee_globals = self.ee_global.clone()
+        # ee_globals += self.terrain.cfg.border_size
+        # ee_globals = (ee_globals / self.terrain.cfg.horizontal_scale).long()
+        # ee_px = ee_globals[:, :, 0].view(-1)
+        # ee_py = ee_globals[:, :, 1].view(-1)
+        # ee_terrain_px = torch.clip(ee_px, 2, self.height_samples.shape[0] - 2)
+        # ee_terrain_py = torch.clip(ee_py, 2, self.height_samples.shape[1] - 2)
+        #
+        # ee_terrain_px = ee_terrain_px.unsqueeze(1) + torch.flatten(self.ee_check_px)
+        # ee_terrain_py = ee_terrain_py.unsqueeze(1) + torch.flatten(self.ee_check_py)
+        # ee_terrain_heights = self.height_samples[ee_terrain_px, ee_terrain_py]
+        # ee_terrain_heights = torch.min(ee_terrain_heights, dim=1)[0]
+        # self.ee_terrain_heights = ee_terrain_heights.view(self.num_envs, -1) * self.terrain.cfg.vertical_scale
 
         # sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(0, 1, 1))
         # for i in range(self.num_envs):
@@ -806,12 +806,12 @@ class Solo12DOMINOPosition(BaseTask):
         joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
         return torch.clip(torch.exp(-torch.square(joint_deviation / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
-    def _reward_feet_slip(self, sigma):  # feet should not slip
-        feet_low = self.ee_global[:, :, 2] < self.ee_terrain_heights + sigma[0]
-        feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
-        sigma_ = sigma[1] + self.ee_global[:, :, 2] * sigma[2]
-        feet_slip = torch.sum(feet_move * feet_low / sigma_, dim=1)
-        return torch.exp(-torch.square(feet_slip))
+    # def _reward_feet_slip(self, sigma):  # feet should not slip
+    #     feet_low = self.ee_global[:, :, 2] < self.ee_terrain_heights + sigma[0]
+    #     feet_move = torch.norm(self.ee_global[:, :, :2] - self.last_ee_global[:, :, :2], p=2, dim=2)
+    #     sigma_ = sigma[1] + self.ee_global[:, :, 2] * sigma[2]
+    #     feet_slip = torch.sum(feet_move * feet_low / sigma_, dim=1)
+    #     return torch.exp(-torch.square(feet_slip))
 
     # def _reward_feet_slip_h(self, sigma):
     #     feet_too_low = self.ee_global[:, :, 2] < sigma[0]
