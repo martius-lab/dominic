@@ -45,7 +45,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
-        train_all_together = 1  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
+        train_all_together = 2  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
         # 2: train curriculum in difficulty and firstly pit then box
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
@@ -227,7 +227,7 @@ class Solo12DOMINOPositionTrainCfg:
         value_lr = 1.e-3  # 1.e-3
 
         fixed_adv_coeff = '[1.0, 1.5, 1.0]'
-        intrinsic_adv_coeff = 1.5
+        intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'new_test'
+        run_name = 'sample_far4'
 
         # load
         load_run = -1  # -1 = last run
