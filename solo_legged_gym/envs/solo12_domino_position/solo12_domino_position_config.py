@@ -30,10 +30,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
-        terrain_length = 6.  # [m]
-        terrain_width = 6.  # [m]
+        terrain_length = 8.  # [m]
+        terrain_width = 8.  # [m]
 
-        init_range = 1.0  # [m]
+        init_range = 2.0  # [m]
 
         num_rows = 20
         frac_box = 0.5
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'move_towards_less'
+        run_name = 'train_to_get_off'
 
         # load
         load_run = -1  # -1 = last run

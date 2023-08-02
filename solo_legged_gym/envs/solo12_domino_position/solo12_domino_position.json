@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "move_towards_less",
+        "run_name": "train_to_get_off",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230802_000433"
+        "wandb_group": "cluster_20230802_170409"
       }
     },
     "env_cfg": {
@@ -269,7 +269,7 @@
         "dynamic_friction": 1.0,
         "frac_box": 0.5,
         "horizontal_scale": 0.1,
-        "init_range": 1.0,
+        "init_range": 2.0,
         "measure_height": true,
         "measured_points_x": [
           -0.4,
@@ -310,8 +310,8 @@
         "restitution": 0.0,
         "slope_threshold": 0.5,
         "static_friction": 1.0,
-        "terrain_length": 6.0,
-        "terrain_width": 6.0,
+        "terrain_length": 8.0,
+        "terrain_width": 8.0,
         "train_all_together": 2,
         "vertical_scale": 0.005
       },

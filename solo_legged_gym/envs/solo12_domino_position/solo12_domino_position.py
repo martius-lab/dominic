@@ -427,8 +427,12 @@ class Solo12DOMINOPosition(BaseTask):
                 self.commands[env_ids, 1] = self.env_origins[env_ids, 1]
                 sampled_yaw = 0.0
             elif self.cfg.terrain.play_terrain == "box":
-                self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 2.5
-                self.commands[env_ids, 1] = self.env_origins[env_ids, 1] - 2.5
+                self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 2.0
+                self.commands[env_ids, 1] = self.env_origins[env_ids, 1] - 2.0
+                sampled_yaw = 0.0
+            elif self.cfg.terrain.play_terrain == "box2":
+                self.commands[env_ids, 0] = self.env_origins[env_ids, 0] - 4.0
+                self.commands[env_ids, 1] = self.env_origins[env_ids, 1] - 2.0
                 sampled_yaw = 0.0
             else:
                 raise NotImplementedError
@@ -595,6 +599,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.root_states[env_ids, :2] += self.env_origins[env_ids, :2]
 
         if self.cfg.env.play:
+            self.root_states[env_ids, 1] -= 2.0
             self.root_states[env_ids, 5] = 1.0  # z
             self.root_states[env_ids, 6] = 0.0  # w
         else:
