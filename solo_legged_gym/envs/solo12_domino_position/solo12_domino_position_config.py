@@ -143,8 +143,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             contact = "[1, 25]"
             stall_pos = "[1, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.9]"  # clip/scale
-            joint_default = "[2, [2.0, 0.8]]"
+            move_towards = "[2, 0.7]"  # clip/scale
+            joint_default = "[2, [2.0, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -203,7 +203,7 @@ class Solo12DOMINOPositionTrainCfg:
 
     class network:
         init_log_std = 0.5
-        drop_out_rate = 0.5
+        drop_out_rate = 0.8
         policy_hidden_dims = [256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [256, 128]
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'sample_far4'
+        run_name = 'move_towards_less'
 
         # load
         load_run = -1  # -1 = last run

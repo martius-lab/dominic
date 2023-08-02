@@ -42,7 +42,7 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "drop_out_rate": 0.5,
+        "drop_out_rate": 0.8,
         "init_log_std": 0.5,
         "policy_activation": "elu",
         "policy_hidden_dims": [
@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "sample_far4",
+        "run_name": "move_towards_less",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230801_093831"
+        "wandb_group": "cluster_20230802_000433"
       }
     },
     "env_cfg": {
@@ -232,9 +232,9 @@
         "terms": {
           "contact": "[1, 25]",
           "feet_acc": "[1, [800, 0.9]]",
-          "joint_default": "[2, [2.0, 0.8]]",
+          "joint_default": "[2, [2.0, 0.9]]",
           "joint_targets_rate": "[1, 1.5]",
-          "move_towards": "[2, 0.9]",
+          "move_towards": "[2, 0.7]",
           "posi": "[0, 1.0]",
           "stall_pos": "[1, [0.4, 0.25, 0.1]]",
           "yawi": "[0, [1.0, 0.25]]"

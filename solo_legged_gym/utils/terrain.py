@@ -70,7 +70,7 @@ class Terrain:
 
 def box_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    x = [0.5, 2.5, 3.5, 5.5]
+    x = [0.0, 2.0, 4.0, 6.0]
     x = [int(i / terrain.horizontal_scale) for i in x]
     terrain.height_field_raw[x[0]:x[1], x[2]:x[3]] = height
     terrain.height_field_raw[x[2]:x[3], x[2]:x[3]] = height
