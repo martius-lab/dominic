@@ -33,13 +33,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 8.  # [m]
         terrain_width = 8.  # [m]
 
-        init_range = 2.0  # [m]
+        init_range = 3.0  # [m]
 
         num_rows = 20
         frac_box = 0.5
         num_cols = 7
 
-        border_size = 2  # [m]
+        border_size = 5  # [m]
 
         horizontal_scale = 0.1  # [m]
         vertical_scale = 0.005  # [m]
@@ -141,9 +141,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[1, 1.5]"
             feet_acc = "[1, [800, 0.9]]"
             contact = "[1, 25]"
-            stall_pos = "[1, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.7]"  # clip/scale
+            move_towards = "[2, 0.8]"  # clip/scale
             joint_default = "[2, [2.0, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'train_to_get_off'
+        run_name = 'train_to_get_off3'
 
         # load
         load_run = -1  # -1 = last run

@@ -91,7 +91,7 @@ def box2_terrain(terrain, height):
 def pit_terrain(terrain, height):
     # for 6 x 6 terrain
     height = int(height / terrain.vertical_scale)
-    x = [2.0, 6.0]
+    x = [1.5, 6.5]
     x = [int(i / terrain.horizontal_scale) for i in x]
     terrain.height_field_raw[x[0]:x[1], x[0]:x[1]] = -height
     # terrain.height_field_raw[x[0]:x[1], x[0]:x[3]] = height
