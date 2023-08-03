@@ -33,10 +33,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         terrain_length = 8.  # [m]
         terrain_width = 8.  # [m]
 
-        init_range = 3.0  # [m]
+        init_range = 2.0  # [m]
 
         num_rows = 20
-        frac_box = 0.5
+        frac_pit = 0.5
         num_cols = 7
 
         border_size = 5  # [m]
@@ -143,7 +143,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             contact = "[1, 25]"
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.8]"  # clip/scale
+            move_towards = "[2, 0.9]"  # clip/scale
             joint_default = "[2, [2.0, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
@@ -256,7 +256,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 100
 
     class runner:
-        max_iterations = 4000  # number of policy updates
+        max_iterations = 3000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'train_to_get_off3'
+        run_name = 'base1'
 
         # load
         load_run = -1  # -1 = last run
