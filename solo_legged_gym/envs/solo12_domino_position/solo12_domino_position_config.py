@@ -112,7 +112,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         file = '{root}/resources/robots/solo12/urdf/solo12.urdf'
         name = "solo12"
         foot_name = "FOOT"
-        penalize_contacts_on = ["base", "SHOULDER", "UPPER"]
+        penalize_contacts_on = ["base", "SHOULDER", "UPPER", "LOWER"]
         terminate_after_contacts_on = []
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
@@ -203,7 +203,7 @@ class Solo12DOMINOPositionTrainCfg:
 
     class network:
         init_log_std = 0.5
-        drop_out_rate = 0.8
+        drop_out_rate = 0.7
         policy_hidden_dims = [256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [256, 128]
@@ -226,8 +226,8 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[1.0, 1.5, 1.0]'
-        intrinsic_adv_coeff = 1.0
+        fixed_adv_coeff = '[1.5, 1.5, 1.0]'
+        intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -256,7 +256,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 100
 
     class runner:
-        max_iterations = 3000  # number of policy updates
+        max_iterations = 4000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'base1'
+        run_name = 'base2'
 
         # load
         load_run = -1  # -1 = last run

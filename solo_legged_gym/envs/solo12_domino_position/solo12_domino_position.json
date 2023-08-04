@@ -19,9 +19,9 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[1.0, 1.5, 1.0]",
+        "fixed_adv_coeff": "[1.5, 1.5, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 1.0,
+        "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -42,7 +42,7 @@
       },
       "algorithm_name": "DOMINO",
       "network": {
-        "drop_out_rate": 0.8,
+        "drop_out_rate": 0.7,
         "init_log_std": 0.5,
         "policy_activation": "elu",
         "policy_hidden_dims": [
@@ -64,17 +64,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 3000,
+        "max_iterations": 4000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "base1",
+        "run_name": "base2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230803_161425"
+        "wandb_group": "cluster_20230804_073635"
       }
     },
     "env_cfg": {
@@ -96,7 +96,8 @@
         "penalize_contacts_on": [
           "base",
           "SHOULDER",
-          "UPPER"
+          "UPPER",
+          "LOWER"
         ],
         "replace_cylinder_with_capsule": true,
         "self_collisions": 1,
