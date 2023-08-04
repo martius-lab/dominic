@@ -41,7 +41,7 @@ class Terrain:
                     if i < int(self.cfg.frac_pit * self.cfg.num_rows):
                         terrain_type = "pit_terrain"
                     else:
-                        terrain_type = "box_terrain"
+                        terrain_type = "boxr_terrain"
 
                 eval(terrain_type)(terrain, self.cfg.params[j])
                 start_x = self.border + i * self.length_per_env_pixels
@@ -76,6 +76,20 @@ def box_terrain(terrain, height):
     terrain.height_field_raw[x[2]:x[3], x[2]:x[3]] = height
     terrain.height_field_raw[x[0]:x[1], x[0]:x[1]] = height
     terrain.height_field_raw[x[2]:x[3], x[0]:x[1]] = height
+
+
+def boxr_terrain(terrain, height):
+    height = int(height / terrain.vertical_scale)
+    num_boxes = 12
+    box_size = [0.5, 1.5]
+    sampled_size = np.random.uniform(box_size[0], box_size[1], num_boxes)
+    sampled_size = [int(i / terrain.horizontal_scale) for i in sampled_size]
+    for i in range(num_boxes):
+        x = np.random.uniform(0.0, 8.0 - box_size[1])
+        y = np.random.uniform(0.0, 8.0 - box_size[1])
+        x = int(x / terrain.horizontal_scale)
+        y = int(y / terrain.horizontal_scale)
+        terrain.height_field_raw[x:x + sampled_size[i], y:y + sampled_size[i]] = height
 
 
 def box2_terrain(terrain, height):

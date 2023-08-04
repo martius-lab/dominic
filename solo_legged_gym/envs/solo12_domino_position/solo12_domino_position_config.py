@@ -253,7 +253,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 100
+        burning_expert_steps = 500
 
     class runner:
         max_iterations = 4000  # number of policy updates
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'base2'
+        run_name = 'test_boxr'
 
         # load
         load_run = -1  # -1 = last run

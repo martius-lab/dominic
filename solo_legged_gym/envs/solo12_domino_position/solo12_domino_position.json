@@ -14,7 +14,7 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 100,
+        "burning_expert_steps": 500,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "base2",
+        "run_name": "test_boxr",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230804_073635"
+        "wandb_group": "cluster_20230804_091755"
       }
     },
     "env_cfg": {
