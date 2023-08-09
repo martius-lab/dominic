@@ -37,7 +37,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         num_rows = 20
         frac_pit = 0.4
-        num_cols = 7
+        num_cols = 6
 
         border_size = 5  # [m]
 
@@ -52,7 +52,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        params = list(np.arange(7) * 0.05)
+        params = list(np.arange(6) * 0.05)
         play_terrain = "pit"
         play_init = [0.0, 0.0]
         play_target = [3.0, 3.0]
@@ -140,8 +140,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             posi = "[0, 1.0]"  # scale of the error
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
-            joint_targets_rate = "[1, 1.5]"
-            feet_acc = "[1, [800, 0.9]]"
+            joint_targets_rate = "[1, 1.0]"
+            feet_acc = "[1, [600, 0.9]]"
             contact = "[1, 15]"
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
@@ -229,7 +229,7 @@ class Solo12DOMINOPositionTrainCfg:
         value_lr = 1.e-3  # 1.e-3
 
         fixed_adv_coeff = '[2.0, 1.5, 1.0]'
-        intrinsic_adv_coeff = 2.0
+        intrinsic_adv_coeff = 8.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -255,10 +255,10 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 400
+        burning_expert_steps = 500
 
     class runner:
-        max_iterations = 3000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -267,7 +267,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'new_baseline'
 
         # load
         load_run = -1  # -1 = last run

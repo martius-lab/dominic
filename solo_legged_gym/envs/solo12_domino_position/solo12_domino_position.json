@@ -14,14 +14,14 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 400,
+        "burning_expert_steps": 500,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
         "fixed_adv_coeff": "[2.0, 1.5, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 2.0,
+        "intrinsic_adv_coeff": 8.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -64,17 +64,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 3000,
+        "max_iterations": 2000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "baseline",
+        "run_name": "new_baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230808_155143"
+        "wandb_group": "cluster_20230809_104955"
       }
     },
     "env_cfg": {
@@ -232,9 +232,9 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "contact": "[1, 15]",
-          "feet_acc": "[1, [800, 0.9]]",
+          "feet_acc": "[1, [600, 0.9]]",
           "joint_default": "[2, [2.0, 0.9]]",
-          "joint_targets_rate": "[1, 1.5]",
+          "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 0.9]",
           "posi": "[0, 1.0]",
           "stall_pos": "[1, [0.5, 0.25, 0.1]]",
@@ -299,17 +299,16 @@
           0.5
         ],
         "mesh_type": "trimesh",
-        "num_cols": 7,
+        "num_cols": 6,
         "num_rows": 20,
-        "num_sub_terrains": 140,
+        "num_sub_terrains": 120,
         "params": [
           0.0,
           0.05,
           0.1,
           0.15000000000000002,
           0.2,
-          0.25,
-          0.30000000000000004
+          0.25
         ],
         "play_init": [
           0.0,
