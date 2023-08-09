@@ -424,7 +424,7 @@ class Solo12DOMINOPosition(BaseTask):
         if self.cfg.env.play:
             self.commands[env_ids, 0] = self.env_origins[env_ids, 0] + self.cfg.terrain.play_target[0]
             self.commands[env_ids, 1] = self.env_origins[env_ids, 1] + self.cfg.terrain.play_target[1]
-            sampled_yaw = 0.0
+            sampled_yaw = np.pi
         else:
             base_pos = self.root_states[env_ids, 0:2]  # x and y in global frame
             sampled_yaw = torch_rand_float(self.command_ranges["yaw"][0], self.command_ranges["yaw"][1],

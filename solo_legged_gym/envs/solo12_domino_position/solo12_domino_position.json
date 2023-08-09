@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "test_larger_net_base_vel",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230805_132251"
+        "wandb_group": "cluster_20230808_155143"
       }
     },
     "env_cfg": {
