@@ -19,9 +19,9 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[2.0, 1.5, 1.0]",
+        "fixed_adv_coeff": "[2.5, 1.5, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 8.0,
+        "intrinsic_adv_coeff": 5.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -64,17 +64,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 2000,
+        "max_iterations": 4000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "new_baseline",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230809_104955"
+        "wandb_group": "cluster_20230810_170533"
       }
     },
     "env_cfg": {
@@ -163,7 +163,7 @@
         "episode_length_s": 6,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 7,
+        "num_features": 3,
         "num_observations": 168,
         "num_skills": 8,
         "play": false,
@@ -237,7 +237,7 @@
           "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 0.9]",
           "posi": "[0, 1.0]",
-          "stall_pos": "[1, [0.5, 0.25, 0.1]]",
+          "stall_pos": "[1, [0.3, 0.25, 0.1]]",
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
