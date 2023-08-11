@@ -19,7 +19,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[2.0, 1.5, 1.0]",
+        "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 5.0,
         "intrinsic_rew_scale": 5.0,
@@ -74,7 +74,7 @@
         "run_name": "roll_back",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230811_160721"
+        "wandb_group": "cluster_20230811_161743"
       }
     },
     "env_cfg": {
@@ -232,7 +232,7 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "contact": "[1, 5]",
-          "feet_acc": "[1, [800, 0.9]]",
+          "feet_acc": "[1, [700, 0.9]]",
           "joint_default": "[2, [2.0, 0.9]]",
           "joint_targets_rate": "[1, 1.2]",
           "move_towards": "[2, 0.9]",
