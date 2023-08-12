@@ -10,7 +10,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 30 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 3
+        num_features = 7
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -140,12 +140,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             posi = "[0, 1.0]"  # scale of the error
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
-            joint_targets_rate = "[1, 1.2]"
-            feet_acc = "[1, [700, 0.9]]"
-            contact = "[1, 5]"
+            joint_targets_rate = "[1, 1.5]"
+            feet_acc = "[1, [800, 0.9]]"
+            contact = "[1, 1]"
+            feet_contact = "[1, 5]"
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.9]"  # clip/scale
+            move_towards = "[2, 1.0]"  # clip/scale
             joint_default = "[2, [2.0, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
@@ -228,8 +229,8 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.5, 1.0]'
-        intrinsic_adv_coeff = 5.0
+        fixed_adv_coeff = '[2.0, 1.5, 1.0]'
+        intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -267,7 +268,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'roll_back'
+        run_name = 'feet_contact'
 
         # load
         load_run = -1  # -1 = last run

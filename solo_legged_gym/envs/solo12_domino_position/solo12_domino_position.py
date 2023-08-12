@@ -337,7 +337,7 @@ class Solo12DOMINOPosition(BaseTask):
             self.base_lin_vel,  # 3
             # self.projected_gravity,  # 3
             # self.base_ang_vel[:, 0:2],  # 2
-            # self.ee_vel_global[:, :, 2],  # 4
+            self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
 
         # no noise added, no clipping
@@ -781,6 +781,10 @@ class Solo12DOMINOPosition(BaseTask):
     def _reward_contact(self, sigma):  # contact forces of the base, shoulder, upper legs should be small
         contact_sum = torch.sum(torch.norm(self.contact_forces[:, self.penalised_contact_indices, :], dim=-1), dim=1)
         return torch.exp(-torch.square(contact_sum / sigma))
+
+    def _reward_feet_contact(self, sigma):  # contact forces of the feet horizontally
+        feet_contact_sum = torch.sum(torch.norm(self.contact_forces[:, self.feet_indices, 0:2], dim=-1), dim=1)
+        return torch.exp(-torch.square(feet_contact_sum / sigma))
 
     # def _reward_dof_acc(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))

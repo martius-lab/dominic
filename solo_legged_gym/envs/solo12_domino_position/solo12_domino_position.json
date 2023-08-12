@@ -19,9 +19,9 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
+        "fixed_adv_coeff": "[2.0, 1.5, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 5.0,
+        "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 5,
-        "run_name": "roll_back",
+        "run_name": "feet_contact",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230811_161743"
+        "wandb_group": "cluster_20230812_075433"
       }
     },
     "env_cfg": {
@@ -163,7 +163,7 @@
         "episode_length_s": 6,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 3,
+        "num_features": 7,
         "num_observations": 168,
         "num_skills": 8,
         "play": false,
@@ -231,11 +231,12 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "contact": "[1, 5]",
-          "feet_acc": "[1, [700, 0.9]]",
+          "contact": "[1, 1]",
+          "feet_acc": "[1, [800, 0.9]]",
+          "feet_contact": "[1, 5]",
           "joint_default": "[2, [2.0, 0.9]]",
-          "joint_targets_rate": "[1, 1.2]",
-          "move_towards": "[2, 0.9]",
+          "joint_targets_rate": "[1, 1.5]",
+          "move_towards": "[2, 1.0]",
           "posi": "[0, 1.0]",
           "stall_pos": "[1, [0.5, 0.25, 0.1]]",
           "yawi": "[0, [1.0, 0.25]]"
