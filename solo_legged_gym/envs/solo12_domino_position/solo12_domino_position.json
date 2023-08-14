@@ -74,7 +74,7 @@
         "run_name": "base_vel",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230812_124315"
+        "wandb_group": "cluster_20230814_093732"
       }
     },
     "env_cfg": {

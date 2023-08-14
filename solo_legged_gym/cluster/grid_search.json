@@ -26,16 +26,12 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_adv_coeff",
-      "values": [1.0, 1.5, 2.0]
-    },
-    {
       "param": "solo_legged_gym.train_cfg.network.drop_out_rate",
-      "values": [0.2, 0.5, 0.8]
+      "values": [0.5, 0.7, 0.8, 0.9]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
-      "values": [22, 27, 42]
+      "values": [8, 22, 25, 27, 42]
     }
   ]
 }
