@@ -96,7 +96,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         control_type = 'P'  # P: position, V: velocity, T: torques
         stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
-        torque_limits = 5.0
+        torque_limits = 2.5
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
         #                       np.pi / 4, np.pi / 4, np.pi / 2,
@@ -140,14 +140,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             posi = "[0, 1.0]"  # scale of the error
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
-            joint_targets_rate = "[1, 1.5]"
+            joint_targets_rate = "[1, 1.0]"
             feet_acc = "[1, [800, 0.9]]"
             contact = "[1, 1]"
-            feet_contact = "[1, 5]"
+            feet_contact = "[1, 1]"
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 1.0]"  # clip/scale
-            joint_default = "[2, [2.0, 0.9]]"
+            move_towards = "[2, 0.9]"  # clip/scale
+            joint_default = "[2, [1.5, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -206,7 +206,7 @@ class Solo12DOMINOPositionTrainCfg:
 
     class network:
         init_log_std = 0.5
-        drop_out_rate = 0.8
+        drop_out_rate = 0.9
         policy_hidden_dims = [256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
         value_hidden_dims = [256, 128]
@@ -259,7 +259,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 400
 
     class runner:
-        max_iterations = 3000  # number of policy updates
+        max_iterations = 4000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -268,7 +268,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'base_vel'
+        run_name = 'need_joint_default'
 
         # load
         load_run = -1  # -1 = last run
