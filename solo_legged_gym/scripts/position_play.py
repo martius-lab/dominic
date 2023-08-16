@@ -54,7 +54,7 @@ class keyboard_play:
         env_cfg.terrain.params = [0.3]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
-        env_cfg.terrain.play_target = [-2.0, 0.0]
+        env_cfg.terrain.play_target = [-3.5, 0.0]
         # env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 

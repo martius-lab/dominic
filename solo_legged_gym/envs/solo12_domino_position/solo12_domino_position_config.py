@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 8 * 6 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 3
@@ -25,8 +25,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         mesh_type = 'trimesh'  # plane, heightfield, trimesh
 
         measure_height = True  # measure the height samples
-        measured_points_x = list((np.arange(11) - (11-1) / 2) / 10)
-        measured_points_y = list((np.arange(11) - (11-1) / 2) / 10)
+        measured_points_x = list((np.arange(8) - (8-1) / 2) / 10)
+        measured_points_y = list((np.arange(6) - (6-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -242,7 +242,7 @@ class Solo12DOMINOPositionTrainCfg:
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
-        alpha = 0.7  # optimality ratio
+        alpha = [0.95, 0.95, 0.7]  # optimality ratio
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -268,7 +268,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'need_joint_default'
+        run_name = 'principal_test'
 
         # load
         load_run = -1  # -1 = last run
