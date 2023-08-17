@@ -82,8 +82,8 @@ def box_terrain(terrain, height):
 
 def boxr_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    num_boxes = 10
-    box_size = [0.5, 1.5]
+    num_boxes = 8
+    box_size = [1.0, 2.0]
     sampled_size = np.random.uniform(box_size[0], box_size[1], num_boxes)
     sampled_size = [int(i / terrain.horizontal_scale) for i in sampled_size]
     for i in range(num_boxes):

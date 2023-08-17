@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 9 * 7 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 9 * 9 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 3
@@ -26,7 +26,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         measure_height = True  # measure the height samples
         measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
-        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
+        measured_points_y = list((np.arange(9) - (9-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -94,7 +94,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class control(BaseEnvCfg.control):
         control_type = 'P'  # P: position, V: velocity, T: torques
-        stiffness = {"HAA": 5.0, "HFE": 5.0, "KFE": 5.0}  # [N*m/rad]
+        stiffness = {"HAA": 2.5, "HFE": 2.5, "KFE": 2.5}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
         torque_limits = 2.5
         # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
@@ -144,10 +144,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             feet_acc = "[1, [800, 0.9]]"
             contact = "[1, 1]"
             # feet_contact = "[1, 1]"
-            stall_pos = "[1, [0.4, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
-            move_towards = "[2, 0.95]"  # clip/scale
-            joint_default = "[2, [2.0, 0.95]]"
+            move_towards = "[2, 0.9]"  # clip/scale
+            joint_default = "[2, [1.8, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -268,7 +268,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'need_pool'
+        run_name = 'hope_for_the_best'
 
         # load
         load_run = -1  # -1 = last run
@@ -276,7 +276,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
-        record_iters = 5  # should be int * num_st   eps_per_env
+        record_iters = 10  # should be int * num_st   eps_per_env
 
         wandb = False  # by default is false, set to true from command line
         wandb_group = 'test'
