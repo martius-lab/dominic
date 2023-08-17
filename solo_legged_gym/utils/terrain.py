@@ -40,8 +40,10 @@ class Terrain:
                 else:
                     if i < int(self.cfg.frac_pit * self.cfg.num_rows):
                         terrain_type = "pit_terrain"
-                    else:
+                    elif i % 2 == 0:
                         terrain_type = "boxr_terrain"
+                    elif i % 2 == 1:
+                        terrain_type = "pool_terrain"
 
                 eval(terrain_type)(terrain, self.cfg.params[j])
                 start_x = self.border + i * self.length_per_env_pixels
@@ -104,7 +106,6 @@ def box2_terrain(terrain, height):
 
 
 def pit_terrain(terrain, height):
-    # for 6 x 6 terrain
     height = int(height / terrain.vertical_scale)
     x = [2.0, 6.0]
     x = [int(i / terrain.horizontal_scale) for i in x]
@@ -114,3 +115,12 @@ def pit_terrain(terrain, height):
     # terrain.height_field_raw[x[0]:x[3], x[0]:x[1]] = height
     # terrain.height_field_raw[x[0]:x[3], x[2]:x[3]] = height
 
+
+def pool_terrain(terrain, height):
+    height = int(height / terrain.vertical_scale)
+    x = [1.0, 2.5, 5.5, 7.0]
+    x = [int(i / terrain.horizontal_scale) for i in x]
+    terrain.height_field_raw[x[0]:x[1], x[0]:x[3]] = height
+    terrain.height_field_raw[x[2]:x[3], x[0]:x[3]] = height
+    terrain.height_field_raw[x[0]:x[3], x[0]:x[1]] = height
+    terrain.height_field_raw[x[0]:x[3], x[2]:x[3]] = height
