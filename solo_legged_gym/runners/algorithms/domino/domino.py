@@ -64,8 +64,8 @@ class DOMINO:
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
-        self.lagrange = nn.Parameter(torch.ones(self.env.num_skills - 1, device=self.device) * 0.0,
-                                     requires_grad=True).cuda()
+        self.lagrange = [nn.Parameter(torch.ones(self.env.num_skills - 1, device=self.device) * 0.0,
+                                      requires_grad=True).cuda() for _ in range(self.num_ext_values)]
 
         if self.a_cfg.use_succ_feat:
             self.succ_feat = MaskedSuccessorFeature(num_obs=self.env.num_obs,
@@ -84,7 +84,8 @@ class DOMINO:
                                            requires_grad=False) * (1 / self.env.num_features)
 
         # set up moving averages
-        self.avg_ext_values = torch.zeros(self.env.num_skills, device=self.device, requires_grad=False)
+        self.avg_ext_values = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
+                               range(self.num_ext_values)]
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
@@ -126,7 +127,7 @@ class DOMINO:
         self.value_optimizer = optim.Adam(value_params_list, lr=self.value_lr)
 
         self.lagrange_lr = self.a_cfg.lagrange_lr
-        self.lagrange_optimizer = optim.Adam([self.lagrange], lr=self.lagrange_lr)
+        self.lagrange_optimizer = optim.Adam(self.lagrange, lr=self.lagrange_lr)
 
         # Log
         self.log_dir = log_dir
@@ -344,21 +345,25 @@ class DOMINO:
         return int_rew, dist
 
     def get_lagrange_coeff(self, skills, burning_expert):
-        lagrange_coeff = torch.zeros_like(skills).to(torch.float32)
-        lagrange_coeff[skills > 0] = self.lagrange[skills[skills > 0] - 1]
-        lagrange_coeff = torch.sigmoid(lagrange_coeff * self.a_cfg.sigmoid_scale)
-        if burning_expert:
-            lagrange_coeff[:] = 1
-        else:
-            lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
+        lagrange_coeff = [torch.zeros_like(skills).to(torch.float32) for _ in range(self.num_ext_values)]
+        for i in range(self.num_ext_values):
+            lagrange_coeff[i][skills > 0] = self.lagrange[i][skills[skills > 0] - 1]
+            lagrange_coeff[i] = torch.sigmoid(lagrange_coeff[i] * self.a_cfg.sigmoid_scale)
+            if burning_expert:
+                lagrange_coeff[i][:] = 1
+            else:
+                lagrange_coeff[i][skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
-    def update_value_moving_avg(self, skills, ext_return):
+    def update_value_moving_avg(self, skills, ext_returns):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
-        encoded_ext_returns = encoded_skills * ext_return.unsqueeze(-1).repeat(1, self.env.num_skills)
-        mean_encoded_ext_returns = torch.nan_to_num(encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0))
-        self.avg_ext_values = self.a_cfg.avg_values_decay_factor * self.avg_ext_values + \
-                              (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
+        encoded_ext_returns = [encoded_skills * ext_returns[i].unsqueeze(-1).repeat(1, self.env.num_skills) for i in
+                               range(self.num_ext_values)]
+        mean_encoded_ext_returns = [torch.nan_to_num(encoded_ext_returns[i].sum(dim=0) / encoded_skills.sum(dim=0)) for
+                                    i in range(self.num_ext_values)]
+        self.avg_ext_values = [self.a_cfg.avg_values_decay_factor * self.avg_ext_values[i] + \
+                               (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns[i] for i in
+                               range(self.num_ext_values)]
 
     def update_feature_moving_avg(self, skills, features):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
@@ -378,9 +383,9 @@ class DOMINO:
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
         mean_succ_feat_loss = 0
-        mean_lagranges = np.zeros(self.env.num_skills - 1)
-        mean_lagrange_coeffs = np.zeros(self.env.num_skills)
-        mean_constraint_satisfaction = np.zeros(self.env.num_skills - 1)
+        mean_lagranges = [np.zeros(self.env.num_skills - 1) for _ in range(self.num_ext_values)]
+        mean_lagrange_coeffs = [np.zeros(self.env.num_skills) for _ in range(self.num_ext_values)]
+        mean_constraint_satisfaction = [np.zeros(self.env.num_skills - 1) for _ in range(self.num_ext_values)]
 
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
@@ -424,10 +429,10 @@ class DOMINO:
                 lagrange_coeff = self.get_lagrange_coeff(skills, self.burning_expert)
 
             # The most important part of the algorithm
-            advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0]  # regularizers
-            advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1]  # track pos
-            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * lagrange_coeff
-            advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1 - lagrange_coeff)
+            advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0] * lagrange_coeff[0]  # task
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1] * lagrange_coeff[1]  # regular
+            advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * lagrange_coeff[2]  # loose
+            advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1.0 - torch.max(torch.stack(lagrange_coeff), dim=0)[0])  # intrinsic
 
             # Using KL to adaptively changing the learning rate
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -511,9 +516,11 @@ class DOMINO:
                 for _ in range(self.a_cfg.num_lagrange_steps):
                     # Lagrange loss
                     lagrange_loss = 0.0
-                    lagrange_losses = self.lagrange * (
-                            self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1)
-                    lagrange_loss += torch.sum(lagrange_losses, dim=-1)
+                    for i in range(self.num_ext_values):
+                        lagrange_losses = self.lagrange[i] * (
+                                self.avg_ext_values[i][1:] - self.a_cfg.alpha[i] * self.avg_ext_values[i][0]).squeeze(
+                            -1)
+                        lagrange_loss += torch.sum(lagrange_losses, dim=-1)
                     lagrange_loss.backward()
                     self.lagrange_optimizer.step()
 
@@ -527,9 +534,10 @@ class DOMINO:
                             clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
                     else:
                         clip_lagrange_threshold = self.a_cfg.clip_lagrange
-                    self.lagrange.data = torch.clamp(self.lagrange.data,
-                                                     min=-clip_lagrange_threshold,
-                                                     max=clip_lagrange_threshold)
+                    for i in range(self.num_ext_values):
+                        self.lagrange[i].data = torch.clamp(self.lagrange[i].data,
+                                                            min=-clip_lagrange_threshold,
+                                                            max=clip_lagrange_threshold)
 
             ############################################################################################################
             # update features sfs/afs
@@ -552,11 +560,11 @@ class DOMINO:
             # logging
             for i in range(self.num_ext_values):
                 mean_ext_value_loss[i] += ext_value_loss[i].item()
-            mean_lagranges += self.lagrange.detach().cpu().numpy()
-            mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff, dim=0) /
-                                     torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).detach().cpu().numpy()
-            mean_constraint_satisfaction += (
-                    self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).detach().cpu().numpy()
+                mean_lagranges[i] += self.lagrange[i].detach().cpu().numpy()
+                mean_lagrange_coeffs[i] += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff[i], dim=0) /
+                                            torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).detach().cpu().numpy()
+                mean_constraint_satisfaction[i] += (
+                        self.avg_ext_values[i][1:] - self.a_cfg.alpha[i] * self.avg_ext_values[i][0]).detach().cpu().numpy()
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
             if self.a_cfg.use_succ_feat:
@@ -568,9 +576,9 @@ class DOMINO:
         mean_surrogate_loss /= num_updates
         if self.a_cfg.use_succ_feat:
             mean_succ_feat_loss /= num_updates
-        mean_lagranges /= num_updates
-        mean_lagrange_coeffs /= num_updates
-        mean_constraint_satisfaction /= num_updates
+        mean_lagranges = [i / num_updates for i in mean_lagranges]
+        mean_lagrange_coeffs = [i / num_updates for i in mean_lagrange_coeffs]
+        mean_constraint_satisfaction = [i / num_updates for i in mean_constraint_satisfaction]
 
         # clear buffer
         self.rollout_buffer.clear()
@@ -611,12 +619,13 @@ class DOMINO:
         mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
         mean_lagranges = locs['mean_lagranges']
-        for j in range(self.env.num_skills - 1):
-            self.writer.add_scalar(f'Skill/constraint_satisfaction_{j}', mean_constraint_satisfaction[j], locs['it'])
-            self.writer.add_scalar(f'Skill/lagrange_{j}', mean_lagranges[j], locs['it'])
-            self.writer.add_scalar(f'Skill/lagrange_coeff_{j}', mean_lagrange_coeffs[j + 1], locs['it'])
-        for j in range(self.env.num_skills):
-            self.writer.add_scalar(f'Skill/avg_ext_values_{j}', self.avg_ext_values[j], locs['it'])
+        for i in range(self.num_ext_values):
+            for j in range(self.env.num_skills - 1):
+                self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}', mean_constraint_satisfaction[i][j], locs['it'])
+                self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j], locs['it'])
+                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1], locs['it'])
+            for j in range(self.env.num_skills):
+                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j], locs['it'])
 
         self.writer.add_scalar('Learning/policy_lr', self.policy_lr, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
@@ -624,9 +633,12 @@ class DOMINO:
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
 
-        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()), locs['it'])
-        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()), locs['it'])
-        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()), locs['it'])
+        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()),
+                               locs['it'])
+        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()),
+                               locs['it'])
+        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()),
+                               locs['it'])
 
         if len(locs['len_buffer']) > 0:
             ext_rew_bufs = locs['ext_rew_buffers']

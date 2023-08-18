@@ -242,7 +242,7 @@ class Solo12DOMINOPositionTrainCfg:
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
-        alpha = 0.7  # optimality ratio
+        alpha = [0.95, 0.95, 0.7]  # optimality ratio
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
