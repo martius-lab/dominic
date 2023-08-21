@@ -17,7 +17,7 @@ import csv
 
 EXPORT_POLICY = False
 LOG_DATA = True
-REAL_TIME = False
+REAL_TIME = True
 np.set_printoptions(precision=2)
 
 
@@ -51,10 +51,10 @@ class keyboard_play:
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
-        env_cfg.terrain.params = [0.3]
+        env_cfg.terrain.params = [0.2]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
-        env_cfg.terrain.play_target = [-2.0, 0.0]
+        env_cfg.terrain.play_target = [-3.5, 0.0]
         # env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 
