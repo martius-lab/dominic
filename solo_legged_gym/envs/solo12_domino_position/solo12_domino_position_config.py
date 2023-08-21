@@ -148,7 +148,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
             move_towards = "[2, 0.9]"  # clip/scale
-            joint_default = "[2, [1.8, 0.9]]"
+            joint_default = "[2, [1.5, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -269,7 +269,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diverse_500'
+        run_name = 'diverse_500_2'
 
         # load
         load_run = -1  # -1 = last run

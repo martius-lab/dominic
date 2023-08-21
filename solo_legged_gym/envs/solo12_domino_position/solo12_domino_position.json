@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "diverse_500",
+        "run_name": "diverse_500_2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230821_071455"
+        "wandb_group": "cluster_20230821_095448"
       }
     },
     "env_cfg": {
@@ -233,7 +233,7 @@
         "terms": {
           "contact": "[1, 1]",
           "feet_acc": "[1, [800, 0.9]]",
-          "joint_default": "[2, [1.8, 0.9]]",
+          "joint_default": "[2, [1.5, 0.9]]",
           "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 0.9]",
           "posi": "[0, 1.0]",
