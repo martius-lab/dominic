@@ -555,6 +555,11 @@ class Solo12DOMINOPosition(BaseTask):
                     self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
                     self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
                                                       (self.num_envs,), device=self.device)
+                elif self.cfg.terrain.train_all_together == 3:
+                    self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+                    self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+                                                      (self.num_envs,), device=self.device)
+                    self.terrain_finished = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
                 else:
                     raise NotImplementedError
                 self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(
@@ -666,6 +671,23 @@ class Solo12DOMINOPosition(BaseTask):
                                                      torch.randint_like(input=self.terrain_rows[env_ids],
                                                                         high=self.cfg.terrain.num_rows),
                                                      self.terrain_rows[env_ids])
+        elif self.cfg.terrain.train_all_together == 3:
+            pos_distance = torch.norm(self.commands_in_base[env_ids, 0:3], dim=1, p=2)
+            move_up = (pos_distance < 0.25)
+            move_down = (pos_distance > 2.0) * ~move_up
+            after_move = (self.terrain_cols[env_ids] + 1 * move_up - 1 * move_down).to(torch.int32)
+            self.terrain_finished[env_ids[after_move >= self.cfg.terrain.num_cols]] = True
+            self.terrain_cols[env_ids] = torch.where(self.terrain_finished[env_ids],
+                                                     torch.randint_like(input=self.terrain_cols[env_ids],
+                                                                        high=self.cfg.terrain.num_cols),
+                                                     torch.clip(input=after_move, min=0))
+
+            self.terrain_rows[env_ids] = torch.where(self.terrain_finished[env_ids],
+                                                     torch.randint_like(input=self.terrain_rows[env_ids],
+                                                                        high=self.cfg.terrain.num_rows),
+                                                     self.terrain_rows[env_ids])
+        else:
+            raise NotImplementedError
         self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _push_robots(self):

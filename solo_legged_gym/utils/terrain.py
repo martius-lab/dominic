@@ -39,11 +39,9 @@ class Terrain:
                     terrain_type = self.cfg.play_terrain + "_terrain"
                 else:
                     if i < int(self.cfg.frac_pit * self.cfg.num_rows):
-                        terrain_type = "pit_terrain"
-                    elif i % 2 == 0:
+                        terrain_type = "pitr_terrain"
+                    else:
                         terrain_type = "boxr_terrain"
-                    elif i % 2 == 1:
-                        terrain_type = "pool_terrain"
 
                 eval(terrain_type)(terrain, self.cfg.params[j])
                 start_x = self.border + i * self.length_per_env_pixels
@@ -82,8 +80,8 @@ def box_terrain(terrain, height):
 
 def boxr_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    num_boxes = 8
-    box_size = [1.0, 2.0]
+    num_boxes = 5
+    box_size = [0.8, 2.0]
     sampled_size = np.random.uniform(box_size[0], box_size[1], num_boxes)
     sampled_size = [int(i / terrain.horizontal_scale) for i in sampled_size]
     for i in range(num_boxes):
@@ -96,8 +94,8 @@ def boxr_terrain(terrain, height):
 
 def box2_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    x = [1.5, 2.5, 4 - 0.5, 4 + 0.5]
-    # x = [1.25, 2.75, 0.0, 8.0]
+    # x = [1.5, 2.5, 4 - 0.5, 4 + 0.5]
+    x = [1.25, 2.75, 0.0, 8.0]
     x = [int(i / terrain.horizontal_scale) for i in x]
     terrain.height_field_raw[x[0]:x[1], x[2]:x[3]] = height
     # terrain.height_field_raw[x[2]:x[3], x[2]:x[3]] = height
@@ -116,9 +114,9 @@ def pit_terrain(terrain, height):
     # terrain.height_field_raw[x[0]:x[3], x[2]:x[3]] = height
 
 
-def pool_terrain(terrain, height):
+def pitr_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    x = [1.0, 2.5, 5.5, 7.0]
+    x = [1.5, 2.5, 5.5, 6.5]
     x = [int(i / terrain.horizontal_scale) for i in x]
     terrain.height_field_raw[x[0]:x[1], x[0]:x[3]] = height
     terrain.height_field_raw[x[2]:x[3], x[0]:x[3]] = height

@@ -86,6 +86,8 @@ class DOMINO:
         # set up moving averages
         self.avg_ext_values = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
                                range(self.num_ext_values)]
+        self.avg_ext_values_copy = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
+                               range(self.num_ext_values)]
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
@@ -357,7 +359,7 @@ class DOMINO:
 
     def update_value_moving_avg(self, skills, ext_returns):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
-        encoded_ext_returns = [encoded_skills * ext_returns[i].unsqueeze(-1).repeat(1, self.env.num_skills) for i in
+        encoded_ext_returns = [encoded_skills * ext_returns[i].repeat(1, self.env.num_skills) for i in
                                range(self.num_ext_values)]
         mean_encoded_ext_returns = [torch.nan_to_num(encoded_ext_returns[i].sum(dim=0) / encoded_skills.sum(dim=0)) for
                                     i in range(self.num_ext_values)]
@@ -553,8 +555,14 @@ class DOMINO:
 
             ############################################################################################################
             # update value moving average
-            self.update_value_moving_avg(skills.squeeze(-1),
-                                         ext_returns[-1].squeeze(-1))  # we sacrifice the last value
+            self.update_value_moving_avg(skills.squeeze(-1), ext_returns)
+
+            if self.burning_expert:
+                self.avg_ext_values_copy = self.avg_ext_values.copy()
+            else:
+                # fixed the expert
+                for i in range(self.num_ext_values):
+                    self.avg_ext_values[i][0] = self.avg_ext_values_copy[i][0]
 
             ############################################################################################################
             # logging

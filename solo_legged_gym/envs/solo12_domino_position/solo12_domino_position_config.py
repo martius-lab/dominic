@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 9 * 9 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 9 * 7 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 3
@@ -26,7 +26,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         measure_height = True  # measure the height samples
         measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
-        measured_points_y = list((np.arange(9) - (9-1) / 2) / 10)
+        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -36,7 +36,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 2.0  # [m]
 
         num_rows = 20
-        frac_pit = 0.4
+        frac_pit = 0.5
         num_cols = 7
 
         border_size = 5  # [m]
@@ -46,7 +46,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
         train_all_together = 2  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
-        # 2: train curriculum in difficulty and firstly pit then box
+        # 2: train curriculum in difficulty and firstly pit then everything else in curriculum,
+        # 3: train curriculum in difficulty and firstly pit then everything else
 
         # choose the type of the terrain, check the params in isaacgym.terrain_utils or utils.terrain
         # pass the params as a dict
@@ -229,7 +230,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.0, 1.5, 1.0]'
+        fixed_adv_coeff = '[2.5, 1.5, 1.0]'
         intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
@@ -256,7 +257,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 400
+        burning_expert_steps = 5000
 
     class runner:
         max_iterations = 4000  # number of policy updates
@@ -268,7 +269,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'hope_for_the_best'
+        run_name = 'blm_to_get_expert_values2'
 
         # load
         load_run = -1  # -1 = last run

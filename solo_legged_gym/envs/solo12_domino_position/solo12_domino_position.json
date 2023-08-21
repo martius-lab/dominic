@@ -18,12 +18,12 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 400,
+        "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[2.0, 1.5, 1.0]",
+        "fixed_adv_coeff": "[2.5, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
@@ -74,11 +74,11 @@
         "num_steps_per_env": 48,
         "record_gif": true,
         "record_gif_interval": 50,
-        "record_iters": 5,
-        "run_name": "principal_test",
+        "record_iters": 10,
+        "run_name": "blm_to_get_expert_values2",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230816_184235"
+        "wandb_group": "cluster_20230820_211553"
       }
     },
     "env_cfg": {
@@ -136,9 +136,9 @@
         "decimation": 4,
         "scale_joint_target": 0.25,
         "stiffness": {
-          "HAA": 5.0,
-          "HFE": 5.0,
-          "KFE": 5.0
+          "HAA": 2.5,
+          "HFE": 2.5,
+          "KFE": 2.5
         },
         "torque_limits": 2.5
       },
@@ -168,7 +168,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 3,
-        "num_observations": 95,
+        "num_observations": 110,
         "num_skills": 8,
         "play": false,
         "plot_target": true,
@@ -237,8 +237,7 @@
         "terms": {
           "contact": "[1, 1]",
           "feet_acc": "[1, [800, 0.9]]",
-          "feet_contact": "[1, 1]",
-          "joint_default": "[2, [1.5, 0.9]]",
+          "joint_default": "[2, [1.8, 0.9]]",
           "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 0.9]",
           "posi": "[0, 1.0]",
@@ -273,27 +272,29 @@
       "terrain": {
         "border_size": 5,
         "dynamic_friction": 1.0,
-        "frac_pit": 0.4,
+        "frac_pit": 0.5,
         "horizontal_scale": 0.1,
         "init_range": 2.0,
         "measure_height": true,
         "measured_points_x": [
-          -0.35,
-          -0.25,
-          -0.15,
-          -0.05,
-          0.05,
-          0.15,
-          0.25,
-          0.35
+          -0.4,
+          -0.3,
+          -0.2,
+          -0.1,
+          0.0,
+          0.1,
+          0.2,
+          0.3,
+          0.4
         ],
         "measured_points_y": [
-          -0.25,
-          -0.15,
-          -0.05,
-          0.05,
-          0.15,
-          0.25
+          -0.3,
+          -0.2,
+          -0.1,
+          0.0,
+          0.1,
+          0.2,
+          0.3
         ],
         "mesh_type": "trimesh",
         "num_cols": 7,
