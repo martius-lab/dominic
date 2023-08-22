@@ -7,10 +7,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 9 * 7 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 30 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 3
+        num_features = 7
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -25,8 +25,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         mesh_type = 'trimesh'  # plane, heightfield, trimesh
 
         measure_height = True  # measure the height samples
-        measured_points_x = list((np.arange(9) - (9-1) / 2) / 10)
-        measured_points_y = list((np.arange(7) - (7-1) / 2) / 10)
+        measured_points_x = list((np.arange(11) - (11-1) / 2) / 10)
+        measured_points_y = list((np.arange(11) - (11-1) / 2) / 10)
 
         # all below are only used for heightfield and trimesh
         # sub-terrain
@@ -104,6 +104,14 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         #                       np.pi / 4, np.pi / 4, np.pi / 2]
         scale_joint_target = 0.25
         clip_joint_target = 100.0
+        joint_lower_limits = [-0.9, -np.pi / 2, -np.pi,
+                              -0.9, -np.pi / 2, -np.pi,
+                              -0.9, -np.pi / 2, -np.pi,
+                              -0.9, -np.pi / 2, -np.pi]
+        joint_upper_limits = [0.9, np.pi / 2, np.pi,
+                              0.9, np.pi / 2, np.pi,
+                              0.9, np.pi / 2, np.pi,
+                              0.9, np.pi / 2, np.pi]
         # dof sequence:
         # FL_HAA, FL_HFE, FL_KFE,
         # FR_HAA, FR_HFE, FR_KFE,
@@ -142,13 +150,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, [800, 0.9]]"
+            feet_acc = "[1, [1000, 1.0]]"
             contact = "[1, 1]"
-            # feet_contact = "[1, 1]"
-            stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            feet_contact = "[1, 1]"
+            stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
             move_towards = "[2, 0.9]"  # clip/scale
-            joint_default = "[2, [1.8, 0.9]]"
+            joint_default = "[2, [1.5, 0.9]]"
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -243,7 +251,7 @@ class Solo12DOMINOPositionTrainCfg:
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
-        alpha = [0.95, 0.95, 0.7]  # optimality ratio
+        alpha = 0.7  # optimality ratio
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -257,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 2000
 
     class runner:
         max_iterations = 4000  # number of policy updates
@@ -269,7 +277,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_to_get_expert_values2'
+        run_name = 'diverse_2000_4'
 
         # load
         load_run = -1  # -1 = last run

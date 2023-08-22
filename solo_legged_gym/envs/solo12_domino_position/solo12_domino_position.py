@@ -40,7 +40,8 @@ class Solo12DOMINOPosition(BaseTask):
 
         self.num_features = self.cfg.env.num_features
         self.feature_buf = torch.zeros(self.num_envs, self.num_features, device=self.device, dtype=torch.float)
-
+        self.joint_lower_limits = torch.tensor(self.cfg.control.joint_lower_limits, device=self.device)
+        self.joint_upper_limits = torch.tensor(self.cfg.control.joint_upper_limits, device=self.device)
         # self.HAA_indices = torch.tensor(
         #     [i for i in range(self.num_dof) if "HAA" not in self.dof_names[i]],
         #     device=self.device,
@@ -334,10 +335,10 @@ class Solo12DOMINOPosition(BaseTask):
         # FL, FR, HL, HR
         self.feature_buf = torch.cat((
             # self.root_states[:, 2:3],  # 1
-            self.base_lin_vel,  # 3
+            self.base_lin_vel / torch.norm(self.base_lin_vel, dim=1, keepdim=True),  # 3
             # self.projected_gravity,  # 3
             # self.base_ang_vel[:, 0:2],  # 2
-            # self.ee_vel_global[:, :, 2],  # 4
+            self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
 
         # no noise added, no clipping
@@ -522,8 +523,11 @@ class Solo12DOMINOPosition(BaseTask):
             joint_targets_ = joint_targets
 
         if control_type == "P":
+            joint_target_positions = joint_targets_ + self.default_dof_pos
+            joint_target_positions = torch.clamp(joint_target_positions, min=self.joint_lower_limits,
+                                                 max=self.joint_upper_limits)
             torques = self.p_gains * (
-                    joint_targets_ + self.default_dof_pos - self.dof_pos) - self.d_gains * self.dof_vel
+                    joint_target_positions - self.dof_pos) - self.d_gains * self.dof_vel
         elif control_type == "V":
             torques = self.p_gains * (joint_targets_ - self.dof_vel) - self.d_gains * (
                     self.dof_vel - self.last_dof_vel) / self.sim_params.dt
