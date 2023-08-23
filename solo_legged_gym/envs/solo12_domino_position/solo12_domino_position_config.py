@@ -150,10 +150,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, [1000, 1.0]]"
+            feet_acc = "[1, [800, 1.0]]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
-            stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
 
             move_towards = "[2, 0.9]"  # clip/scale
             joint_default = "[2, [1.5, 0.9]]"
@@ -238,7 +238,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[2.5, 1.5, 1.0]'
+        fixed_adv_coeff = '[3.0, 2.0, 1.0]'
         intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
@@ -251,7 +251,10 @@ class Solo12DOMINOPositionTrainCfg:
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
-        alpha = 0.7  # optimality ratio
+        pretrain_expert = False
+        expert_ext_values = [27, 30, 47]  # will be used only if pretrain_expert is True
+        alpha = [0.95, 0.9, 0.8]  # optimality ratio pretrain = False
+        # alpha = [0.9, 0.8, 0.7]  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -265,10 +268,10 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 2000
+        burning_expert_steps = 3000
 
     class runner:
-        max_iterations = 4000  # number of policy updates
+        max_iterations = 3000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -277,7 +280,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diverse_2000_4'
+        run_name = 'blm_expert'
 
         # load
         load_run = -1  # -1 = last run

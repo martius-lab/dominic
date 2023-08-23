@@ -86,8 +86,10 @@ class DOMINO:
         # set up moving averages
         self.avg_ext_values = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
                                range(self.num_ext_values)]
-        self.avg_ext_values_copy = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
-                               range(self.num_ext_values)]
+        if self.a_cfg.pretrain_expert:
+            self.avg_expert_ext_values = self.a_cfg.expert_ext_values
+        else:
+            self.avg_expert_ext_values = torch.zeros(self.num_ext_values, device=self.device, requires_grad=False)
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
@@ -434,7 +436,8 @@ class DOMINO:
             advantages = eval(self.a_cfg.fixed_adv_coeff)[0] * ext_advantages[0] * lagrange_coeff[0]  # task
             advantages += eval(self.a_cfg.fixed_adv_coeff)[1] * ext_advantages[1] * lagrange_coeff[1]  # regular
             advantages += eval(self.a_cfg.fixed_adv_coeff)[2] * ext_advantages[2] * lagrange_coeff[2]  # loose
-            advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (1.0 - torch.max(torch.stack(lagrange_coeff), dim=0)[0])  # intrinsic
+            advantages += self.a_cfg.intrinsic_adv_coeff * int_advantages * (
+                        1.0 - torch.max(torch.stack(lagrange_coeff), dim=0)[0])  # intrinsic
 
             # Using KL to adaptively changing the learning rate
             if self.a_cfg.desired_kl is not None and self.a_cfg.schedule == "adaptive":
@@ -557,12 +560,15 @@ class DOMINO:
             # update value moving average
             self.update_value_moving_avg(skills.squeeze(-1), ext_returns)
 
-            if self.burning_expert:
-                self.avg_ext_values_copy = self.avg_ext_values.copy()
-            else:
-                # fixed the expert
+            if self.a_cfg.pretrain_expert:
                 for i in range(self.num_ext_values):
-                    self.avg_ext_values[i][0] = self.avg_ext_values_copy[i][0]
+                    self.avg_ext_values[i][0] = self.avg_expert_ext_values[i]  # assign expert value to pretrained value
+            else:
+                for i in range(self.num_ext_values):
+                    if self.burning_expert:
+                        self.avg_expert_ext_values[i] = self.avg_ext_values[i][0].item()  # copy the value as expert
+                    else:
+                        self.avg_ext_values[i][0] = self.avg_expert_ext_values[i]  # fix expert to be the end of burning
 
             ############################################################################################################
             # logging
@@ -629,11 +635,14 @@ class DOMINO:
         mean_lagranges = locs['mean_lagranges']
         for i in range(self.num_ext_values):
             for j in range(self.env.num_skills - 1):
-                self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}', mean_constraint_satisfaction[i][j], locs['it'])
+                self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}',
+                                       mean_constraint_satisfaction[i][j], locs['it'])
                 self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j], locs['it'])
-                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1], locs['it'])
+                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1],
+                                       locs['it'])
             for j in range(self.env.num_skills):
-                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j], locs['it'])
+                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j],
+                                       locs['it'])
 
         self.writer.add_scalar('Learning/policy_lr', self.policy_lr, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])

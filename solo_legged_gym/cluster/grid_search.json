@@ -26,16 +26,8 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.env_cfg.rewards.terms.stall_pos",
-      "values": ["[1, [0.5, 0.25, 0.1]]", "[1, [0.3, 0.25, 0.1]]", "[1, [0.1, 0.25, 0.1]]"]
-    },
-    {
-      "param": "solo_legged_gym.env_cfg.rewards.terms.joint_default",
-      "values": ["[2, [1.8, 0.9]]", "[2, [1.5, 0.9]]", "[2, [1.2, 0.9]]"]
-    },
-    {
-      "param": "solo_legged_gym.train_cfg.algorithm.burning_expert_steps",
-      "values": [500, 750, 1000]
+      "param": "solo_legged_gym.env_cfg.seed",
+      "values": [22, 27, 42]
     }
   ]
 }
