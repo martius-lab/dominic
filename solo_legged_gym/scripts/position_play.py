@@ -17,7 +17,7 @@ import csv
 
 EXPORT_POLICY = False
 LOG_DATA = True
-REAL_TIME = False
+REAL_TIME = True
 np.set_printoptions(precision=2)
 
 
