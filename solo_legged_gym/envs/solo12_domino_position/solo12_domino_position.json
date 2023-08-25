@@ -8,18 +8,27 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": 0.7,
+        "alpha": [
+          0.8,
+          0.7,
+          0.7
+        ],
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 2000,
+        "burning_expert_steps": 500,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[2.5, 1.5, 1.0]",
+        "expert_ext_values": [
+          27,
+          30,
+          47
+        ],
+        "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
@@ -30,6 +39,7 @@
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "policy_lr": 0.001,
+        "pretrain_expert": true,
         "repulsive_power": 0,
         "schedule": "fixed",
         "sigmoid_scale": 1.0,
@@ -71,10 +81,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "diversityx",
+        "run_name": "blm_pretrain_500",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230823_153231"
+        "wandb_group": "cluster_20230824_132856"
       }
     },
     "env_cfg": {
@@ -260,7 +270,7 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "contact": "[1, 1]",
-          "feet_acc": "[1, [1000, 1.0]]",
+          "feet_acc": "[1, [800, 1.0]]",
           "feet_contact": "[1, 1]",
           "joint_default": "[2, [1.5, 0.9]]",
           "joint_targets_rate": "[1, 1.0]",
@@ -270,7 +280,7 @@
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
-      "seed": 42,
+      "seed": 27,
       "sim": {
         "dt": 0.005,
         "gravity": [
