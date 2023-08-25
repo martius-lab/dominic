@@ -150,7 +150,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, [800, 1.0]]"
+            feet_acc = "[1, 800]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
@@ -239,7 +239,7 @@ class Solo12DOMINOPositionTrainCfg:
         value_lr = 1.e-3  # 1.e-3
 
         fixed_adv_coeff = '[3.0, 1.5, 1.0]'
-        intrinsic_adv_coeff = 2.0
+        intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -265,7 +265,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 2000
+        burning_expert_steps = 500  # 500 (preferred), 1000, 1500, 2000 (preferred)
 
     class runner:
         max_iterations = 4000  # number of policy updates
@@ -277,7 +277,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'diversityx'
+        run_name = 'baseline'
 
         # load
         load_run = -1  # -1 = last run

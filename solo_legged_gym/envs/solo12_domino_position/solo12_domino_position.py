@@ -802,7 +802,7 @@ class Solo12DOMINOPosition(BaseTask):
 
     def _reward_feet_acc(self, sigma):  # feet should not vibrate
         feet_acc_error = torch.sum(torch.norm(self.ee_acc_global, p=2, dim=-1), dim=-1)
-        return torch.clip(torch.exp(-torch.square(feet_acc_error / sigma[0])), min=None, max=sigma[1]) / sigma[1]
+        return torch.exp(-torch.square(feet_acc_error / sigma))
 
     def _reward_contact(self, sigma):  # contact forces of the base, shoulder, upper legs should be small
         contact_sum = torch.sum(torch.norm(self.contact_forces[:, self.penalised_contact_indices, :], dim=-1), dim=1)
