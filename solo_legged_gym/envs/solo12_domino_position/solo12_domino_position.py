@@ -97,7 +97,7 @@ class Solo12DOMINOPosition(BaseTask):
         self.base_check_px, self.base_check_py = torch.meshgrid(torch.arange(-1, 2, device=self.device),
                                                                 torch.arange(-1, 2, device=self.device))
 
-        self.play_skill = 0
+        self.play_skill = torch.arange(self.cfg.env.num_skills, device=self.device, requires_grad=False)
         self.draw_height_colors = [(0.75, 0, 0),
                                    (0, 0.75, 0),
                                    (0, 0, 0.75),
@@ -112,6 +112,20 @@ class Solo12DOMINOPosition(BaseTask):
                                    (0.75, 0, 0.5),
                                    (0, 0.75, 0.5),
                                    ]
+        self.draw_body_colors = [(0.95, 0.5, 0.5),
+                                 (0.5, 0.95, 0.5),
+                                 (0.5, 0.5, 0.95),
+                                 (0.95, 0.95, 0.5),
+                                 (0.5, 0.95, 0.95),
+                                 (0.95, 0.5, 0.95),
+                                 (0.95, 0.95, 0.95),
+                                 (0.75, 0.95, 0.5),
+                                 (0.75, 0.5, 0.95),
+                                 (0.95, 0.75, 0.5),
+                                 (0.5, 0.75, 0.95),
+                                 (0.95, 0.5, 0.75),
+                                 (0.5, 0.95, 0.75),
+                                 ]
 
     def reset_idx(self, env_ids):
         """Reset selected robots"""
@@ -219,28 +233,19 @@ class Solo12DOMINOPosition(BaseTask):
 
             # step graphics
             if self.enable_viewer_sync:
-                if self.cfg.env.play:
-                    ref_pos = [self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
-                               self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
-                               self.cfg.viewer.ref_pos_b[2]]
-                    ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
-                                  self.root_states[self.cfg.viewer.ref_env, 1].item(),
-                                  0.2]
-                    self._set_camera(ref_pos, ref_lookat)
-                else:
-                    if not self.viewer_set:
-                        if self.overview:
-                            self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
-                        else:
-                            ref_pos = [
-                                self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
-                                self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
-                                self.root_states[self.cfg.viewer.ref_env, 2].item() + self.cfg.viewer.ref_pos_b[2]]
-                            ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
-                                          self.root_states[self.cfg.viewer.ref_env, 1].item(),
-                                          self.root_states[self.cfg.viewer.ref_env, 2].item()]
-                            self._set_camera(ref_pos, ref_lookat)
-                        self.viewer_set = True
+                if not self.viewer_set:
+                    if self.overview:
+                        self._set_camera(self.cfg.viewer.overview_pos, self.cfg.viewer.overview_lookat)
+                    else:
+                        ref_pos = [
+                            self.root_states[self.cfg.viewer.ref_env, 0].item() + self.cfg.viewer.ref_pos_b[0],
+                            self.root_states[self.cfg.viewer.ref_env, 1].item() + self.cfg.viewer.ref_pos_b[1],
+                            self.root_states[self.cfg.viewer.ref_env, 2].item() + self.cfg.viewer.ref_pos_b[2]]
+                        ref_lookat = [self.root_states[self.cfg.viewer.ref_env, 0].item(),
+                                      self.root_states[self.cfg.viewer.ref_env, 1].item(),
+                                      self.root_states[self.cfg.viewer.ref_env, 2].item()]
+                        self._set_camera(ref_pos, ref_lookat)
+                    self.viewer_set = True
             else:
                 self.gym.poll_viewer_events(self.viewer)
 
@@ -259,7 +264,7 @@ class Solo12DOMINOPosition(BaseTask):
 
             if self.viewer and self.enable_viewer_sync:
                 self._draw_target()
-                if self.cfg.terrain.measure_height and self.cfg.env.play:
+                if self.cfg.terrain.measure_height and self.cfg.env.play and self.cfg.env.plot_heights:
                     self._draw_heights()
                 self.gym.draw_viewer(self.viewer, self.sim, True)
                 if sync_frame_time:
@@ -506,7 +511,14 @@ class Solo12DOMINOPosition(BaseTask):
         self.skills[env_ids] = torch.randint(low=0, high=self.num_skills, size=(len(env_ids),), device=self.device)
 
         if self.cfg.env.play:
-            self.skills[env_ids] = self.play_skill
+            self.skills[env_ids] = self.play_skill[env_ids]
+
+            if self.cfg.env.plot_colors:
+                for i in range(len(env_ids)):
+                    self.gym.set_rigid_body_color(self.envs[env_ids[i]], 0, 0, gymapi.MESH_VISUAL,
+                                                  gymapi.Vec3(self.draw_body_colors[self.skills[env_ids[i]]][0],
+                                                              self.draw_body_colors[self.skills[env_ids[i]]][1],
+                                                              self.draw_body_colors[self.skills[env_ids[i]]][2]))
 
     def _compute_torques(self, joint_targets):
         # pd controller

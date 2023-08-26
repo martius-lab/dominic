@@ -15,6 +15,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         remaining_check_time_s = 1
 
         play = False
+        plot_heights = False
+        plot_colors = False
         plot_target = True
 
     class terrain:

@@ -26,7 +26,7 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        train_cfg.runner.load_run = '1_controllability/92'
+        train_cfg.runner.load_run = '1_controllability/68'
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
@@ -42,21 +42,23 @@ class keyboard_play:
             load_config = json.load(f)
             update_cfgs_from_dict(env_cfg, train_cfg, load_config)
 
-        env_cfg.env.num_envs = 1
+        env_cfg.env.num_envs = 8
         env_cfg.env.play = True
         env_cfg.env.plot_heights = True
+        env_cfg.env.plot_colors = True
         env_cfg.env.debug = False
         env_cfg.env.episode_length_s = 6
-        env_cfg.viewer.overview = False
-        env_cfg.viewer.ref_pos_b = [1.5, 1.5, 1.0]
+        env_cfg.viewer.overview = True
+        env_cfg.viewer.overview_pos = [4, 8, 2]  # [m]
+        env_cfg.viewer.overview_lookat = [0, 0, 0]  # [m]
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
         env_cfg.terrain.params = [0.3]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
-        env_cfg.terrain.play_target = [-3.5, 0.0]
-        # env_cfg.terrain.play_target = [-2.0, 0.0]
+        # env_cfg.terrain.play_target = [-3.5, 0.0]
+        env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False
@@ -123,6 +125,7 @@ class keyboard_play:
     def register_keyboard(self):
         self.keyboard_control = {
             "reset robot": "r",
+            "all skills": "a",
         }
 
         self.skill_control = {}
@@ -199,6 +202,8 @@ class keyboard_play:
         for event in events:
             if event.action == "r" and event.value > 0:
                 self.env.reset()
+            elif event.action == "a" and event.value > 0:
+                self.env.play_skill = torch.arange(self.env.cfg.env.num_skills, device=self.env.device, requires_grad=False)
             elif event.action in list(self.skill_control.values()) and event.value > 0:
                 self.env.play_skill[:] = int(event.action)
 
