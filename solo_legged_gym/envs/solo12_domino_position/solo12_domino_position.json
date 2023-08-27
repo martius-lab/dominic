@@ -8,11 +8,7 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": [
-          0.8,
-          0.7,
-          0.7
-        ],
+        "alpha": "[0.9, 0.8, 0.7]",
         "attractive_coeff": 0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
@@ -30,7 +26,7 @@
         ],
         "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 2.0,
+        "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -81,10 +77,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "blm_pretrain_500",
+        "run_name": "blm",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230824_132856"
+        "wandb_group": "cluster_20230827_103307"
       }
     },
     "env_cfg": {
@@ -201,10 +197,12 @@
         "episode_length_s": 6,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 7,
+        "num_features": 3,
         "num_observations": 168,
         "num_skills": 8,
         "play": false,
+        "plot_colors": false,
+        "plot_heights": false,
         "plot_target": true,
         "remaining_check_time_s": 1
       },
@@ -270,7 +268,7 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "contact": "[1, 1]",
-          "feet_acc": "[1, [800, 1.0]]",
+          "feet_acc": "[1, 800]",
           "feet_contact": "[1, 1]",
           "joint_default": "[2, [1.5, 0.9]]",
           "joint_targets_rate": "[1, 1.0]",

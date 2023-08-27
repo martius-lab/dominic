@@ -10,11 +10,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 30 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 7
+        num_features = 3
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
         play = False
+        plot_heights = False
+        plot_colors = False
         plot_target = True
 
     class terrain:
@@ -150,7 +152,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, [800, 1.0]]"
+            feet_acc = "[1, 800]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
@@ -239,7 +241,7 @@ class Solo12DOMINOPositionTrainCfg:
         value_lr = 1.e-3  # 1.e-3
 
         fixed_adv_coeff = '[3.0, 1.5, 1.0]'
-        intrinsic_adv_coeff = 2.0
+        intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -253,8 +255,8 @@ class Solo12DOMINOPositionTrainCfg:
 
         pretrain_expert = True
         expert_ext_values = [27, 30, 47]  # will be used only if pretrain_expert is True
-        # alpha = [0.95, 0.9, 0.8]  # optimality ratio pretrain = False
-        alpha = [0.8, 0.7, 0.7]  # optimality ratio pretrain = True
+        # alpha = [0.95, 0.9, 0.8]  # optimality ratio pretrain = False, the values are not converged
+        alpha = '[0.9, 0.8, 0.7]'  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -280,7 +282,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_pretrain_500'
+        run_name = 'blm'
 
         # load
         load_run = -1  # -1 = last run

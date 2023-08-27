@@ -44,6 +44,7 @@ class keyboard_play:
 
         env_cfg.env.num_envs = 1
         env_cfg.env.play = True
+        env_cfg.env.plot_heights = True
         env_cfg.env.debug = False
         env_cfg.env.episode_length_s = 6
         env_cfg.viewer.overview = False
@@ -51,7 +52,7 @@ class keyboard_play:
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
-        env_cfg.terrain.params = [0.2]
+        env_cfg.terrain.params = [0.3]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
         env_cfg.terrain.play_target = [-3.5, 0.0]
@@ -60,6 +61,7 @@ class keyboard_play:
 
         env_cfg.observations.add_noise = False
         env_cfg.domain_rand.randomize_friction = False
+        env_cfg.domain_rand.randomize_base_mass = False
         env_cfg.domain_rand.push_robots = False
         env_cfg.domain_rand.actuator_lag = True
         env_cfg.domain_rand.randomize_actuator_lag = False
@@ -199,7 +201,7 @@ class keyboard_play:
             if event.action == "r" and event.value > 0:
                 self.env.reset()
             elif event.action in list(self.skill_control.values()) and event.value > 0:
-                self.env.play_skill = int(event.action)
+                self.env.play_skill[:] = int(event.action)
 
             if event.value > 0 and event.action in list(self.skill_control.values()):
                 print(list(self.skill_control.keys())[list(self.skill_control.values()).index(event.action)])
