@@ -71,10 +71,10 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "grid_on_alpha_l0",
+        "run_name": "grid2_on_alpha_l0",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230825_173413"
+        "wandb_group": "cluster_20230827_101132"
       }
     },
     "env_cfg": {
@@ -191,10 +191,12 @@
         "episode_length_s": 6,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 7,
+        "num_features": 3,
         "num_observations": 168,
         "num_skills": 8,
         "play": false,
+        "plot_colors": false,
+        "plot_heights": false,
         "plot_target": true,
         "remaining_check_time_s": 1
       },

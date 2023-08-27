@@ -17,6 +17,7 @@ wandb = "*"
 pynput = "*"
 imageio = "*"
 moviepy = "*"
+notebook = "*"
 
 [tool.poetry.group.dev.dependencies]
 cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}

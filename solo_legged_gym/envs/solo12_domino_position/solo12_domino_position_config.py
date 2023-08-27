@@ -10,7 +10,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 30 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 7
+        num_features = 3
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -279,7 +279,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'grid_on_alpha_l0'
+        run_name = 'grid2_on_alpha_l0'
 
         # load
         load_run = -1  # -1 = last run

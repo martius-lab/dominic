@@ -54,11 +54,11 @@ class keyboard_play:
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
-        env_cfg.terrain.params = [0.3]
+        env_cfg.terrain.params = [0.0]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
-        # env_cfg.terrain.play_target = [-3.5, 0.0]
-        env_cfg.terrain.play_target = [-2.0, 0.0]
+        env_cfg.terrain.play_target = [-3.5, 0.0]
+        # env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False
@@ -148,7 +148,7 @@ class keyboard_play:
             threading.Timer(1 / 50, self.play).start()
             self.step()
         else:
-            while True:
+            for _ in range(int(self.env.max_episode_length)):
                 self.step()
                 # time.sleep(0.1)
 
@@ -166,32 +166,21 @@ class keyboard_play:
         path = os.path.join(os.path.dirname(load_path), "logged_data")
         if not os.path.exists(path):
             os.makedirs(path)
-        self.log_path = os.path.join(path, "log_data.csv")
+        self.log_path = os.path.join(path, "log_data_f.csv")
         self.step_counter = 0
-        header = ['step',
-                  'command_x', 'command_y', 'command_az',
-                  'base_x', 'base_y', 'base_z', 'base_ax', 'base_ay', 'base_az',
-                  'base_vel_x', 'base_vel_y', 'base_vel_z',
-                  'base_avel_x', 'base_avel_y', 'base_avel_z',
-                  'skill',
-                  'joint_targets_rate', 'torques', 'dof_vel', 'dof_acc'
-                  ]
+        header = ['step']
+        for i in range(8):
+            header.extend([f'root_pos_x_{i}', f'root_pos_y_{i}', f'root_pos_z_{i}'])
+        for i in range(8):
+            header.extend([f'base_lin_vel_x_{i}', f'base_lin_vel_y_{i}', f'base_lin_vel_z_{i}'])
         with open(self.log_path, 'w+', encoding='UTF8') as f:
             writer = csv.writer(f)
             writer.writerow(header)
 
     def log_data(self):
         data = [self.step_counter]
-        data.extend(self.env.commands[0, :].tolist())
-        data.extend(self.env.root_states[0, :3].tolist())
-        data.extend(torch.stack(get_euler_xyz(self.env.base_quat), dim=1)[0, :].tolist())
-        data.extend(self.env.base_lin_vel[0, :].tolist())
-        data.extend(self.env.base_ang_vel[0, :].tolist())
-        data.append(self.env.skills[0].item())
-        data.append(self.env.joint_targets_rate[0].item())
-        data.append(torch.norm(self.env.torques[0, :], p=2).item())
-        data.append(torch.norm(self.env.dof_vel[0, :], p=2).item())
-        data.append(torch.norm(self.env.dof_acc[0, :], p=2).item())
+        data.extend(self.env.root_states[:, :3].flatten().tolist())
+        data.extend(self.env.base_lin_vel[:, :].flatten().tolist())
 
         self.step_counter += 1
         with open(self.log_path, 'a', encoding='UTF8') as f:
