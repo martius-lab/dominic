@@ -18,6 +18,7 @@ pynput = "*"
 imageio = "*"
 moviepy = "*"
 notebook = "*"
+shapely = "1.7.1"
 
 [tool.poetry.group.dev.dependencies]
 cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}
