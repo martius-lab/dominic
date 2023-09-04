@@ -208,9 +208,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             dof_vel = 0.5
             lin_vel = 0.2
             ang_vel = 0.2
-            gravity = 0.1
+            # gravity = 0.1
             height_measurements = 0.05
-
+            commands = 0.05
 
 class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'

@@ -357,9 +357,14 @@ class Solo12DOMINOPosition(BaseTask):
         noise_vec[6:18] = noise_scales.dof_pos
         noise_vec[18:30] = noise_scales.dof_vel
 
+        num_height_points = len(self.cfg.terrain.measured_points_x) * len(self.cfg.terrain.measured_points_y)
         if self.cfg.terrain.measure_height:
-            num_height_points = len(self.cfg.terrain.measured_points_x) * len(self.cfg.terrain.measured_points_y)
             noise_vec[30:30 + num_height_points] = noise_scales.height_measurements
+
+        # noise_vec[30 + num_height_points:
+        #           30 + num_height_points + self.num_actions] = noise_scales.actions
+        noise_vec[30 + num_height_points + self.num_actions:
+                  30 + num_height_points + self.num_actions + self.cfg.commands.num_commands] = noise_scales.commands
 
         return noise_vec * noise_level
 
