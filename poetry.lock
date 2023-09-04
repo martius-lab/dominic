@@ -15,7 +15,7 @@ files = [
 [[package]]
 name = "AL-Logger"
 version = "0.2.5"
-description = ""
+description = "Logging experimental data"
 category = "dev"
 optional = false
 python-versions = "*"
