@@ -304,6 +304,8 @@ class DOMINO:
             ep_infos.clear()
 
             if it % self.restart_interval == 0 and self.r_cfg.on_cluster and it != 0:
+                wandb.alert(title='Restart', text='Restarting the job at iteration {}'.format(it))
+                wandb.finish(0)
                 print("Triggering cluster restart...")
                 cluster.exit_for_resume()
 
