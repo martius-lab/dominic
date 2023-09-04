@@ -303,7 +303,7 @@ class DOMINO:
             self.iter = it
             ep_infos.clear()
 
-            if it % self.restart_interval == 0 and self.r_cfg.on_cluster:
+            if it % self.restart_interval == 0 and self.r_cfg.on_cluster and it != 0:
                 print("Triggering cluster restart...")
                 cluster.exit_for_resume()
 
