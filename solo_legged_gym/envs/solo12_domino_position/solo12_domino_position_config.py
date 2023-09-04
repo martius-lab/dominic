@@ -271,7 +271,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 500  # 500 (preferred), 1000, 1500, 2000 (preferred)
 
     class runner:
-        max_iterations = 4000  # number of policy updates
+        max_iterations = 300  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -280,7 +280,11 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'grid2_on_alpha_l0'
+        run_name = 'test_on_resume'
+
+        # cluster
+        restart_interval = 100
+        on_cluster = False
 
         # load
         load_run = -1  # -1 = last run

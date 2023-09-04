@@ -47,44 +47,49 @@ class TaskRegistry:
                          headless=args.headless)
         return env, env_cfg
 
-    def make_alg_runner(self, env, name, args, env_cfg, train_cfg=None):
+    def make_alg_runner(self, env, name, args, env_cfg, log_root="default", train_cfg=None):
         create_and_save = False
         if train_cfg is None:
             _, train_cfg = self.get_cfgs(name)
             create_and_save = True
         train_cfg = update_train_cfg_from_args(train_cfg, args)
 
-        log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
-        log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '_' + train_cfg.runner.run_name)
+        if log_root == "default":
+            log_root = os.path.join(ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
+            log_dir = os.path.join(log_root, datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '_' + train_cfg.runner.run_name)
 
-        if create_and_save:
-            os.makedirs(log_dir)
-            # update the json file for cluster running only!!!
-            env_cfg_dict = class_to_dict(env_cfg)
-            train_cfg_dict = class_to_dict(train_cfg)
-            train_cfg_dict["runner"]["wandb_group"] = "cluster" + "_" + datetime.now().strftime('%Y%m%d_%H%M%S')
-            train_cfg_dict["runner"]["wandb"] = True
-            env_cfg_dict["viewer"]["enable_viewer"] = False
-            cfg = {
-                "solo_legged_gym": {
-                    "args": {
-                        "dv": True,
-                        "w": True,
-                        "dr": False,
-                        "task": train_cfg.runner.experiment_name
+            if create_and_save:
+                os.makedirs(log_dir)
+                # update the json file for cluster running only!!!
+                env_cfg_dict = class_to_dict(env_cfg)
+                train_cfg_dict = class_to_dict(train_cfg)
+                train_cfg_dict["runner"]["wandb_group"] = "cluster" + "_" + datetime.now().strftime('%Y%m%d_%H%M%S')
+                train_cfg_dict["runner"]["wandb"] = True
+                train_cfg_dict["runner"]["on_cluster"] = True
+                env_cfg_dict["viewer"]["enable_viewer"] = False
+                cfg = {
+                    "solo_legged_gym": {
+                        "args": {
+                            "dv": True,
+                            "w": True,
+                            "dr": False,
+                            "task": train_cfg.runner.experiment_name
+                        },
+                        "train_cfg": train_cfg_dict,
+                        "env_cfg": env_cfg_dict
                     },
-                    "train_cfg": train_cfg_dict,
-                    "env_cfg": env_cfg_dict
-                },
-                "working_dir": "./logs/cluster",
-                "id": 1
-            }
+                    "working_dir": "./logs/cluster",
+                    "id": 1
+                }
 
-            with open(os.path.join(ROOT_DIR, 'envs', train_cfg.runner.experiment_name + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
-                json.dump(cfg, f, indent=2)
+                with open(os.path.join(ROOT_DIR, 'envs', train_cfg.runner.experiment_name + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
+                    json.dump(cfg, f, indent=2)
 
-            with open(os.path.join(log_dir + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
-                json.dump(cfg, f, indent=2)
+                with open(os.path.join(log_dir + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
+                    json.dump(cfg, f, indent=2)
+
+        else:
+            log_dir = log_root
 
         algorithm = eval(train_cfg.algorithm_name)
         runner = algorithm(

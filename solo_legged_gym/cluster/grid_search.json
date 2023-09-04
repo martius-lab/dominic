@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "test",
+  "optimization_procedure_name": "test_on_resume",
   "results_dir": "results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -27,11 +27,11 @@
   "hyperparam_list": [
     {
       "param": "solo_legged_gym.train_cfg.algorithm.alpha",
-      "values": [0.6, 0.7, 0.8, 0.9]
+      "values": [0.7, 0.8, 0.9]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
-      "values": [2.0, 4.0, 6.0, 8.0]
+      "values": [2.0, 4.0, 6.0]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",

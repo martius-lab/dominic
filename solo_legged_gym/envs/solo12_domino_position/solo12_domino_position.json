@@ -64,17 +64,19 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 4000,
+        "max_iterations": 300,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
+        "on_cluster": true,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "grid2_on_alpha_l0",
+        "restart_interval": 100,
+        "run_name": "test_on_resume",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230904_182548"
+        "wandb_group": "cluster_20230904_222415"
       }
     },
     "env_cfg": {
