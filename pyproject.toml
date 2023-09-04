@@ -17,6 +17,7 @@ wandb = "*"
 pynput = "*"
 imageio = "*"
 moviepy = "*"
+onnx = "*"
 notebook = "*"
 shapely = "1.7.1"
 

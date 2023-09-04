@@ -15,8 +15,8 @@ import torch
 import threading
 import csv
 
-EXPORT_POLICY = False
-LOG_DATA = True
+EXPORT_POLICY = True
+LOG_DATA = False
 REAL_TIME = False
 np.set_printoptions(precision=2)
 
@@ -26,7 +26,7 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        train_cfg.runner.load_run = '1_controllability/92'
+        train_cfg.runner.load_run = '1_controllability2/92'
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
@@ -47,16 +47,18 @@ class keyboard_play:
         env_cfg.env.plot_heights = True
         env_cfg.env.debug = False
         env_cfg.env.episode_length_s = 6
-        env_cfg.viewer.overview = False
+        env_cfg.viewer.overview = True
+        env_cfg.viewer.overview_pos = [3.5, 6.5, 1.5]  # [m]
+        env_cfg.viewer.overview_lookat = [0, 0, 0]  # [m]
         env_cfg.viewer.ref_pos_b = [1.5, 1.5, 1.0]
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
-        env_cfg.terrain.params = [0.3]
+        env_cfg.terrain.params = [0.2]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
-        env_cfg.terrain.play_target = [-3.5, 0.0]
-        # env_cfg.terrain.play_target = [-2.0, 0.0]
+        # env_cfg.terrain.play_target = [-3.5, 0.0]
+        env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False
