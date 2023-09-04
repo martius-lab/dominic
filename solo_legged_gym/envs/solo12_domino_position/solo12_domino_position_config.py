@@ -212,6 +212,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             height_measurements = 0.05
             commands = 0.05
 
+
 class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
