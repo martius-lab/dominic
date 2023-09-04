@@ -676,7 +676,8 @@ class DOMINO:
             self.writer.add_scalar('Train/mean_feature_distance', statistics.mean(locs['dist_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']), locs['it'])
 
-        self.writer.flush_logger()
+        if self.r_cfg.wandb:
+            self.writer.flush_logger()
 
         title = f" \033[1m Learning iteration {locs['it']}/{self.num_learning_iterations} \033[0m "
 
