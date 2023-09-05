@@ -206,9 +206,9 @@ class DOMINO:
         cur_dist_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
 
-        filming = False
-        filming_imgs = []
-        filming_iter_counter = 0
+        # filming = False
+        # filming_imgs = []
+        # filming_iter_counter = 0
 
         collection_time = 0
         learn_time = 0
@@ -217,9 +217,10 @@ class DOMINO:
         for it in range(self.current_learning_iteration, self.num_learning_iterations):
             # Collect
             start = time.time()
-            # filming
-            if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
-                filming = True
+
+            # # filming
+            # if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
+            #     filming = True
 
             # burning expert
             if it <= self.a_cfg.burning_expert_steps:
@@ -246,8 +247,8 @@ class DOMINO:
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
 
-                    if filming:
-                        filming_imgs.append(self.env.camera_image)
+                    # if filming:
+                    #     filming_imgs.append(self.env.camera_image)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
@@ -292,16 +293,16 @@ class DOMINO:
             stop = time.time()
             learn_time = stop - start
 
-            if filming:
-                filming_iter_counter += 1
-                if filming_iter_counter == self.r_cfg.record_iters:
-                    export_imgs = np.array(filming_imgs)
-                    if self.r_cfg.wandb:
-                        wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
-                    del export_imgs
-                    filming = False
-                    filming_imgs = []
-                    filming_iter_counter = 0
+            # if filming:
+            #     filming_iter_counter += 1
+            #     if filming_iter_counter == self.r_cfg.record_iters:
+            #         export_imgs = np.array(filming_imgs)
+            #         if self.r_cfg.wandb:
+            #             wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
+            #         del export_imgs
+            #         filming = False
+            #         filming_imgs = []
+            #         filming_iter_counter = 0
 
             if self.log_dir is not None:
                 self.log(locals())
