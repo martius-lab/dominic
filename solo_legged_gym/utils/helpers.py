@@ -41,7 +41,7 @@ def get_args() -> argparse.Namespace:
     # name alignment
     args.sim_device_id = args.compute_device_id
     args.sim_device = args.sim_device_type
-    args.headless = False
+    args.headless = True
     args.device = "cuda:0"
     if args.sim_device == "cuda":
         args.sim_device += f":{args.sim_device_id}"

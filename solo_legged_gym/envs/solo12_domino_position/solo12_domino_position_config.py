@@ -283,7 +283,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'test_without_video_recording'
 
         # cluster
-        restart_interval = 10000  # not working now on cluster, segmentation fault
+        restart_interval = 2000  # not working now on cluster, segmentation fault
         on_cluster = False
 
         # load
