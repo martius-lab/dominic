@@ -2,11 +2,14 @@ from solo_legged_gym.envs import *  # needed
 import os
 import sys
 import time
+import faulthandler
+
 from cluster import cluster_main
 
 
 @cluster_main
 def train(id, working_dir, **kwargs):
+    faulthandler.enable()
     import isaacgym
     import torch
     from solo_legged_gym.utils import (
