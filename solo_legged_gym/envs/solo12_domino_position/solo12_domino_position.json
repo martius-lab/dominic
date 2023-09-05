@@ -68,13 +68,15 @@
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
+        "on_cluster": true,
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "run_name": "grid2_on_alpha_l0",
+        "restart_interval": 10000,
+        "run_name": "test_without_video_recording",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230904_182548"
+        "wandb_group": "test"
       }
     },
     "env_cfg": {
@@ -381,7 +383,7 @@
           -5,
           10
         ],
-        "record_camera_imgs": true,
+        "record_camera_imgs": false,
         "ref_env": 0,
         "ref_pos_b": [
           1,

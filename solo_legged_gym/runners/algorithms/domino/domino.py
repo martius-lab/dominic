@@ -1,10 +1,12 @@
 import json
+import logging
 import time
 import os
 from collections import deque
 import statistics
 import numpy as np
 import wandb
+import cluster
 
 import torch
 import torch.optim as optim
@@ -88,6 +90,7 @@ class DOMINO:
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
+        self.restart_interval = self.r_cfg.restart_interval
 
         self.normalize_observation = self.r_cfg.normalize_observation
         if self.normalize_observation:
@@ -128,21 +131,56 @@ class DOMINO:
         self.lagrange_lr = self.a_cfg.lagrange_lr
         self.lagrange_optimizer = optim.Adam([self.lagrange], lr=self.lagrange_lr)
 
-        # Log
-        self.log_dir = log_dir
-        self.writer = None
-        self.init_writer(self.env.cfg.env.play)
-
-        # iterations
+        self.num_learning_iterations = self.r_cfg.max_iterations
+        self.current_learning_iteration = 0
         self.tot_timesteps = 0
         self.tot_time = 0
-        self.num_learning_iterations = self.r_cfg.max_iterations
+        self.resume_id = None
+        self.writer = None
+        self.logger = None
+        self.logger_state = None
+
+        # resume
+        self.log_dir = log_dir
+
+        models = [file for file in os.listdir(log_dir) if 'model' in file]
+        if len(models) == 0:
+            print("[Resume] No models in this directory: " + log_dir + ", starting from scratch!")
+            self.resume = False
+        else:
+            models.sort(key=lambda m: '{0:0>15}'.format(m))
+            model = models[-1]
+            load_path = os.path.join(log_dir, model)
+            print("[Resume] Load model from: " + load_path)
+
+            self.load(path=load_path,
+                      load_values=True,
+                      load_succ_feat=True,
+                      load_optimizer=True,
+                      load_feat_normalizer=True)
+            self.resume = True
+
+        # Log
+        if not self.env.cfg.env.play:
+            self.init_writer(resume_id=self.resume_id)  # should be updated if resumed
+            if self.resume:
+                if self.r_cfg.wandb:
+                    self.writer.load_allogger_step(self.logger_state)
+            else:
+                try:
+                    self.resume_id = self.writer.run_id
+                except:
+                    self.resume_id = None
 
         if self.a_cfg.burning_expert_steps != 0:
             self.burning_expert = True
         else:
             self.burning_expert = False
+
         self.env.reset()
+        if self.resume:
+            self.current_learning_iteration += 1
+        self.iter = self.current_learning_iteration
         self.avg_score = 0
 
     def learn(self):
@@ -168,21 +206,21 @@ class DOMINO:
         cur_dist_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
 
-        tot_iter = self.num_learning_iterations
-        filming = False
-        filming_imgs = []
-        filming_iter_counter = 0
+        # filming = False
+        # filming_imgs = []
+        # filming_iter_counter = 0
 
         collection_time = 0
         learn_time = 0
         misc_time = 0
 
-        for it in range(tot_iter):
+        for it in range(self.current_learning_iteration, self.num_learning_iterations):
             # Collect
             start = time.time()
-            # filming
-            if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
-                filming = True
+
+            # # filming
+            # if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
+            #     filming = True
 
             # burning expert
             if it <= self.a_cfg.burning_expert_steps:
@@ -209,8 +247,8 @@ class DOMINO:
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
 
-                    if filming:
-                        filming_imgs.append(self.env.camera_image)
+                    # if filming:
+                    #     filming_imgs.append(self.env.camera_image)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
@@ -251,28 +289,41 @@ class DOMINO:
             # Learning update
             start = stop
             mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_succ_feat_loss, \
-                mean_lagranges, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update(it, tot_iter)
+                mean_lagranges, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update()
             stop = time.time()
             learn_time = stop - start
 
-            if filming:
-                filming_iter_counter += 1
-                if filming_iter_counter == self.r_cfg.record_iters:
-                    export_imgs = np.array(filming_imgs)
-                    if self.r_cfg.wandb:
-                        wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
-                    del export_imgs
-                    filming = False
-                    filming_imgs = []
-                    filming_iter_counter = 0
+            # if filming:
+            #     filming_iter_counter += 1
+            #     if filming_iter_counter == self.r_cfg.record_iters:
+            #         export_imgs = np.array(filming_imgs)
+            #         if self.r_cfg.wandb:
+            #             wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
+            #         del export_imgs
+            #         filming = False
+            #         filming_imgs = []
+            #         filming_iter_counter = 0
 
             if self.log_dir is not None:
                 self.log(locals())
             if it % self.save_interval == 0:
-                self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)))
+                self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)), it)
+            self.iter = it
             ep_infos.clear()
 
-        self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.num_learning_iterations)))
+            if (it % self.restart_interval == 0 and
+                    self.r_cfg.on_cluster and
+                    it != self.current_learning_iteration and
+                    it != self.num_learning_iterations - 1):
+                print("Triggering cluster restart...")
+                wandb.alert(title='Restart', text='Restarting the job at iteration {}'.format(it))
+                self.writer.stop()
+                cluster.exit_for_resume()
+
+        self.current_learning_iteration = self.iter
+        self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)),
+                  self.current_learning_iteration)
+        self.writer.stop()
         # score not implemented yet
         return 0
 
@@ -372,7 +423,7 @@ class DOMINO:
     def encode_skills(self, skills):
         return (func.one_hot(skills, num_classes=self.env.num_skills)).squeeze(1)
 
-    def update(self, it, tot_iter):
+    def update(self):
         # for logging
         mean_ext_value_loss = [0 for _ in range(self.num_ext_values)]
         mean_int_value_loss = 0
@@ -624,9 +675,12 @@ class DOMINO:
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
 
-        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()), locs['it'])
-        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()), locs['it'])
-        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()), locs['it'])
+        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()),
+                               locs['it'])
+        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()),
+                               locs['it'])
+        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()),
+                               locs['it'])
 
         if len(locs['len_buffer']) > 0:
             ext_rew_bufs = locs['ext_rew_buffers']
@@ -635,6 +689,9 @@ class DOMINO:
             self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_feature_distance', statistics.mean(locs['dist_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']), locs['it'])
+
+        if self.r_cfg.wandb:
+            self.writer.flush_logger()
 
         title = f" \033[1m Learning iteration {locs['it']}/{self.num_learning_iterations} \033[0m "
 
@@ -653,12 +710,23 @@ class DOMINO:
                                self.num_learning_iterations - locs['it']):.1f}s\n""")
         print(log_string)
 
-    def save(self, path, infos=None):
+    def save(self, path, it, infos=None):
+        if self.r_cfg.wandb:
+            self.logger_state = self.writer.get_allogger_step()
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
             "intrinsic_value_state_dict": self.int_value.state_dict(),
             "policy_optimizer_state_dict": self.policy_optimizer.state_dict(),
+            "value_optimizer_state_dict": self.value_optimizer.state_dict(),
+            "lagrange_optimizer_state_dict": self.lagrange_optimizer.state_dict(),
+            "lagrange": self.lagrange,
+            "avg_ext_values": self.avg_ext_values,
             "infos": infos,
+            "iteration": it,
+            "tot_timesteps": self.tot_timesteps,
+            "tot_time": self.tot_time,
+            "logger_state": self.logger_state,
+            "resume_id": self.resume_id,
         }
         for i in range(self.num_ext_values):
             saved_dict[f"ext_value_{i}_state_dict"] = self.ext_values[i].state_dict()
@@ -668,23 +736,40 @@ class DOMINO:
             saved_dict["feat_norm_state_dict"] = self.feat_normalizer.state_dict()
         if self.a_cfg.use_succ_feat:
             saved_dict["succ_feat_state_dict"] = self.succ_feat.state_dict()
+            saved_dict["succ_feat_optimizer_state_dict"] = self.succ_feat_optimizer.state_dict()
+        else:
+            saved_dict["avg_features"] = self.avg_features
         torch.save(saved_dict, path)
 
     def load(self, path, load_values=False, load_succ_feat=False, load_optimizer=False, load_feat_normalizer=False):
         loaded_dict = torch.load(path)
+        self.current_learning_iteration = loaded_dict['iteration']
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
+        self.lagrange = loaded_dict["lagrange"]
+        self.avg_ext_values = loaded_dict["avg_ext_values"]
+        self.resume_id = loaded_dict["resume_id"]
+        self.tot_timesteps = loaded_dict["tot_timesteps"]
+        self.tot_time = loaded_dict["tot_time"]
+        if self.r_cfg.wandb:
+            self.logger_state = loaded_dict["logger_state"]
+
         if load_values:
             self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
             for i in range(self.num_ext_values):
                 self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
         if load_succ_feat:
             self.succ_feat.load_state_dict(loaded_dict["succ_feat_state_dict"])
+            self.succ_feat_optimizer.load_state_dict(loaded_dict["succ_feat_optimizer_state_dict"])
+        else:
+            self.avg_features = loaded_dict["avg_features"]
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
         if self.normalize_features and load_feat_normalizer:
             self.feat_normalizer.load_state_dict(loaded_dict["feat_norm_state_dict"])
         if load_optimizer:
             self.policy_optimizer.load_state_dict(loaded_dict["policy_optimizer_state_dict"])
+            self.value_optimizer.load_state_dict(loaded_dict["value_optimizer_state_dict"])
+            self.lagrange_optimizer.load_state_dict(loaded_dict["lagrange_optimizer_state_dict"])
         return loaded_dict["infos"]
 
     def get_inference_policy(self, device=None):
@@ -720,18 +805,17 @@ class DOMINO:
         if self.normalize_features:
             self.feat_normalizer.eval()
 
-    def init_writer(self, play):
-        if play:
-            return
+    def init_writer(self, resume_id=None):
         # initialize writer
         if self.r_cfg.wandb:
             self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.r_cfg,
-                                             group=self.r_cfg.wandb_group)
-            self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
+                                             group=self.r_cfg.wandb_group, resume_id=resume_id, use_allogger=True)
+            if resume_id is None:
+                self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
         else:
             self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
 
-        print(json.dumps(class_to_dict(self.env.cfg), indent=2, default=str))
-        print(json.dumps(class_to_dict(self.r_cfg), indent=2, default=str))
-        print(json.dumps(class_to_dict(self.a_cfg), indent=2, default=str))
-        print(json.dumps(class_to_dict(self.n_cfg), indent=2, default=str))
+        # print(json.dumps(class_to_dict(self.env.cfg), indent=2, default=str))
+        # print(json.dumps(class_to_dict(self.r_cfg), indent=2, default=str))
+        # print(json.dumps(class_to_dict(self.a_cfg), indent=2, default=str))
+        # print(json.dumps(class_to_dict(self.n_cfg), indent=2, default=str))
