@@ -657,6 +657,7 @@ class Solo12DOMINOPosition(BaseTask):
             return
 
         if not self.init_done:
+            self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
             return
 
         if self.cfg.terrain.train_all_together == 0:

@@ -280,10 +280,10 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'test_without_video_recording'
+        run_name = 'baseline'
 
         # cluster
-        restart_interval = 2000  # not working now on cluster, segmentation fault
+        restart_interval = 1000  # not working now on cluster, segmentation fault
         on_cluster = False
 
         # load

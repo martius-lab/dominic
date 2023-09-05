@@ -64,7 +64,7 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 4000,
+        "max_iterations": 300,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
@@ -72,9 +72,9 @@
         "record_gif": true,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 2000,
-        "run_name": "test_without_video_recording",
-        "save_interval": 50,
+        "restart_interval": 50,
+        "run_name": "test_run",
+        "save_interval": 25,
         "wandb": true,
         "wandb_group": "test"
       }

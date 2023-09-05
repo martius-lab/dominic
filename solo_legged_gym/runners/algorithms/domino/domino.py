@@ -727,6 +727,7 @@ class DOMINO:
             "tot_time": self.tot_time,
             "logger_state": self.logger_state,
             "resume_id": self.resume_id,
+            "curriculum": [self.env.terrain_cols, self.env.terrain_rows],
         }
         for i in range(self.num_ext_values):
             saved_dict[f"ext_value_{i}_state_dict"] = self.ext_values[i].state_dict()
@@ -750,6 +751,8 @@ class DOMINO:
         self.resume_id = loaded_dict["resume_id"]
         self.tot_timesteps = loaded_dict["tot_timesteps"]
         self.tot_time = loaded_dict["tot_time"]
+        self.env.terrain_cols = loaded_dict["curriculum"][0]
+        self.env.terrain_rows = loaded_dict["curriculum"][1]
         if self.r_cfg.wandb:
             self.logger_state = loaded_dict["logger_state"]
 
