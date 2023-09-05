@@ -74,7 +74,7 @@
         "run_name": "grid2_on_alpha_l0",
         "save_interval": 50,
         "wandb": true,
-        "wandb_group": "cluster_20230827_101132"
+        "wandb_group": "cluster_20230904_182548"
       }
     },
     "env_cfg": {
@@ -245,9 +245,9 @@
         "noise_level": 1.0,
         "noise_scales": {
           "ang_vel": 0.2,
+          "commands": 0.05,
           "dof_pos": 0.05,
           "dof_vel": 0.5,
-          "gravity": 0.1,
           "height_measurements": 0.05,
           "lin_vel": 0.2
         }
