@@ -29,12 +29,6 @@ def get_args() -> argparse.Namespace:
             "default": False,
             "help": "Turn on Weights and Bias writer",
         },
-        {
-            "name": "--dr",
-            "action": "store_false",
-            "default": True,
-            "help": "Disable recording gifs",
-        },
     ]
     # parse arguments
     args = gymutil.parse_arguments(description="RL Policy using IsaacGym", custom_parameters=custom_parameters)
@@ -143,8 +137,6 @@ def update_env_cfg_from_args(env_cfg, args):
 def update_train_cfg_from_args(train_cfg, args):
     if args.w is not None:
         train_cfg.runner.wandb = args.w
-    if args.dr is not None:
-        train_cfg.runner.record_gif = args.dr
     return train_cfg
 
 

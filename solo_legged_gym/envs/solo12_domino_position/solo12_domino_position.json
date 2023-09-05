@@ -3,7 +3,6 @@
     "args": {
       "dv": true,
       "w": true,
-      "dr": false,
       "task": "solo12_domino_position"
     },
     "train_cfg": {
@@ -64,17 +63,17 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 300,
+        "max_iterations": 4000,
         "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "on_cluster": true,
-        "record_gif": true,
+        "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 50,
-        "run_name": "test_run",
-        "save_interval": 25,
+        "restart_interval": 1000,
+        "run_name": "baseline",
+        "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
       }
