@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
-    seed = 27
+    seed = 42
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
@@ -286,7 +286,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'blm'
 
         # cluster
-        restart_interval = 10000  # not working now on cluster, segmentation fault
+        restart_interval = 1000  # not working now on cluster, segmentation fault
         on_cluster = False
 
         # load

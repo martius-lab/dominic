@@ -71,7 +71,6 @@ class TaskRegistry:
                         "args": {
                             "dv": True,
                             "w": True,
-                            "dr": False,
                             "task": train_cfg.runner.experiment_name
                         },
                         "train_cfg": train_cfg_dict,

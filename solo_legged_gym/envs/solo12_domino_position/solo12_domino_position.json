@@ -3,12 +3,11 @@
     "args": {
       "dv": true,
       "w": true,
-      "dr": false,
       "task": "solo12_domino_position"
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": "[0.9, 0.8, 0.7]",
+        "alpha": 0.7,
         "attractive_coeff": 0.5,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
@@ -19,11 +18,6 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "expert_ext_values": [
-          27,
-          30,
-          47
-        ],
         "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
@@ -35,7 +29,6 @@
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "policy_lr": 0.001,
-        "pretrain_expert": true,
         "repulsive_power": 0,
         "schedule": "fixed",
         "sigmoid_scale": 1.0,
@@ -75,11 +68,11 @@
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "on_cluster": true,
-        "record_gif": true,
+        "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 10000,
-        "run_name": "blm",
+        "restart_interval": 1000,
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
@@ -280,7 +273,7 @@
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
-      "seed": 27,
+      "seed": 42,
       "sim": {
         "dt": 0.005,
         "gravity": [
