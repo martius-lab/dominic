@@ -26,7 +26,7 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        train_cfg.runner.load_run = '1_blm/987_'
+        train_cfg.runner.load_run = -1
         # train_cfg.runner.load_run = '1_controllability2/78_'
         train_cfg.runner.checkpoint = -1
 
