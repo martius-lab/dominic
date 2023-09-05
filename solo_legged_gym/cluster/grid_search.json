@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "test_on_resume",
+  "optimization_procedure_name": "alpha_l0",
   "results_dir": "results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
