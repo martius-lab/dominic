@@ -142,23 +142,25 @@ class DOMINO:
 
         # resume
         self.log_dir = log_dir
+        self.resume = False
 
-        models = [file for file in os.listdir(log_dir) if 'model' in file]
-        if len(models) == 0:
-            print("[Resume] No models in this directory: " + log_dir + ", starting from scratch!")
-            self.resume = False
-        else:
-            models.sort(key=lambda m: '{0:0>15}'.format(m))
-            model = models[-1]
-            load_path = os.path.join(log_dir, model)
-            print("[Resume] Load model from: " + load_path)
+        if not self.env.cfg.env.play:
+            models = [file for file in os.listdir(log_dir) if 'model' in file]
+            if len(models) == 0:
+                print("[Resume] No models in this directory: " + log_dir + ", starting from scratch!")
+            else:
+                models.sort(key=lambda m: '{0:0>15}'.format(m))
+                model = models[-1]
+                load_path = os.path.join(log_dir, model)
+                print("[Resume] Load model from: " + load_path)
 
-            self.load(path=load_path,
-                      load_values=True,
-                      load_succ_feat=True,
-                      load_optimizer=True,
-                      load_feat_normalizer=True)
-            self.resume = True
+                self.load(path=load_path,
+                          load_values=True,
+                          load_feat=True,
+                          load_optimizer=True,
+                          load_feat_normalizer=True,
+                          load_curriculum=True)
+                self.resume = True
 
         # Log
         if not self.env.cfg.env.play:
@@ -742,7 +744,7 @@ class DOMINO:
             saved_dict["avg_features"] = self.avg_features
         torch.save(saved_dict, path)
 
-    def load(self, path, load_values=False, load_succ_feat=False, load_optimizer=False, load_feat_normalizer=False):
+    def load(self, path, load_values=False, load_feat=False, load_optimizer=False, load_feat_normalizer=False, load_curriculum=False):
         loaded_dict = torch.load(path)
         self.current_learning_iteration = loaded_dict['iteration']
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
@@ -751,8 +753,9 @@ class DOMINO:
         self.resume_id = loaded_dict["resume_id"]
         self.tot_timesteps = loaded_dict["tot_timesteps"]
         self.tot_time = loaded_dict["tot_time"]
-        self.env.terrain_cols = loaded_dict["curriculum"][0]
-        self.env.terrain_rows = loaded_dict["curriculum"][1]
+        if load_curriculum:
+            self.env.terrain_cols = loaded_dict["curriculum"][0]
+            self.env.terrain_rows = loaded_dict["curriculum"][1]
         if self.r_cfg.wandb:
             self.logger_state = loaded_dict["logger_state"]
 
@@ -760,11 +763,12 @@ class DOMINO:
             self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
             for i in range(self.num_ext_values):
                 self.ext_values[i].load_state_dict(loaded_dict[f"ext_value_{i}_state_dict"])
-        if load_succ_feat:
-            self.succ_feat.load_state_dict(loaded_dict["succ_feat_state_dict"])
-            self.succ_feat_optimizer.load_state_dict(loaded_dict["succ_feat_optimizer_state_dict"])
-        else:
-            self.avg_features = loaded_dict["avg_features"]
+        if load_feat:
+            if self.a_cfg.use_succ_feat:
+                self.succ_feat.load_state_dict(loaded_dict["succ_feat_state_dict"])
+                self.succ_feat_optimizer.load_state_dict(loaded_dict["succ_feat_optimizer_state_dict"])
+            else:
+                self.avg_features = loaded_dict["avg_features"]
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
         if self.normalize_features and load_feat_normalizer:
