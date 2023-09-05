@@ -14,7 +14,7 @@
     "gpu_memory_mb": 18000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
     "bid": 15,
-    "forbidden_hostnames": ["g095", "g023", "g020", "g097"]
+    "forbidden_hostnames": []
   },
   "fixed_params": {
     "__import_promise__": "solo_legged_gym/envs/solo12_domino_position/solo12_domino_position.json"
@@ -27,7 +27,15 @@
   "hyperparam_list": [
     {
       "param": "solo_legged_gym.train_cfg.algorithm.alpha",
-      "values": [0.7, 0.8, 0.9]
+      "values": [0.6, 0.7, 0.8, 0.9]
+    },
+    {
+      "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
+      "values": [2.0, 4.0, 6.0, 8.0]
+    },
+    {
+      "param": "solo_legged_gym.env_cfg.seed",
+      "values": [22, 27, 42]
     }
   ]
 }

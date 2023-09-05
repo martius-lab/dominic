@@ -25,7 +25,7 @@ def train(id, working_dir, **kwargs):
     args = get_args()
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     update_cfgs_from_dict(env_cfg, train_cfg, kwargs)
-    run_name = os.path.basename(os.path.dirname(working_dir))
+    run_name = os.path.basename(os.path.dirname(os.path.dirname(working_dir)))
 
     train_cfg.runner.run_name = run_name + "_" + str(id)
     train_cfg.runner.wandb_group = run_name

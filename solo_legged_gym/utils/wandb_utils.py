@@ -43,7 +43,7 @@ class WandbSummaryWriter(SummaryWriter):
         else:
             self.run_id = wandb.util.generate_id()
             wandb.init(project=project, entity=entity, dir=log_dir, group=group, id=self.run_id)
-            wandb.run.name = os.path.basename(os.path.abspath(log_dir))
+            wandb.run.name = cfg.run_name
 
         self.use_allogger = use_allogger
         if self.use_allogger:
