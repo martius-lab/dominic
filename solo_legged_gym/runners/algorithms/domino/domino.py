@@ -136,8 +136,11 @@ class DOMINO:
         self.tot_timesteps = 0
         self.tot_time = 0
         self.resume_id = None
+        self.writer = None
+        self.logger = None
+        self.logger_state = None
 
-        # Log
+        # resume
         self.log_dir = log_dir
 
         models = [file for file in os.listdir(log_dir) if 'model' in file]
@@ -157,11 +160,13 @@ class DOMINO:
                       load_feat_normalizer=True)
             self.resume = True
 
-        self.writer = None
-        self.logger = None
+        # Log
         if not self.env.cfg.env.play:
             self.init_writer(resume_id=self.resume_id)  # should be updated if resumed
-            if not self.resume:
+            if self.resume:
+                if self.r_cfg.wandb:
+                    self.writer.load_allogger_step(self.logger_state)
+            else:
                 try:
                     self.resume_id = self.writer.run_id
                 except:
@@ -173,6 +178,8 @@ class DOMINO:
             self.burning_expert = False
 
         self.env.reset()
+        if self.resume:
+            self.current_learning_iteration += 1
         self.iter = self.current_learning_iteration
         self.avg_score = 0
 
@@ -703,6 +710,8 @@ class DOMINO:
         print(log_string)
 
     def save(self, path, it, infos=None):
+        if self.r_cfg.wandb:
+            self.logger_state = self.writer.get_allogger_step()
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
             "intrinsic_value_state_dict": self.int_value.state_dict(),
@@ -715,6 +724,7 @@ class DOMINO:
             "iteration": it,
             "tot_timesteps": self.tot_timesteps,
             "tot_time": self.tot_time,
+            "logger_state": self.logger_state,
             "resume_id": self.resume_id,
         }
         for i in range(self.num_ext_values):
@@ -739,6 +749,8 @@ class DOMINO:
         self.resume_id = loaded_dict["resume_id"]
         self.tot_timesteps = loaded_dict["tot_timesteps"]
         self.tot_time = loaded_dict["tot_time"]
+        if self.r_cfg.wandb:
+            self.logger_state = loaded_dict["logger_state"]
 
         if load_values:
             self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
@@ -796,7 +808,7 @@ class DOMINO:
         # initialize writer
         if self.r_cfg.wandb:
             self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.r_cfg,
-                                             group=self.r_cfg.wandb_group, resume_id=resume_id)
+                                             group=self.r_cfg.wandb_group, resume_id=resume_id, use_allogger=True)
             if resume_id is None:
                 self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
         else:
