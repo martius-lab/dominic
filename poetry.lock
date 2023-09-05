@@ -3115,22 +3115,6 @@ files = [
 ]
 
 [[package]]
-name = "pyvicon"
-version = "0.1"
-description = "Python wrapper over Vicon DataStream SDK"
-category = "dev"
-optional = false
-python-versions = "*"
-files = []
-develop = false
-
-[package.source]
-type = "git"
-url = "git@gitlab.is.tue.mpg.de:autonomous-learning/pyvicon.git"
-reference = "HEAD"
-resolved_reference = "3d28d2f16c45f60540f16c0236d2ac0fed437987"
-
-[[package]]
 name = "pywin32"
 version = "306"
 description = "Python for Window Extensions"
@@ -4451,4 +4435,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8 <3.9"
-content-hash = "a3bcdf0ca4d1174dbe6e0dcf637097e9abc7fe03015f4f6b4327d7a468b52f2f"
+content-hash = "c6824833378453c2c91170e814ea98481ee9bd9cf4339eee325cff9fb6de6e00"

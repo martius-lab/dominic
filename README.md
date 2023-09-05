@@ -153,7 +153,8 @@ condor_submit_bid 15 -i -append request_cpus=1 -append request_memory=15000 -app
 For training, specify the grid search params in `cluster/grid_search.json`
 be sure to enable `tmux` so that your session will not terminate if you close the terminal.
 ```bash
-poetry run python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
+poetry shell
+python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
 ```
 by default, weights and biases is used. 
 
