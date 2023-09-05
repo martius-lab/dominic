@@ -76,7 +76,7 @@
         "run_name": "test_on_resume",
         "save_interval": 5,
         "wandb": true,
-        "wandb_group": "cluster_20230905_120048"
+        "wandb_group": "test"
       }
     },
     "env_cfg": {

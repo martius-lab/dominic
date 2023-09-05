@@ -63,7 +63,6 @@ class TaskRegistry:
                 # update the json file for cluster running only!!!
                 env_cfg_dict = class_to_dict(env_cfg)
                 train_cfg_dict = class_to_dict(train_cfg)
-                train_cfg_dict["runner"]["wandb_group"] = "cluster" + "_" + datetime.now().strftime('%Y%m%d_%H%M%S')
                 train_cfg_dict["runner"]["wandb"] = True
                 train_cfg_dict["runner"]["on_cluster"] = True
                 env_cfg_dict["viewer"]["enable_viewer"] = False
