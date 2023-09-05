@@ -303,15 +303,19 @@ class DOMINO:
             self.iter = it
             ep_infos.clear()
 
-            if it % self.restart_interval == 0 and self.r_cfg.on_cluster and it != self.current_learning_iteration:
+            if (it % self.restart_interval == 0 and
+                    self.r_cfg.on_cluster and
+                    it != self.current_learning_iteration and
+                    it != self.num_learning_iterations - 1):
                 print("Triggering cluster restart...")
                 wandb.alert(title='Restart', text='Restarting the job at iteration {}'.format(it))
-                wandb.finish(0)
+                self.writer.stop()
                 cluster.exit_for_resume()
 
         self.current_learning_iteration = self.iter
-        self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.num_learning_iterations)),
-                  self.num_learning_iterations)
+        self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration)),
+                  self.current_learning_iteration)
+        self.writer.stop()
         # score not implemented yet
         return 0
 

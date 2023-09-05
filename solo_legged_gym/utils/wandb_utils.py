@@ -72,7 +72,7 @@ class WandbSummaryWriter(SummaryWriter):
         allogger.get_root().flush(children=True)
 
     def stop(self):
-        wandb.finish()
+        wandb.finish(0)
         allogger.get_root().flush(children=True)
         allogger.close()
 
