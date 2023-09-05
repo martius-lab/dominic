@@ -63,7 +63,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
     class viewer(BaseEnvCfg.viewer):
         overview = True
         ref_pos_b = [1, 1, 0.6]
-        record_camera_imgs = True
+        record_camera_imgs = False
         overview_pos = [-5, -5, 10]  # [m]
         overview_lookat = [5, 5, 1]  # [m]
 
@@ -208,8 +208,9 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             dof_vel = 0.5
             lin_vel = 0.2
             ang_vel = 0.2
-            gravity = 0.1
+            # gravity = 0.1
             height_measurements = 0.05
+            commands = 0.05
 
 
 class Solo12DOMINOPositionTrainCfg:
@@ -264,13 +265,13 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0
+        attractive_coeff = 0.5
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 500
+        burning_expert_steps = 500  # 500 (preferred), 1000, 1500, 2000 (preferred)
 
     class runner:
         max_iterations = 4000  # number of policy updates
@@ -284,11 +285,15 @@ class Solo12DOMINOPositionTrainCfg:
         experiment_name = 'solo12_domino_position'
         run_name = 'blm'
 
+        # cluster
+        restart_interval = 10000  # not working now on cluster, segmentation fault
+        on_cluster = False
+
         # load
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
-        record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
+        record_gif = False  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
         record_iters = 10  # should be int * num_st   eps_per_env
 

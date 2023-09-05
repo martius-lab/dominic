@@ -147,13 +147,14 @@ run at least once on the local machine to update the json file specified in `env
 ####  - Interactive debug on cluster
 launch an interactive session to debug
 ```bash
-condor_submit_bid 15 -i -append request_cpus=10 -append request_memory=20000 -append request_gpus=1
+condor_submit_bid 15 -i -append request_cpus=1 -append request_memory=15000 -append request_gpus=1
 ```
 ####  - Grid search
 For training, specify the grid search params in `cluster/grid_search.json`
 be sure to enable `tmux` so that your session will not terminate if you close the terminal.
 ```bash
-poetry run python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
+source .venv/bin/activate
+python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
 ```
 by default, weights and biases is used. 
 

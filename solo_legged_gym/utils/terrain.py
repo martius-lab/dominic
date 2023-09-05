@@ -94,7 +94,8 @@ def boxr_terrain(terrain, height):
 
 def box2_terrain(terrain, height):
     height = int(height / terrain.vertical_scale)
-    x = [1.25, 2.75, 4 - 0.75, 4 + 0.75]
+    size = 1.4
+    x = [2 - size/2, 2+size/2, 4 - size/2, 4 + size/2]
     # x = [1.25, 2.75, 0.0, 8.0]
     x = [int(i / terrain.horizontal_scale) for i in x]
     terrain.height_field_raw[x[0]:x[1], x[2]:x[3]] = height

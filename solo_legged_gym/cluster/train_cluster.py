@@ -1,6 +1,8 @@
 from solo_legged_gym.envs import *  # needed
 import os
 import sys
+import time
+
 from cluster import cluster_main
 
 
@@ -23,12 +25,20 @@ def train(id, working_dir, **kwargs):
     args = get_args()
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
     update_cfgs_from_dict(env_cfg, train_cfg, kwargs)
+    run_name = os.path.basename(os.path.dirname(os.path.dirname(working_dir)))
+
+    train_cfg.runner.run_name = run_name + "_" + str(id)
+    train_cfg.runner.wandb_group = run_name
+
+    if not os.path.exists(working_dir):
+        os.makedirs(working_dir)
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     runner = task_registry.make_alg_runner(
         env=env,
         env_cfg=env_cfg,
         train_cfg=train_cfg,
         name=args.task,
+        log_root=working_dir,
         args=args,
     )
     avg_score = runner.learn()
