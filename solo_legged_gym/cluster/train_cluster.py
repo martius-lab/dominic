@@ -7,7 +7,6 @@ from cluster import cluster_main
 
 @cluster_main
 def train(id, working_dir, **kwargs):
-    time.sleep((id - int(id / 100) * 100) * 1)
     import isaacgym
     import torch
     from solo_legged_gym.utils import (
