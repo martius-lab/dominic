@@ -63,7 +63,7 @@
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
-        "max_iterations": 4000,
+        "max_iterations": 2000,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "on_cluster": true,
