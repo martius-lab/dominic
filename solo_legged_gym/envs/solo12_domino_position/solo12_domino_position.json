@@ -72,7 +72,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 1000,
-        "run_name": "init_obs_for_distance",
+        "run_name": "dist_measurements",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"

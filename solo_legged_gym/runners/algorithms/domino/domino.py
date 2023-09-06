@@ -268,7 +268,7 @@ class DOMINO:
                         cur_int_rew_sum[new_ids] = 0
 
                         cur_dist_sum += dist
-                        avg_dist_per_step = cur_dist_sum / cur_episode_length
+                        avg_dist_per_step = cur_dist_sum / (cur_episode_length + 1)
                         dist_buffer.extend(avg_dist_per_step.cpu().numpy().tolist())
                         cur_dist_sum[new_ids] = 0
 

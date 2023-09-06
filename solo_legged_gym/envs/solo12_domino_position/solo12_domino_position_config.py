@@ -280,7 +280,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'init_obs_for_distance'
+        run_name = 'dist_measurements'
 
         # cluster
         restart_interval = 1000  # not working now on cluster, segmentation fault
