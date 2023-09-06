@@ -178,8 +178,8 @@ class Solo12DOMINOPosition(BaseTask):
                                                                  self.num_actions,
                                                                  device=self.device,
                                                                  requires_grad=False))
-
-        self._init_env_origins()
+        if not self.cfg.env.play:
+            self._init_env_origins()
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         self._update_remaining_time()
         self._update_commands_in_base()
