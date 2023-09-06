@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "test",
+  "optimization_procedure_name": "blm",
   "results_dir": "results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -13,7 +13,7 @@
     "memory_in_mb": 10000,
     "gpu_memory_mb": 18000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
-    "bid": 15,
+    "bid": 25,
     "forbidden_hostnames": []
   },
   "fixed_params": {
@@ -30,14 +30,6 @@
       "values": [
         "[0.9, 0.9, 0.7]", "[0.9, 0.8, 0.7]", "[0.8, 0.8, 0.7]", "[0.8, 0.7, 0.7]", "[0.7, 0.7, 0.7]"
       ]
-    },
-    {
-      "param": "solo_legged_gym.train_cfg.algorithm.lagrange_lr",
-      "values": [1e-3, 5e-4, 5e-3]
-    },
-    {
-      "param": "solo_legged_gym.train_cfg.algorithm.value_lr",
-      "values": [1e-3, 5e-3]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
