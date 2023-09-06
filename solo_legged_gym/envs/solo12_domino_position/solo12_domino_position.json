@@ -13,12 +13,12 @@
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 500,
+        "burning_expert_steps": 5000,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
+        "fixed_adv_coeff": "[3.0, 2.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -64,15 +64,14 @@
         "experiment_name": "solo12_domino_position",
         "load_run": -1,
         "max_iterations": 4000,
-        "normalize_features": true,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "on_cluster": true,
         "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 1000,
-        "run_name": "lr",
+        "restart_interval": 10000,
+        "run_name": "brand_new_world_expert",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
@@ -193,7 +192,7 @@
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 3,
-        "num_observations": 168,
+        "num_observations": 171,
         "num_skills": 8,
         "play": false,
         "plot_colors": false,
@@ -249,6 +248,7 @@
           "commands": 0.05,
           "dof_pos": 0.05,
           "dof_vel": 0.5,
+          "gravity": 0.1,
           "height_measurements": 0.05,
           "lin_vel": 0.2
         }
@@ -262,14 +262,13 @@
         "soft_dof_vel_limit": 1.0,
         "soft_torque_limit": 1.0,
         "terms": {
-          "contact": "[1, 1]",
           "feet_acc": "[1, 800]",
           "feet_contact": "[1, 1]",
-          "joint_default": "[2, [1.5, 0.9]]",
+          "gravity": "[1, 0.1]",
           "joint_targets_rate": "[1, 1.0]",
-          "move_towards": "[2, 0.9]",
+          "move_towards": "[2, 1.0]",
           "posi": "[0, 1.0]",
-          "stall_pos": "[1, [0.5, 0.25, 0.1]]",
+          "stall_pos": "[1, [0.3, 0.25, 0.1]]",
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
@@ -331,17 +330,15 @@
           0.5
         ],
         "mesh_type": "trimesh",
-        "num_cols": 7,
+        "num_cols": 5,
         "num_rows": 20,
-        "num_sub_terrains": 140,
+        "num_sub_terrains": 100,
         "params": [
           0.0,
           0.05,
           0.1,
           0.15000000000000002,
-          0.2,
-          0.25,
-          0.30000000000000004
+          0.2
         ],
         "play_init": [
           0.0,

@@ -99,13 +99,6 @@ class DOMINO:
         else:
             self.obs_normalizer = torch.nn.Identity()  # no normalization
 
-        self.normalize_features = self.r_cfg.normalize_features
-        if self.normalize_features:
-            self.feat_normalizer = EmpiricalNormalization(shape=self.env.num_features,
-                                                          until=int(1.0e8)).to(self.device)
-        else:
-            self.feat_normalizer = torch.nn.Identity()  # no normalization
-
         # set up rollout buffer
         self.rollout_buffer = RolloutBuffer(num_envs=self.env.num_envs,
                                             num_transitions_per_env=self.num_steps_per_env,
@@ -158,7 +151,6 @@ class DOMINO:
                           load_values=True,
                           load_feat=True,
                           load_optimizer=True,
-                          load_feat_normalizer=True,
                           load_curriculum=True,
                           load_init_obs=True)
                 self.resume = True
@@ -243,7 +235,6 @@ class DOMINO:
                     new_obs, new_skills, features, group_rew, dones, infos = self.env.step(actions)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
-                    features = self.feat_normalizer(features)
                     int_rew, dist = self.get_intrinsic_reward(skills, obs, features, self.a_cfg.intrinsic_rew_scale)
                     self.process_env_step(obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos,
                                           self.a_cfg.bootstrap_value)
@@ -776,8 +767,6 @@ class DOMINO:
             saved_dict[f"ext_value_{i}_state_dict"] = self.ext_values[i].state_dict()
         if self.normalize_observation:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
-        if self.normalize_features:
-            saved_dict["feat_norm_state_dict"] = self.feat_normalizer.state_dict()
         if self.a_cfg.use_succ_feat:
             saved_dict["succ_feat_state_dict"] = self.succ_feat.state_dict()
             saved_dict["succ_feat_optimizer_state_dict"] = self.succ_feat_optimizer.state_dict()
@@ -785,7 +774,7 @@ class DOMINO:
             saved_dict["avg_features"] = self.avg_features
         torch.save(saved_dict, path)
 
-    def load(self, path, load_values=False, load_feat=False, load_optimizer=False, load_feat_normalizer=False,
+    def load(self, path, load_values=False, load_feat=False, load_optimizer=False,
              load_curriculum=False, load_init_obs=False):
         loaded_dict = torch.load(path)
         self.current_learning_iteration = loaded_dict['iteration']
@@ -815,8 +804,6 @@ class DOMINO:
                 self.avg_features = loaded_dict["avg_features"]
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
-        if self.normalize_features and load_feat_normalizer:
-            self.feat_normalizer.load_state_dict(loaded_dict["feat_norm_state_dict"])
         if load_optimizer:
             self.policy_optimizer.load_state_dict(loaded_dict["policy_optimizer_state_dict"])
             self.value_optimizer.load_state_dict(loaded_dict["value_optimizer_state_dict"])
@@ -843,8 +830,6 @@ class DOMINO:
             self.ext_values[i].train()
         if self.normalize_observation:
             self.obs_normalizer.train()
-        if self.normalize_features:
-            self.feat_normalizer.train()
 
     def eval_mode(self):
         self.policy.eval()
@@ -853,8 +838,6 @@ class DOMINO:
             self.ext_values[i].eval()
         if self.normalize_observation:
             self.obs_normalizer.eval()
-        if self.normalize_features:
-            self.feat_normalizer.eval()
 
     def init_writer(self, resume_id=None):
         # initialize writer
