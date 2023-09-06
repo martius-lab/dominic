@@ -16,7 +16,7 @@ import threading
 import csv
 
 EXPORT_POLICY = False
-LOG_DATA = True
+LOG_DATA = False
 REAL_TIME = False
 np.set_printoptions(precision=2)
 
@@ -26,7 +26,8 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        train_cfg.runner.load_run = '1_controllability2/92'
+        train_cfg.runner.load_run = -1
+        # train_cfg.runner.load_run = '1_controllability2/78_'
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
