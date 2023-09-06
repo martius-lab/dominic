@@ -153,10 +153,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
             joint_targets_rate = "[1, 1.0]"
             feet_acc = "[1, 800]"
-            # contact = "[1, 1]"
+            contact = "[1, 1]"
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            gravity = "[1, 0.1]"
+            gravity = "[1, 1.0]"
             # torques = "[1, 500]"
 
             move_towards = "[2, 1.0]"  # clip/scale
@@ -218,7 +218,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        init_log_std = 0.5
+        init_log_std = 0.0
         drop_out_rate = 0.9
         policy_hidden_dims = [256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
@@ -242,7 +242,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 2.0, 1.0]'
+        fixed_adv_coeff = '[3.0, 1.5, 1.0]'
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
