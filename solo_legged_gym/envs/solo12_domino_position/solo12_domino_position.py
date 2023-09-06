@@ -127,6 +127,9 @@ class Solo12DOMINOPosition(BaseTask):
                                  (0.5, 0.95, 0.75),
                                  ]
 
+        # for evaluating the successor features for distance measurement
+        self.init_obs_buf = torch.zeros(self.num_envs, self.num_obs, device=self.device, dtype=torch.float)
+
     def reset_idx(self, env_ids):
         """Reset selected robots"""
         if len(env_ids) == 0:
@@ -166,6 +169,17 @@ class Solo12DOMINOPosition(BaseTask):
 
     def reset(self):
         """ Reset all robots"""
+        # till now the robot should be uniformly placed in all terrains.
+        self.reset_idx(torch.arange(self.num_envs, device=self.device))
+        self._update_remaining_time()
+        self._update_commands_in_base()
+
+        self.init_obs_buf, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
+                                                                 self.num_actions,
+                                                                 device=self.device,
+                                                                 requires_grad=False))
+        if not self.cfg.env.play:
+            self._init_env_origins()
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         self._update_remaining_time()
         self._update_commands_in_base()
@@ -174,6 +188,7 @@ class Solo12DOMINOPosition(BaseTask):
                                                  self.num_actions,
                                                  device=self.device,
                                                  requires_grad=False))
+
         self.init_done = True
 
     def pre_physics_step(self, actions):
@@ -563,26 +578,10 @@ class Solo12DOMINOPosition(BaseTask):
             self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
         else:
             if self.cfg.terrain.mesh_type in ["heightfield", "trimesh"]:
-                if self.cfg.terrain.train_all_together == 0:
-                    self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,),
-                                                      device=self.device)
-                    self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
-                                                      device=self.device)
-                elif self.cfg.terrain.train_all_together == 1:
-                    self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-                    self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
-                                                      device=self.device)
-                elif self.cfg.terrain.train_all_together == 2:
-                    self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-                    self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
-                                                      (self.num_envs,), device=self.device)
-                elif self.cfg.terrain.train_all_together == 3:
-                    self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-                    self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
-                                                      (self.num_envs,), device=self.device)
-                    self.terrain_finished = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
-                else:
-                    raise NotImplementedError
+                self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,),
+                                                  device=self.device)
+                self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
+                                                  device=self.device)
                 self.terrain_origins = torch.from_numpy(self.terrain.sub_terrain_origins).to(self.device).to(
                     torch.float)
                 self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
@@ -595,6 +594,29 @@ class Solo12DOMINOPosition(BaseTask):
                 self.env_origins[:, 0] = spacing * xx.flatten()[:self.num_envs]
                 self.env_origins[:, 1] = spacing * yy.flatten()[:self.num_envs]
                 self.env_origins[:, 2] = 0.
+
+    def _init_env_origins(self):
+        if self.cfg.terrain.train_all_together == 0:
+            self.terrain_cols = torch.randint(0, self.cfg.terrain.num_cols, (self.num_envs,),
+                                              device=self.device)
+            self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
+                                              device=self.device)
+        elif self.cfg.terrain.train_all_together == 1:
+            self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+            self.terrain_rows = torch.randint(0, self.cfg.terrain.num_rows, (self.num_envs,),
+                                              device=self.device)
+        elif self.cfg.terrain.train_all_together == 2:
+            self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+                                              (self.num_envs,), device=self.device)
+        elif self.cfg.terrain.train_all_together == 3:
+            self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
+            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+                                              (self.num_envs,), device=self.device)
+            self.terrain_finished = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
+        else:
+            raise NotImplementedError
+        self.env_origins[:] = self.terrain_origins[self.terrain_rows, self.terrain_cols]
 
     def _reset_dofs(self, env_ids):
         self.dof_pos[env_ids] = self.default_dof_pos

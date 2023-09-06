@@ -16,7 +16,7 @@ import threading
 import csv
 
 EXPORT_POLICY = False
-LOG_DATA = True
+LOG_DATA = False
 REAL_TIME = False
 np.set_printoptions(precision=2)
 

@@ -164,7 +164,8 @@ class DOMINO:
                           load_feat=True,
                           load_optimizer=True,
                           load_feat_normalizer=True,
-                          load_curriculum=True)
+                          load_curriculum=True,
+                          load_init_obs=True)
                 self.resume = True
 
         # Log
@@ -204,7 +205,7 @@ class DOMINO:
 
         ext_rew_buffers = [deque(maxlen=100) for _ in range(self.num_ext_values)]
         int_rew_buffer = deque(maxlen=100)
-        dist_buffer = deque(maxlen=100)
+        dist_buffer = deque(maxlen=10000)
         len_buffer = deque(maxlen=100)
 
         cur_ext_rew_sums = [torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
@@ -272,7 +273,8 @@ class DOMINO:
                         cur_int_rew_sum[new_ids] = 0
 
                         cur_dist_sum += dist
-                        dist_buffer.extend(cur_dist_sum[new_ids][:, 0].cpu().numpy().tolist())
+                        avg_dist_per_step = cur_dist_sum / (cur_episode_length + 1)
+                        dist_buffer.extend(avg_dist_per_step.cpu().numpy().tolist())
                         cur_dist_sum[new_ids] = 0
 
                         cur_episode_length += 1
@@ -297,6 +299,10 @@ class DOMINO:
             start = stop
             mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_succ_feat_loss, \
                 mean_lagranges, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update()
+
+            with torch.inference_mode():
+                avg_nearest_dist = self.get_avg_dist(self.obs_normalizer(self.env.init_obs_buf))
+
             stop = time.time()
             learn_time = stop - start
 
@@ -400,6 +406,38 @@ class DOMINO:
             self.a_cfg.attractive_coeff * torch.pow(norm_diff, self.a_cfg.attractive_power)
         int_rew = intrinsic_rew_scale * c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
         return int_rew, dist
+
+    def get_avg_dist(self, obs):
+        n_skills = self.env.num_skills
+        n_samples = obs.size(0)
+        n_obs = obs.size(1)
+        nearest_dists = torch.zeros(n_samples, n_skills, device=self.device)
+
+        if self.a_cfg.use_succ_feat:
+            all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
+            all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
+                                      all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(
+                n_samples, n_skills, -1)  # num_samples * num_skills * num_features
+            for i in range(n_skills):
+                sfs = all_sfs[:, i, :]
+                sfs_dist = torch.norm((sfs.unsqueeze(1).repeat(1, self.env.num_skills, 1) - all_sfs), dim=2, p=2)
+                _, nearest_sfs_idx = torch.kthvalue(sfs_dist, k=2, dim=-1)  # num_samples
+                nearst_sfs = all_sfs[torch.arange(all_sfs.size(0)), nearest_sfs_idx, :]
+                psi_diff = sfs - nearst_sfs
+                nearest_dists[:, i] = torch.norm(psi_diff, p=2, dim=-1)
+
+        else:
+            for i in range(n_skills):
+                afs = self.avg_features[i]  # num_samples * num_features
+                afs_dist = torch.norm((afs.unsqueeze(1).repeat(1, self.env.num_skills, 1) -
+                                       self.avg_features.unsqueeze(0).repeat(self.env.num_envs, 1, 1)),
+                                      dim=2, p=2)
+                _, nearest_afs_idx = torch.kthvalue(afs_dist, k=2, dim=-1)  # num_samples
+                nearst_afs = self.avg_features[nearest_afs_idx]  # num_samples * num_features
+                psi_diff = afs - nearst_afs
+                nearest_dists[:, i] = torch.norm(psi_diff, p=2, dim=-1)
+
+        return torch.mean(nearest_dists)
 
     def get_lagrange_coeff(self, skills, burning_expert):
         lagrange_coeff = [torch.zeros_like(skills).to(torch.float32) for _ in range(self.num_ext_values)]
@@ -715,8 +753,10 @@ class DOMINO:
             for i in range(self.num_ext_values):
                 self.writer.add_scalar(f'Train/mean_ext_reward_{i}', statistics.mean(ext_rew_bufs[i]), locs['it'])
             self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']), locs['it'])
-            self.writer.add_scalar('Train/mean_feature_distance', statistics.mean(locs['dist_buffer']), locs['it'])
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']), locs['it'])
+
+        self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']), locs['it'])
+        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'], locs['it'])
 
         if self.r_cfg.wandb:
             self.writer.flush_logger()
@@ -756,6 +796,7 @@ class DOMINO:
             "logger_state": self.logger_state,
             "resume_id": self.resume_id,
             "curriculum": [self.env.terrain_cols, self.env.terrain_rows],
+            "init_obs": self.env.init_obs_buf,
         }
         for i in range(self.num_ext_values):
             saved_dict[f"ext_value_{i}_state_dict"] = self.ext_values[i].state_dict()
@@ -770,7 +811,8 @@ class DOMINO:
             saved_dict["avg_features"] = self.avg_features
         torch.save(saved_dict, path)
 
-    def load(self, path, load_values=False, load_feat=False, load_optimizer=False, load_feat_normalizer=False, load_curriculum=False):
+    def load(self, path, load_values=False, load_feat=False, load_optimizer=False, load_feat_normalizer=False,
+             load_curriculum=False, load_init_obs=False):
         loaded_dict = torch.load(path)
         self.current_learning_iteration = loaded_dict['iteration']
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
@@ -779,6 +821,8 @@ class DOMINO:
         self.resume_id = loaded_dict["resume_id"]
         self.tot_timesteps = loaded_dict["tot_timesteps"]
         self.tot_time = loaded_dict["tot_time"]
+        if load_init_obs:
+            self.env.init_obs_buf = loaded_dict["init_obs"]
         if load_curriculum:
             self.env.terrain_cols = loaded_dict["curriculum"][0]
             self.env.terrain_rows = loaded_dict["curriculum"][1]
