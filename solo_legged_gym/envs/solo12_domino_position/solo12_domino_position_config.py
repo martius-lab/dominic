@@ -262,7 +262,7 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0.0
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
@@ -280,7 +280,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'baseline'
+        run_name = 'init_obs_for_distance'
 
         # cluster
         restart_interval = 1000  # not working now on cluster, segmentation fault
