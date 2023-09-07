@@ -34,6 +34,10 @@
       ]
     },
     {
+      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_adv_coeff",
+      "values": [1.0, 2.5, 5.0]
+    },
+    {
       "param": "solo_legged_gym.env_cfg.seed",
       "values": [22, 27, 42]
     }
