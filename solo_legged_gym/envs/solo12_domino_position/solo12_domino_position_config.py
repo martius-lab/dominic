@@ -159,7 +159,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
             gravity = "[1, 1.0]"
-            joint_default = "[1, 5.0]"
+            joint_default = "[1, 10.0]"
             torques = "[1, 300]"
 
             move_towards = "[2, 1.0]"  # clip/scale
