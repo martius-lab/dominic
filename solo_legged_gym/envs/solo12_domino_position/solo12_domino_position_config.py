@@ -152,7 +152,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, 800]"
+            feet_acc = "[1, 900]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
@@ -242,7 +242,8 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.5, 1.0]'
+        fixed_adv_coeff = '[3.0, 1.8, 1.0]'
+        sacr_idx = 2
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
