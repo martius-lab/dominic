@@ -788,13 +788,19 @@ class DOMINO:
     def load(self, path, load_values=False, load_feat=False, load_optimizer=False, load_feat_normalizer=False,
              load_curriculum=False, load_init_obs=False):
         loaded_dict = torch.load(path)
-        self.current_learning_iteration = loaded_dict['iteration']
+        if "iteration" in loaded_dict:
+            self.current_learning_iteration = loaded_dict['iteration']
         self.policy.load_state_dict(loaded_dict["policy_state_dict"])
-        self.lagrange = loaded_dict["lagrange"]
-        self.avg_ext_values = loaded_dict["avg_ext_values"]
-        self.resume_id = loaded_dict["resume_id"]
-        self.tot_timesteps = loaded_dict["tot_timesteps"]
-        self.tot_time = loaded_dict["tot_time"]
+        if "lagrange" in loaded_dict:
+            self.lagrange = loaded_dict["lagrange"]
+        if "avg_ext_values" in loaded_dict:
+            self.avg_ext_values = loaded_dict["avg_ext_values"]
+        if "resume_id" in loaded_dict:
+            self.resume_id = loaded_dict["resume_id"]
+        if "tot_timesteps" in loaded_dict:
+            self.tot_timesteps = loaded_dict["tot_timesteps"]
+        if "tot_time" in loaded_dict:
+            self.tot_time = loaded_dict["tot_time"]
         if load_init_obs:
             self.env.init_obs_buf = loaded_dict["init_obs"]
         if load_curriculum:

@@ -18,21 +18,25 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
 TEST_SKILLS = 0
 MAX_EPISODE_LENGTH = 6.0
-RUN_NAME = '1_controllability2/92'
+# RUN_NAME = '1_controllability2/92'
+RUN_NAME = 'noisy'
 
 
-TERRAIN = 0.18  # 0.105
-size_x = 0.94  # 0.8
-size_y = 1.05  # 0.8
-TARGET = [0.0, 0.0, 0.23 + TERRAIN]
-# TARGET = [0.0, -1.5, 0.23]
+# TERRAIN = 0.18  # 0.105
+# size_x = 0.9  # 0.8
+# size_y = 1.0  # 0.8
+TERRAIN = 0.105
+size_x = 0.85  # 0.8
+size_y = 0.85  # 0.8
+# TARGET = [0.0, 0.0, 0.23 + TERRAIN]
+TARGET = [0.0, -1.0, 0.23]
 
 MIN_SMOOTH = 0.1  # 0.0: no smooth, 1.0: full smooth (will not move)
-KP = 2.0
-KD = 0.12
+KP = 2.5
+KD = 0.1
 
 LOG_DATA = False
-LOG_FILE_NAME = "log_data_tor4.csv"
+LOG_FILE_NAME = "log_data.csv"
 
 
 class Solo12Controller:
@@ -278,7 +282,7 @@ class Solo12Controller:
         )
 
     def _measure_height(self):
-        if TERRAIN <= 0.05:
+        if TERRAIN <= 0.01:
             self.measured_height[:] = 0
         else:
             self.measured_height[:] = 0
@@ -289,9 +293,12 @@ class Solo12Controller:
             on_box = (points[:, 0] > -size_x / 2) & (points[:, 0] < size_x / 2) & (points[:, 1] > -size_y / 2) & (
                         points[:, 1] < size_y / 2)
             self.measured_height[on_box] = TERRAIN
-        # print(self.height_points[:, 0].flip(0).reshape((9, 7)).detach().cpu().numpy())
-        # print(self.height_points[:, 1].flip(0).reshape((9, 7)).detach().cpu().numpy())
-        print(self.measured_height.flip(0).reshape((11, 11)).detach().cpu().numpy())
+            # print("__________________________")
+            # print(points[:, 0].flip(0).reshape((11, 11)).detach().cpu().numpy())
+            # print("__________________________")
+            # print(points[:, 1].flip(0).reshape((11, 11)).detach().cpu().numpy())
+            # print("__________________________")
+            print(self.measured_height.flip(0).reshape((11, 11)).detach().cpu().numpy())
 
     def _init_height_points(self):
         y = torch.tensor(list((np.arange(11) - (11 - 1) / 2) / 10), requires_grad=False)
