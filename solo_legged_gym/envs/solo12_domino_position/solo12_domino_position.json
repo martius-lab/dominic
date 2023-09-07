@@ -18,7 +18,7 @@
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[3.0, 1.8, 1.0]",
+        "fixed_adv_coeff": "[3.0, 2.0, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 1.0,
         "intrinsic_rew_scale": 5.0,
@@ -72,7 +72,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 10000,
-        "run_name": "brand_new_world_expert",
+        "run_name": "torques",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
@@ -264,13 +264,13 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "contact": "[1, 1]",
-          "feet_acc": "[1, 900]",
           "feet_contact": "[1, 1]",
           "gravity": "[1, 1.0]",
           "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 1.0]",
           "posi": "[0, 1.0]",
           "stall_pos": "[1, [0.3, 0.25, 0.1]]",
+          "torques": "[1, 300]",
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
