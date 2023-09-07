@@ -330,7 +330,7 @@ class Solo12DOMINOPosition(BaseTask):
                                   self.base_ang_vel,  # 3
                                   (self.dof_pos - self.default_dof_pos),  # 12
                                   self.dof_vel,  # 12
-                                  # self.projected_gravity,  # 3
+                                  self.projected_gravity,  # 3
                                   ), dim=-1)
         if self.cfg.terrain.measure_height:
             heights = torch.clip(self.root_states[:, 2].unsqueeze(1) - 0.25 - self.measured_height, -1, 1.)
@@ -356,8 +356,6 @@ class Solo12DOMINOPosition(BaseTask):
         self.feature_buf = torch.cat((
             # self.root_states[:, 2:3],  # 1
             self.base_lin_vel / torch.norm(self.base_lin_vel, dim=1, keepdim=True),  # 3
-            # self.projected_gravity,  # 3
-            # self.base_ang_vel[:, 0:2],  # 2
             # self.ee_vel_global[:, :, 2],  # 4
         ), dim=-1)
 
@@ -371,15 +369,16 @@ class Solo12DOMINOPosition(BaseTask):
         noise_vec[3:6] = noise_scales.ang_vel
         noise_vec[6:18] = noise_scales.dof_pos
         noise_vec[18:30] = noise_scales.dof_vel
+        noise_vec[30:33] = noise_scales.gravity
 
         num_height_points = len(self.cfg.terrain.measured_points_x) * len(self.cfg.terrain.measured_points_y)
         if self.cfg.terrain.measure_height:
-            noise_vec[30:30 + num_height_points] = noise_scales.height_measurements
+            noise_vec[33:33 + num_height_points] = noise_scales.height_measurements
 
         # noise_vec[30 + num_height_points:
         #           30 + num_height_points + self.num_actions] = noise_scales.actions
-        noise_vec[30 + num_height_points + self.num_actions:
-                  30 + num_height_points + self.num_actions + self.cfg.commands.num_commands] = noise_scales.commands
+        noise_vec[33 + num_height_points + self.num_actions:
+                  33 + num_height_points + self.num_actions + self.cfg.commands.num_commands] = noise_scales.commands
 
         return noise_vec * noise_level
 
@@ -607,11 +606,11 @@ class Solo12DOMINOPosition(BaseTask):
                                               device=self.device)
         elif self.cfg.terrain.train_all_together == 2:
             self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+            self.terrain_rows = torch.randint(0, int(0.5 * self.terrain.cfg.num_rows),
                                               (self.num_envs,), device=self.device)
         elif self.cfg.terrain.train_all_together == 3:
             self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+            self.terrain_rows = torch.randint(0, int(0.5 * self.terrain.cfg.num_rows),
                                               (self.num_envs,), device=self.device)
             self.terrain_finished = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
         else:
@@ -855,8 +854,21 @@ class Solo12DOMINOPosition(BaseTask):
     # def _reward_dof_acc(self, sigma):
     #     return torch.exp(-torch.square(torch.norm(self.dof_acc, p=2, dim=1) / sigma))
 
-    # def _reward_torques(self, sigma):
-    #     return torch.exp(-torch.square(self.total_torque / sigma))
+    def _reward_torques(self, sigma):
+        return torch.exp(-torch.square(self.total_torque / sigma))
+
+    def _reward_gravity(self, sigma):
+        gravity_difference = torch.norm(self.projected_gravity - self.gravity_vec, p=2, dim=1)
+        return torch.exp(-torch.square(gravity_difference / sigma))
+
+    # def _reward_ang_xy(self, sigma):
+    #     ang_xy = torch.stack(list(get_euler_xyz(self.base_quat)[:2]), dim=1)
+    #     ang_xy = torch.norm(ang_xy, p=2, dim=1)
+    #     return torch.exp(-torch.square(ang_xy / sigma))
+
+    def _reward_joint_default(self, sigma):  # joints should be close to default
+        joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
+        return torch.exp(-torch.square(joint_deviation / sigma))
 
     # reward group 2 ---------------------------------------------------------------------------------------------------
     def _reward_move_towards(self, sigma):  # move towards target
@@ -867,9 +879,6 @@ class Solo12DOMINOPosition(BaseTask):
         norm_rew = torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1) / 2 + 0.5
         return torch.clip(norm_rew, min=None, max=sigma) / sigma
 
-    def _reward_joint_default(self, sigma):  # joints should be close to default
-        joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
-        return torch.clip(torch.exp(-torch.square(joint_deviation / sigma[0])), min=None, max=sigma[1]) / sigma[1]
 
     # def _reward_feet_slip(self, sigma):  # feet should not slip
     #     feet_low = self.ee_global[:, :, 2] < self.ee_terrain_heights + sigma[0]
@@ -926,11 +935,6 @@ class Solo12DOMINOPosition(BaseTask):
     #     last_lin_vel_z = self.last_root_vel[:, 2]
     #     lin_acc_z = torch.abs(lin_vel_z - last_lin_vel_z)
     #     return torch.exp(-torch.square(lin_acc_z / sigma))
-    #
-    # def _reward_ang_xy(self, sigma):
-    #     ang_xy = torch.stack(list(get_euler_xyz(self.base_quat)[:2]), dim=1)
-    #     ang_xy = torch.norm(ang_xy, p=2, dim=1)
-    #     return torch.clip(torch.exp(-torch.square(ang_xy / sigma)), min=None, max=0.9) / 0.9
     #
     # def _reward_ang_vel_xy(self, sigma):
     #     ang_vel_xy = torch.norm(self.base_ang_vel[:, :2], p=2, dim=1)

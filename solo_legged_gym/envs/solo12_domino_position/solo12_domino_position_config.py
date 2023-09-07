@@ -7,7 +7,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
     class env(BaseEnvCfg.env):
         num_envs = 4096
-        num_observations = 30 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
+        num_observations = 33 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
         num_features = 3
@@ -38,8 +38,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 2.0  # [m]
 
         num_rows = 20
-        frac_pit = 0.5
-        num_cols = 7
+        num_cols = 5
 
         border_size = 5  # [m]
 
@@ -55,7 +54,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        params = list(np.arange(7) * 0.05)
+        pit_params = (np.arange(5) * 0.05).tolist()
+        box_params = ((np.arange(50) * 0.005).reshape(5, 10)).tolist()
+
+        play_params = [0.2]
         play_terrain = "pit"
         play_init = [0.0, 0.0]
         play_target = [3.0, 3.0]
@@ -152,13 +154,15 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, 800]"
+            # feet_acc = "[1, 1000]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
-            stall_pos = "[1, [0.5, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            gravity = "[1, 1.0]"
+            # joint_default = "[1, 10.0]"
+            torques = "[1, 300]"
 
-            move_towards = "[2, 0.9]"  # clip/scale
-            joint_default = "[2, [1.5, 0.9]]"
+            move_towards = "[2, 1.0]"  # clip/scale
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -176,7 +180,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             # lin_acc_z = "[2, 10]"
             # ang_acc_xy = "[2, 20]"
 
-            # torques = "[0, 400]"
             # lin_z = "[0, 0.2]"
             # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
             # dof_acc = "[0, 4000]"
@@ -208,8 +211,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             dof_vel = 0.5
             lin_vel = 0.2
             ang_vel = 0.2
-            # gravity = 0.1
-            height_measurements = 0.05
+            gravity = 0.1
+            height_measurements = 0.02
             commands = 0.05
 
 
@@ -217,7 +220,7 @@ class Solo12DOMINOPositionTrainCfg:
     algorithm_name = 'DOMINO'
 
     class network:
-        init_log_std = 0.5
+        init_log_std = 0.0
         drop_out_rate = 0.9
         policy_hidden_dims = [256, 128]
         policy_activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
@@ -241,7 +244,8 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.5, 1.0]'
+        fixed_adv_coeff = '[3.0, 2.0, 1.0]'
+        sacr_idx = 2
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
 
@@ -265,20 +269,19 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0.0
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 500  # 500 (preferred), 1000, 1500, 2000 (preferred)
+        burning_expert_steps = 800
 
     class runner:
-        max_iterations = 4000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
-        normalize_features = True
 
         # logging
         save_interval = 50  # check for potential saves every this many iterations
@@ -286,7 +289,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'blm'
 
         # cluster
-        restart_interval = 1000  # not working now on cluster, segmentation fault
+        restart_interval = 10000  # not working now on cluster, segmentation fault
         on_cluster = False
 
         # load
