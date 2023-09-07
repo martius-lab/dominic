@@ -54,7 +54,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        params = ((np.arange(50) * 0.005).reshape(5, 10)).tolist()
+        pit_params = (np.arange(5) * 0.05).tolist()
+        box_params = ((np.arange(50) * 0.005).reshape(5, 10)).tolist()
+
+        play_params = [0.2]
         play_terrain = "pit"
         play_init = [0.0, 0.0]
         play_target = [3.0, 3.0]
