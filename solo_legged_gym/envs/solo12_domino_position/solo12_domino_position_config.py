@@ -209,7 +209,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             lin_vel = 0.2
             ang_vel = 0.2
             gravity = 0.1
-            height_measurements = 0.05
+            height_measurements = 0.02
             commands = 0.05
 
 
@@ -269,7 +269,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 800
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -280,7 +280,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'joint_default'
+        run_name = 'trial_diversity_rep'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
