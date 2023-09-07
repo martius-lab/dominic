@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "new_expert_joint_default",
+  "optimization_procedure_name": "repulsive_alpha_expert",
   "results_dir": "results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -26,12 +26,16 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.env_cfg.rewards.terms.joint_default",
-      "values": ["[1, 2.5]", "[1, 5.0]","[1, 8.0]", "[1, 10.0]"]
+      "param": "solo_legged_gym.train_cfg.algorithm.burning_expert_steps",
+      "values": [500, 800, 1000, 3000]
+    },
+    {
+      "param": "solo_legged_gym.train_cfg.algorithm.alpha",
+      "values": [0.6, 0.7, 0.8, 0.9]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
-      "values": [22, 27]
+      "values": [22, 27, 42]
     }
   ]
 }

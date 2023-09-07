@@ -72,7 +72,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 10000,
-        "run_name": "trial_diversity_rep",
+        "run_name": "baseline",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
