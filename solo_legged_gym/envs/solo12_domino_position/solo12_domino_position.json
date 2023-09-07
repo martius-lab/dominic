@@ -72,7 +72,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 10000,
-        "run_name": "torques",
+        "run_name": "joint_default",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
@@ -266,6 +266,7 @@
           "contact": "[1, 1]",
           "feet_contact": "[1, 1]",
           "gravity": "[1, 1.0]",
+          "joint_default": "[1, 5.0]",
           "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 1.0]",
           "posi": "[0, 1.0]",

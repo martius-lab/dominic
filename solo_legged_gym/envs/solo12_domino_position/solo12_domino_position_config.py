@@ -157,7 +157,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
             gravity = "[1, 1.0]"
-            # joint_default = "[1, 2.0]"
+            joint_default = "[1, 5.0]"
             torques = "[1, 300]"
 
             move_towards = "[2, 1.0]"  # clip/scale
@@ -281,7 +281,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'torques'
+        run_name = 'joint_default'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
