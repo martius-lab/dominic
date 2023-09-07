@@ -266,7 +266,6 @@
           "contact": "[1, 1]",
           "feet_contact": "[1, 1]",
           "gravity": "[1, 1.0]",
-          "joint_default": "[1, 10.0]",
           "joint_targets_rate": "[1, 1.0]",
           "move_towards": "[2, 1.0]",
           "posi": "[0, 1.0]",
