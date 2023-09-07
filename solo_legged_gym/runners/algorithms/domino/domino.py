@@ -86,7 +86,9 @@ class DOMINO:
                                            requires_grad=False) * (1 / self.env.num_features)
 
         # set up moving averages
-        self.avg_ext_values = torch.zeros(self.env.num_skills, device=self.device, requires_grad=False)
+        self.avg_ext_values = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
+                               range(self.num_ext_values)]
+        self.sacr_idx = int(self.a_cfg.sacr_idx)
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
@@ -98,13 +100,6 @@ class DOMINO:
                                                          until=int(1.0e8)).to(self.device)
         else:
             self.obs_normalizer = torch.nn.Identity()  # no normalization
-
-        self.normalize_features = self.r_cfg.normalize_features
-        if self.normalize_features:
-            self.feat_normalizer = EmpiricalNormalization(shape=self.env.num_features,
-                                                          until=int(1.0e8)).to(self.device)
-        else:
-            self.feat_normalizer = torch.nn.Identity()  # no normalization
 
         # set up rollout buffer
         self.rollout_buffer = RolloutBuffer(num_envs=self.env.num_envs,
@@ -158,7 +153,6 @@ class DOMINO:
                           load_values=True,
                           load_feat=True,
                           load_optimizer=True,
-                          load_feat_normalizer=True,
                           load_curriculum=True,
                           load_init_obs=True)
                 self.resume = True
@@ -243,7 +237,6 @@ class DOMINO:
                     new_obs, new_skills, features, group_rew, dones, infos = self.env.step(actions)
                     ext_rews = [group_rew[:, i] for i in range(self.num_ext_values)]
                     # features should be part of the outcome of the actions
-                    features = self.feat_normalizer(features)
                     int_rew, dist = self.get_intrinsic_reward(skills, obs, features, self.a_cfg.intrinsic_rew_scale)
                     self.process_env_step(obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos,
                                           self.a_cfg.bootstrap_value)
@@ -444,12 +437,15 @@ class DOMINO:
             lagrange_coeff[skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
-    def update_value_moving_avg(self, skills, ext_return):
+    def update_value_moving_avg(self, skills, ext_returns):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
-        encoded_ext_returns = encoded_skills * ext_return.unsqueeze(-1).repeat(1, self.env.num_skills)
-        mean_encoded_ext_returns = torch.nan_to_num(encoded_ext_returns.sum(dim=0) / encoded_skills.sum(dim=0))
-        self.avg_ext_values = self.a_cfg.avg_values_decay_factor * self.avg_ext_values + \
-                              (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns
+        encoded_ext_returns = [encoded_skills * ext_returns[i].repeat(1, self.env.num_skills) for i in
+                               range(self.num_ext_values)]
+        mean_encoded_ext_returns = [torch.nan_to_num(encoded_ext_returns[i].sum(dim=0) / encoded_skills.sum(dim=0)) for
+                                    i in range(self.num_ext_values)]
+        self.avg_ext_values = [self.a_cfg.avg_values_decay_factor * self.avg_ext_values[i] + \
+                               (1 - self.a_cfg.avg_values_decay_factor) * mean_encoded_ext_returns[i] for i in
+                               range(self.num_ext_values)]
 
     def update_feature_moving_avg(self, skills, features):
         encoded_skills = func.one_hot(skills, num_classes=self.env.num_skills)
@@ -603,7 +599,7 @@ class DOMINO:
                     # Lagrange loss
                     lagrange_loss = 0.0
                     lagrange_losses = self.lagrange * (
-                            self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).squeeze(-1)
+                            self.avg_ext_values[self.sacr_idx][1:] - self.a_cfg.alpha * self.avg_ext_values[self.sacr_idx][0]).squeeze(-1)
                     lagrange_loss += torch.sum(lagrange_losses, dim=-1)
                     lagrange_loss.backward()
                     self.lagrange_optimizer.step()
@@ -636,8 +632,7 @@ class DOMINO:
 
             ############################################################################################################
             # update value moving average
-            self.update_value_moving_avg(skills.squeeze(-1),
-                                         ext_returns[-1].squeeze(-1))  # we sacrifice the last value
+            self.update_value_moving_avg(skills.squeeze(-1), ext_returns)
 
             ############################################################################################################
             # logging
@@ -647,7 +642,7 @@ class DOMINO:
             mean_lagrange_coeffs += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff, dim=0) /
                                      torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).detach().cpu().numpy()
             mean_constraint_satisfaction += (
-                    self.avg_ext_values[1:] - self.a_cfg.alpha * self.avg_ext_values[0]).detach().cpu().numpy()
+                    self.avg_ext_values[self.sacr_idx][1:] - self.a_cfg.alpha * self.avg_ext_values[self.sacr_idx][0]).detach().cpu().numpy()
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
             if self.a_cfg.use_succ_feat:
@@ -702,12 +697,24 @@ class DOMINO:
         mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
         mean_lagranges = locs['mean_lagranges']
+
+        for i in range(self.num_ext_values):
+            # for j in range(self.env.num_skills - 1):
+            #     self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}',
+            #                            mean_constraint_satisfaction[i][j], locs['it'])
+            #     self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j], locs['it'])
+            #     self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1],
+            #                            locs['it'])
+            for j in range(self.env.num_skills):
+                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j],
+                                       locs['it'])
+
         for j in range(self.env.num_skills - 1):
-            self.writer.add_scalar(f'Skill/constraint_satisfaction_{j}', mean_constraint_satisfaction[j], locs['it'])
+            self.writer.add_scalar(f'Constraint/constraint_satisfaction_{j}', mean_constraint_satisfaction[j], locs['it'])
             self.writer.add_scalar(f'Skill/lagrange_{j}', mean_lagranges[j], locs['it'])
             self.writer.add_scalar(f'Skill/lagrange_coeff_{j}', mean_lagrange_coeffs[j + 1], locs['it'])
-        for j in range(self.env.num_skills):
-            self.writer.add_scalar(f'Skill/avg_ext_values_{j}', self.avg_ext_values[j], locs['it'])
+        # for j in range(self.env.num_skills):
+        #     self.writer.add_scalar(f'Skill/avg_ext_values_{j}', self.avg_ext_values[j], locs['it'])
 
         self.writer.add_scalar('Learning/policy_lr', self.policy_lr, locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
@@ -776,8 +783,6 @@ class DOMINO:
             saved_dict[f"ext_value_{i}_state_dict"] = self.ext_values[i].state_dict()
         if self.normalize_observation:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
-        if self.normalize_features:
-            saved_dict["feat_norm_state_dict"] = self.feat_normalizer.state_dict()
         if self.a_cfg.use_succ_feat:
             saved_dict["succ_feat_state_dict"] = self.succ_feat.state_dict()
             saved_dict["succ_feat_optimizer_state_dict"] = self.succ_feat_optimizer.state_dict()
@@ -785,7 +790,7 @@ class DOMINO:
             saved_dict["avg_features"] = self.avg_features
         torch.save(saved_dict, path)
 
-    def load(self, path, load_values=False, load_feat=False, load_optimizer=False, load_feat_normalizer=False,
+    def load(self, path, load_values=False, load_feat=False, load_optimizer=False,
              load_curriculum=False, load_init_obs=False):
         loaded_dict = torch.load(path)
         if "iteration" in loaded_dict:
@@ -821,8 +826,6 @@ class DOMINO:
                 self.avg_features = loaded_dict["avg_features"]
         if self.normalize_observation:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
-        if self.normalize_features and load_feat_normalizer:
-            self.feat_normalizer.load_state_dict(loaded_dict["feat_norm_state_dict"])
         if load_optimizer:
             self.policy_optimizer.load_state_dict(loaded_dict["policy_optimizer_state_dict"])
             self.value_optimizer.load_state_dict(loaded_dict["value_optimizer_state_dict"])
@@ -849,8 +852,6 @@ class DOMINO:
             self.ext_values[i].train()
         if self.normalize_observation:
             self.obs_normalizer.train()
-        if self.normalize_features:
-            self.feat_normalizer.train()
 
     def eval_mode(self):
         self.policy.eval()
@@ -859,8 +860,6 @@ class DOMINO:
             self.ext_values[i].eval()
         if self.normalize_observation:
             self.obs_normalizer.eval()
-        if self.normalize_features:
-            self.feat_normalizer.eval()
 
     def init_writer(self, resume_id=None):
         # initialize writer
