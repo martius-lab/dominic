@@ -38,7 +38,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 2.0  # [m]
 
         num_rows = 20
-        frac_pit = 0.5
         num_cols = 5
 
         border_size = 5  # [m]
@@ -55,7 +54,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        params = list(np.arange(5) * 0.05)
+        params = ((np.arange(50) * 0.005).reshape(5, 10)).tolist()
         play_terrain = "pit"
         play_init = [0.0, 0.0]
         play_target = [3.0, 3.0]

@@ -606,11 +606,11 @@ class Solo12DOMINOPosition(BaseTask):
                                               device=self.device)
         elif self.cfg.terrain.train_all_together == 2:
             self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+            self.terrain_rows = torch.randint(0, int(0.5 * self.terrain.cfg.num_rows),
                                               (self.num_envs,), device=self.device)
         elif self.cfg.terrain.train_all_together == 3:
             self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+            self.terrain_rows = torch.randint(0, int(0.5 * self.terrain.cfg.num_rows),
                                               (self.num_envs,), device=self.device)
             self.terrain_finished = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
         else:

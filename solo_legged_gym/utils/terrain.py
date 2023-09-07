@@ -38,12 +38,14 @@ class Terrain:
                 if play:
                     terrain_type = self.cfg.play_terrain + "_terrain"
                 else:
-                    if i < int(self.cfg.frac_pit * self.cfg.num_rows):
+                    if i < int(0.5 * self.cfg.num_rows):
                         terrain_type = "pitr_terrain"
                     else:
                         terrain_type = "boxr_terrain"
 
-                eval(terrain_type)(terrain, self.cfg.params[j])
+                row = i % int(0.5 * self.cfg.num_rows)
+                col = j
+                eval(terrain_type)(terrain, self.cfg.params[col][row])
                 start_x = self.border + i * self.length_per_env_pixels
                 end_x = self.border + (i + 1) * self.length_per_env_pixels
                 start_y = self.border + j * self.width_per_env_pixels
