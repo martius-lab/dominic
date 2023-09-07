@@ -244,7 +244,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 2.0, 1.0]'
+        fixed_adv_coeff = '[3.0, 1.8, 1.0]'
         sacr_idx = 2
         intrinsic_adv_coeff = 1.0
         intrinsic_rew_scale = 5.0
