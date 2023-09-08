@@ -255,7 +255,7 @@ class Solo12DOMINOPositionTrainCfg:
         lam = 0.95  # GAE coeff
         max_grad_norm = 1.
 
-        num_lagrange_steps = 10
+        num_lagrange_steps = 1
         lagrange_lr = 1.e-3
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
