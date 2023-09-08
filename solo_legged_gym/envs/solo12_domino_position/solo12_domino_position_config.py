@@ -38,7 +38,6 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         init_range = 2.0  # [m]
 
         num_rows = 20
-        frac_pit = 0.5
         num_cols = 5
 
         border_size = 5  # [m]
@@ -55,7 +54,10 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         # pass the params as a dict
         # random_uniform, sloped, pyramid_sloped, discrete_obstacles, wave, stairs, pyramid_stairs,
         # stepping_stones, gap, pit
-        params = list(np.arange(5) * 0.05)
+        pit_params = (np.arange(5) * 0.05).tolist()
+        box_params = ((np.arange(50) * 0.005).reshape(5, 10)).tolist()
+
+        play_params = [0.2]
         play_terrain = "pit"
         play_init = [0.0, 0.0]
         play_target = [3.0, 3.0]
@@ -152,15 +154,17 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             yawi = "[0, [1.0, 0.25]]"  # scale of the error, check distance
 
             joint_targets_rate = "[1, 1.0]"
-            feet_acc = "[1, 900]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
             stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
             gravity = "[1, 1.0]"
-            # torques = "[1, 500]"
+            torques = "[1, 300]"
+            # joint_default = "[1, 10.0]"
+            # feet_acc = "[1, 1000]"
 
             move_towards = "[2, 1.0]"  # clip/scale
-            # joint_default = "[2, [1.5, 0.9]]"
+            move_face = "[2, 1.0]"  # clip/scale
+
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
 
             # ang_xy = "[2, 0.1]"
@@ -210,7 +214,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             lin_vel = 0.2
             ang_vel = 0.2
             gravity = 0.1
-            height_measurements = 0.05
+            height_measurements = 0.02
             commands = 0.05
 
 
@@ -242,9 +246,9 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.8, 1.0]'
+        fixed_adv_coeff = '[3.0, 1.8, 1.5]'
         sacr_idx = 2
-        intrinsic_adv_coeff = 1.0
+        intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -256,7 +260,9 @@ class Solo12DOMINOPositionTrainCfg:
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
-        alpha = 0.7  # optimality ratio
+        pretrain_expert = True
+        expert_ext_values = [28, 39, 56]  # will be used only if pretrain_expert is True
+        alpha = '[0.9, 0.9, 0.7]'  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -270,7 +276,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 5000
+        burning_expert_steps = 800
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -281,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'brand_new_world_expert'
+        run_name = 'blm_face'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault

@@ -7,20 +7,25 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha": 0.7,
+        "alpha": "[0.9, 0.9, 0.7]",
         "attractive_coeff": 0.0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
-        "burning_expert_steps": 5000,
+        "burning_expert_steps": 800,
         "clip_lagrange": "auto_2",
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
-        "fixed_adv_coeff": "[3.0, 1.8, 1.0]",
+        "expert_ext_values": [
+          28,
+          39,
+          56
+        ],
+        "fixed_adv_coeff": "[3.0, 1.8, 1.5]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 1.0,
+        "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
@@ -29,6 +34,7 @@
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "policy_lr": 0.001,
+        "pretrain_expert": true,
         "repulsive_power": 0,
         "sacr_idx": 2,
         "schedule": "fixed",
@@ -72,7 +78,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 10000,
-        "run_name": "brand_new_world_expert",
+        "run_name": "blm_face",
         "save_interval": 50,
         "wandb": true,
         "wandb_group": "test"
@@ -250,7 +256,7 @@
           "dof_pos": 0.05,
           "dof_vel": 0.5,
           "gravity": 0.1,
-          "height_measurements": 0.05,
+          "height_measurements": 0.02,
           "lin_vel": 0.2
         }
       },
@@ -264,13 +270,14 @@
         "soft_torque_limit": 1.0,
         "terms": {
           "contact": "[1, 1]",
-          "feet_acc": "[1, 900]",
           "feet_contact": "[1, 1]",
           "gravity": "[1, 1.0]",
           "joint_targets_rate": "[1, 1.0]",
+          "move_face": "[2, 1.0]",
           "move_towards": "[2, 1.0]",
           "posi": "[0, 1.0]",
           "stall_pos": "[1, [0.3, 0.25, 0.1]]",
+          "torques": "[1, 300]",
           "yawi": "[0, [1.0, 0.25]]"
         }
       },
@@ -300,8 +307,69 @@
       },
       "terrain": {
         "border_size": 5,
+        "box_params": [
+          [
+            0.0,
+            0.005,
+            0.01,
+            0.015,
+            0.02,
+            0.025,
+            0.03,
+            0.035,
+            0.04,
+            0.045
+          ],
+          [
+            0.05,
+            0.055,
+            0.06,
+            0.065,
+            0.07,
+            0.075,
+            0.08,
+            0.085,
+            0.09,
+            0.095
+          ],
+          [
+            0.1,
+            0.105,
+            0.11,
+            0.115,
+            0.12,
+            0.125,
+            0.13,
+            0.135,
+            0.14,
+            0.145
+          ],
+          [
+            0.15,
+            0.155,
+            0.16,
+            0.165,
+            0.17,
+            0.17500000000000002,
+            0.18,
+            0.185,
+            0.19,
+            0.195
+          ],
+          [
+            0.2,
+            0.20500000000000002,
+            0.21,
+            0.215,
+            0.22,
+            0.225,
+            0.23,
+            0.23500000000000001,
+            0.24,
+            0.245
+          ]
+        ],
         "dynamic_friction": 1.0,
-        "frac_pit": 0.5,
         "horizontal_scale": 0.1,
         "init_range": 2.0,
         "measure_height": true,
@@ -335,7 +403,7 @@
         "num_cols": 5,
         "num_rows": 20,
         "num_sub_terrains": 100,
-        "params": [
+        "pit_params": [
           0.0,
           0.05,
           0.1,
@@ -345,6 +413,9 @@
         "play_init": [
           0.0,
           0.0
+        ],
+        "play_params": [
+          0.2
         ],
         "play_target": [
           3.0,

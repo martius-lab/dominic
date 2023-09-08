@@ -606,11 +606,11 @@ class Solo12DOMINOPosition(BaseTask):
                                               device=self.device)
         elif self.cfg.terrain.train_all_together == 2:
             self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+            self.terrain_rows = torch.randint(0, int(0.5 * self.terrain.cfg.num_rows),
                                               (self.num_envs,), device=self.device)
         elif self.cfg.terrain.train_all_together == 3:
             self.terrain_cols = torch.zeros(self.num_envs, dtype=torch.int32, device=self.device)
-            self.terrain_rows = torch.randint(0, int(self.cfg.terrain.frac_pit * self.terrain.cfg.num_rows),
+            self.terrain_rows = torch.randint(0, int(0.5 * self.terrain.cfg.num_rows),
                                               (self.num_envs,), device=self.device)
             self.terrain_finished = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
         else:
@@ -866,6 +866,10 @@ class Solo12DOMINOPosition(BaseTask):
     #     ang_xy = torch.norm(ang_xy, p=2, dim=1)
     #     return torch.exp(-torch.square(ang_xy / sigma))
 
+    def _reward_joint_default(self, sigma):  # joints should be close to default
+        joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
+        return torch.exp(-torch.square(joint_deviation / sigma))
+
     # reward group 2 ---------------------------------------------------------------------------------------------------
     def _reward_move_towards(self, sigma):  # move towards target
         target_pos_in_base_normalized = self.commands_in_base[:, 0:3] / (
@@ -875,9 +879,12 @@ class Solo12DOMINOPosition(BaseTask):
         norm_rew = torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1) / 2 + 0.5
         return torch.clip(norm_rew, min=None, max=sigma) / sigma
 
-    # def _reward_joint_default(self, sigma):  # joints should be close to default
-    #     joint_deviation = torch.norm(self.dof_pos - self.default_dof_pos, p=2, dim=1)
-    #     return torch.clip(torch.exp(-torch.square(joint_deviation / sigma[0])), min=None, max=sigma[1]) / sigma[1]
+    def _reward_move_face(self, sigma):  # face towards target
+        target_pos_in_base_normalized = self.commands_in_base[:, 0:3] / (
+                torch.norm(self.commands_in_base[:, 0:3], dim=-1, keepdim=True) + 1e-8)
+        base_face_direction = torch.tensor([1, 0, 0], dtype=torch.float, device=self.device).repeat(self.num_envs, 1)
+        norm_rew = torch.sum(target_pos_in_base_normalized * base_face_direction, dim=-1) / 2 + 0.5
+        return torch.clip(norm_rew, min=None, max=sigma) / sigma
 
     # def _reward_feet_slip(self, sigma):  # feet should not slip
     #     feet_low = self.ee_global[:, :, 2] < self.ee_terrain_heights + sigma[0]

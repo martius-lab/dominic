@@ -26,8 +26,8 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
+        # train_cfg.runner.load_run = "cluster_home/results/blm/working_directories/38"
         train_cfg.runner.load_run = -1
-        # train_cfg.runner.load_run = '1_controllability2/78_'
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
@@ -55,7 +55,7 @@ class keyboard_play:
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
-        env_cfg.terrain.params = [0.0]
+        env_cfg.terrain.params = [0.2]
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
         env_cfg.terrain.play_target = [-3.5, 0.0]
