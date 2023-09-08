@@ -13,7 +13,7 @@
     "memory_in_mb": 10000,
     "gpu_memory_mb": 18000,
     "cuda_requirement": "TARGET.CUDACapability >= 6.0",
-    "bid": 25,
+    "bid": 15,
     "forbidden_hostnames": []
   },
   "fixed_params": {
@@ -28,14 +28,15 @@
     {
       "param": "solo_legged_gym.train_cfg.algorithm.alpha",
       "values": [
-        "[0.9, 0.9, 0.9]", "[0.9, 0.8, 0.9]", "[0.8, 0.9, 0.9]", "[0.8, 0.8, 0.9]",
-        "[0.9, 0.9, 0.8]", "[0.9, 0.8, 0.8]", "[0.8, 0.9, 0.8]", "[0.8, 0.8, 0.8]",
-        "[0.9, 0.9, 0.7]", "[0.9, 0.8, 0.7]", "[0.8, 0.9, 0.7]", "[0.8, 0.8, 0.7]"
+        "[0.9, 0.9, 0.9]", "[0.8, 0.9, 0.9]",
+        "[0.9, 0.9, 0.8]", "[0.8, 0.9, 0.8]",
+        "[0.9, 0.9, 0.7]", "[0.8, 0.9, 0.7]",
+        "[0.9, 0.9, 0.6]", "[0.8, 0.9, 0.6]"
       ]
     },
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_adv_coeff",
-      "values": [2.0, 5.0, 10.0]
+      "param": "solo_legged_gym.train_cfg.algorithm.num_lagrange_steps",
+      "values": [1, 5, 10]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",

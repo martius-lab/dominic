@@ -20,12 +20,12 @@
         "entropy_coef": 0.03,
         "expert_ext_values": [
           28,
-          40,
+          39,
           56
         ],
         "fixed_adv_coeff": "[3.0, 1.8, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 1.0,
+        "intrinsic_adv_coeff": 2.0,
         "intrinsic_rew_scale": 5.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,

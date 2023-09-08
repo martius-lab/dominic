@@ -246,7 +246,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         fixed_adv_coeff = '[3.0, 1.8, 1.0]'
         sacr_idx = 2
-        intrinsic_adv_coeff = 1.0
+        intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
