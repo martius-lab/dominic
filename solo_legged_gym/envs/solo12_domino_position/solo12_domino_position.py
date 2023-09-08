@@ -879,6 +879,12 @@ class Solo12DOMINOPosition(BaseTask):
         norm_rew = torch.sum(target_pos_in_base_normalized * base_lin_vel_normalized, dim=-1) / 2 + 0.5
         return torch.clip(norm_rew, min=None, max=sigma) / sigma
 
+    def _reward_move_face(self, sigma):  # face towards target
+        target_pos_in_base_normalized = self.commands_in_base[:, 0:3] / (
+                torch.norm(self.commands_in_base[:, 0:3], dim=-1, keepdim=True) + 1e-8)
+        base_face_direction = torch.tensor([1, 0, 0], dtype=torch.float, device=self.device).repeat(self.num_envs, 1)
+        norm_rew = torch.sum(target_pos_in_base_normalized * base_face_direction, dim=-1) / 2 + 0.5
+        return torch.clip(norm_rew, min=None, max=sigma) / sigma
 
     # def _reward_feet_slip(self, sigma):  # feet should not slip
     #     feet_low = self.ee_global[:, :, 2] < self.ee_terrain_heights + sigma[0]
