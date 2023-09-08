@@ -244,7 +244,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.8, 1.0]'
+        fixed_adv_coeff = '[3.0, 1.8, 1.5]'
         sacr_idx = 2
         intrinsic_adv_coeff = 2.0
         intrinsic_rew_scale = 5.0
@@ -260,8 +260,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         pretrain_expert = True
         expert_ext_values = [28, 39, 56]  # will be used only if pretrain_expert is True
-        # alpha = [0.95, 0.9, 0.8]  # optimality ratio pretrain = False, the values are not converged
-        alpha = '[0.9, 0.8, 0.7]'  # optimality ratio pretrain = True
+        alpha = '[0.9, 0.9, 0.7]'  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
