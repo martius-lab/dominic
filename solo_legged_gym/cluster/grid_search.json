@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "blm_new_int_alpha",
+  "optimization_procedure_name": "blm_new_alpha_l0",
   "results_dir": "/fast/jcheng/results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -26,12 +26,17 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_adv_coeff",
-      "values": [2.0, 3.5, 5.0]
+      "param": "solo_legged_gym.train_cfg.algorithm.alpha",
+      "values": [
+        "[0.9, 0.9, 0.9]", "[0.9, 0.9, 0.8]", "[0.9, 0.9, 0.7]",
+        "[0.9, 0.8, 0.9]", "[0.9, 0.8, 0.8]", "[0.9, 0.8, 0.7]",
+        "[0.8, 0.9, 0.9]", "[0.8, 0.9, 0.8]", "[0.8, 0.9, 0.7]",
+        "[0.8, 0.8, 0.9]", "[0.8, 0.8, 0.8]", "[0.8, 0.8, 0.7]"
+      ]
     },
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.alpha",
-      "values": ["[0.9, 0.9, 0.95]", "[0.9, 0.9, 0.9]", "[0.9, 0.9, 0.8]", "[0.9, 0.9, 0.7]", "[0.9, 0.9, 0.6]"]
+      "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
+      "values": [1.0, 2.0, 3.0, 4.0]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
