@@ -246,9 +246,9 @@ class Solo12DOMINOPositionTrainCfg:
 
         value_lr = 1.e-3  # 1.e-3
 
-        fixed_adv_coeff = '[3.0, 1.8, 1.5]'
+        fixed_adv_coeff = '[3.0, 1.8, 1.0]'
         sacr_idx = 2
-        intrinsic_adv_coeff = 2.0
+        intrinsic_adv_coeff = 5.0
         intrinsic_rew_scale = 5.0
 
         gamma = 0.99  # discount factor
@@ -276,7 +276,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 800
+        burning_expert_steps = 3000
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -287,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_face'
+        run_name = 'blm_face_expert2'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
