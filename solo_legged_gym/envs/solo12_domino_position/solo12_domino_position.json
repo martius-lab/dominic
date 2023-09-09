@@ -19,9 +19,9 @@
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
         "expert_ext_values": [
-          28,
-          38,
-          52
+          27,
+          35,
+          62
         ],
         "fixed_adv_coeff": "[3.0, 1.8, 1.0]",
         "gamma": 0.99,

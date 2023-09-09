@@ -261,7 +261,7 @@ class Solo12DOMINOPositionTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
         pretrain_expert = True
-        expert_ext_values = [28, 37, 51]  # will be used only if pretrain_expert is True
+        expert_ext_values = [27, 35, 62]  # will be used only if pretrain_expert is True
         alpha = '[0.9, 0.9, 0.7]'  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
