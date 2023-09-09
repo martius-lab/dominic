@@ -249,7 +249,7 @@ class Solo12DOMINOPositionTrainCfg:
         fixed_adv_coeff = '[3.0, 1.8, 1.0]'
         sacr_idx = 2
         intrinsic_adv_coeff = 5.0
-        intrinsic_rew_scale = 5.0
+        intrinsic_rew_scale = 5.0  # for better learning the value function
 
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -261,7 +261,7 @@ class Solo12DOMINOPositionTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
         pretrain_expert = True
-        expert_ext_values = [28, 38, 52]  # will be used only if pretrain_expert is True
+        expert_ext_values = [28, 37, 51]  # will be used only if pretrain_expert is True
         alpha = '[0.9, 0.9, 0.7]'  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
@@ -287,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_face_expert2'
+        run_name = 'blm_new_expert'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
