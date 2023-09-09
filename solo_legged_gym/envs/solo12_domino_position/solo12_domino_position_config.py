@@ -276,7 +276,7 @@ class Solo12DOMINOPositionTrainCfg:
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 3000
+        burning_expert_steps = 800
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -287,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_face_expert3'
+        run_name = 'blm_new'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
