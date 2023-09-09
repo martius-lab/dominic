@@ -156,13 +156,13 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             joint_targets_rate = "[1, 1.0]"
             contact = "[1, 1]"
             feet_contact = "[1, 1]"
-            stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
             gravity = "[1, 1.0]"
             torques = "[1, 300]"
+            stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
+            move_towards = "[1, 0.8]"  # clip/scale
             # joint_default = "[1, 10.0]"
             # feet_acc = "[1, 1000]"
 
-            move_towards = "[2, 1.0]"  # clip/scale
             move_face = "[2, 1.0]"  # clip/scale
 
             # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
@@ -287,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_new_expert'
+        run_name = 'blm_face_expert3'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
