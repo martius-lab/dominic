@@ -93,6 +93,8 @@ class DOMINO:
         else:
             self.avg_expert_ext_values = torch.zeros(self.num_ext_values, device=self.device, requires_grad=False)
 
+        self.alphas = [self.a_cfg.alpha_0, self.a_cfg.alpha_1, self.a_cfg.alpha_2]
+
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
         self.restart_interval = self.r_cfg.restart_interval
@@ -605,7 +607,7 @@ class DOMINO:
                     lagrange_loss = 0.0
                     for i in range(self.num_ext_values):
                         lagrange_losses = self.lagrange[i] * (
-                                self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).squeeze(
+                                self.avg_ext_values[i][1:] - self.alphas[i] * self.avg_ext_values[i][0]).squeeze(
                             -1)
                         lagrange_loss += torch.sum(lagrange_losses, dim=-1)
                     lagrange_loss.backward()
@@ -660,7 +662,7 @@ class DOMINO:
                 mean_lagrange_coeffs[i] += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff[i], dim=0) /
                                             torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).detach().cpu().numpy()
                 mean_constraint_satisfaction[i] += (
-                        self.avg_ext_values[i][1:] - eval(self.a_cfg.alpha)[i] * self.avg_ext_values[i][0]).detach().cpu().numpy()
+                        self.avg_ext_values[i][1:] - self.alphas[i] * self.avg_ext_values[i][0]).detach().cpu().numpy()
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
             if self.a_cfg.use_succ_feat:
