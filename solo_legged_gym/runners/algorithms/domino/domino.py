@@ -97,6 +97,7 @@ class DOMINO:
 
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
+        self.log_interval = self.r_cfg.log_interval
         self.restart_interval = self.r_cfg.restart_interval
 
         self.normalize_observation = self.r_cfg.normalize_observation
@@ -298,6 +299,7 @@ class DOMINO:
 
             stop = time.time()
             learn_time = stop - start
+            fps = int(self.num_steps_per_env * self.env.num_envs / (collection_time + learn_time))
 
             # if filming:
             #     filming_iter_counter += 1
@@ -310,7 +312,8 @@ class DOMINO:
             #         filming_imgs = []
             #         filming_iter_counter = 0
 
-            if self.log_dir is not None:
+            self.print_in_terminal(locals())
+            if self.log_dir is not None and it % self.log_interval == 0:
                 self.log(locals())
             if it % self.save_interval == 0:
                 self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(it)), it)
@@ -684,81 +687,15 @@ class DOMINO:
         return mean_ext_value_loss, mean_int_value_loss, mean_surrogate_loss, mean_succ_feat_loss, \
             mean_lagranges, mean_lagrange_coeffs, mean_constraint_satisfaction
 
-    def log(self, locs, width=80, pad=35):
+    def print_in_terminal(self, locs, width=80, pad=35):
         self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
         self.tot_time += locs['collection_time'] + locs['learn_time']
         iteration_time = locs['collection_time'] + locs['learn_time']
-
         ep_string = f''
-        if locs['ep_infos']:
-            for key in locs['ep_infos'][0]:
-                info_tensor = torch.tensor([], device=self.device)
-                for ep_info in locs['ep_infos']:
-                    # handle scalar and zero dimensional tensor infos
-                    if not isinstance(ep_info[key], torch.Tensor):
-                        ep_info[key] = torch.Tensor([ep_info[key]])
-                    if len(ep_info[key].shape) == 0:
-                        ep_info[key] = ep_info[key].unsqueeze(0)
-                    info_tensor = torch.cat((info_tensor, ep_info[key].to(self.device)))
-                value = torch.mean(info_tensor)
-                self.writer.add_scalar('Episode/' + key, value, locs['it'])
-                ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
-        mean_std = self.policy.action_std.mean()
-        fps = int(self.num_steps_per_env * self.env.num_envs / (locs['collection_time'] + locs['learn_time']))
-
-        mean_ext_value_losses = locs['mean_ext_value_loss']
-        for i in range(len(mean_ext_value_losses)):
-            self.writer.add_scalar(f'Learning/ext_value_function_loss_{i}', mean_ext_value_losses[i], locs['it'])
-        self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], locs['it'])
-        self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], locs['it'])
-        if self.a_cfg.use_succ_feat:
-            self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'], locs['it'])
-
-        mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
-        mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
-        mean_lagranges = locs['mean_lagranges']
-        for i in range(self.num_ext_values):
-            for j in range(self.env.num_skills - 1):
-                self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}',
-                                       mean_constraint_satisfaction[i][j], locs['it'])
-                self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j], locs['it'])
-                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1],
-                                       locs['it'])
-            for j in range(self.env.num_skills):
-                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j],
-                                       locs['it'])
-
-        self.writer.add_scalar('Learning/policy_lr', self.policy_lr, locs['it'])
-        self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), locs['it'])
-        self.writer.add_scalar('Perf/total_fps', fps, locs['it'])
-        self.writer.add_scalar('Perf/collection time', locs['collection_time'], locs['it'])
-        self.writer.add_scalar('Perf/learning_time', locs['learn_time'], locs['it'])
-
-        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()),
-                               locs['it'])
-        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()),
-                               locs['it'])
-        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()),
-                               locs['it'])
-
-        if len(locs['len_buffer']) > 0:
-            ext_rew_bufs = locs['ext_rew_buffers']
-            for i in range(self.num_ext_values):
-                self.writer.add_scalar(f'Train/mean_ext_reward_{i}', statistics.mean(ext_rew_bufs[i]), locs['it'])
-            self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']), locs['it'])
-            self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']), locs['it'])
-
-        self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']), locs['it'])
-        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'], locs['it'])
-
-        if self.r_cfg.wandb:
-            self.writer.flush_logger()
-
         title = f" \033[1m Learning iteration {locs['it']}/{self.num_learning_iterations} \033[0m "
-
         log_string = (f"""{'#' * width}\n"""
                       f"""{title.center(width, ' ')}\n\n"""
-                      f"""{'Computation:':>{pad}} {fps:.0f} steps/s (collection: {locs[
+                      f"""{'Computation:':>{pad}} {locs['fps']:.0f} steps/s (collection: {locs[
                           'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
                       f"""{'Burning expert:':>{pad}} {self.burning_expert}\n""")
 
@@ -770,6 +707,64 @@ class DOMINO:
                        f"""{'ETA:':>{pad}} {self.tot_time / (locs['it'] + 1) * (
                                self.num_learning_iterations - locs['it']):.1f}s\n""")
         print(log_string)
+
+    def log(self, locs):
+        if locs['ep_infos']:
+            for key in locs['ep_infos'][0]:
+                info_tensor = torch.tensor([], device=self.device)
+                for ep_info in locs['ep_infos']:
+                    # handle scalar and zero dimensional tensor infos
+                    if not isinstance(ep_info[key], torch.Tensor):
+                        ep_info[key] = torch.Tensor([ep_info[key]])
+                    if len(ep_info[key].shape) == 0:
+                        ep_info[key] = ep_info[key].unsqueeze(0)
+                    info_tensor = torch.cat((info_tensor, ep_info[key].to(self.device)))
+                value = torch.mean(info_tensor)
+                self.writer.add_scalar('Episode/' + key, value)
+        mean_std = self.policy.action_std.mean()
+
+        mean_ext_value_losses = locs['mean_ext_value_loss']
+        for i in range(len(mean_ext_value_losses)):
+            self.writer.add_scalar(f'Learning/ext_value_function_loss_{i}', mean_ext_value_losses[i])
+        self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'])
+        self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'])
+        if self.a_cfg.use_succ_feat:
+            self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'])
+
+        mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
+        mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
+        mean_lagranges = locs['mean_lagranges']
+        for i in range(self.num_ext_values):
+            for j in range(self.env.num_skills - 1):
+                self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}',
+                                       mean_constraint_satisfaction[i][j])
+                self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j])
+                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1])
+            for j in range(self.env.num_skills):
+                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j])
+
+        self.writer.add_scalar('Learning/policy_lr', self.policy_lr)
+        self.writer.add_scalar('Learning/mean_noise_std', mean_std.item())
+        self.writer.add_scalar('Perf/total_fps', locs['fps'])
+        self.writer.add_scalar('Perf/collection time', locs['collection_time'])
+        self.writer.add_scalar('Perf/learning_time', locs['learn_time'])
+
+        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()))
+        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()))
+        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()))
+
+        if len(locs['len_buffer']) > 0:
+            ext_rew_bufs = locs['ext_rew_buffers']
+            for i in range(self.num_ext_values):
+                self.writer.add_scalar(f'Train/mean_ext_reward_{i}', statistics.mean(ext_rew_bufs[i]))
+            self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']))
+            self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']))
+
+        self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']))
+        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'])
+
+        if self.r_cfg.wandb:
+            self.writer.flush_logger(locs['it'])
 
     def save(self, path, it, infos=None):
         if self.r_cfg.wandb:

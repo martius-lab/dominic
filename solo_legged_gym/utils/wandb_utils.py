@@ -54,15 +54,18 @@ class WandbSummaryWriter(SummaryWriter):
             self.logger = allogger.get_logger(scope="main", basic_logging_params={"level": logging.INFO},
                                               default_outputs=['hdf'])
 
+        self.log_dict = {}
+
     def add_scalar(self, tag, scalar_value, global_step=None, walltime=None, new_style=False):
-        super().add_scalar(
-            tag,
-            scalar_value,
-            global_step=global_step,
-            walltime=walltime,
-            new_style=new_style,
-        )
-        wandb.log({tag: scalar_value}, step=global_step)
+        # super().add_scalar(
+        #     tag,
+        #     scalar_value,
+        #     global_step=global_step,
+        #     walltime=walltime,
+        #     new_style=new_style,
+        # )
+        # wandb.log({tag: scalar_value}, step=global_step)
+        self.log_dict[tag] = scalar_value
 
         if self.use_allogger:
             v = scalar_value
@@ -71,7 +74,9 @@ class WandbSummaryWriter(SummaryWriter):
             k = tag.replace('/', '-')
             self.logger.log(v, k, to_hdf=True)
 
-    def flush_logger(self):
+    def flush_logger(self, step):
+        wandb.log(self.log_dict, step=step)
+        self.log_dict = {}
         if self.use_allogger:
             allogger.get_root().flush(children=True)
 
