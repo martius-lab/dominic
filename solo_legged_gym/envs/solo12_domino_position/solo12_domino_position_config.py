@@ -261,7 +261,7 @@ class Solo12DOMINOPositionTrainCfg:
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
         pretrain_expert = True
-        expert_ext_values = [27, 35, 62]  # will be used only if pretrain_expert is True
+        expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
         alpha = '[0.9, 0.9, 0.7]'  # optimality ratio pretrain = True
 
         avg_values_decay_factor = 0.99
@@ -270,13 +270,13 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.0
+        attractive_coeff = 0.5
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
         succ_feat_lr = 1.e-3
 
-        burning_expert_steps = 3000
+        burning_expert_steps = 800
 
     class runner:
         max_iterations = 2000  # number of policy updates
@@ -287,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_expert4'
+        run_name = 'blm_diverse'
 
         # cluster
         restart_interval = 10000  # not working now on cluster, segmentation fault
