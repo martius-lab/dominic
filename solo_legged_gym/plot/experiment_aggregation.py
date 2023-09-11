@@ -3,6 +3,7 @@ import os
 from glob import glob
 import smart_settings
 from tqdm import tqdm
+import pandas as pd
 from collections import defaultdict
 import collections
 import pandas as pd
@@ -112,8 +113,9 @@ fd = flatten
 
 
 class ExperimentSummary:
-    def __init__(self, experiments) -> None:
+    def __init__(self, experiments, exclude_params=[]) -> None:
         self.experiments = experiments
+        self._exclude_params = exclude_params
         self.settings_df = pd.DataFrame.from_records([dict(**fd(e.settings_flat)) for i, e in enumerate(experiments)])
         if hasattr(experiments[0], 'metrics'):
             self.metrics_df = pd.DataFrame.from_records( [e.metrics for e in experiments])
@@ -130,7 +132,7 @@ class ExperimentSummary:
         # find columns with more than 1 unique element
         self.params_of_interest  = []
         for col in self.settings_df.columns:
-            if len(self.settings_df[col].unique())>1 and col not in ['working_dir', 'id', 'seed']:
+            if len(self.settings_df[col].unique())>1 and col not in ['working_dir', 'id', 'seed'] + self._exclude_params:
                 self.params_of_interest.append(col)
 
     def print_unique_params(self):
@@ -164,7 +166,7 @@ class ExperimentSummary:
         return is_in
 
 
-    def time_statistics(self, value, filter_params=[], use_min_len=False, verbose=True):
+    def time_statistics(self, value, filter_params=[], use_min_len=False, verbose=True, apply_func=lambda x:x):
         res = {}
         for name, group in self._group_by_params(self.params_of_interest):
             if filter_params is None or self._check_contains(name, filter_params):
@@ -172,9 +174,9 @@ class ExperimentSummary:
                     min_len = min([len(self.experiments[i].values[value]) for i in group.index])
                     max_len = max([len(self.experiments[i].values[value]) for i in group.index])
                     if use_min_len:
-                        stacked_time_steps = np.stack(self.experiments[i].values[value][:min_len] for i in group.index)
+                        stacked_time_steps = np.stack(apply_func(self.experiments[i].values[value][:min_len]) for i in group.index)
                     else:
-                        stacked_time_steps = np.stack(self.experiments[i].values[value] for i in group.index if len(self.experiments[i].values[value]) == max_len)
+                        stacked_time_steps = np.stack(apply_func(self.experiments[i].values[value]) for i in group.index if len(self.experiments[i].values[value]) == max_len)
                     #TODO fix this, this is because they're stored wrong
                     #steps = np.stack([es.experiments[i].steps_of_values[value][0] for i in group.index])
                     if verbose:
@@ -199,7 +201,7 @@ warnings.simplefilter("ignore")
 fxn()
 
 class Experiment:
-    def __init__(self, root_path, load_tensorboard, load_h5, load_metrics=True) -> None:
+    def __init__(self, root_path, load_tensorboard, load_h5, load_metrics=False) -> None:
         self.root_path = root_path
         if load_metrics:
             self._load_metrics()
@@ -233,8 +235,11 @@ class Experiment:
     def is_experiment(root_path):
         files = os.listdir(root_path)
         # return ('metrics.csv' in files) and ('settings.json' in files)
-        return ('settings.json' in files)
-
+        is_experiment =  ('settings.json' in files)
+        if not is_experiment:
+            print("Not an experiment", root_path)
+        return is_experiment
+    
     def _accumulate_events(self):
         #print("Checking", self.root_path)
         for root, dirs, files in os.walk(self.root_path):
