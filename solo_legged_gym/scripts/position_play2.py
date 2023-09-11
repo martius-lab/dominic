@@ -26,6 +26,8 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
+        # train_cfg.runner.load_run = "hardware_alpha_l0/62"
+        # train_cfg.runner.load_run = "hardware_alpha_l0/67"
         train_cfg.runner.load_run = -1
         train_cfg.runner.checkpoint = -1
 
@@ -47,7 +49,7 @@ class keyboard_play:
         env_cfg.env.plot_heights = True
         env_cfg.env.plot_colors = True
         env_cfg.env.debug = False
-        env_cfg.env.episode_length_s = 12
+        env_cfg.env.episode_length_s = 10
         env_cfg.viewer.overview = True
         env_cfg.viewer.overview_pos = [3.5, 6.5, 1.5]  # [m]
         env_cfg.viewer.overview_lookat = [0, 0, 0]  # [m]
