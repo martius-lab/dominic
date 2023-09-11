@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "blm_more_alpha_l0",
+  "optimization_procedure_name": "blm_more2_alpha_l0",
   "results_dir": "/fast/jcheng/results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -27,15 +27,15 @@
   "hyperparam_list": [
     {
       "param": "solo_legged_gym.train_cfg.algorithm.alpha_0",
-      "values": [0.3, 0.6, 0.9]
+      "values": [0.5, 0.7, 0.9]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.alpha_1",
-      "values": [0.3, 0.6, 0.9]
+      "values": [0.5, 0.7, 0.9]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.alpha_2",
-      "values": [0.3, 0.6, 0.9]
+      "values": [0.5, 0.7, 0.9]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
