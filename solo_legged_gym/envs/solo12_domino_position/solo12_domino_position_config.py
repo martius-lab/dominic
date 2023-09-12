@@ -287,7 +287,7 @@ class Solo12DOMINOPositionTrainCfg:
         normalize_observation = True  # it will make the training much faster
 
         # logging
-        log_interval = 10  # log every this many iterations
+        log_interval = 2  # log every this many iterations
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
         run_name = 'blm_diverse_test_wandb'
