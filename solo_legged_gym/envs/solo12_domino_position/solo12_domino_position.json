@@ -74,7 +74,7 @@
         "experiment_name": "solo12_domino_position",
         "group": "test",
         "load_run": -1,
-        "log_interval": 1,
+        "log_interval": 2,
         "max_iterations": 2000,
         "normalize_observation": true,
         "num_steps_per_env": 48,
