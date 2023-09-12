@@ -748,7 +748,7 @@ class DOMINO:
 
         self.writer.add_scalar('Learning/policy_lr', self.policy_lr, global_step=locs['it'])
         self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), global_step=locs['it'])
-        self.writer.add_scalar('Perf/total_fps', locs['fps'])
+        self.writer.add_scalar('Perf/total_fps', locs['fps'], global_step=locs['it'])
         self.writer.add_scalar('Perf/collection time', locs['collection_time'], global_step=locs['it'])
         self.writer.add_scalar('Perf/learning_time', locs['learn_time'], global_step=locs['it'])
 
