@@ -26,8 +26,8 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        # train_cfg.runner.load_run = "cluster_home/results/blm/working_directories/38"
-        train_cfg.runner.load_run = -1
+        train_cfg.runner.load_run = "cluster_home/results/blm/working_directories/37"
+        # train_cfg.runner.load_run = -1
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(

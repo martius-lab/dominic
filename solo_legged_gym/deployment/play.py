@@ -1,6 +1,6 @@
 from solo_legged_gym import ROOT_DIR
 from isaacgym.torch_utils import (
-    quat_rotate_inverse, quat_apply,
+    quat_rotate_inverse, quat_apply, to_torch, get_axis_params,
 )
 import os
 import csv
@@ -17,19 +17,18 @@ from solo_legged_gym.utils import get_quat_yaw, wrap_to_pi, quat_apply_yaw
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
 TEST_SKILLS = 0
-MAX_EPISODE_LENGTH = 6.0
-# RUN_NAME = '1_controllability2/92'
-RUN_NAME = 'noisy'
+MAX_EPISODE_LENGTH = 10.0
+RUN_NAME = 'cluster/blm/36'
 
 
-# TERRAIN = 0.18  # 0.105
-# size_x = 0.9  # 0.8
-# size_y = 1.0  # 0.8
-TERRAIN = 0.105
-size_x = 0.85  # 0.8
-size_y = 0.85  # 0.8
+TERRAIN = 0.20  # 0.18
+size_x = 0.9  # 0.8
+size_y = 1.0  # 0.8
+# TERRAIN = 0.105
+# size_x = 0.85  # 0.8
+# size_y = 0.85  # 0.8
 # TARGET = [0.0, 0.0, 0.23 + TERRAIN]
-TARGET = [0.0, -1.0, 0.23]
+TARGET = [0.0, -1.5, 0.23]
 
 MIN_SMOOTH = 0.1  # 0.0: no smooth, 1.0: full smooth (will not move)
 KP = 2.5
@@ -258,6 +257,10 @@ class Solo12Controller:
         dof_pos = self._adapt_dofs(dof_info.joint_positions)
         dof_vel = self._adapt_dofs(dof_info.joint_velocities)
 
+        base_quat = self.tracker_states[3:7]
+        gravity_vec = to_torch(get_axis_params(-1.0, 2), device='cpu')
+        projected_gravity = quat_rotate_inverse(base_quat.unsqueeze(0), gravity_vec.unsqueeze(0)).squeeze(0)
+
         heights = torch.clip(self.tracker_states[2] - 0.25 - self.measured_height, -1, 1.)
         # heights = self.measured_height
         # print(self.tracker_states[2])
@@ -273,6 +276,7 @@ class Solo12Controller:
                 base_ang_vel,
                 (dof_pos - self.default_dof_pos),
                 dof_vel,
+                projected_gravity,
                 heights,
                 self.actions,
                 self.commands_in_base,
