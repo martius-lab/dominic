@@ -709,7 +709,7 @@ class DOMINO:
                        f"""{'Total time:':>{pad}} {self.tot_time:.2f}s\n"""
                        f"""{'ETA:':>{pad}} {self.tot_time / (locs['it'] + 1) * (
                                self.num_learning_iterations - locs['it']):.1f}s\n""")
-        logging.warning(log_string)
+        print(log_string)
 
     def log(self, locs):
         if locs['ep_infos']:
