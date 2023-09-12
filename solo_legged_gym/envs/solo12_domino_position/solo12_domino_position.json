@@ -69,8 +69,10 @@
         ]
       },
       "runner": {
+        "allogger": true,
         "checkpoint": -1,
         "experiment_name": "solo12_domino_position",
+        "group": "test",
         "load_run": -1,
         "log_interval": 2,
         "max_iterations": 2000,
@@ -80,11 +82,10 @@
         "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 10000,
+        "restart_interval": 240,
         "run_name": "blm_diverse_test_wandb",
         "save_interval": 50,
-        "wandb": true,
-        "wandb_group": "test"
+        "wandb": false
       }
     },
     "env_cfg": {

@@ -293,7 +293,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'blm_diverse_test_wandb'
 
         # cluster
-        restart_interval = 10000  # not working now on cluster, segmentation fault
+        restart_interval = 240  # minutes
         on_cluster = False
 
         # load
@@ -304,5 +304,7 @@ class Solo12DOMINOPositionTrainCfg:
         record_gif_interval = 50
         record_iters = 10  # should be int * num_st   eps_per_env
 
+        group = 'test'
+
         wandb = False  # by default is false, set to true from command line
-        wandb_group = 'test'
+        allogger = True

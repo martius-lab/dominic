@@ -15,7 +15,8 @@ import torch.nn.functional as func
 from torch.utils.tensorboard import SummaryWriter
 
 from solo_legged_gym.utils import class_to_dict
-from solo_legged_gym.utils.wandb_utils import WandbSummaryWriter
+from solo_legged_gym.utils.logger import CustomSummaryWriter
+from solo_legged_gym.utils.helpers import Ticker
 from solo_legged_gym.runners.modules.masked_policy import MaskedPolicy
 from solo_legged_gym.runners.modules.masked_value import MaskedValue
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
@@ -98,7 +99,9 @@ class DOMINO:
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
         self.log_interval = self.r_cfg.log_interval
-        self.restart_interval = self.r_cfg.restart_interval
+
+        if self.r_cfg.on_cluster:
+            self.ticker = Ticker(self.r_cfg.restart_interval)
 
         self.normalize_observation = self.r_cfg.normalize_observation
         if self.normalize_observation:
@@ -167,7 +170,7 @@ class DOMINO:
         if not self.env.cfg.env.play:
             self.init_writer(resume_id=self.resume_id)  # should be updated if resumed
             if self.resume:
-                if self.r_cfg.wandb:
+                if self.r_cfg.use_allogger:
                     self.writer.load_allogger_step(self.logger_state)
             else:
                 try:
@@ -320,12 +323,12 @@ class DOMINO:
             self.iter = it
             ep_infos.clear()
 
-            if (it % self.restart_interval == 0 and
-                    self.r_cfg.on_cluster and
-                    it != self.current_learning_iteration and
-                    it != self.num_learning_iterations - 1):
+            if (self.r_cfg.on_cluster
+                    and self.ticker.should_restart()
+                    and it != self.current_learning_iteration
+                    and it != self.num_learning_iterations - 1):
                 print("Triggering cluster restart...")
-                wandb.alert(title='Restart', text='Restarting the job at iteration {}'.format(it))
+                # wandb.alert(title='Restart', text='Restarting the job at iteration {}'.format(it))
                 self.writer.stop()
                 cluster.exit_for_resume()
 
@@ -763,11 +766,10 @@ class DOMINO:
         self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']))
         self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'])
 
-        if self.r_cfg.wandb:
-            self.writer.flush_logger(locs['it'])
+        self.writer.flush_logger(locs['it'])
 
     def save(self, path, it, infos=None):
-        if self.r_cfg.wandb:
+        if self.r_cfg.allogger:
             self.logger_state = self.writer.get_allogger_step()
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
@@ -812,7 +814,7 @@ class DOMINO:
         if load_curriculum:
             self.env.terrain_cols = loaded_dict["curriculum"][0]
             self.env.terrain_rows = loaded_dict["curriculum"][1]
-        if self.r_cfg.wandb:
+        if self.r_cfg.allogger:
             self.logger_state = loaded_dict["logger_state"]
 
         if load_values:
@@ -864,13 +866,17 @@ class DOMINO:
 
     def init_writer(self, resume_id=None):
         # initialize writer
-        if self.r_cfg.wandb:
-            self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.r_cfg,
-                                             group=self.r_cfg.wandb_group, resume_id=resume_id, use_allogger=True)
-            if resume_id is None:
-                self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
-        else:
-            self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
+        self.writer = CustomSummaryWriter(
+            log_dir=self.log_dir,
+            flush_secs=10,
+            cfg=self.r_cfg,
+            group=self.r_cfg.group,
+            resume_id=resume_id,
+            use_wandb=self.r_cfg.wandb,
+            use_allogger=self.r_cfg.allogger)
+        self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
+        # else:
+        #     self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
 
         # print(json.dumps(class_to_dict(self.env.cfg), indent=2, default=str))
         # print(json.dumps(class_to_dict(self.r_cfg), indent=2, default=str))

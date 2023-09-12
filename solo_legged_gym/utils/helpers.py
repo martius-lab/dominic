@@ -6,6 +6,7 @@ import copy
 import numpy as np
 import random
 import torch
+import time
 import argparse
 
 
@@ -234,3 +235,13 @@ def merge_config_args_into_cmd_line(args):
 def update_cfgs_from_dict(env_cfg, train_cfg, update_cfg):
     update_class_from_dict(env_cfg, update_cfg["solo_legged_gym"]["env_cfg"])
     update_class_from_dict(train_cfg, update_cfg["solo_legged_gym"]["train_cfg"])
+
+
+class Ticker:
+    def __init__(self, restart_time=60 * 4):
+        self.start_time = time.time()
+        self.restart_time = restart_time * 60
+
+    def should_restart(self):
+        return time.time() - self.start_time > self.restart_time
+
