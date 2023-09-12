@@ -60,13 +60,13 @@ class CustomSummaryWriter(SummaryWriter):
         self.log_dict = {}
 
     def add_scalar(self, tag, scalar_value, global_step=None, walltime=None, new_style=False):
-        # super().add_scalar(
-        #     tag,
-        #     scalar_value,
-        #     global_step=global_step,
-        #     walltime=walltime,
-        #     new_style=new_style,
-        # )
+        super().add_scalar(
+            tag,
+            scalar_value,
+            global_step=global_step,
+            walltime=walltime,
+            new_style=new_style,
+        )
         self.log_dict[tag] = scalar_value
 
         if self.use_allogger:
