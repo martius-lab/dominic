@@ -28,7 +28,7 @@ def train(id, working_dir, **kwargs):
     run_name = os.path.basename(os.path.dirname(os.path.dirname(working_dir)))
 
     train_cfg.runner.run_name = run_name + "_" + str(id)
-    train_cfg.runner.wandb_group = run_name
+    train_cfg.runner.group = run_name
 
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
