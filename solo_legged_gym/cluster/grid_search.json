@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "cluster_test2",
+  "optimization_procedure_name": "cluster_test3",
   "results_dir": "/fast/jcheng/results",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {

@@ -871,9 +871,7 @@ class DOMINO:
             flush_secs=10,
             cfg=self.r_cfg,
             group=self.r_cfg.group,
-            resume_id=resume_id,
-            use_wandb=self.r_cfg.wandb,
-            use_allogger=self.r_cfg.allogger)
+            resume_id=resume_id)
         self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
         # else:
         #     self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)

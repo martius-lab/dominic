@@ -15,9 +15,9 @@ except ModuleNotFoundError:
 class CustomSummaryWriter(SummaryWriter):
     def __init__(self, log_dir: str, flush_secs: int, cfg, group=None, resume_id=None, use_wandb=False, use_allogger=False):
         super().__init__(log_dir, flush_secs)
-
-        self.use_allogger = use_allogger
-        self.use_wandb = use_wandb
+        self.cfg = cfg
+        self.use_allogger = cfg.allogger
+        self.use_wandb = cfg.wandb
 
         if use_wandb:
             try:

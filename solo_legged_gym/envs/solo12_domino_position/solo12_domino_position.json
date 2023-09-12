@@ -2,7 +2,7 @@
   "solo_legged_gym": {
     "args": {
       "dv": true,
-      "w": true,
+      "w": false,
       "task": "solo12_domino_position"
     },
     "train_cfg": {

@@ -33,6 +33,7 @@ def train(id, working_dir, **kwargs):
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
+    print(train_cfg.runner.wandb)
     runner = task_registry.make_alg_runner(
         env=env,
         env_cfg=env_cfg,

@@ -70,7 +70,7 @@ class TaskRegistry:
                     "solo_legged_gym": {
                         "args": {
                             "dv": True,
-                            "w": True,
+                            "w": False,
                             "task": train_cfg.runner.experiment_name
                         },
                         "train_cfg": train_cfg_dict,
