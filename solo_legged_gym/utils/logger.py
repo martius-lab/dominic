@@ -13,13 +13,13 @@ except ModuleNotFoundError:
 
 
 class CustomSummaryWriter(SummaryWriter):
-    def __init__(self, log_dir: str, flush_secs: int, cfg, group=None, resume_id=None, use_wandb=False, use_allogger=False):
+    def __init__(self, log_dir: str, flush_secs: int, cfg, group=None, resume_id=None):
         super().__init__(log_dir, flush_secs)
         self.cfg = cfg
         self.use_allogger = cfg.allogger
         self.use_wandb = cfg.wandb
 
-        if use_wandb:
+        if self.use_wandb:
             try:
                 project = cfg.experiment_name
             except KeyError:
@@ -51,7 +51,7 @@ class CustomSummaryWriter(SummaryWriter):
 
         if self.use_allogger:
             allogger.basic_configure(
-                logdir=self.log_dir,
+                logdir=log_dir,
                 default_outputs=["hdf"],
                 manual_flush=True)
             self.logger = allogger.get_logger(scope="main", basic_logging_params={"level": logging.INFO},
@@ -60,14 +60,13 @@ class CustomSummaryWriter(SummaryWriter):
         self.log_dict = {}
 
     def add_scalar(self, tag, scalar_value, global_step=None, walltime=None, new_style=False):
-        super().add_scalar(
-            tag,
-            scalar_value,
-            global_step=global_step,
-            walltime=walltime,
-            new_style=new_style,
-        )
-        # wandb.log({tag: scalar_value}, step=global_step)
+        # super().add_scalar(
+        #     tag,
+        #     scalar_value,
+        #     global_step=global_step,
+        #     walltime=walltime,
+        #     new_style=new_style,
+        # )
         self.log_dict[tag] = scalar_value
 
         if self.use_allogger:
@@ -87,7 +86,6 @@ class CustomSummaryWriter(SummaryWriter):
     def stop(self):
         if self.use_wandb:
             wandb.finish(0)
-
         if self.use_allogger:
             allogger.get_root().flush(children=True)
             allogger.close()
