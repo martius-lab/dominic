@@ -74,7 +74,7 @@
         "experiment_name": "solo12_domino_position",
         "group": "test",
         "load_run": -1,
-        "log_interval": 2,
+        "log_interval": 1,
         "max_iterations": 2000,
         "normalize_observation": true,
         "num_steps_per_env": 48,
@@ -82,7 +82,7 @@
         "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 240,
+        "restart_interval": 300,
         "run_name": "blm_diverse_test_wandb",
         "save_interval": 50,
         "wandb": false
