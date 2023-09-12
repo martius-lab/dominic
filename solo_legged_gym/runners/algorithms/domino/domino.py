@@ -723,16 +723,16 @@ class DOMINO:
                         ep_info[key] = ep_info[key].unsqueeze(0)
                     info_tensor = torch.cat((info_tensor, ep_info[key].to(self.device)))
                 value = torch.mean(info_tensor)
-                self.writer.add_scalar('Episode/' + key, value)
+                self.writer.add_scalar('Episode/' + key, value, global_step=locs['it'])
         mean_std = self.policy.action_std.mean()
 
         mean_ext_value_losses = locs['mean_ext_value_loss']
         for i in range(len(mean_ext_value_losses)):
-            self.writer.add_scalar(f'Learning/ext_value_function_loss_{i}', mean_ext_value_losses[i])
-        self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'])
-        self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'])
+            self.writer.add_scalar(f'Learning/ext_value_function_loss_{i}', mean_ext_value_losses[i], global_step=locs['it'])
+        self.writer.add_scalar('Learning/int_value_function_loss', locs['mean_int_value_loss'], global_step=locs['it'])
+        self.writer.add_scalar('Learning/surrogate_loss', locs['mean_surrogate_loss'], global_step=locs['it'])
         if self.a_cfg.use_succ_feat:
-            self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'])
+            self.writer.add_scalar('Learning/success_feature_loss', locs['mean_succ_feat_loss'], global_step=locs['it'])
 
         mean_constraint_satisfaction = locs['mean_constraint_satisfaction']
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
@@ -740,31 +740,31 @@ class DOMINO:
         for i in range(self.num_ext_values):
             for j in range(self.env.num_skills - 1):
                 self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}',
-                                       mean_constraint_satisfaction[i][j])
-                self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j])
-                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1])
+                                       mean_constraint_satisfaction[i][j], global_step=locs['it'])
+                self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j], global_step=locs['it'])
+                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1], global_step=locs['it'])
             for j in range(self.env.num_skills):
-                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j])
+                self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j], global_step=locs['it'])
 
-        self.writer.add_scalar('Learning/policy_lr', self.policy_lr)
-        self.writer.add_scalar('Learning/mean_noise_std', mean_std.item())
+        self.writer.add_scalar('Learning/policy_lr', self.policy_lr, global_step=locs['it'])
+        self.writer.add_scalar('Learning/mean_noise_std', mean_std.item(), global_step=locs['it'])
         self.writer.add_scalar('Perf/total_fps', locs['fps'])
-        self.writer.add_scalar('Perf/collection time', locs['collection_time'])
-        self.writer.add_scalar('Perf/learning_time', locs['learn_time'])
+        self.writer.add_scalar('Perf/collection time', locs['collection_time'], global_step=locs['it'])
+        self.writer.add_scalar('Perf/learning_time', locs['learn_time'], global_step=locs['it'])
 
-        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()))
-        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()))
-        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()))
+        self.writer.add_scalar('Train/mean_curriculum_cols', np.mean(self.env.terrain_cols.detach().cpu().numpy()), global_step=locs['it'])
+        self.writer.add_scalar('Train/mean_curriculum_rows', np.mean(self.env.terrain_rows.detach().cpu().numpy()), global_step=locs['it'])
+        self.writer.add_scalar('Train/std_curriculum_cols', np.std(self.env.terrain_cols.detach().cpu().numpy()), global_step=locs['it'])
 
         if len(locs['len_buffer']) > 0:
             ext_rew_bufs = locs['ext_rew_buffers']
             for i in range(self.num_ext_values):
-                self.writer.add_scalar(f'Train/mean_ext_reward_{i}', statistics.mean(ext_rew_bufs[i]))
-            self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']))
-            self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']))
+                self.writer.add_scalar(f'Train/mean_ext_reward_{i}', statistics.mean(ext_rew_bufs[i]), global_step=locs['it'])
+            self.writer.add_scalar('Train/mean_intrinsic_reward', statistics.mean(locs['int_rew_buffer']), global_step=locs['it'])
+            self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']), global_step=locs['it'])
 
-        self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']))
-        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'])
+        self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']), global_step=locs['it'])
+        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'], global_step=locs['it'])
 
         self.writer.flush_logger(locs['it'])
 
