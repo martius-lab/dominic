@@ -170,7 +170,7 @@ class DOMINO:
         if not self.env.cfg.env.play:
             self.init_writer(resume_id=self.resume_id)  # should be updated if resumed
             if self.resume:
-                if self.r_cfg.use_allogger:
+                if self.r_cfg.allogger:
                     self.writer.load_allogger_step(self.logger_state)
             else:
                 try:
