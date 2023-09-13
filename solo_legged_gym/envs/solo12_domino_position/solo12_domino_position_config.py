@@ -264,7 +264,7 @@ class Solo12DOMINOPositionTrainCfg:
         expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
         alpha_0 = 0.9
         alpha_1 = 0.9
-        alpha_2 = 0.7
+        alpha_2 = 0.9
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -293,7 +293,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'blm_diverse_test_wandb'
 
         # cluster
-        restart_interval = 300  # minutes
+        restart_interval = 240  # minutes
         on_cluster = False
 
         # load
