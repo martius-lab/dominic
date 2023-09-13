@@ -82,7 +82,7 @@
         "record_gif": false,
         "record_gif_interval": 50,
         "record_iters": 10,
-        "restart_interval": 240,
+        "restart_interval": 300,
         "run_name": "blm_diverse_test_wandb",
         "save_interval": 50,
         "wandb": false

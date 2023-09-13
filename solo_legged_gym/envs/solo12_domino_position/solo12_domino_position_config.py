@@ -293,7 +293,7 @@ class Solo12DOMINOPositionTrainCfg:
         run_name = 'blm_diverse_test_wandb'
 
         # cluster
-        restart_interval = 240  # minutes
+        restart_interval = 300  # minutes
         on_cluster = False
 
         # load
