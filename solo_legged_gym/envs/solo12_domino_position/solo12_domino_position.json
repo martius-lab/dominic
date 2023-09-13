@@ -75,7 +75,7 @@
         "group": "test",
         "load_run": -1,
         "log_interval": 5,
-        "max_iterations": 2000,
+        "max_iterations": 6000,
         "normalize_observation": true,
         "num_steps_per_env": 48,
         "on_cluster": true,

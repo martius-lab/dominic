@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "blm_alpha_l0_9_n_9_n",
+  "optimization_procedure_name": "blm_alpha_l0_9_n_9_n_long",
   "results_dir": "/fast/jcheng/blm_alpha_l0",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -30,7 +30,7 @@
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
-      "values": [1.0, 2.0, 3.0, 4.0]
+      "values": [3.0, 4.0]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
