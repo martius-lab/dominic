@@ -255,7 +255,7 @@ class Solo12DOMINOPositionTrainCfg:
         lam = 0.95  # GAE coeff
         max_grad_norm = 1.
 
-        num_lagrange_steps = 1
+        num_lagrange_steps = 10
         lagrange_lr = 1.e-3
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
@@ -281,7 +281,7 @@ class Solo12DOMINOPositionTrainCfg:
         burning_expert_steps = 800
 
     class runner:
-        max_iterations = 6000  # number of policy updates
+        max_iterations = 2000  # number of policy updates
 
         num_steps_per_env = 48  # per iteration
         normalize_observation = True  # it will make the training much faster
@@ -290,10 +290,10 @@ class Solo12DOMINOPositionTrainCfg:
         log_interval = 5  # log every this many iterations
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm_diverse_test_wandb'
+        run_name = 'blm'
 
         # cluster
-        restart_interval = 300  # minutes
+        restart_interval = 50000  # minutes  # TODO: not working properly yet
         on_cluster = False
 
         # load
