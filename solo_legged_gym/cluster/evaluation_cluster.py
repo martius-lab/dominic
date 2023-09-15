@@ -128,7 +128,7 @@ def train(id, working_dir, **kwargs):
         allogger.get_root().flush(children=True)
         allogger.close()
 
-    return 0.0
+    return {"score": 0.0}
 
 
 if __name__ == "__main__":
