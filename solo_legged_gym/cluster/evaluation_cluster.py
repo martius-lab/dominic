@@ -116,17 +116,17 @@ def train(id, working_dir, **kwargs):
             nearest_init_dist[i], _ = torch.kthvalue(all_init_dist[i, :], k=2)
             nearest_every_dist[i], _ = torch.kthvalue(all_every_dist[i, :], k=2)
 
-        avg_nearest_init_dist = torch.mean(nearest_init_dist)
-        avg_init_dist = torch.mean(all_init_dist)
-        avg_nearest_every_dist = torch.mean(nearest_every_dist)
-        avg_every_dist = torch.mean(all_every_dist)
+    avg_nearest_init_dist = torch.mean(nearest_init_dist)
+    avg_init_dist = torch.mean(all_init_dist)
+    avg_nearest_every_dist = torch.mean(nearest_every_dist)
+    avg_every_dist = torch.mean(all_every_dist)
 
-        logger.log(avg_nearest_init_dist.detach().cpu().numpy(), "avg_nearest_init_dist", to_hdf=True)
-        logger.log(avg_init_dist.detach().cpu().numpy(), "avg_init_dist", to_hdf=True)
-        logger.log(avg_nearest_every_dist.detach().cpu().numpy(), "avg_nearest_every_dist", to_hdf=True)
-        logger.log(avg_every_dist.detach().cpu().numpy(), "avg_every_dist", to_hdf=True)
-        allogger.get_root().flush(children=True)
-        allogger.close()
+    logger.log(avg_nearest_init_dist.detach().cpu().numpy(), "avg_nearest_init_dist", to_hdf=True)
+    logger.log(avg_init_dist.detach().cpu().numpy(), "avg_init_dist", to_hdf=True)
+    logger.log(avg_nearest_every_dist.detach().cpu().numpy(), "avg_nearest_every_dist", to_hdf=True)
+    logger.log(avg_every_dist.detach().cpu().numpy(), "avg_every_dist", to_hdf=True)
+    allogger.get_root().flush(children=True)
+    allogger.close()
 
     return {"score": 0.0}
 
