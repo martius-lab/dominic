@@ -88,16 +88,38 @@ class keyboard_play:
         self.avg_every_dist = 0
 
     def play(self):
-        for i in range(8):
-            self.env.eval_skill[:] = i
-            self.successor[:] = 0
-            self.env.reset()
+        avg_nearest_init_dists = []
+        avg_init_dists = []
+        avg_nearest_every_dists = []
+        avg_every_dists = []
+        for _ in range(1):
+            for i in range(8):
+                self.env.eval_skill[:] = i
+                self.successor[:] = 0
+                self.env.reset()
 
-            for j in range(int(self.env.max_episode_length)):
-                print("skill: ", i, "step: ", j)
-                self.step(j)
-            self.calculate_successor(i)
-        self.calculate_metrics()
+                for j in range(int(self.env.max_episode_length)):
+                    print("skill: ", i, "step: ", j)
+                    self.step(j)
+                self.calculate_successor(i)
+            self.calculate_metrics()
+            avg_nearest_init_dists.append(self.avg_nearest_init_dist.detach().cpu().numpy())
+            avg_init_dists.append(self.avg_init_dist.detach().cpu().numpy())
+            avg_nearest_every_dists.append(self.avg_nearest_every_dist.detach().cpu().numpy())
+            avg_every_dists.append(self.avg_every_dist.detach().cpu().numpy())
+
+        avg_nearest_init_dists_array = np.array(avg_nearest_init_dists)
+        avg_init_dists_array = np.array(avg_init_dists)
+        avg_nearest_every_dists_array = np.array(avg_nearest_every_dists)
+        avg_every_dists_array = np.array(avg_every_dists)
+        print("mean_avg_nearest_init_dists_array: ", np.mean(avg_nearest_init_dists_array))
+        print("mean_avg_init_dists_array: ", np.mean(avg_init_dists_array))
+        print("mean_avg_nearest_every_dists_array: ", np.mean(avg_nearest_every_dists_array))
+        print("mean_avg_every_dists_array: ", np.mean(avg_every_dists_array))
+        print("var_avg_nearest_init_dists_array: ", np.var(avg_nearest_init_dists_array))
+        print("var_avg_init_dists_array: ", np.var(avg_init_dists_array))
+        print("var_avg_nearest_every_dists_array: ", np.var(avg_nearest_every_dists_array))
+        print("var_avg_every_dists_array: ", np.var(avg_every_dists_array))
 
     def step(self, j):
         obs_skills = (self.obs.detach(), self.encode_skills(self.env.skills))
