@@ -19,6 +19,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         plot_colors = False
         plot_target = True
 
+        evaluation = False
+
     class terrain:
         static_friction = 1.0
         dynamic_friction = 1.0

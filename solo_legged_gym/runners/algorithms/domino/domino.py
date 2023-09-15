@@ -148,7 +148,7 @@ class DOMINO:
         self.log_dir = log_dir
         self.resume = False
 
-        if not self.env.cfg.env.play:
+        if (not self.env.cfg.env.play) and (not self.env.cfg.env.evaluation):
             models = [file for file in os.listdir(log_dir) if 'model' in file]
             if len(models) == 0:
                 print("[Resume] No models in this directory: " + log_dir + ", starting from scratch!")
@@ -167,7 +167,7 @@ class DOMINO:
                 self.resume = True
 
         # Log
-        if not self.env.cfg.env.play:
+        if (not self.env.cfg.env.play) and (not self.env.cfg.env.evaluation):
             self.init_writer(resume_id=self.resume_id)  # should be updated if resumed
             if self.resume:
                 if self.r_cfg.allogger:

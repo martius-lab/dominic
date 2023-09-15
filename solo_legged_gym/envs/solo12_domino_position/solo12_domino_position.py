@@ -98,6 +98,7 @@ class Solo12DOMINOPosition(BaseTask):
                                                                 torch.arange(-1, 2, device=self.device))
 
         self.play_skill = torch.arange(self.cfg.env.num_skills, device=self.device, requires_grad=False)
+        self.eval_skill = torch.zeros(self.num_envs, dtype=torch.long, device=self.device, requires_grad=False)
         self.draw_height_colors = [(0.75, 0, 0),
                                    (0, 0.75, 0),
                                    (0, 0, 0.75),
@@ -171,16 +172,17 @@ class Solo12DOMINOPosition(BaseTask):
     def reset(self):
         """ Reset all robots"""
         # till now the robot should be uniformly placed in all terrains.
-        self.reset_idx(torch.arange(self.num_envs, device=self.device))
-        self._update_remaining_time()
-        self._update_commands_in_base()
-
-        self.init_obs_buf, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
-                                                                 self.num_actions,
-                                                                 device=self.device,
-                                                                 requires_grad=False))
-        if not self.cfg.env.play:
+        if (not self.cfg.env.play) and (not self.cfg.env.evaluation):
             self._init_env_origins()
+            self.reset_idx(torch.arange(self.num_envs, device=self.device))
+            self._update_remaining_time()
+            self._update_commands_in_base()
+
+            self.init_obs_buf, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
+                                                                     self.num_actions,
+                                                                     device=self.device,
+                                                                     requires_grad=False))
+
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         self._update_remaining_time()
         self._update_commands_in_base()
@@ -320,6 +322,10 @@ class Solo12DOMINOPosition(BaseTask):
         self.last_ee_vel_global[:] = self.ee_vel_global[:]
 
     def _check_termination(self):
+        if self.cfg.env.evaluation:
+            self.reset_buf[:] = False
+            return
+
         self.terminate_buf = torch.any(
             torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
         self.terminate_buf |= self.root_states[:, 2] < self.base_terrain_heights + self.cfg.rewards.base_height_danger
@@ -533,12 +539,15 @@ class Solo12DOMINOPosition(BaseTask):
         if self.cfg.env.play:
             self.skills[env_ids] = self.play_skill[env_ids]
 
-            if self.cfg.env.plot_colors:
-                for i in range(len(env_ids)):
-                    self.gym.set_rigid_body_color(self.envs[env_ids[i]], 0, 0, gymapi.MESH_VISUAL,
-                                                  gymapi.Vec3(self.draw_body_colors[self.skills[env_ids[i]]][0],
-                                                              self.draw_body_colors[self.skills[env_ids[i]]][1],
-                                                              self.draw_body_colors[self.skills[env_ids[i]]][2]))
+        if self.cfg.env.evaluation:
+            self.skills[env_ids] = self.eval_skill[env_ids]
+
+        if self.cfg.env.plot_colors:
+            for i in range(len(env_ids)):
+                self.gym.set_rigid_body_color(self.envs[env_ids[i]], 0, 0, gymapi.MESH_VISUAL,
+                                              gymapi.Vec3(self.draw_body_colors[self.skills[env_ids[i]]][0],
+                                                          self.draw_body_colors[self.skills[env_ids[i]]][1],
+                                                          self.draw_body_colors[self.skills[env_ids[i]]][2]))
 
     def _compute_torques(self, joint_targets):
         # pd controller
