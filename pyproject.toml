@@ -17,12 +17,13 @@ wandb = "*"
 pynput = "*"
 imageio = "*"
 moviepy = "*"
+onnx = "*"
 notebook = "*"
 shapely = "1.7.1"
 
 [tool.poetry.group.dev.dependencies]
 cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}
-#pyvicon = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/pyvicon.git"}
+pyvicon = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/pyvicon.git"}
 al-logger = { git = "git@gitlab.tuebingen.mpg.de:sblaes/allogger.git", branch = "dev"}
 
 [tool.black]

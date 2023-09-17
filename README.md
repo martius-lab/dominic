@@ -183,7 +183,22 @@ The hardware details are documented [here](https://github.com/open-dynamic-robot
 
 Set up `solo_legged_gym` environment in `~/solo12_workspace`.
 
-The low-level robot interface has been compiled and is ready to be used. To recompile the workspace, go to `~/ws_solo12/workspace` and do `colcon build`. Remember to import the ROS installation in by `source /opt/ros/foxy/setup.bash`.
+The low-level robot interface has been compiled and is ready to be used. 
+
+But in case you need to recompile it, follow the instructions below.
+
+   >    ```bash
+   >    ### go into apptainer
+   >    cd ws_solo12/workspace
+   >    sudo apptainer shell -e --bind=$(pwd) ~/solo_robot_latest.sif
+   >    
+   >    ### go into the interactive mode for testing
+   >    source /setup.bash
+   > 
+   >    ### compile the low-level robot interface
+   >    colcon build
+   >    source install/setup.bash
+   >    ```
 
 #### Operational Instruction
 
@@ -191,24 +206,23 @@ The low-level robot interface has been compiled and is ready to be used. To reco
 
 2. Put the robot on the stand holder. Turn on the robot power supply and release the emergency stop.
 
-   3. Set up robot configurations in `solo12_config.yml`.
+3. Set up robot configurations in `solo12_config.yml`. The workstation communicates with Solo 12 using an Ethernet cable. Set `network_interface` to the correct interface.
 
-   >    The workstation communicates with Solo 12 using an Ethernet cable. Set `network_interface` to the correct interface.
-
-   >    For debuging at low level, go to the apptainer.
+   >    For debuging at low level, go to the apptainer again.
    >    ```bash
    >    ### go into apptainer
-   >    cd ws_solo12
+   >    cd ws_solo12/workspace
    >    sudo apptainer shell -e --bind=$(pwd) ~/solo_robot_latest.sif
    >    
    >    ### go into the interactive mode for testing
    >    source /setup.bash
    >    ```
-   >    (motor issue) running interactively by `ros2 run robot_interfaces_solo solo12_show_data workspace/solo12_config.yml`.
    >       
-   >    (offset) measure `home_offset_rad` by running `ros2 run solo solo12_hardware_calibration network_interface`.
+   >    (offset) measure `home_offset_rad` by running `ros2 run solo solo12_hardware_calibration <network_interface>`.
+   >    
+   >    (motor issue) running interactively by `ros2 run robot_interfaces_solo solo12_show_data workspace/solo12_config.yml`.
 
-4. If you have already played the learned policy with `script/keyboard_play.py`, you should have the exported policy in the log folder where there should be a folder `exported`.
+4. If you have already played the learned policy with `script/position_play.py`, you should have the exported policy in the log folder where there should be a folder `exported`.
    
    > Change the load policy in `deployment/play.py`. 
 
@@ -225,16 +239,16 @@ The low-level robot interface has been compiled and is ready to be used. To reco
    ```
    > Unlike Solo 8, the homing of the joints for Solo 12 is integrated and is executed at the beginning of each run. The joint offset values are remembered each time when powered on. Therefore, to redo homing, the robot should be rebooted entirely.
 
-```
-#!/bin/bash
-
-source /home/robot/.bashrc
-source /home/robot/ws_solo12/workspace/install/setup.bash
-source /home/robot/solo12_workspace/solo_legged_gym/.venv/bin/activate
-cd /home/robot/solo12_workspace/solo_legged_gym/solo_legged_gym/deployment
-export DISPLAY=:1
-python play.py solo12_config.yml
-```
+   ```
+   #!/bin/bash
+   
+   source /home/robot/.bashrc
+   source /home/robot/ws_solo12/workspace/install/setup.bash
+   source /home/robot/solo12_workspace/solo_legged_gym/.venv/bin/activate
+   cd /home/robot/solo12_workspace/solo_legged_gym/solo_legged_gym/deployment
+   export DISPLAY=:1
+   python play.py solo12_config.yml
+   ```
 
 8. Switch off the power supply, press the emergency stop, and switch off the Vicon system after experiments.
 
