@@ -17,7 +17,6 @@ import csv
 
 EXPORT_POLICY = False
 LOG_DATA = False
-REAL_TIME = False
 np.set_printoptions(precision=2)
 
 
@@ -26,13 +25,13 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        # train_cfg.runner.load_run = "hardware_alpha_l0/62"
-        # train_cfg.runner.load_run = "hardware_alpha_l0/67"
-        train_cfg.runner.load_run = -1
+        train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_1_sd_2"
+        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_4_sd_2"
+        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_1_sd_2"
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
-            os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),
+            "/is/rg/al/Data/solo12_data/blm_579_alpha_l0_demo/working_directories",
             load_run=train_cfg.runner.load_run,
             checkpoint=train_cfg.runner.checkpoint,
         )
@@ -46,13 +45,13 @@ class keyboard_play:
 
         env_cfg.env.num_envs = 8
         env_cfg.env.play = True
-        env_cfg.env.plot_heights = True
+        env_cfg.env.plot_heights = False
         env_cfg.env.plot_colors = True
         env_cfg.env.debug = False
         env_cfg.env.episode_length_s = 10
         env_cfg.viewer.overview = True
-        env_cfg.viewer.overview_pos = [3.5, 6.5, 1.5]  # [m]
-        env_cfg.viewer.overview_lookat = [0, 0, 0]  # [m]
+        env_cfg.viewer.overview_pos = [3.5, 6.5, 2.0]  # [m]
+        env_cfg.viewer.overview_lookat = [2, 4, 0]  # [m]
         env_cfg.terrain.num_cols = 1
         env_cfg.terrain.num_rows = 1
         env_cfg.terrain.init_range = 0.5
@@ -146,13 +145,12 @@ class keyboard_play:
             self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
 
     def play(self):
-        if REAL_TIME:
-            threading.Timer(1 / 50, self.play).start()
-            self.step()
-        else:
+        if LOG_DATA:
             for _ in range(int(self.env.max_episode_length)):
                 self.step()
-                # time.sleep(0.1)
+        else:
+            while True:
+                self.step()
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
