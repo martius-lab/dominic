@@ -25,9 +25,9 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_1_sd_2"
+        # train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_1_sd_2"
         # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_4_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_1_sd_2"
+        train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_1_sd_2"
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
