@@ -223,12 +223,9 @@ But in case you need to recompile it, follow the instructions below.
    >    (motor issue) running interactively by `ros2 run robot_interfaces_solo solo12_show_data workspace/solo12_config.yml`.
 
 4. If you have already played the learned policy with `script/position_play.py`, you should have the exported policy in the log folder where there should be a folder `exported`.
-   
-   > Change the load policy in `deployment/play.py`. 
+   You can change the load policy in `deployment/play.py`. 
 
-5. Adapt observation space in `_compute_observations()` and key commands in `_on_press()` in `deployment/play.py`.
-
-   > Please go through `deployment.py` to check other configurations (default joint positions, PD gains, etc.) and adapt where necessary.
+5. Please go through `deployment/play.py` to check other configurations (height map, default joint positions, PD gains, etc.) and adapt them if necessary.
 
 6. Obtain root access by executing `sudo -i`.
 
@@ -250,7 +247,7 @@ But in case you need to recompile it, follow the instructions below.
    python play.py solo12_config.yml
    ```
 
-8. Switch off the power supply, press the emergency stop, and switch off the Vicon system after experiments.
+8. Press the emergency stop, switch off the power supply, and switch off the Vicon system after experiments.
 
 ## WIP
 1. Cluster optimization
