@@ -452,20 +452,20 @@ class DOMINO:
         self.avg_features = self.a_cfg.avg_features_decay_factor * self.avg_features + \
                             (1 - self.a_cfg.avg_features_decay_factor) * mean_encoded_features
 
-    def update_global_succ_feat(self):
-        # here we should use the latest obs_normalizer
-        obs = self.obs_normalizer(self.env.init_obs_buf)
+    def update_global_succ_feat(self, obs):
         n_skills = self.env.num_skills
         n_samples = obs.size(0)
-        n_obs = obs.size(1)
-        all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
-        all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
-                                  all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(
-            n_samples, n_skills, -1)  # num_samples * num_skills * num_features
-        for i in range(self.env.num_skills):
-            self.global_succ_feat[i] = torch.mean(all_sfs[:, i, :], dim=0)
+        # n_obs = obs.size(1)
+        # all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
+        # all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
+        #                           all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(
+        #     n_samples, n_skills, -1)  # num_samples * num_skills * num_features
+        for i in range(n_skills):
+            skill = self.encode_skills(torch.tensor(i, dtype=torch.long, device=self.device).unsqueeze(0))
+            sfs = self.succ_feat((obs, skill.repeat(n_samples, 1)))
+            self.global_succ_feat[i] = torch.mean(sfs, dim=0)
 
-    def encode_skills(self, skills):
+    def encode_skills(self, skills: object) -> object:
         return (func.one_hot(skills, num_classes=self.env.num_skills)).squeeze(1)
 
     def update(self):
@@ -641,7 +641,8 @@ class DOMINO:
                 succ_feat_loss.backward()
                 self.succ_feat_optimizer.step()
 
-                self.update_global_succ_feat()
+                with torch.inference_mode():
+                    self.update_global_succ_feat(self.obs_normalizer(self.env.init_obs_buf))
             else:
                 self.update_feature_moving_avg(skills.squeeze(-1), features)
 
@@ -771,9 +772,7 @@ class DOMINO:
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']),
                                    global_step=locs['it'])
 
-        # self.writer.add_scalar('Feature/avg_nearest_dist_per_step', statistics.mean(locs['dist_buffer']),
-        #                        global_step=locs['it'])
-        # self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'], global_step=locs['it'])
+        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'], global_step=locs['it'])
 
         self.writer.flush_logger(locs['it'])
 

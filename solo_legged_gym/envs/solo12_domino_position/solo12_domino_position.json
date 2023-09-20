@@ -406,8 +406,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 5,
-        "num_rows": 10,
-        "num_sub_terrains": 50,
+        "num_rows": 20,
+        "num_sub_terrains": 100,
         "pit_params": [
           0.0,
           0.05,

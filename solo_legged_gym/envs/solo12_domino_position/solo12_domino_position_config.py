@@ -39,7 +39,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         init_range = 2.0  # [m]
 
-        num_rows = 10
+        num_rows = 20
         num_cols = 5
 
         border_size = 5  # [m]
