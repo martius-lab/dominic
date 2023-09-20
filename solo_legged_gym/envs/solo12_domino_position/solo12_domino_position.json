@@ -8,9 +8,9 @@
     "train_cfg": {
       "algorithm": {
         "alpha_0": 0.9,
-        "alpha_1": 0.9,
-        "alpha_2": 0.9,
-        "attractive_coeff": 0.0,
+        "alpha_1": 0.8,
+        "alpha_2": 0.7,
+        "attractive_coeff": 0.5,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
@@ -28,7 +28,7 @@
         "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
         "gamma": 0.99,
         "intrinsic_adv_coeff": 5.0,
-        "intrinsic_rew_scale": 5.0,
+        "intrinsic_rew_scale": 1.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,
         "max_grad_norm": 1.0,
@@ -82,7 +82,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 50000,
-        "run_name": "global_sfs_repulsive",
+        "run_name": "global_sfs_vdw",
         "save_interval": 50,
         "wandb": true
       }

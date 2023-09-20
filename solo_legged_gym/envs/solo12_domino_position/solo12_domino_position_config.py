@@ -250,7 +250,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         fixed_adv_coeff = '[3.0, 1.5, 1.0]'
         intrinsic_adv_coeff = 5.0
-        intrinsic_rew_scale = 5.0  # for better learning the value function
+        intrinsic_rew_scale = 1.0  # for better learning the value function
 
         gamma = 0.99  # discount factor
         lam = 0.95  # GAE coeff
@@ -264,8 +264,8 @@ class Solo12DOMINOPositionTrainCfg:
         pretrain_expert = True
         expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
         alpha_0 = 0.9
-        alpha_1 = 0.9
-        alpha_2 = 0.9
+        alpha_1 = 0.8
+        alpha_2 = 0.7
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
@@ -273,7 +273,7 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.0
+        attractive_coeff = 0.5
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
@@ -291,7 +291,7 @@ class Solo12DOMINOPositionTrainCfg:
         log_interval = 5  # log every this many iterations
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'global_sfs_repulsive'
+        run_name = 'global_sfs_vdw'
 
         # cluster
         restart_interval = 50000  # minutes  # TODO: not working properly yet
