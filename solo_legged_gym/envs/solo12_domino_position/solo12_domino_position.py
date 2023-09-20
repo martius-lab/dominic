@@ -178,6 +178,7 @@ class Solo12DOMINOPosition(BaseTask):
             self._update_remaining_time()
             self._update_commands_in_base()
 
+            # store the initial observation for evaluating the successor features
             self.init_obs_buf, _, _, _, _, _ = self.step(torch.zeros(self.num_envs,
                                                                      self.num_actions,
                                                                      device=self.device,

@@ -39,7 +39,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
 
         init_range = 2.0  # [m]
 
-        num_rows = 20
+        num_rows = 10
         num_cols = 5
 
         border_size = 5  # [m]
@@ -249,7 +249,6 @@ class Solo12DOMINOPositionTrainCfg:
         value_lr = 1.e-3  # 1.e-3
 
         fixed_adv_coeff = '[3.0, 1.5, 1.0]'
-        sacr_idx = 2
         intrinsic_adv_coeff = 5.0
         intrinsic_rew_scale = 5.0  # for better learning the value function
 
@@ -274,7 +273,7 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 1.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0.0
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
@@ -292,7 +291,7 @@ class Solo12DOMINOPositionTrainCfg:
         log_interval = 5  # log every this many iterations
         save_interval = 50  # check for potential saves every this many iterations
         experiment_name = 'solo12_domino_position'
-        run_name = 'blm'
+        run_name = 'global_sfs_repulsive'
 
         # cluster
         restart_interval = 50000  # minutes  # TODO: not working properly yet

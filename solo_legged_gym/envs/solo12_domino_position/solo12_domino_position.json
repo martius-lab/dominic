@@ -2,7 +2,7 @@
   "solo_legged_gym": {
     "args": {
       "dv": true,
-      "w": false,
+      "w": true,
       "task": "solo12_domino_position"
     },
     "train_cfg": {
@@ -10,7 +10,7 @@
         "alpha_0": 0.9,
         "alpha_1": 0.9,
         "alpha_2": 0.9,
-        "attractive_coeff": 0.5,
+        "attractive_coeff": 0.0,
         "attractive_power": 3,
         "avg_features_decay_factor": 0.999,
         "avg_values_decay_factor": 0.99,
@@ -38,7 +38,6 @@
         "policy_lr": 0.001,
         "pretrain_expert": true,
         "repulsive_power": 0,
-        "sacr_idx": 2,
         "schedule": "fixed",
         "sigmoid_scale": 1.0,
         "succ_feat_gamma": 0.95,
@@ -83,9 +82,9 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 50000,
-        "run_name": "blm",
+        "run_name": "global_sfs_repulsive",
         "save_interval": 50,
-        "wandb": false
+        "wandb": true
       }
     },
     "env_cfg": {
@@ -200,6 +199,7 @@
         "debug": false,
         "env_spacing": 2.0,
         "episode_length_s": 6,
+        "evaluation": false,
         "num_actions": 12,
         "num_envs": 4096,
         "num_features": 3,
@@ -406,8 +406,8 @@
         ],
         "mesh_type": "trimesh",
         "num_cols": 5,
-        "num_rows": 20,
-        "num_sub_terrains": 100,
+        "num_rows": 10,
+        "num_sub_terrains": 50,
         "pit_params": [
           0.0,
           0.05,

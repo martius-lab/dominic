@@ -1,6 +1,6 @@
 {
-  "optimization_procedure_name": "blm_alpha_l0_9_n_9_n_long",
-  "results_dir": "/fast/jcheng/blm_alpha_l0",
+  "optimization_procedure_name": "blm_better_repulsive_test",
+  "results_dir": "/fast/jcheng/blm_better",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
   },
@@ -25,12 +25,16 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.alpha_1",
-      "values": [0.3, 0.6, 0.9]
+      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_adv_coeff",
+      "values": [1.0, 5.0]
     },
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
-      "values": [3.0, 4.0]
+      "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_rew_scale",
+      "values": [1.0, 5.0]
+    },
+    {
+      "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
+      "values": ["auto_2", "auto_5"]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
