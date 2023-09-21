@@ -36,7 +36,6 @@
         "num_learning_epochs": 5,
         "num_mini_batches": 4,
         "policy_lr": 0.001,
-        "pretrain_expert": true,
         "repulsive_power": 0,
         "schedule": "fixed",
         "sigmoid_scale": 1.0,
@@ -432,7 +431,7 @@
         "static_friction": 1.0,
         "terrain_length": 8.0,
         "terrain_width": 8.0,
-        "train_all_together": 2,
+        "train_all_together": 3,
         "vertical_scale": 0.005
       },
       "viewer": {

@@ -48,7 +48,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         vertical_scale = 0.005  # [m]
         slope_threshold = 0.5  # slopes above this threshold will be corrected to vertical surfaces
 
-        train_all_together = 2  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
+        train_all_together = 3  # 0: train all together, 1: train curriculum in difficulty and all tgt in terrain,
         # 2: train curriculum in difficulty and firstly pit then everything else in curriculum,
         # 3: train curriculum in difficulty and firstly pit then everything else
 
@@ -261,7 +261,6 @@ class Solo12DOMINOPositionTrainCfg:
         sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
 
-        pretrain_expert = True
         expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
         alpha_0 = 0.9
         alpha_1 = 0.8

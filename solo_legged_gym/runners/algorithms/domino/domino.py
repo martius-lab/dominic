@@ -67,7 +67,7 @@ class DOMINO:
 
         # set up Lagrangian multipliers
         # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
-        self.lagrange = [nn.Parameter(torch.ones(self.env.num_skills - 1, device=self.device) * 0.0,
+        self.lagrange = [nn.Parameter(torch.ones(self.env.num_skills, device=self.device) * 0.0,
                                       requires_grad=True).cuda() for _ in range(self.num_ext_values)]
 
         if self.a_cfg.use_succ_feat:
@@ -92,10 +92,7 @@ class DOMINO:
         # set up moving averages
         self.avg_ext_values = [torch.zeros(self.env.num_skills, device=self.device, requires_grad=False) for _ in
                                range(self.num_ext_values)]
-        if self.a_cfg.pretrain_expert:
-            self.avg_expert_ext_values = self.a_cfg.expert_ext_values
-        else:
-            self.avg_expert_ext_values = torch.zeros(self.num_ext_values, device=self.device, requires_grad=False)
+        self.avg_expert_ext_values = self.a_cfg.expert_ext_values
 
         self.alphas = [self.a_cfg.alpha_0, self.a_cfg.alpha_1, self.a_cfg.alpha_2]
 
@@ -425,12 +422,10 @@ class DOMINO:
     def get_lagrange_coeff(self, skills, burning_expert):
         lagrange_coeff = [torch.zeros_like(skills).to(torch.float32) for _ in range(self.num_ext_values)]
         for i in range(self.num_ext_values):
-            lagrange_coeff[i][skills > 0] = self.lagrange[i][skills[skills > 0] - 1]
+            lagrange_coeff[i] = self.lagrange[i][skills]
             lagrange_coeff[i] = torch.sigmoid(lagrange_coeff[i] * self.a_cfg.sigmoid_scale)
             if burning_expert:
                 lagrange_coeff[i][:] = 1
-            else:
-                lagrange_coeff[i][skills == 0] = 1  # with only extrinsic reward
         return lagrange_coeff
 
     def update_value_moving_avg(self, skills, ext_returns):
@@ -474,9 +469,9 @@ class DOMINO:
         mean_int_value_loss = 0
         mean_surrogate_loss = 0
         mean_succ_feat_loss = 0
-        mean_lagranges = [np.zeros(self.env.num_skills - 1) for _ in range(self.num_ext_values)]
+        mean_lagranges = [np.zeros(self.env.num_skills) for _ in range(self.num_ext_values)]
         mean_lagrange_coeffs = [np.zeros(self.env.num_skills) for _ in range(self.num_ext_values)]
-        mean_constraint_satisfaction = [np.zeros(self.env.num_skills - 1) for _ in range(self.num_ext_values)]
+        mean_constraint_satisfaction = [np.zeros(self.env.num_skills) for _ in range(self.num_ext_values)]
 
         generator = self.rollout_buffer.mini_batch_generator(self.a_cfg.num_mini_batches,
                                                              self.a_cfg.num_learning_epochs)
@@ -611,7 +606,7 @@ class DOMINO:
                     lagrange_loss = 0.0
                     for i in range(self.num_ext_values):
                         lagrange_losses = self.lagrange[i] * (
-                                self.avg_ext_values[i][1:] - self.alphas[i] * self.avg_ext_values[i][0]).squeeze(
+                                self.avg_ext_values[i] - self.alphas[i] * self.avg_expert_ext_values[i]).squeeze(
                             -1)
                         lagrange_loss += torch.sum(lagrange_losses, dim=-1)
                     lagrange_loss.backward()
@@ -650,16 +645,6 @@ class DOMINO:
             # update value moving average
             self.update_value_moving_avg(skills.squeeze(-1), ext_returns)
 
-            if self.a_cfg.pretrain_expert:
-                for i in range(self.num_ext_values):
-                    self.avg_ext_values[i][0] = self.avg_expert_ext_values[i]  # assign expert value to pretrained value
-            else:
-                for i in range(self.num_ext_values):
-                    if self.burning_expert:
-                        self.avg_expert_ext_values[i] = self.avg_ext_values[i][0].item()  # copy the value as expert
-                    else:
-                        self.avg_ext_values[i][0] = self.avg_expert_ext_values[i]  # fix expert to be the end of burning
-
             ############################################################################################################
             # logging
             for i in range(self.num_ext_values):
@@ -668,7 +653,7 @@ class DOMINO:
                 mean_lagrange_coeffs[i] += (torch.sum(func.one_hot(skills.squeeze(1)) * lagrange_coeff[i], dim=0) /
                                             torch.sum(func.one_hot(skills.squeeze(1)), dim=0)).detach().cpu().numpy()
                 mean_constraint_satisfaction[i] += (
-                        self.avg_ext_values[i][1:] - self.alphas[i] * self.avg_ext_values[i][0]).detach().cpu().numpy()
+                        self.avg_ext_values[i] - self.alphas[i] * self.avg_expert_ext_values[i]).detach().cpu().numpy()
             mean_int_value_loss += int_value_loss.item()
             mean_surrogate_loss += surrogate_loss.item()
             if self.a_cfg.use_succ_feat:
@@ -739,13 +724,12 @@ class DOMINO:
         mean_lagrange_coeffs = locs['mean_lagrange_coeffs']
         mean_lagranges = locs['mean_lagranges']
         for i in range(self.num_ext_values):
-            for j in range(self.env.num_skills - 1):
+            for j in range(self.env.num_skills):
                 self.writer.add_scalar(f'Constraint/constraint_satisfaction_rew{i}_skill{j}',
                                        mean_constraint_satisfaction[i][j], global_step=locs['it'])
                 self.writer.add_scalar(f'Skill/lagrange_rew{i}_skill{j}', mean_lagranges[i][j], global_step=locs['it'])
-                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j + 1],
+                self.writer.add_scalar(f'Skill/lagrange_coeff_rew{i}_skill{j}', mean_lagrange_coeffs[i][j],
                                        global_step=locs['it'])
-            for j in range(self.env.num_skills):
                 self.writer.add_scalar(f'Constraint/avg_ext_values_rew{i}_skill{j}', self.avg_ext_values[i][j],
                                        global_step=locs['it'])
 
