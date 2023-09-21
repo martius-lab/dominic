@@ -27,7 +27,7 @@
         ],
         "fixed_adv_coeff": "[3.0, 1.5, 1.0]",
         "gamma": 0.99,
-        "intrinsic_adv_coeff": 5.0,
+        "intrinsic_adv_coeff": 10.0,
         "intrinsic_rew_scale": 1.0,
         "lagrange_lr": 0.001,
         "lam": 0.95,

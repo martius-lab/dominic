@@ -294,7 +294,7 @@ class DOMINO:
                 mean_lagranges, mean_lagrange_coeffs, mean_constraint_satisfaction = self.update()
 
             with torch.inference_mode():
-                avg_nearest_dist = self.get_avg_dist()
+                mean_nearest_dist, var_nearest_dist, min_nearest_dist, max_nearest_dist = self.get_dist()
 
             stop = time.time()
             learn_time = stop - start
@@ -398,7 +398,7 @@ class DOMINO:
         int_rew = intrinsic_rew_scale * c * torch.sum(features * psi_diff, dim=-1) / self.env.num_features
         return int_rew, dist
 
-    def get_avg_dist(self):
+    def get_dist(self):
         # get the average distance between the successor features using init_obs_buf
         n_skills = self.env.num_skills
         nearest_dists = torch.zeros(n_skills, device=self.device)
@@ -420,7 +420,7 @@ class DOMINO:
                 psi_diff = afs - nearst_afs
                 nearest_dists[i] = torch.norm(psi_diff, p=2, dim=-1)
 
-        return torch.mean(nearest_dists)
+        return torch.mean(nearest_dists), torch.var(nearest_dists), torch.min(nearest_dists), torch.max(nearest_dists)
 
     def get_lagrange_coeff(self, skills, burning_expert):
         lagrange_coeff = [torch.zeros_like(skills).to(torch.float32) for _ in range(self.num_ext_values)]
@@ -772,7 +772,10 @@ class DOMINO:
             self.writer.add_scalar('Train/mean_episode_length', statistics.mean(locs['len_buffer']),
                                    global_step=locs['it'])
 
-        self.writer.add_scalar('Feature/avg_nearest_dist', locs['avg_nearest_dist'], global_step=locs['it'])
+        self.writer.add_scalar('Feature/mean_nearest_dist', locs['mean_nearest_dist'], global_step=locs['it'])
+        self.writer.add_scalar('Feature/var_nearest_dist', locs['var_nearest_dist'], global_step=locs['it'])
+        self.writer.add_scalar('Feature/min_nearest_dist', locs['min_nearest_dist'], global_step=locs['it'])
+        self.writer.add_scalar('Feature/max_nearest_dist', locs['max_nearest_dist'], global_step=locs['it'])
 
         self.writer.flush_logger(locs['it'])
 
