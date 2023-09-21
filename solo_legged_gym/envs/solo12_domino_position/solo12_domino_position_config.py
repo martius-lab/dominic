@@ -10,7 +10,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 33 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 3
+        num_features = 12
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -269,7 +269,7 @@ class Solo12DOMINOPositionTrainCfg:
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
 
-        target_dist = 1.0  # l_0 in VDW force
+        target_dist = 2.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
         attractive_coeff = 0.5

@@ -41,7 +41,7 @@
         "sigmoid_scale": 1.0,
         "succ_feat_gamma": 0.95,
         "succ_feat_lr": 0.001,
-        "target_dist": 1.0,
+        "target_dist": 2.0,
         "use_clipped_value_loss": true,
         "use_succ_feat": true,
         "value_lr": 0.001
@@ -201,7 +201,7 @@
         "evaluation": false,
         "num_actions": 12,
         "num_envs": 4096,
-        "num_features": 3,
+        "num_features": 12,
         "num_observations": 171,
         "num_skills": 8,
         "play": false,

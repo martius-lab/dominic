@@ -363,8 +363,9 @@ class Solo12DOMINOPosition(BaseTask):
         # FL, FR, HL, HR
         self.feature_buf = torch.cat((
             # self.root_states[:, 2:3],  # 1
-            self.base_lin_vel / torch.norm(self.base_lin_vel, dim=1, keepdim=True),  # 3
+            # self.base_lin_vel / torch.norm(self.base_lin_vel, dim=1, keepdim=True),  # 3
             # self.ee_vel_global[:, :, 2],  # 4
+            (self.dof_pos - self.default_dof_pos),  # 12
         ), dim=-1)
 
         # no noise added, no clipping

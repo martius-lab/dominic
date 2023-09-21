@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "blm_better_vdw_test4",
+  "optimization_procedure_name": "blm_better_vdw_test_dof_feature",
   "results_dir": "/fast/jcheng/blm_better",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -30,7 +30,7 @@
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.intrinsic_adv_coeff",
-      "values": [10.0, 20.0, 30.0, 40.0]
+      "values": [1.0, 5.0, 10.0, 20.0]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",

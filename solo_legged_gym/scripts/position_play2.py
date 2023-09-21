@@ -30,7 +30,7 @@ class keyboard_play:
         # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_1_sd_2"
         # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_2_sd_2"
         # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_3_sd_1"
-        train_cfg.runner.load_run = "9"
+        train_cfg.runner.load_run = "10"
         train_cfg.runner.checkpoint = -1
 
         # load_path = get_load_path(
