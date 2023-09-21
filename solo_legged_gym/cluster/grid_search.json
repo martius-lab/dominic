@@ -30,7 +30,7 @@
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
-      "values": [27, 42]
+      "values": [22, 27, 42]
     }
   ]
 }
