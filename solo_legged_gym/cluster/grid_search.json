@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "blm_better_rep_test_more_feature",
+  "optimization_procedure_name": "blm_better_vdw_test_feature",
   "results_dir": "/fast/jcheng/blm_better",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -25,12 +25,12 @@
   "restarts": 1,
   "hyperparam_list": [
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.alpha_2",
-      "values": [0.6, 0.7, 0.8, 0.9]
+      "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
+      "values": ["auto_2", "auto_5", "auto_10", "auto_20"]
     },
     {
-      "param": "solo_legged_gym.train_cfg.algorithm.burning_expert_steps",
-      "values": [500, 600, 700, 800]
+      "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
+      "values": [20, 30, 40, 50]
     },
     {
       "param": "solo_legged_gym.env_cfg.seed",
