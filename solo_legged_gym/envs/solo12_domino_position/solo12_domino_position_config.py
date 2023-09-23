@@ -10,7 +10,7 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
         num_observations = 33 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 15
+        num_features = 6
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -258,8 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         num_lagrange_steps = 10
         lagrange_lr = 1.e-3
-        sigmoid_scale = 1.0  # larger smoother, smaller more like on/off switch?
-        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5 / sigmoid_scale, 'auto_a' = a / sigmoid_scale
+        clip_lagrange = 'auto_2'  # None, float, 'auto' = 5, 'auto_a' = a
 
         expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
         alpha_0 = 0.95
@@ -272,7 +271,7 @@ class Solo12DOMINOPositionTrainCfg:
         target_dist = 2.0  # l_0 in VDW force
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0.0
 
         use_succ_feat = True
         succ_feat_gamma = 0.95

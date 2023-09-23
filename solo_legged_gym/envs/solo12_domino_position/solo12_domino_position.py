@@ -366,7 +366,8 @@ class Solo12DOMINOPosition(BaseTask):
             # self.base_lin_vel / torch.norm(self.base_lin_vel, dim=1, keepdim=True),  # 3
             # self.ee_vel_global[:, :, 2],  # 4
             self.base_lin_vel,  # 3
-            (self.dof_pos - self.default_dof_pos),  # 12
+            self.base_ang_vel,  # 3
+            # (self.dof_pos - self.default_dof_pos),  # 12
         ), dim=-1)
 
         # no noise added, no clipping

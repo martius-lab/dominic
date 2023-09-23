@@ -423,7 +423,7 @@ class DOMINO:
         lagrange_coeff = [torch.zeros_like(skills).to(torch.float32) for _ in range(self.num_ext_values)]
         for i in range(self.num_ext_values):
             lagrange_coeff[i] = self.lagrange[i][skills]
-            lagrange_coeff[i] = torch.sigmoid(lagrange_coeff[i] * self.a_cfg.sigmoid_scale)
+            lagrange_coeff[i] = torch.sigmoid(lagrange_coeff[i])
             if burning_expert:
                 lagrange_coeff[i][:] = 1
         return lagrange_coeff
@@ -617,9 +617,9 @@ class DOMINO:
                     if 'auto' in self.a_cfg.clip_lagrange:
                         if len(self.a_cfg.clip_lagrange.split('_')) == 2:
                             clip_lagrange_threshold = float(
-                                self.a_cfg.clip_lagrange.split('_')[1]) / self.a_cfg.sigmoid_scale
+                                self.a_cfg.clip_lagrange.split('_')[1])
                         else:
-                            clip_lagrange_threshold = 5 / self.a_cfg.sigmoid_scale
+                            clip_lagrange_threshold = 5
                     else:
                         clip_lagrange_threshold = self.a_cfg.clip_lagrange
                     for i in range(self.num_ext_values):
