@@ -7,8 +7,8 @@
     },
     "train_cfg": {
       "algorithm": {
-        "alpha_0": 0.95,
-        "alpha_1": 0.9,
+        "alpha_0": 0.9,
+        "alpha_1": 0.85,
         "alpha_2": 0.8,
         "attractive_coeff": 0.0,
         "attractive_power": 3,
