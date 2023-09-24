@@ -1,5 +1,5 @@
 {
-  "optimization_procedure_name": "blm_better_vdw_lr",
+  "optimization_procedure_name": "blm_better_vdw_lr_and_all",
   "results_dir": "/fast/jcheng/blm_better",
   "script_relative_path": "solo_legged_gym/cluster/train_cluster.py",
   "git_params": {
@@ -26,7 +26,15 @@
   "hyperparam_list": [
     {
       "param": "solo_legged_gym.train_cfg.algorithm.target_dist",
-      "values": [10.0, 20.0, 30.0, 40.0]
+      "values": [20.0]
+    },
+    {
+      "param": "solo_legged_gym.train_cfg.algorithm.sigmoid_lagrange_in_loss",
+      "values": [true, false]
+    },
+    {
+      "param": "solo_legged_gym.train_cfg.algorithm.clip_lagrange",
+      "values": ["auto_2", "auto_3", "auto_4"]
     },
     {
       "param": "solo_legged_gym.train_cfg.algorithm.lagrange_lr",

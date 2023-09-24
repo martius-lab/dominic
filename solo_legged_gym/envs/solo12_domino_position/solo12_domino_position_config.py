@@ -256,8 +256,8 @@ class Solo12DOMINOPositionTrainCfg:
         lam = 0.95  # GAE coeff
         max_grad_norm = 1.
 
-        num_lagrange_steps = 10
         lagrange_lr = 1.e-3
+        sigmoid_lagrange_in_loss = True
         clip_lagrange = 'auto_2'  # None, float, 'auto' = 5, 'auto_a' = a
 
         expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True

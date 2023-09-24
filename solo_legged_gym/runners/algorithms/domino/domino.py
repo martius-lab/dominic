@@ -601,16 +601,20 @@ class DOMINO:
             ############################################################################################################
             # learn lagrange multipliers
             if not self.burning_expert:
-                for _ in range(self.a_cfg.num_lagrange_steps):
-                    # Lagrange loss
-                    lagrange_loss = 0.0
-                    for i in range(self.num_ext_values):
+                # Lagrange loss
+                lagrange_loss = 0.0
+                for i in range(self.num_ext_values):
+                    if self.a_cfg.sigmoid_lagrange_in_loss:
+                        lagrange_losses = torch.sigmoid(self.lagrange[i]) * (
+                                self.avg_ext_values[i] - self.alphas[i] * self.avg_expert_ext_values[i]).squeeze(
+                            -1)
+                    else:
                         lagrange_losses = self.lagrange[i] * (
                                 self.avg_ext_values[i] - self.alphas[i] * self.avg_expert_ext_values[i]).squeeze(
                             -1)
-                        lagrange_loss += torch.sum(lagrange_losses, dim=-1)
-                    lagrange_loss.backward()
-                    self.lagrange_optimizer.step()
+                    lagrange_loss += torch.sum(lagrange_losses, dim=-1)
+                lagrange_loss.backward()
+                self.lagrange_optimizer.step()
 
                 # clipping Lagrange multipliers if needed
                 if self.a_cfg.clip_lagrange is not None:
