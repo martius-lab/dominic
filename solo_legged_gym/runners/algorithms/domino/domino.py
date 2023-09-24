@@ -618,14 +618,7 @@ class DOMINO:
 
                 # clipping Lagrange multipliers if needed
                 if self.a_cfg.clip_lagrange is not None:
-                    if 'auto' in self.a_cfg.clip_lagrange:
-                        if len(self.a_cfg.clip_lagrange.split('_')) == 2:
-                            clip_lagrange_threshold = float(
-                                self.a_cfg.clip_lagrange.split('_')[1])
-                        else:
-                            clip_lagrange_threshold = 5
-                    else:
-                        clip_lagrange_threshold = self.a_cfg.clip_lagrange
+                    clip_lagrange_threshold = self.a_cfg.clip_lagrange
                     for i in range(self.num_ext_values):
                         self.lagrange[i].data = torch.clamp(self.lagrange[i].data,
                                                             min=-clip_lagrange_threshold,
