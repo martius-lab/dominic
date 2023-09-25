@@ -258,7 +258,7 @@ class Solo12DOMINOPositionTrainCfg:
 
         lagrange_lr = 5.e-3
         sigmoid_lagrange_in_loss = False
-        clip_lagrange = 3.5  # None, 3, 3.5, 4 ...
+        clip_lagrange = 3  # None, 3, 3.5, 4 ...
 
         expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
         alpha_0 = 0.95

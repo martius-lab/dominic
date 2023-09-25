@@ -16,7 +16,7 @@
         "avg_values_decay_factor": 0.99,
         "bootstrap_value": false,
         "burning_expert_steps": 800,
-        "clip_lagrange": 3.5,
+        "clip_lagrange": 3,
         "clip_param": 0.2,
         "desired_kl": 0.02,
         "entropy_coef": 0.03,
