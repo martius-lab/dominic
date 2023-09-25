@@ -2,7 +2,7 @@
   "solo_legged_gym": {
     "args": {
       "dv": true,
-      "w": true,
+      "w": false,
       "task": "solo12_domino_position"
     },
     "train_cfg": {
@@ -82,7 +82,7 @@
         "restart_interval": 50000,
         "run_name": "global_sfs_vdw",
         "save_interval": 50,
-        "wandb": true
+        "wandb": false
       }
     },
     "env_cfg": {
