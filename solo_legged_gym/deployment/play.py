@@ -40,7 +40,7 @@ LOG_FILE_NAME = "log_data.csv"
 
 class Solo12Controller:
     def __init__(self) -> None:
-        log_root = os.path.join(ROOT_DIR, "logs", 'solo12_domino_position')
+        log_root = os.path.join(ROOT_DIR, "logs", 'solo12_dominic_position')
         run_name = RUN_NAME
         self.policy_path = os.path.join(log_root, run_name, "exported", "policies", "policy.pt")
         # server_ip = socket.gethostbyname('enp0s25')

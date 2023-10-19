@@ -96,25 +96,25 @@ Run the scripts from the root directory (where `.venv` is).
 1. use `scripts/train.py` to start training.
    For example:
    ```bash 
-   poetry run python solo_legged_gym/scripts/train.py --task=solo12_vanilla (--wandb --headless)
+   poetry run python solo_legged_gym/scripts/train.py --task=solo12_dominic_position (--w --dv)
    ```
    When viewer is enabled, use `v` to pause/resume rendering; use `b` to zoom in the first env/ zoom out. 
-2. use `scripts/keyboard_play.py` to control the robot with trained model. 
+2. use `scripts/position_play.py` to play the trained skill. 
    For example:
    ```bash 
-   poetry run python solo_legged_gym/scripts/keyboard_play.py --task=solo12_vanilla
+   poetry run python solo_legged_gym/scripts/position_play.py --task=solo12_dominic_position
    ```
-   use `w/a/s/d/q/e/x` to send command, specify the log data in `keyboard_play.py`
-3. use `scripts/log_data_plot.py` to plot the data. 
+   specify the log data in `position_play.py`, use `r` to restart, use number to specify skill.
+3. use `scripts/position_play2.py` to play all trained skills. 
    For example:
-   ```bash
-   poetry run python solo_legged_gym/scripts/log_data_plot.py --task=solo12_vanilla
+   ```bash 
+   poetry run python solo_legged_gym/scripts/position_play2.py --task=solo12_dominic_position
    ```
-   use `w/a/s/d/q/e/x` to send command, specify the log data in `keyboard_play.py`
+   specify the log data in `position_play2.py`, use `r` to restart, use number to specify skill.
 4. If wandb is not used, tensorboard will be the default writer. 
    For example:
    ```bash
-   poetry run tensorboard --logdir logs/solo12_vanilla
+   poetry run tensorboard --logdir logs/solo12_dominic_position
    ```
 5. specify the argument as shown in `utis/helpers.py`
    
@@ -157,13 +157,6 @@ source .venv/bin/activate
 python -m cluster.grid_search solo_legged_gym/cluster/grid_search.json
 ```
 by default, weights and biases is used. 
-
-#### - File transfer
-FileZilla is recommended, you can easily install it
-```bash
-sudo apt install filezilla
-```
-connect the cluster by specifying `SFTP` and port `22`. 
 
 ## Deployment
 #### Solo 12 System

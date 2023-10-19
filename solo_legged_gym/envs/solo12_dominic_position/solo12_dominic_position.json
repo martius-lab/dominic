@@ -3,7 +3,7 @@
     "args": {
       "dv": true,
       "w": false,
-      "task": "solo12_domino_position"
+      "task": "solo12_dominic_position"
     },
     "train_cfg": {
       "algorithm": {
@@ -45,7 +45,7 @@
         "use_succ_feat": true,
         "value_lr": 0.001
       },
-      "algorithm_name": "DOMINO",
+      "algorithm_name": "DOMINIC",
       "network": {
         "drop_out_rate": 0.9,
         "init_log_std": 0.0,
@@ -68,7 +68,7 @@
       "runner": {
         "allogger": true,
         "checkpoint": -1,
-        "experiment_name": "solo12_domino_position",
+        "experiment_name": "solo12_dominic_position",
         "group": "test",
         "load_run": -1,
         "log_interval": 5,
@@ -80,7 +80,7 @@
         "record_gif_interval": 50,
         "record_iters": 10,
         "restart_interval": 50000,
-        "run_name": "global_sfs_vdw",
+        "run_name": "dominic",
         "save_interval": 50,
         "wandb": false
       }

@@ -45,7 +45,7 @@ class keyboard_play:
             checkpoint=train_cfg.runner.checkpoint,
         )
         # load_path = get_load_path(
-        #     "/is/sg2/jcheng/Dev/solo/solo_legged_gym/solo_legged_gym/logs/solo12_domino_position/fast_home/blm_better/blm_better_vdw_lr_and_all/working_directories",
+        #     "/is/sg2/jcheng/Dev/solo/solo_legged_gym/solo_legged_gym/logs/solo12_dominic_position/fast_home/blm_better/blm_better_vdw_lr_and_all/working_directories",
         #     load_run=train_cfg.runner.load_run,
         #     checkpoint=train_cfg.runner.checkpoint,
         # )

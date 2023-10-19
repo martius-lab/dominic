@@ -21,12 +21,12 @@ from solo_legged_gym.runners.modules.masked_policy import MaskedPolicy
 from solo_legged_gym.runners.modules.masked_value import MaskedValue
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
 from solo_legged_gym.runners.modules.masked_successor_feature import MaskedSuccessorFeature
-from solo_legged_gym.runners.algorithms.domino.rollout_buffer import RolloutBuffer
+from solo_legged_gym.runners.modules.rollout_buffer import RolloutBuffer
 
 torch.autograd.set_detect_anomaly(True)
 
 
-class DOMINO:
+class DOMINIC:
     def __init__(self,
                  env,
                  train_cfg,

@@ -2,7 +2,7 @@ from solo_legged_gym.envs import BaseEnvCfg
 import numpy as np
 
 
-class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
+class Solo12DOMINICPositionEnvCfg(BaseEnvCfg):
     seed = 42
 
     class env(BaseEnvCfg.env):
@@ -220,8 +220,8 @@ class Solo12DOMINOPositionEnvCfg(BaseEnvCfg):
             commands = 0.05
 
 
-class Solo12DOMINOPositionTrainCfg:
-    algorithm_name = 'DOMINO'
+class Solo12DOMINICPositionTrainCfg:
+    algorithm_name = 'DOMINIC'
 
     class network:
         init_log_std = 0.0
@@ -288,8 +288,8 @@ class Solo12DOMINOPositionTrainCfg:
         # logging
         log_interval = 5  # log every this many iterations
         save_interval = 50  # check for potential saves every this many iterations
-        experiment_name = 'solo12_domino_position'
-        run_name = 'global_sfs_vdw'
+        experiment_name = 'solo12_dominic_position'
+        run_name = 'dominic'
 
         # cluster
         restart_interval = 50000  # minutes  # TODO: not working properly yet

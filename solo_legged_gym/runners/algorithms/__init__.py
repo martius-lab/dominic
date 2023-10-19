@@ -1,2 +1,2 @@
-from solo_legged_gym.runners.algorithms.domino.domino import DOMINO
+from solo_legged_gym.runners.algorithms.dominic.dominic import DOMINIC
 
