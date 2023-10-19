@@ -1,22 +1,16 @@
-import json
-import logging
 import time
 import os
 from collections import deque
 import statistics
 import numpy as np
 import wandb
-import cluster
 
 import torch
 import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as func
-from torch.utils.tensorboard import SummaryWriter
 
-from solo_legged_gym.utils import class_to_dict
 from solo_legged_gym.utils.logger import CustomSummaryWriter
-from solo_legged_gym.utils.helpers import Ticker
 from solo_legged_gym.runners.modules.masked_policy import MaskedPolicy
 from solo_legged_gym.runners.modules.masked_value import MaskedValue
 from solo_legged_gym.runners.modules.normalizer import EmpiricalNormalization
@@ -66,7 +60,6 @@ class DOMINIC:
                                      device=self.device)
 
         # set up Lagrangian multipliers
-        # There should be num_skills Lagrangian multipliers, but we fixed the first one to be sig(la_0) = 1
         self.lagrange = [nn.Parameter(torch.ones(self.env.num_skills, device=self.device) * 0.0,
                                       requires_grad=True).cuda() for _ in range(self.num_ext_values)]
 
@@ -99,9 +92,6 @@ class DOMINIC:
         self.num_steps_per_env = self.r_cfg.num_steps_per_env
         self.save_interval = self.r_cfg.save_interval
         self.log_interval = self.r_cfg.log_interval
-
-        if self.r_cfg.on_cluster:
-            self.ticker = Ticker(self.r_cfg.restart_interval)
 
         self.normalize_observation = self.r_cfg.normalize_observation
         if self.normalize_observation:
@@ -139,44 +129,12 @@ class DOMINIC:
         self.current_learning_iteration = 0
         self.tot_timesteps = 0
         self.tot_time = 0
-        self.resume_id = None
         self.writer = None
         self.logger = None
         self.logger_state = None
 
-        # resume
         self.log_dir = log_dir
-        self.resume = False
-
-        if (not self.env.cfg.env.play) and (not self.env.cfg.env.evaluation):
-            models = [file for file in os.listdir(log_dir) if 'model' in file]
-            if len(models) == 0:
-                print("[Resume] No models in this directory: " + log_dir + ", starting from scratch!")
-            else:
-                models.sort(key=lambda m: '{0:0>15}'.format(m))
-                model = models[-1]
-                load_path = os.path.join(log_dir, model)
-                print("[Resume] Load model from: " + load_path)
-
-                self.load(path=load_path,
-                          load_values=True,
-                          load_feat=True,
-                          load_optimizer=True,
-                          load_curriculum=True,
-                          load_init_obs=True)
-                self.resume = True
-
-        # Log
-        if (not self.env.cfg.env.play) and (not self.env.cfg.env.evaluation):
-            self.init_writer(resume_id=self.resume_id)  # should be updated if resumed
-            if self.resume:
-                if self.r_cfg.allogger:
-                    self.writer.load_allogger_step(self.logger_state)
-            else:
-                try:
-                    self.resume_id = self.writer.run_id
-                except:
-                    self.resume_id = None
+        self.init_writer()
 
         if self.a_cfg.burning_expert_steps != 0:
             self.burning_expert = True
@@ -184,8 +142,6 @@ class DOMINIC:
             self.burning_expert = False
 
         self.env.reset()
-        if self.resume:
-            self.current_learning_iteration += 1
         self.iter = self.current_learning_iteration
         self.avg_score = 0
 
@@ -210,9 +166,9 @@ class DOMINIC:
         cur_int_rew_sum = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
         cur_episode_length = torch.zeros(self.env.num_envs, dtype=torch.float, device=self.device)
 
-        # filming = False
-        # filming_imgs = []
-        # filming_iter_counter = 0
+        filming = False
+        filming_imgs = []
+        filming_iter_counter = 0
 
         collection_time = 0
         learn_time = 0
@@ -222,9 +178,9 @@ class DOMINIC:
             # Collect
             start = time.time()
 
-            # # filming
-            # if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
-            #     filming = True
+            # filming
+            if self.r_cfg.record_gif and (it % self.r_cfg.record_gif_interval == 0):
+                filming = True
 
             # burning expert
             if it <= self.a_cfg.burning_expert_steps:
@@ -250,8 +206,8 @@ class DOMINIC:
                     # normalize new obs
                     new_obs = self.obs_normalizer(new_obs)
 
-                    # if filming:
-                    #     filming_imgs.append(self.env.camera_image)
+                    if filming:
+                        filming_imgs.append(self.env.camera_image)
 
                     if self.log_dir is not None:
                         if 'episode' in infos:
@@ -297,16 +253,16 @@ class DOMINIC:
             learn_time = stop - start
             fps = int(self.num_steps_per_env * self.env.num_envs / (collection_time + learn_time))
 
-            # if filming:
-            #     filming_iter_counter += 1
-            #     if filming_iter_counter == self.r_cfg.record_iters:
-            #         export_imgs = np.array(filming_imgs)
-            #         if self.r_cfg.wandb:
-            #             wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
-            #         del export_imgs
-            #         filming = False
-            #         filming_imgs = []
-            #         filming_iter_counter = 0
+            if filming:
+                filming_iter_counter += 1
+                if filming_iter_counter == self.r_cfg.record_iters:
+                    export_imgs = np.array(filming_imgs)
+                    if self.r_cfg.wandb:
+                        wandb.log({'Video': wandb.Video(export_imgs.transpose(0, 3, 1, 2), fps=50, format="mp4")})
+                    del export_imgs
+                    filming = False
+                    filming_imgs = []
+                    filming_iter_counter = 0
 
             self.print_in_terminal(locals())
             if self.log_dir is not None and it % self.log_interval == 0:
@@ -316,20 +272,10 @@ class DOMINIC:
             self.iter = it
             ep_infos.clear()
 
-            if (self.r_cfg.on_cluster
-                    and self.ticker.should_restart()
-                    and it != self.current_learning_iteration
-                    and it != self.num_learning_iterations - 1):
-                print("Triggering cluster restart...")
-                # wandb.alert(title='Restart', text='Restarting the job at iteration {}'.format(it))
-                self.writer.stop()
-                cluster.exit_for_resume()
-
         self.current_learning_iteration = self.iter
         self.save(os.path.join(self.log_dir, 'model_{}.pt'.format(self.current_learning_iteration + 1)),
                   self.current_learning_iteration + 1)
         self.writer.stop()
-        # score not implemented yet
         return 0
 
     def process_env_step(self, obs, actions, ext_rews, int_rew, skills, features, log_prob, dones, infos,
@@ -450,11 +396,6 @@ class DOMINIC:
     def update_global_succ_feat(self, obs):
         n_skills = self.env.num_skills
         n_samples = obs.size(0)
-        # n_obs = obs.size(1)
-        # all_encoded_skills = self.encode_skills(torch.arange(n_skills).to(self.device))
-        # all_sfs = self.succ_feat((obs.unsqueeze(1).repeat(1, n_skills, 1).view(-1, n_obs),
-        #                           all_encoded_skills.unsqueeze(0).repeat(n_samples, 1, 1).view(-1, n_skills))).view(
-        #     n_samples, n_skills, -1)  # num_samples * num_skills * num_features
         for i in range(n_skills):
             skill = self.encode_skills(torch.tensor(i, dtype=torch.long, device=self.device).unsqueeze(0))
             sfs = self.succ_feat((obs, skill.repeat(n_samples, 1)))
@@ -761,8 +702,6 @@ class DOMINIC:
         self.writer.flush_logger(locs['it'])
 
     def save(self, path, it, infos=None):
-        if self.r_cfg.allogger:
-            self.logger_state = self.writer.get_allogger_step()
         saved_dict = {
             "policy_state_dict": self.policy.state_dict(),
             "intrinsic_value_state_dict": self.int_value.state_dict(),
@@ -775,8 +714,6 @@ class DOMINIC:
             "iteration": it,
             "tot_timesteps": self.tot_timesteps,
             "tot_time": self.tot_time,
-            "logger_state": self.logger_state,
-            "resume_id": self.resume_id,
             "curriculum": [self.env.terrain_cols, self.env.terrain_rows],
             "init_obs": self.env.init_obs_buf,
         }
@@ -802,8 +739,6 @@ class DOMINIC:
             self.lagrange = loaded_dict["lagrange"]
         if "avg_ext_values" in loaded_dict:
             self.avg_ext_values = loaded_dict["avg_ext_values"]
-        if "resume_id" in loaded_dict:
-            self.resume_id = loaded_dict["resume_id"]
         if "tot_timesteps" in loaded_dict:
             self.tot_timesteps = loaded_dict["tot_timesteps"]
         if "tot_time" in loaded_dict:
@@ -813,8 +748,6 @@ class DOMINIC:
         if load_curriculum:
             self.env.terrain_cols = loaded_dict["curriculum"][0]
             self.env.terrain_rows = loaded_dict["curriculum"][1]
-        if self.r_cfg.allogger:
-            self.logger_state = loaded_dict["logger_state"]
 
         if load_values:
             self.int_value.load_state_dict(loaded_dict["intrinsic_value_state_dict"])
@@ -864,19 +797,11 @@ class DOMINIC:
         if self.normalize_observation:
             self.obs_normalizer.eval()
 
-    def init_writer(self, resume_id=None):
+    def init_writer(self):
         # initialize writer
         self.writer = CustomSummaryWriter(
             log_dir=self.log_dir,
             flush_secs=10,
             cfg=self.r_cfg,
-            group=self.r_cfg.group,
-            resume_id=resume_id)
+            group=self.r_cfg.group)
         self.writer.log_config(self.env.cfg, self.r_cfg, self.a_cfg, self.n_cfg)
-        # else:
-        #     self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
-
-        # print(json.dumps(class_to_dict(self.env.cfg), indent=2, default=str))
-        # print(json.dumps(class_to_dict(self.r_cfg), indent=2, default=str))
-        # print(json.dumps(class_to_dict(self.a_cfg), indent=2, default=str))
-        # print(json.dumps(class_to_dict(self.n_cfg), indent=2, default=str))

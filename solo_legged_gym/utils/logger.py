@@ -1,8 +1,4 @@
 import os
-import allogger
-import logging
-
-import torch
 from torch.utils.tensorboard import SummaryWriter
 from solo_legged_gym.utils import class_to_dict
 
@@ -13,10 +9,9 @@ except ModuleNotFoundError:
 
 
 class CustomSummaryWriter(SummaryWriter):
-    def __init__(self, log_dir: str, flush_secs: int, cfg, group=None, resume_id=None):
+    def __init__(self, log_dir: str, flush_secs: int, cfg, group=None):
         super().__init__(log_dir, flush_secs)
         self.cfg = cfg
-        self.use_allogger = cfg.allogger
         self.use_wandb = cfg.wandb
 
         if self.use_wandb:
@@ -34,28 +29,9 @@ class CustomSummaryWriter(SummaryWriter):
                     "Wandb username not found. Please run or add to ~/.bashrc: export WANDB_USERNAME=YOUR_USERNAME"
                 )
 
-            if resume_id is not None:
-                wandb.init(
-                    project=project,
-                    entity=entity,
-                    dir=log_dir,
-                    group=group,
-                    resume="allow",
-                    id=resume_id,
-                )
-                self.run_id = resume_id
-            else:
-                self.run_id = wandb.util.generate_id()
-                wandb.init(project=project, entity=entity, dir=log_dir, group=group, id=self.run_id)
-                wandb.run.name = cfg.run_name
-
-        if self.use_allogger:
-            allogger.basic_configure(
-                logdir=log_dir,
-                default_outputs=["hdf"],
-                manual_flush=True)
-            self.logger = allogger.get_logger(scope="main", basic_logging_params={"level": logging.INFO},
-                                              default_outputs=['hdf'])
+            self.run_id = wandb.util.generate_id()
+            wandb.init(project=project, entity=entity, dir=log_dir, group=group, id=self.run_id)
+            wandb.run.name = cfg.run_name
 
         self.log_dict = {}
 
@@ -69,32 +45,14 @@ class CustomSummaryWriter(SummaryWriter):
         )
         self.log_dict[tag] = scalar_value
 
-        if self.use_allogger:
-            v = scalar_value
-            if isinstance(v, torch.Tensor):
-                v = v.cpu().detach().numpy()
-            k = tag.replace('/', '-')
-            self.logger.log(v, k, to_hdf=True)
-
     def flush_logger(self, step):
         if self.use_wandb:
             wandb.log(self.log_dict, step=step)
-        if self.use_allogger:
-            allogger.get_root().flush(children=True)
         self.log_dict = {}
 
     def stop(self):
         if self.use_wandb:
             wandb.finish(0)
-        if self.use_allogger:
-            allogger.get_root().flush(children=True)
-            allogger.close()
-
-    def get_allogger_step(self):
-        return dict(allogger.get_logger("root").step_per_key)
-
-    def load_allogger_step(self, step):
-        allogger.get_logger("root").step_per_key = allogger.get_logger("root").manager.dict(step)
 
     def log_config(self, env_cfg, runner_cfg, algorithm_cfg, policy_cfg):
         if self.use_wandb:

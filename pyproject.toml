@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "solo_legged_gym"
-version = "0.1.0"
-description = "RL Training for Solo robot"
-authors = ["Jin Cheng <jcheng@tuebingen.mpg.de>"]
+version = "1.0.0"
+description = "Environment for DOMiNiC"
+authors = ["Jin Cheng <jin.cheng@tuebingen.mpg.de>"]
 readme = "README.md"
 packages = [{include = "solo_legged_gym"}]
 
@@ -20,11 +20,6 @@ moviepy = "*"
 onnx = "*"
 notebook = "*"
 shapely = "1.7.1"
-
-[tool.poetry.group.dev.dependencies]
-cluster = { git = "git@gitlab.tuebingen.mpg.de:mrolinek/cluster_utils.git"}
-pyvicon = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/pyvicon.git"}
-al-logger = { git = "git@gitlab.tuebingen.mpg.de:sblaes/allogger.git", branch = "dev"}
 
 [tool.black]
 line-length = 140

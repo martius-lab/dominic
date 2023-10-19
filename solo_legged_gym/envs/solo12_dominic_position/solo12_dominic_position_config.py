@@ -67,7 +67,7 @@ class Solo12DOMINICPositionEnvCfg(BaseEnvCfg):
     class viewer(BaseEnvCfg.viewer):
         overview = True
         ref_pos_b = [1, 1, 0.6]
-        record_camera_imgs = False
+        record_camera_imgs = True
         overview_pos = [-5, -5, 10]  # [m]
         overview_lookat = [5, 5, 1]  # [m]
 
@@ -104,10 +104,6 @@ class Solo12DOMINICPositionEnvCfg(BaseEnvCfg):
         stiffness = {"HAA": 2.5, "HFE": 2.5, "KFE": 2.5}  # [N*m/rad]
         damping = {"HAA": 0.1, "HFE": 0.1, "KFE": 0.1}  # [N*m*s/rad]
         torque_limits = 2.5
-        # scale_joint_target = [np.pi / 4, np.pi / 4, np.pi / 2,
-        #                       np.pi / 4, np.pi / 4, np.pi / 2,
-        #                       np.pi / 4, np.pi / 4, np.pi / 2,
-        #                       np.pi / 4, np.pi / 4, np.pi / 2]
         scale_joint_target = 0.25
         clip_joint_target = 100.0
         joint_lower_limits = [-0.9, -np.pi / 2, -np.pi,
@@ -161,43 +157,10 @@ class Solo12DOMINICPositionEnvCfg(BaseEnvCfg):
             gravity = "[1, 1.0]"
             torques = "[1, 300]"
             stall_pos = "[1, [0.3, 0.25, 0.1]]"  # minimal vel, distance, sigma
-            # feet_acc = "[1, 1000]"
 
             joint_default = "[2, [5.0, 0.9]]"
             move_towards = "[2, 1.0]"  # clip/scale
             face_towards = "[2, 1.0]"  # clip/scale
-
-            # feet_slip = "[2, [0.04, 0.1, 0.4]]"  # target height, sigma, sigma+
-
-            # ang_xy = "[2, 0.1]"
-            # ang_vel_xy = "[2, 2.0]"
-
-            # stall_yaw = "[0, [0.1, 0.1, 0.2]]"  # minimal ang vel, yaw distance, distance, sigma
-
-            # pos = "[1, 0.5]"  # sigma
-            # yaw = "[1, 0.5]"  # sigma
-            # posl = "[1, 5.0]"  # max error
-
-            # yawl = f"[1, [{np.pi}, 0.25]]"  # max error
-            # pos_yaw = "[1, [0.5, 0.5, 0.25]]"  # sigma
-
-            # lin_acc_z = "[2, 10]"
-            # ang_acc_xy = "[2, 20]"
-
-            # lin_z = "[0, 0.2]"
-            # feet_height = "[0, [0.08, 0.2, 0.25]]"  # target height, sigma, pos threshold
-            # dof_acc = "[0, 4000]"
-
-            # lin_vel_z = "[0, 0.5]"
-
-            # stand_still = "[0, 0.01]"
-            # stand_still_h = "[0, 0.05]"
-            # feet_contact_force = "[0, 20.0]"
-
-            # feet_slip_h = "[0, [0.01, 0.01]]"
-            # feet_slip_v = "[0, [0.04, 0.8]]"
-            # dof_vel = "[0, 50.0]"
-            # feet_air_time = "[0, None]"
 
         num_groups = 3
 
@@ -260,18 +223,18 @@ class Solo12DOMINICPositionTrainCfg:
         sigmoid_lagrange_in_loss = False
         clip_lagrange = 3  # None, 3, 3.5, 4 ...
 
-        expert_ext_values = [28, 36, 52]  # will be used only if pretrain_expert is True
-        alpha_0 = 0.95
+        expert_ext_values = [28, 36, 52]  # These values come from using pretraining only (by setting Lagranges to 0)
+        alpha_0 = 0.8
         alpha_1 = 0.9
-        alpha_2 = 0.85
+        alpha_2 = 0.7
 
         avg_values_decay_factor = 0.99
         avg_features_decay_factor = 0.999
 
-        target_dist = 2.0  # l_0 in VDW force
+        target_dist = 2.0  # l_0 in VDW force, only works when attractive_power != 0
         attractive_power = 3
         repulsive_power = 0
-        attractive_coeff = 0.5
+        attractive_coeff = 0
 
         use_succ_feat = True
         succ_feat_gamma = 0.95
@@ -291,19 +254,14 @@ class Solo12DOMINICPositionTrainCfg:
         experiment_name = 'solo12_dominic_position'
         run_name = 'dominic'
 
-        # cluster
-        restart_interval = 50000  # minutes  # TODO: not working properly yet
-        on_cluster = False
-
         # load
         load_run = -1  # -1 = last run
         checkpoint = -1  # -1 = last saved model
 
-        record_gif = False  # need to enable env.viewer.record_camera_imgs and run with wandb
+        record_gif = True  # need to enable env.viewer.record_camera_imgs and run with wandb
         record_gif_interval = 50
         record_iters = 10  # should be int * num_st   eps_per_env
 
         group = 'test'
 
         wandb = False  # by default is false, set to true from command line
-        allogger = True

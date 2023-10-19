@@ -1,12 +1,10 @@
 """Probability distributions."""
 
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, TypeVar, Union
+from typing import Optional, Tuple, TypeVar
 import numpy as np
 import torch as th
-from torch import nn
 from torch.distributions import Normal
-from solo_legged_gym.runners.utils.cnrl import ColoredNoiseProcess
 
 SelfDistribution = TypeVar("SelfDistribution", bound="Distribution")
 SelfDiagGaussianDistribution = TypeVar("SelfDiagGaussianDistribution", bound="DiagGaussianDistribution")
@@ -220,110 +218,3 @@ class TanhBijector:
     def log_prob_correction(self, x: th.Tensor) -> th.Tensor:
         # Squash correction (from original SAC implementation)
         return th.log(1.0 - th.tanh(x) ** 2 + self.epsilon)
-
-
-class ColoredNoiseDist(DiagGaussianDistribution):
-    def __init__(self, beta, seq_len, action_dim=None, rng=None, device='cpu'):
-        """
-        Gaussian colored noise distribution for using colored action noise with stochastic policies.
-
-        The colored noise is only used for sampling actions. In all other respects, this class acts like its parent
-        class (`SquashedDiagGaussianDistribution`).
-
-        Parameters
-        ----------
-        beta : float or array_like
-            Exponent(s) of colored noise power-law spectra. If it is a single float, then `action_dim` has to be
-            specified and the noise will be sampled in a vectorized manner for each action dimension. If it is
-            array_like, then it specifies one beta for each action dimension. This allows different betas for different
-            action dimensions, but sampling might be slower for high-dimensional action spaces.
-        seq_len : int
-            Length of sampled colored noise signals. If sampled for longer than `seq_len` steps, a new
-            colored noise signal of the same length is sampled. Should usually be set to the episode length
-            (horizon) of the RL task.
-        action_dim : int, optional
-            Dimensionality of the action space. If passed, `beta` has to be a single float and the noise will be
-            sampled in a vectorized manner for each action dimension.
-        rng : np.random.Generator, optional
-            Random number generator (for reproducibility). If not passed, a new random number generator is created by
-            calling `np.random.default_rng()`.
-        """
-        assert (action_dim is not None) == np.isscalar(beta), \
-            "`action_dim` has to be specified if and only if `beta` is a scalar."
-
-        self.device = device
-
-        if np.isscalar(beta):
-            super().__init__(action_dim)
-            self.beta = beta
-            self.gen = ColoredNoiseProcess(beta=self.beta, size=(action_dim, seq_len), rng=rng)
-        else:
-            super().__init__(len(beta))
-            self.beta = np.asarray(beta)
-            self.gen = [ColoredNoiseProcess(beta=b, size=seq_len, rng=rng) for b in self.beta]
-
-    def sample(self) -> th.Tensor:
-        if np.isscalar(self.beta):
-            cn_sample = th.tensor(self.gen.sample()).float().to(self.device)
-        else:
-            cn_sample = th.tensor([cnp.sample() for cnp in self.gen]).float().to(self.device)
-        return self.distribution.mean + self.distribution.stddev * cn_sample
-
-    def __repr__(self) -> str:
-        return f"ColoredNoiseDist(beta={self.beta})"
-
-
-class SquashedColoredNoiseDist(SquashedDiagGaussianDistribution):
-    def __init__(self, beta, seq_len, action_dim=None, rng=None, epsilon=1e-6, device='cpu'):
-        """
-        Gaussian colored noise distribution for using colored action noise with stochastic policies.
-
-        The colored noise is only used for sampling actions. In all other respects, this class acts like its parent
-        class (`SquashedDiagGaussianDistribution`).
-
-        Parameters
-        ----------
-        beta : float or array_like
-            Exponent(s) of colored noise power-law spectra. If it is a single float, then `action_dim` has to be
-            specified and the noise will be sampled in a vectorized manner for each action dimension. If it is
-            array_like, then it specifies one beta for each action dimension. This allows different betas for different
-            action dimensions, but sampling might be slower for high-dimensional action spaces.
-        seq_len : int
-            Length of sampled colored noise signals. If sampled for longer than `seq_len` steps, a new
-            colored noise signal of the same length is sampled. Should usually be set to the episode length
-            (horizon) of the RL task.
-        action_dim : int, optional
-            Dimensionality of the action space. If passed, `beta` has to be a single float and the noise will be
-            sampled in a vectorized manner for each action dimension.
-        rng : np.random.Generator, optional
-            Random number generator (for reproducibility). If not passed, a new random number generator is created by
-            calling `np.random.default_rng()`.
-        epsilon : float, optional, by default 1e-6
-            A small value to avoid NaN due to numerical imprecision.
-        """
-        assert (action_dim is not None) == np.isscalar(beta), \
-            "`action_dim` has to be specified if and only if `beta` is a scalar."
-
-        self.device = device
-
-        if np.isscalar(beta):
-            super().__init__(action_dim, epsilon)
-            self.beta = beta
-            self.gen = ColoredNoiseProcess(beta=self.beta, size=(action_dim, seq_len), rng=rng)
-        else:
-            super().__init__(len(beta), epsilon)
-            self.beta = np.asarray(beta)
-            self.gen = [ColoredNoiseProcess(beta=b, size=seq_len, rng=rng) for b in self.beta]
-
-    def sample(self) -> th.Tensor:
-        if np.isscalar(self.beta):
-            cn_sample = th.tensor(self.gen.sample()).float().to(self.device)
-        else:
-            cn_sample = th.tensor([cnp.sample() for cnp in self.gen]).float().to(self.device)
-        self.gaussian_actions = self.distribution.mean + self.distribution.stddev*cn_sample
-        return th.tanh(self.gaussian_actions)
-
-    def __repr__(self) -> str:
-        return f"ColoredNoiseDist(beta={self.beta})"
-
-

@@ -63,25 +63,12 @@ class TaskRegistry:
                 # update the json file for cluster running only!!!
                 env_cfg_dict = class_to_dict(env_cfg)
                 train_cfg_dict = class_to_dict(train_cfg)
-                train_cfg_dict["runner"]["wandb"] = False
-                train_cfg_dict["runner"]["on_cluster"] = True
-                env_cfg_dict["viewer"]["enable_viewer"] = False
                 cfg = {
                     "solo_legged_gym": {
-                        "args": {
-                            "dv": True,
-                            "w": False,
-                            "task": train_cfg.runner.experiment_name
-                        },
                         "train_cfg": train_cfg_dict,
                         "env_cfg": env_cfg_dict
                     },
-                    "working_dir": "./logs/cluster",
-                    "id": 1
                 }
-
-                with open(os.path.join(ROOT_DIR, 'envs', train_cfg.runner.experiment_name + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
-                    json.dump(cfg, f, indent=2)
 
                 with open(os.path.join(log_dir + '/' + train_cfg.runner.experiment_name + '.json'), 'w') as f:
                     json.dump(cfg, f, indent=2)

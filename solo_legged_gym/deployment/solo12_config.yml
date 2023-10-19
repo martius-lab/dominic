@@ -1,4 +1,0 @@
-network_interface: enx58ef681442a4
-logger_level: debug
-max_motor_current_A: 9
-home_offset_rad: [0.236, 0.113, 0.246, -0.518, 0.167, 0.172, 0.106, 0.240, 0.038, -0.374, 0.258, 0.315, ]
