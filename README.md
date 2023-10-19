@@ -37,8 +37,17 @@
     ```bash
     poetry install
     ```
+6. Download IsaacGym from [here](https://developer.nvidia.com/isaac-gym/download) and extract it to somewhere you like :). 
+   ```bash
+   poetry shell  # enter the virtual environment
+   ```
+   enter the directory of `IsaacGym_Preview_4_Package/isaacgym/python`, and run
+   ```bash
+   pip install -e .
+   ```
+   Don't panic if some packages are removed and reinstalled :)
 
-6. (Optional) Login Weights and Biases
+7.(Optional) Login Weights and Biases
    ```bash
    echo 'export WANDB_USERNAME=<wandb_username>' >> ~/.bashrc
    source ~/.bashrc 

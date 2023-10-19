@@ -11,7 +11,6 @@ python = ">=3.8 <3.9"
 matplotlib = "*"
 numpy = "<1.20"
 torch = {url = "https://download.pytorch.org/whl/cu118/torch-2.0.1%2Bcu118-cp38-cp38-linux_x86_64.whl"}
-isaacgym = { git = "git@gitlab.is.tue.mpg.de:autonomous-learning/isaacgym.git"}
 tensorboard = "^2.12.0"
 wandb = "*"
 pynput = "*"
