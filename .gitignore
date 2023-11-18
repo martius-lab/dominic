@@ -43,9 +43,6 @@ Thumbs.db
 
 # VS Code
 .vscode
-# logs
-logs
-runs
 
 #wandb
 wandb

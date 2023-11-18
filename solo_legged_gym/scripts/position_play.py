@@ -26,23 +26,11 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        # train_cfg.runner.load_run = 'cluster/blm/36'
-        # train_cfg.runner.checkpoint = -1
-
-        # load_path = get_load_path(
-        #     os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),
-        #     load_run=train_cfg.runner.load_run,
-        #     checkpoint=train_cfg.runner.checkpoint,
-        # )
-        # print(f"Loading model from: {load_path}")
-
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_1_sd_2"
-        train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_4_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_1_sd_2"
+        train_cfg.runner.load_run = -1
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
-            "/is/rg/al/Data/solo12_data/blm_579_alpha_l0_demo/working_directories",
+            os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),
             load_run=train_cfg.runner.load_run,
             checkpoint=train_cfg.runner.checkpoint,
         )
@@ -159,7 +147,7 @@ class keyboard_play:
             threading.Timer(1 / 50, self.play).start()
             self.step()
         else:
-            while True:
+            for i in range(100):
                 self.step()
                 # time.sleep(0.1)
 

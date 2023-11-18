@@ -10,7 +10,7 @@ class Solo12DOMINICPositionEnvCfg(BaseEnvCfg):
         num_observations = 33 + 11 * 11 + 12 + 4 + 1  # #states + #height + #actions + #commands + #remaining time
         num_skills = 8  # latent space
         num_actions = 12
-        num_features = 15
+        num_features = 3
         episode_length_s = 6  # episode length in seconds
         remaining_check_time_s = 1
 
@@ -224,7 +224,7 @@ class Solo12DOMINICPositionTrainCfg:
         clip_lagrange = 3  # None, 3, 3.5, 4 ...
 
         expert_ext_values = [28, 36, 52]  # These values come from using pretraining only (by setting Lagranges to 0)
-        alpha_0 = 0.8
+        alpha_0 = 0.9
         alpha_1 = 0.9
         alpha_2 = 0.7
 

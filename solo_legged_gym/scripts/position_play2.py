@@ -25,30 +25,14 @@ class keyboard_play:
     def __init__(self, args):
         env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
 
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_1_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_4_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_1_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_2_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_7_l0_3_sd_1"
-
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_1_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_9_l0_4_sd_2"
-        # train_cfg.runner.load_run = "a0_9_a1_9_a2_5_l0_1_sd_1"
-        train_cfg.runner.load_run = "a0_9_a1_9_a2_5_l0_4_sd_1"
-
-        # train_cfg.runner.load_run = "38"
+        train_cfg.runner.load_run = -1
         train_cfg.runner.checkpoint = -1
 
         load_path = get_load_path(
-            "/is/rg/al/Data/solo12_data/blm_better_vdw_alpha_l0_big_demo/working_directories",
+            os.path.join(ROOT_DIR, "logs", train_cfg.runner.experiment_name),
             load_run=train_cfg.runner.load_run,
             checkpoint=train_cfg.runner.checkpoint,
         )
-        # load_path = get_load_path(
-        #     "/is/sg2/jcheng/Dev/solo/solo_legged_gym/solo_legged_gym/logs/solo12_dominic_position/fast_home/blm_better/blm_better_vdw_lr_and_all/working_directories",
-        #     load_run=train_cfg.runner.load_run,
-        #     checkpoint=train_cfg.runner.checkpoint,
-        # )
         print(f"Loading model from: {load_path}")
 
         load_config_path = os.path.join(os.path.dirname(load_path), f"{train_cfg.runner.experiment_name}.json")
@@ -73,7 +57,6 @@ class keyboard_play:
         env_cfg.terrain.play_terrain = "box2"
         env_cfg.terrain.play_init = [-0.5, 0.0]
         env_cfg.terrain.play_target = [-3.5, 0.0]
-        # env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False

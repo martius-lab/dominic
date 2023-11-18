@@ -134,7 +134,8 @@ class DOMINIC:
         self.logger_state = None
 
         self.log_dir = log_dir
-        self.init_writer()
+        if not self.env.cfg.env.play:
+            self.init_writer()
 
         if self.a_cfg.burning_expert_steps != 0:
             self.burning_expert = True
