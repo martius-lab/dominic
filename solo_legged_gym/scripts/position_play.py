@@ -1,8 +1,6 @@
 import json
-import time
 
 from isaacgym import gymapi
-from isaacgym.torch_utils import get_euler_xyz
 import torch.nn.functional as func
 
 from solo_legged_gym import ROOT_DIR
@@ -13,10 +11,8 @@ import os
 import numpy as np
 import torch
 import threading
-import csv
 
 EXPORT_POLICY = False
-LOG_DATA = False
 REAL_TIME = False
 np.set_printoptions(precision=2)
 
@@ -72,7 +68,8 @@ class keyboard_play:
 
         env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
         self.env = env
-        self.runner = task_registry.make_alg_runner(env=self.env, name=args.task, args=args, env_cfg=env_cfg, train_cfg=train_cfg)
+        self.runner = task_registry.make_alg_runner(env=self.env, name=args.task, args=args, env_cfg=env_cfg,
+                                                    train_cfg=train_cfg)
         self.obs = self.env.get_observations()
         self.runner.load(load_path)
         self.policy = self.runner.get_inference_policy(device=self.env.device)
@@ -118,9 +115,6 @@ class keyboard_play:
             print(policy_jit(torch.concat((test_obs, test_encoded_skill), dim=-1)))
             print("--------------------------")
 
-        if LOG_DATA:
-            self.prepare_log_file(load_path)
-
         self.register_keyboard()
 
     def register_keyboard(self):
@@ -152,50 +146,10 @@ class keyboard_play:
                 # time.sleep(0.1)
 
     def step(self):
-        # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))
-
         obs_skills = (self.obs.detach(), self.encode_skills(self.env.skills))
 
         self.obs, _, _, _, _, _ = self.env.step(self.policy(obs_skills).detach())
         self.update_keyboard_command()
-        if LOG_DATA:
-            self.log_data()
-
-    def prepare_log_file(self, load_path):
-        path = os.path.join(os.path.dirname(load_path), "logged_data")
-        if not os.path.exists(path):
-            os.makedirs(path)
-        self.log_path = os.path.join(path, "log_data.csv")
-        self.step_counter = 0
-        header = ['step',
-                  'command_x', 'command_y', 'command_az',
-                  'base_x', 'base_y', 'base_z', 'base_ax', 'base_ay', 'base_az',
-                  'base_vel_x', 'base_vel_y', 'base_vel_z',
-                  'base_avel_x', 'base_avel_y', 'base_avel_z',
-                  'skill',
-                  'joint_targets_rate', 'torques', 'dof_vel', 'dof_acc'
-                  ]
-        with open(self.log_path, 'w+', encoding='UTF8') as f:
-            writer = csv.writer(f)
-            writer.writerow(header)
-
-    def log_data(self):
-        data = [self.step_counter]
-        data.extend(self.env.commands[0, :].tolist())
-        data.extend(self.env.root_states[0, :3].tolist())
-        data.extend(torch.stack(get_euler_xyz(self.env.base_quat), dim=1)[0, :].tolist())
-        data.extend(self.env.base_lin_vel[0, :].tolist())
-        data.extend(self.env.base_ang_vel[0, :].tolist())
-        data.append(self.env.skills[0].item())
-        data.append(self.env.joint_targets_rate[0].item())
-        data.append(torch.norm(self.env.torques[0, :], p=2).item())
-        data.append(torch.norm(self.env.dof_vel[0, :], p=2).item())
-        data.append(torch.norm(self.env.dof_acc[0, :], p=2).item())
-
-        self.step_counter += 1
-        with open(self.log_path, 'a', encoding='UTF8') as f:
-            writer = csv.writer(f)
-            writer.writerow(data)
 
     def update_keyboard_command(self):
         events = self.env.gym.query_viewer_action_events(self.env.viewer)
@@ -216,4 +170,3 @@ if __name__ == "__main__":
     args = get_args()
     kp = keyboard_play(args)
     kp.play()
-
