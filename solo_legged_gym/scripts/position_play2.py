@@ -1,4 +1,5 @@
 import json
+import threading
 
 from isaacgym import gymapi
 import torch.nn.functional as func
@@ -12,6 +13,7 @@ import numpy as np
 import torch
 
 EXPORT_POLICY = False
+REAL_TIME = True
 np.set_printoptions(precision=2)
 
 
@@ -135,8 +137,12 @@ class keyboard_play:
             self.env.gym.subscribe_viewer_keyboard_event(self.env.viewer, key_enum, key)
 
     def play(self):
-        while True:
+        if REAL_TIME:
+            threading.Timer(1 / 50, self.play).start()
             self.step()
+        else:
+            while True:
+                self.step()
 
     def step(self):
         # self.obs, _, _, _ = self.env.step(torch.zeros(1, 16, device=self.env.device))

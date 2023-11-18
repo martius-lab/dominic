@@ -13,7 +13,7 @@ import torch
 import threading
 
 EXPORT_POLICY = False
-REAL_TIME = False
+REAL_TIME = True
 np.set_printoptions(precision=2)
 
 
@@ -52,9 +52,9 @@ class keyboard_play:
         env_cfg.terrain.init_range = 0.5
         env_cfg.terrain.params = [0.2]
         env_cfg.terrain.play_terrain = "box2"
-        # env_cfg.terrain.play_init = [-0.5, 0.0]
+        env_cfg.terrain.play_init = [-0.5, 0.0]
         env_cfg.terrain.play_target = [-3.5, 0.0]
-        env_cfg.terrain.play_target = [-2.0, 0.0]
+        # env_cfg.terrain.play_target = [-2.0, 0.0]
         env_cfg.terrain.border_size = 5
 
         env_cfg.observations.add_noise = False
@@ -141,9 +141,8 @@ class keyboard_play:
             threading.Timer(1 / 50, self.play).start()
             self.step()
         else:
-            for i in range(100):
+            while True:
                 self.step()
-                # time.sleep(0.1)
 
     def step(self):
         obs_skills = (self.obs.detach(), self.encode_skills(self.env.skills))
