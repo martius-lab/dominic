@@ -1,13 +1,24 @@
+# Learning Diverse Skills for Local Navigation under Multi-constraint Optimality (ICRA-2024)
+
+**_[Website](https://sites.google.com/view/icra2024-dominic)_**  | **_[Paper](https://arxiv.org/abs/2310.02440)_**  | **_[Supplementary Video](https://youtu.be/DXNqdx4SsdA?si=ux_jLKuoodmp_fxW)_**
+
+Authors:
+[Jin Cheng](https://jin-cheng.me/), [Marin Vlastelica](https://jimimvp.github.io/), [Pavel Kolev](https://pavelkolev.github.io/), [Chenhao Li](https://breadli428.github.io/), [Georg Martius](https://is.mpg.de/person/gmartius)
+
+Autonomous Learning Group, Max Planck Institute for Intelligent Systems, Tübingen, Germany
+
+ETH Zürich, Zürich, Switzerland
+
+University of Tübingen, Tübingen, Germany
+
 ## Installation
 1. Clone the repo:
     ```bash
     git clone git@gitlab.is.tue.mpg.de:autonomous-learning/solo_legged_gym.git
     ```
-    then checkout to this branch and go to the root folder.
 
 2. Install poetry
     
-    on local machine
     ```bash
     curl -sSL https://install.python-poetry.org | python3 - --version 1.4.0
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
@@ -24,7 +35,7 @@
     Poetry (version 1.4.0)
     ```
 
-4. Now we want to use Python 3.8 to create virtual environment. This is ensured to work with isaacgym preview version 4. `python >= 3.10` will definitely not work with the cluster_utils package. First make sure that you are in a clean environment. Deactivate all conda env virtualenv environments and delete any `.venv` in the root folder of your legged_gym clone. Call:
+4. Now we want to use Python 3.8 to create virtual environment. This is ensured to work with isaacgym preview version 4. First make sure that you are in a clean environment. Deactivate all conda env virtualenv environments and delete any `.venv` in the root folder of your legged_gym clone. Call:
     ```bash
     poetry env use /usr/bin/python3.8
     ```
@@ -47,7 +58,7 @@
    ```
    Don't panic if some packages are removed and reinstalled :)
 
-7.(Optional) Login Weights and Biases
+7. (Optional) Login Weights and Biases
    ```bash
    echo 'export WANDB_USERNAME=<wandb_username>' >> ~/.bashrc
    source ~/.bashrc 
@@ -55,7 +66,7 @@
    ```
    you will be asked to paste the API keys, you can get it from your personal profile. 
 
-## Optional troubleshooting
+## Troubleshooting
    To fix the following error:
    ```
    ImportError: libpython3.8m.so.1.0: cannot open shared object file: No such file or directory
@@ -65,8 +76,8 @@
    sudo apt install libpython3.8
    ```
 
-## RUN
-Run the scripts from the root directory (where `.venv` is). 
+## Run the code
+Run the scripts from the repository root directory (where `.venv` is). 
 
 You can either choose to enter the environment by runing `poetry shell` or run the scripts directly by `poetry run python <script_name>`.
 
@@ -99,3 +110,6 @@ You can either choose to enter the environment by runing `poetry shell` or run t
    ```bash
    run tensorboard --logdir logs/solo12_dominic_position
    ```
+
+## Addtionally
+This project is based on [legged_gym](https://github.com/leggedrobotics/legged_gym) and [rsl_rl](https://github.com/leggedrobotics/rsl_rl). We thank all the contributors for their great work.
